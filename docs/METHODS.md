@@ -30,3 +30,13 @@
 - `--suite smac`：原SMAC静态地图，调用原训练循环；支持上表配置选择。
 - `--suite continual`：SMACv2 task_drift/task_switch；目前只接入QMIX baseline/softprotect。
 - ReBorn/ReDo/reset尚未接入连续任务驱动，未来做这些比较时必须补接阶段调度并说明口径，不能仅把静态地图入口的可用性当作连续任务支持。
+
+## Configurable soft-protection locations (2026-10-30)
+
+The continual QMIX driver now accepts any configured subset of A/W/V:
+- A: `agent.net[2]`, the first shared-agent ReLU output (64 units). Associated parameters: `agent.net[0]` input rows/bias and `agent.net[3]` output columns. This is neither the second Agent ReLU nor the GRU.
+- W: `mixer.hyper_w_final[2]`; V: `mixer.V[2]` (64 units each), with the same incoming rows/bias and outgoing columns as the previous W/V implementation.
+
+For A, each state's activity is the mean absolute activation over agent histories. The state weight is the same counterfactual team-Q sensitivity c/mean(c) used for W/V. Thus A_j = sum_state omega(state) * mean_agent abs(z_agent,j) / N. Thresholding remains strictly >3 within each eligible layer. Shared Agent parameters are scaled once, not five times. Only configured layers are screened/protected/recorded. All-one frozen gates and shared output biases stay outside protection; target copies follow the original schedule. Protection scales the post-RMSprop increment, preserving optimizer state. Latest selection replacement and 100k-step linear recovery are unchanged.
+
+`results/location_ablation_seed1111/implementation_validation.json` records offline checks on an existing 32-episode batch: explicit state-agent A statistic, exact old/new W/V equality, no model/RNG/hidden change, and real RMSprop increments at 0.1/0.55/1 for all four configurations. No new SC2 smoke training was run. Assertions in the offline checker are not in the training execution path.

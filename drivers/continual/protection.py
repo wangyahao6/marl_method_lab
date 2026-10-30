@@ -1,4 +1,4 @@
-"""Boundary-only W/V screening and RMSprop parameter-increment scaling."""
+"""Boundary-only configurable A/W/V screening and RMSprop parameter-increment scaling."""
 from collections import deque
 import copy
 import hashlib
@@ -70,6 +70,11 @@ def combine(episodes):
 def screen(mac, mixer, batch, config, enumerate_check=False):
     """One frozen online model, complete histories; no target activations."""
     old_hidden = mac.hidden_states
+    captured = []
+    handle = None
+    if 'A' in config['layers']:
+        handle = mac.agent.net[2].register_forward_hook(
+            lambda module, inputs, output: captured.append(output.detach()))
     try:
         mac.init_hidden(batch.batch_size)
         qs = th.stack([mac.forward(batch, t=t) for t in range(batch.max_seq_length)], 1)
@@ -83,7 +88,7 @@ def screen(mac, mixer, batch, config, enumerate_check=False):
         states = batch['state'][:, :-1][good]
         if not len(states):
             return dict(valid_states=0, layers={k: dict(selected=None, reason='no_valid_states')
-                                              for k in ['W', 'V']})
+                                              for k in config['layers']})
         c, verification = sensitivity(mixer, qs[:, :-1][good],
             batch['actions'][:, :-1].squeeze(-1)[good],
             batch['avail_actions'][:, :-1][good], states, enumerate_check)
@@ -94,8 +99,18 @@ def screen(mac, mixer, batch, config, enumerate_check=False):
         result = dict(valid_states=len(c), sensitivity=summary(c), weights=summary(omega),
                       weight_sum=total, mean_sensitivity=mean_c, activity_denominator=sample_count,
                       weight_formula='c/mean(c)', verification=verification, layers={})
+        features = {}
+        if 'A' in config['layers']:
+            # Shared agent parameters: each state contributes the mean absolute
+            # activation over the five agent histories, before state weighting.
+            activations = th.stack([x.reshape(batch.batch_size, mac.n_agents, -1)
+                                    for x in captured], dim=1)
+            features['A'] = activations[:, :-1][good].abs().mean(dim=1)
         for label, network in [('W', mixer.hyper_w_final), ('V', mixer.V)]:
-            z = network[:3](states).abs().cpu().numpy().astype(np.float64)
+            if label in config['layers']:
+                features[label] = network[:3](states).abs()
+        for label in config['layers']:
+            z = features[label].cpu().numpy().astype(np.float64)
             num = (z*omega[:, None]).sum(0)
             a = num/sample_count if mean_c > 0 else None
             avg = float(a.mean()) if a is not None else 0
@@ -110,6 +125,7 @@ def screen(mac, mixer, batch, config, enumerate_check=False):
                 reason=None if ids is not None else 'zero_weight_or_zero_layer')
         return result
     finally:
+        if handle is not None: handle.remove()
         mac.hidden_states = old_hidden
 
 
@@ -120,7 +136,9 @@ class SoftProtection:
         self.fifo = deque(maxlen=config['episodes'])
         self.keys = {}
         self.latest = {label: [] for label in config['layers']}
-        self.schedule = ReleaseSchedule({label:64 for label in config['layers']},
+        networks = {'A': learner.mac.agent.net, 'W': learner.mixer.hyper_w_final,
+                    'V': learner.mixer.V}
+        self.schedule = ReleaseSchedule({label:networks[label][0].out_features for label in config['layers']},
                                         config['step_scale'], config['recovery_env_steps'])
         self.current = None
         self.phase = -1
@@ -128,13 +146,14 @@ class SoftProtection:
         self.steps = 0
         self.audit_next = True
         self.params = []
-        for label, network in [('W', learner.mixer.hyper_w_final), ('V', learner.mixer.V)]:
+        for label in config['layers']:
+            network = networks[label]
             for name, param, axis in [('input_weight', network[0].weight, 0),
                                       ('input_bias', network[0].bias, 0),
                                       ('output_weight', network[3].weight, 1)]:
                 self.params.append((label, name, param, axis))
         self.masks = [th.zeros_like(p, dtype=th.bool) for _, _, p, _ in self.params]
-        self.protected = {'W': [], 'V': []}
+        self.protected = {label: [] for label in config['layers']}
         self.original_step = learner.optimiser.step
         learner.optimiser.step = self.step
 
@@ -160,7 +179,7 @@ class SoftProtection:
         self.audit_next = True
         self.append(self.output/'protection_transitions.jsonl', dict(t_env=t_env,
             previous=previous, released={l: sorted(set(previous[l])-set(self.protected[l]))
-                                        for l in ['W', 'V']}, **self.state()))
+                                        for l in self.config['layers']}, **self.state()))
 
     def remember(self, batch, episode, task, start, end, info):
         self.fifo.append((cpu_episode(batch), dict(episode=episode, task=task,
@@ -169,7 +188,7 @@ class SoftProtection:
     @th.no_grad()
     def step(self, *args, **kwargs):
         audit = self.audit_next or self.steps % 1000 == 0
-        # Save only six small parameter tensors; all unselected entries are left exact.
+        # Save only tensors attached to the configured neuron locations; all unselected entries are left exact.
         before = [p.detach().clone() for _, _, p, _ in self.params]
         result = self.original_step(*args, **kwargs)
         records = []
@@ -226,7 +245,7 @@ class SoftProtection:
         for other, keys in self.keys.items():
             if other == task: continue
             overlaps[other] = {}
-            for label in ['W', 'V']:
+            for label in self.config['layers']:
                 a, b = set(record.get(label, [])), set(keys.get(label, []))
                 overlaps[other][label] = dict(intersection=len(a & b), union=len(a | b),
                                              jaccard=len(a & b)/len(a | b) if a | b else None)

@@ -22,3 +22,7 @@
 | `.venv`、`runtime/` | 本机运行时链接，不属于可公开源码 |
 
 新实验共用本仓库代码，用配置与运行编号区分。旧复现工程、已停止实验及产物保留原路径，不搬迁或认作新仓库结果。当前状态是代码整理和静态核对完成；没有新仓库真实训练或性能结论。
+
+## 2026-10-30 location ablation
+
+A/W/V soft protection is configurable; see docs/METHODS.md and docs/EXPERIMENTS.md. The explicitly authorized seed-1111 task-switch queue has four locations A, W, V, A+W+V, each 4M steps. Its live state and generated report are in `results/location_ablation_seed1111/`; this is separate from all previously stopped queues. Launch is not a completed result.

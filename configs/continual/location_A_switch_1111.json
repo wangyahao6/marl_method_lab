@@ -1,0 +1,65 @@
+{
+  "id": "softprotect_location_A_switch_seed1111_20261030",
+  "algorithms": [
+    "qmix"
+  ],
+  "seeds": [
+    1111
+  ],
+  "interventions": [
+    "A_actual_step_scaling"
+  ],
+  "method": {
+    "layers": [
+      "A"
+    ],
+    "step_scale": 0.1,
+    "episodes": 32,
+    "overlap": "latest_selection_replace",
+    "threshold_beta": 3.0,
+    "recovery_env_steps": 100000,
+    "recovery_schedule": "linear",
+    "reselection": "immediate_protection",
+    "weight_formula": "c/mean(c)",
+    "activity_denominator": "valid_state_count",
+    "agent_activity_reduction": "mean_abs_over_agents_per_state"
+  },
+  "scenarios": {
+    "task_switch": [
+      [
+        500000,
+        "stalker"
+      ],
+      [
+        1000000,
+        "zealot"
+      ],
+      [
+        1500000,
+        "stalker"
+      ],
+      [
+        2000000,
+        "zealot"
+      ],
+      [
+        2500000,
+        "stalker"
+      ],
+      [
+        3000000,
+        "zealot"
+      ],
+      [
+        3500000,
+        "stalker"
+      ],
+      [
+        4000000,
+        "zealot"
+      ]
+    ]
+  },
+  "planned_runs": 1,
+  "total_training_steps": 4000000
+}

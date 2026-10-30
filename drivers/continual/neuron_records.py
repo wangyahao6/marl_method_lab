@@ -3,7 +3,7 @@ import csv
 import json
 from pathlib import Path
 
-PATHS={'W':'mixer.hyper_w_final[2]','V':'mixer.V[2]'}
+PATHS={'A':'agent.net[2]','W':'mixer.hyper_w_final[2]','V':'mixer.V[2]'}
 
 def append_csv(path, rows):
     if not rows:return

@@ -35,3 +35,13 @@ cd /home/wyh/marl_method_lab
 - “在我的仓库中，按configs/……方案运行远端实验，种子……，每次……步；原始产物留远端，结束后整理独立评价、胜率曲线和报告。”
 - “在我的仓库中修改本方法的……，其余设置沿用……；这次只改代码，不启动训练。”
 - “检查我的仓库实验……的进度，只读，不重启。”
+
+## Authorized location ablation (2026-10-30)
+
+User request: soft-protection QMIX, 5gen_protoss task-switch, seed 1111, locations A / W / V / A+W+V. Each location starts from scratch for the inherited full 4M-step sequence (Stalker/Zealot alternating every 500k). Four runs, total 16M steps. Preserve replay, optimizer, target state and cumulative exploration across switches. Same 32-episode tests every 10k steps and at phase boundaries; same final independent 32-episode Zealot evaluation. Logical 5v5 continues to use the existing SMACv2 10gen_protoss map registration with capability n_units=5, as in the preceding task-switch experiment.
+
+Named protocols: `configs/continual/location_{A,W,V,AWV}_switch_1111.json`. Only location-related fields differ across them. Per-layer selection count is determined by the existing threshold; this is a location ablation, not an equal protected-parameter-budget experiment. No additional baseline or seed is scheduled.
+
+Queue: `.venv/bin/python scripts/run_location_ablation.py`, two concurrent runs, order A, W, V, AWV. It invokes the public scripts/run.py, preserving each run's effective protocol, config, source snapshot and local Git identity. Failed runs are recorded without cancelling the remaining requested locations, and never silently retried. The old stopped experiment queue remains stopped.
+
+Artifacts: `runs/qmix_switch_softprotect_<location>_seed1111_20261030/`; summary/status in `results/location_ablation_seed1111/`. After training, the queue runs independent final evaluation, then writes explicit learning curves, phase-end comparisons, per-run state, final evaluation tables and REPORT.md. Raw checkpoints and logs remain remote. Four groups contain only one training seed each; no across-training-seed confidence interval or significance claim is appropriate. No desktop notification/automatic chat wakeup is configured.

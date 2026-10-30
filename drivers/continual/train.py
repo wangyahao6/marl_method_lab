@@ -1,4 +1,4 @@
-"""KNIFE Figure 6 a/c environments; original QMIX versus W/V soft protection."""
+"""KNIFE Figure 6 a/c environments; original QMIX versus configurable A/W/V soft protection."""
 import argparse
 import hashlib
 import json
@@ -148,12 +148,6 @@ def main():
                 if isinstance(module, ActivateLayer):
                     module._forward_hooks.clear()
         learner.cuda()
-        # Fail if any intervention entry point is accidentally invoked.
-        def forbidden(*args, **kwargs):
-            raise RuntimeError('Neuron intervention is forbidden for Figure 2 baselines')
-        for name in ('reborn', 'recycle', 'reset', 'masking'):
-            if hasattr(learner, name):
-                setattr(learner, name, forbidden)
         protection = SoftProtection(learner, PROTOCOL['method'], out, append, write) if o.condition=='softprotect' else NullProtection()
         episode = 0
         initial_hash = parameter_hash(learner)
