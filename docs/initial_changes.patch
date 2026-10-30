@@ -1,0 +1,74 @@
+--- a/src/main.py
++++ b/src/main.py
+@@ -45,7 +45,7 @@
+     if config_name is not None:
+         with open(os.path.join(os.path.dirname(__file__), "config", subfolder, "{}.yaml".format(config_name)), "r") as f:
+             try:
+-                config_dict = yaml.load(f)
++                config_dict = yaml.safe_load(f)
+             except yaml.YAMLError as exc:
+                 assert False, "{}.yaml error: {}".format(config_name, exc)
+         return config_dict
+@@ -75,7 +75,7 @@
+     # Get the defaults from default.yaml
+     with open(os.path.join(os.path.dirname(__file__), "config", "default.yaml"), "r") as f:
+         try:
+-            config_dict = yaml.load(f)
++            config_dict = yaml.safe_load(f)
+         except yaml.YAMLError as exc:
+             assert False, "default.yaml error: {}".format(exc)
+ 
+--- a/src/main.py
++++ b/src/main.py
+@@ -1,6 +1,6 @@
+ import numpy as np
+ import os
+-import collections
++import collections.abc
+ from os.path import dirname, abspath
+ from copy import deepcopy
+ from sacred import Experiment, SETTINGS
+--- a/src/main.py
++++ b/src/main.py
+@@ -53,7 +53,7 @@
+ 
+ def recursive_dict_update(d, u):
+     for k, v in u.items():
+-        if isinstance(v, collections.Mapping):
++        if isinstance(v, collections.abc.Mapping):
+             d[k] = recursive_dict_update(d.get(k, {}), v)
+         else:
+             d[k] = v
+--- a/src/main.py
++++ b/src/main.py
+@@ -20,7 +20,7 @@
+ ex.logger = logger
+ ex.captured_out_filter = apply_backspaces_and_linefeeds
+ 
+-results_path = os.path.join(dirname(dirname(abspath(__file__))), "results")
++results_path = os.environ.get("MARL_RUN_DIR", os.path.join(dirname(dirname(abspath(__file__))), "results"))
+ 
+ 
+ @ex.main
+--- a/src/run.py
++++ b/src/run.py
+@@ -57,7 +57,7 @@
+     unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+     args.unique_token = unique_token
+     if args.use_tensorboard:
+-        tb_logs_direc = os.path.join(dirname(dirname(abspath(__file__))), "results", "tb_logs")
++        tb_logs_direc = os.path.join(os.environ.get("MARL_RUN_DIR", os.path.join(dirname(dirname(abspath(__file__))), "results")), "tb_logs")
+         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
+         logger.setup_tb(tb_exp_direc)
+ 
+--- a/src/runners/episode_runner.py
++++ b/src/runners/episode_runner.py
+@@ -113,7 +113,7 @@
+ 
+         if test_mode and (len(self.test_returns) == self.args.test_nepisode):
+             self._log(cur_returns, cur_stats, log_prefix)
+-        elif self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
++        elif not test_mode and self.t_env - self.log_train_stats_t >= self.args.runner_log_interval:
+             self._log(cur_returns, cur_stats, log_prefix)
+             if hasattr(self.mac.action_selector, "epsilon"):
+                 self.logger.log_stat("epsilon", self.mac.action_selector.epsilon, self.t_env)
