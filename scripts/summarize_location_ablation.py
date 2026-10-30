@@ -20,7 +20,7 @@ def main():
     OUT.mkdir(parents=True,exist_ok=True);curves=[];stages=[];final=[];summary=[]
     fig,ax=plt.subplots(figsize=(11,5))
     for location in COLORS:
-        run=ROOT/'runs'/('qmix_switch_softprotect_'+location+'_seed1111_20261030')
+        run=ROOT/'runs'/('qmix_switch_softprotect_'+location+'_seed1111_20261030_attempt002')
         path=run/'evaluations.jsonl';records=[json.loads(x) for x in path.read_text().splitlines()] if path.exists() else []
         for r in records:
             row={k:v for k,v in r.items() if k!='wall_seconds'}

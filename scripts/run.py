@@ -60,6 +60,7 @@ def main():
         protocol_path=(ROOT/a.protocol).resolve()
         protocol=json.loads(protocol_path.read_text())
         env['MARL_PROTOCOL']=str(out/'protocol.json')
+        env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/train.py'),'--algorithm',a.algorithm,'--condition',a.method,'--scenario',a.scenario,'--seed',str(a.seed)]
         details={'protocol':protocol,'scenario':a.scenario,'steps':protocol['scenarios'][a.scenario][-1][0]}
     plan={'request':vars(a),'command':command,'output':str(out),'details':details}

@@ -17,3 +17,5 @@
 该固定版本的原README称Apache2.0，但LICENSE正文为GPLv3，存在不一致。本仓库保留双方原文，不自行指定新的整体许可证；公开前需确认来源许可口径并保留第三方版权和声明。独立仓库名称或新Git历史不改变代码来源。SMACv2自身LICENSE随vendor保留。
 
 当前仅远端本地Git，无origin、无推送。旧实验工程未迁移、未改写。此次建立只做静态核对，不产生训练结果。
+
+Continuous SMACv2 runs use runtime/SMACv2StarCraftII -> /home/wyh/stagnant_figure2/runtime/StarCraftII (existing SC2 4.10 task-switch runtime including SMACv2 maps). The static SMAC runtime/StarCraftII remains unchanged. Both are read-only reused dependencies.

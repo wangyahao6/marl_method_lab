@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PROTOCOL = json.loads(Path(os.environ['MARL_PROTOCOL']).read_text())
 sys.path.insert(0, str(ROOT / 'src'))
 sys.path.insert(0, str(ROOT / 'vendor/smacv2'))
-os.environ['SC2PATH'] = str(ROOT / 'runtime/StarCraftII')
+os.environ['SC2PATH'] = str(ROOT / 'runtime/SMACv2StarCraftII')
 import numpy as np
 import torch as th
 import yaml

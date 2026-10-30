@@ -20,6 +20,7 @@ if suite=='smac':
 else:
     if a.step:p.error('continual evaluator currently evaluates its final checkpoint only')
     env['MARL_PROTOCOL']=str(run/'protocol.json')
+    env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
     cmd=[sys.executable,str(ROOT/'drivers/continual/evaluate.py'),'--run',str(run),'--episodes',str(a.episodes),'--output',str(out)]
 if a.dry_run:print(json.dumps({'command':cmd,'output':str(out)},indent=2));sys.exit()
 out.mkdir(parents=True,exist_ok=False)

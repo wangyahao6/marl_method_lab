@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'results/location_ablation_seed1111'
 LOCATIONS=['A','W','V','AWV']
-RUNS={l:'qmix_switch_softprotect_'+l+'_seed1111_20261030' for l in LOCATIONS}
+RUNS={l:'qmix_switch_softprotect_'+l+'_seed1111_20261030_attempt002' for l in LOCATIONS}
 
 def write(value):
     dest=OUT/'status.json';tmp=dest.with_suffix('.tmp')
