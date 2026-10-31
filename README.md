@@ -26,3 +26,7 @@
 ## 2026-10-30 location ablation
 
 A/W/V soft protection is configurable; see docs/METHODS.md and docs/EXPERIMENTS.md. The explicitly authorized seed-1111 task-switch queue has four locations A, W, V, A+W+V, each 4M steps. Its live state and generated report are in `results/location_ablation_seed1111/`; this is separate from all previously stopped queues. Launch is not a completed result.
+
+## 2026-10-31 ABA comparison
+
+Authorized seed-1111 QMIX baseline versus W+V soft protection: Stalker 1M → Zealot 500k → Stalker 500k, 5v5. Protection applies in B only, with immediate full release on return A. Protocol and execution details: docs/EXPERIMENTS.md. Queue: scripts/run_aba.py; result directory: results/aba_WV_seed1111_20261031/. Launch is not completion evidence.

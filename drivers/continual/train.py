@@ -219,7 +219,7 @@ def main():
                     evaluate('phase_end' if runner.t_env == end else 'periodic')
                     next_test = min(next_test + args.test_interval, end)
             save_model(f'phase{phase}_{end}')
-            if phase < len(phases)-1:
+            if phase < len(phases)-1 and phase in PROTOCOL['method'].get('detection_phases', range(len(phases)-1)):
                 protection.detect(unit, end, args, enumerate_check=o.smoke)
                 write(out / 'models' / f'phase{phase}_{end}' / 'protection_after_detection.json', protection.state())
         write(out / 'protection_final.json', protection.state())

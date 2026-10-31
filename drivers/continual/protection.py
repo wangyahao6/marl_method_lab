@@ -167,7 +167,15 @@ class SoftProtection:
         previous = self.protected
         self.current, self.phase, self.t_env = task, phase, t_env
         self.fifo.clear()
-        self.schedule.replace(self.latest, t_env)
+        active_phases = self.config.get('active_phases')
+        if active_phases is not None and phase not in active_phases:
+            # Explicit phase override: cancel both protection and release ramps.
+            # Keep selected task identities for provenance, without scaling updates.
+            for label in self.config['layers']:
+                self.schedule.protected[label].clear()
+                self.schedule.recovering[label].clear()
+        else:
+            self.schedule.replace(self.latest, t_env)
         self.protected = {label: sorted(ids) for label,ids in self.schedule.protected.items()}
         self.masks = []
         for label, name, param, axis in self.params:

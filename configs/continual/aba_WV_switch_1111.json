@@ -1,0 +1,53 @@
+{
+  "id": "qmix_ABA_WV_seed1111_20261031",
+  "algorithms": [
+    "qmix"
+  ],
+  "seeds": [
+    1111
+  ],
+  "interventions": [
+    "WV_actual_step_scaling_B_only"
+  ],
+  "method": {
+    "layers": [
+      "W",
+      "V"
+    ],
+    "step_scale": 0.1,
+    "episodes": 32,
+    "overlap": "latest_selection_replace",
+    "threshold_beta": 3.0,
+    "recovery_env_steps": 100000,
+    "recovery_schedule": "linear",
+    "reselection": "immediate_protection",
+    "weight_formula": "c/mean(c)",
+    "activity_denominator": "valid_state_count",
+    "agent_activity_reduction": "mean_abs_over_agents_per_state",
+    "active_phases": [
+      1
+    ],
+    "detection_phases": [
+      0
+    ],
+    "inactive_phase_behavior": "immediate_all_scales_one_no_release_ramp"
+  },
+  "scenarios": {
+    "task_switch": [
+      [
+        1000000,
+        "stalker"
+      ],
+      [
+        1500000,
+        "zealot"
+      ],
+      [
+        2000000,
+        "stalker"
+      ]
+    ]
+  },
+  "planned_runs": 2,
+  "total_training_steps": 4000000
+}
