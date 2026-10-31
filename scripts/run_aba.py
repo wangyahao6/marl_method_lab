@@ -20,11 +20,15 @@ def summarize():
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     OUT.mkdir(parents=True,exist_ok=True)
+    first_run=ROOT/'runs'/next(iter(RUNS.values()))
+    config=json.loads((first_run/'config.json').read_text())
+    seed=config['seed'];end_step=config['phases'][-1][0]
+    return_steps=end_step-1500000
     rows=[];states=[];final=[]
     fig,axes=plt.subplots(1,2,figsize=(12,4.5))
     colors={'baseline':'#2878b5','softprotect':'#df7833'}
     lines=['# ABA: QMIX vs QMIX + W/V soft protection','',
-        'Seed 1111; 5v5 homogeneous mirror teams. Stalker 1M → Zealot 500k → Stalker 500k. Each method independently initializes and trains 2M environment steps. Only the B phase scales selected W/V post-RMSprop increments by 0.1; returning A immediately restores all scales to 1. Screening uses only the last 32 training episodes of the first A phase, threshold strictly >3. Other settings inherit the existing task-switch driver.','',
+        f'Seed {seed}; 5v5 homogeneous mirror teams. Stalker 1M → Zealot 500k → Stalker {return_steps/1000:g}k. Each method independently initializes and trains {end_step/1e6:g}M environment steps. Only the B phase scales selected W/V post-RMSprop increments by 0.1; returning A immediately restores all scales to 1. Screening uses only the last 32 training episodes of the first A phase, threshold strictly >3. Other settings inherit the existing task-switch driver.','',
         'Replay, target networks, optimizer state and cumulative exploration persist across transitions. Evaluation: 32 greedy episodes before training each phase and about every 10k steps, including exact phase endpoints. The return-A initial value is phase=2, t_env=1500000, evaluation=phase_start, before any A2 update. Phase boundaries truncate exactly; periodic evaluation follows whole episodes. Logical 5gen_protoss uses the inherited 10gen_protoss registration with n_units=n_enemies=5.','',
         '| Method | Training state | Steps | A1 end | Return A initial | A2 end |',
         '| --- | --- | ---: | ---: | ---: | ---: |']
@@ -47,8 +51,8 @@ def summarize():
         for p in sorted((run/'evaluation').glob('*/results.json')):
             for r in json.loads(p.read_text()):final.append(dict(method=method,task=r['task'],t_env=r['t_env'],wins=r['wins'],episodes=r['episodes'],win_rate=r['win_rate'],evaluation_seed=r['evaluation_seed'],result=str(p)))
     for x in [1,1.5]:axes[0].axvline(x,color='gray',ls='--',lw=.8)
-    axes[0].set(title='ABA learning curves',xlabel='Total environment steps (million)',xlim=(0,2))
-    axes[1].set(title='Return to A: initial retention and recovery',xlabel='A2 environment steps (thousand)',xlim=(0,500))
+    axes[0].set(title='ABA learning curves',xlabel='Total environment steps (million)',xlim=(0,end_step/1e6))
+    axes[1].set(title='Return to A: initial retention and recovery',xlabel='A2 environment steps (thousand)',xlim=(0,return_steps/1000))
     for ax in axes:
         ax.set(ylabel='Win rate (32 episodes)',ylim=(-.02,1.02));ax.grid(alpha=.2)
         if ax.lines:ax.legend()
@@ -59,7 +63,7 @@ def summarize():
                 w=csv.DictWriter(stream,fieldnames=list(data[0]));w.writeheader();w.writerows(data)
     lines+=['','## Independent final A evaluation','','| Method | Wins / episodes | Win rate |','| --- | ---: | ---: |']
     for r in final:lines.append('| {} | {} / {} | {:.2%} |'.format(r['method'],r['wins'],r['episodes'],r['win_rate']))
-    lines+=['','![Learning and recovery](learning_and_recovery.png)','','A single training seed is a case comparison; evaluation episodes are not independent training replicates. No across-seed significance claim. Incomplete runs provide partial evidence only. Raw artifacts: '+str(ROOT/'runs')+'. Configuration: configs/continual/aba_WV_switch_1111.json.','']
+    lines+=['','![Learning and recovery](learning_and_recovery.png)','','A single training seed is a case comparison; evaluation episodes are not independent training replicates. No across-seed significance claim. Incomplete runs provide partial evidence only. Raw artifacts: '+str(ROOT/'runs')+'. Effective configuration and protocol are saved in each run directory.','']
     (OUT/'REPORT.md').write_text('\n'.join(lines))
 
 def main():

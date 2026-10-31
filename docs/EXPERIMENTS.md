@@ -59,3 +59,11 @@ Run: `.venv/bin/python scripts/run_aba.py` (two concurrent independent runs). Un
 Primary return-A observation: evaluations.jsonl phase=2, t_env=1500000, evaluation=phase_start, 32 greedy episodes before any A2 training; followed by the inherited roughly 10k-step evaluation cadence and exact endpoint. Queue performs independent final 32-episode A evaluation and writes `results/aba_WV_seed1111_20261031/{REPORT.md,learning_and_recovery.png,evaluations.csv,return_A_recovery.csv,independent_final.csv,status.json}`. One training seed per method; no across-seed significance claim. No desktop notification or chat wakeup configured.
 
 Direct verification before launch: Python syntax; dry-run effective protocol; CPU real RMSprop update scaling 0.1 in B, exactly 1 in A2; immediate removal of both selected sets and a synthetic outstanding ramp. No extra SC2 training or changed seeds/budgets.
+
+## Authorized extended-return ABA, seeds 3535 / 2222 (2026-10-31)
+
+New runs from scratch: QMIX baseline and W+V soft protection for each seed 3535, 2222 (four runs). Stalker 1M → Zealot 500k → Stalker 1M, 2.5M steps/run, 10M total. All method, environment, replay/optimizer/target retention, cumulative exploration and evaluation settings inherit the seed1111 ABA experiment. Detection only at A1 end; protection only in B; immediate all-one scaling on return A.
+
+Protocol: `configs/continual/aba_WV_A2_1M_3535_2222.json`. Queue: `.venv/bin/python scripts/run_aba_two_seeds.py`; maximum two concurrent runs, paired methods for 3535 then 2222. Single-run failures do not cancel the remaining requested runs; no automatic retries. Unique IDs: `qmix_ABA_A2_1M_{baseline,softprotect}_seed{3535,2222}_20261031`.
+
+Results/status: `results/aba_WV_A2_1M_seeds3535_2222_20261031/`. After training, independent final A evaluation (32 episodes/run) and per-seed curves/CSV/reports are generated under seed3535/ and seed2222/. The seed1111 2M schedule remains separate. Reusable run_aba.summarize now reads the seed and final phase budget from actual run config, rather than hardcoding the previous schedule. Direct checks: syntax and dry-run protocol; training/method code unchanged. No extra verification training or chat notification.

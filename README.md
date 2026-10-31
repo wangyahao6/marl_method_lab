@@ -30,3 +30,5 @@ A/W/V soft protection is configurable; see docs/METHODS.md and docs/EXPERIMENTS.
 ## 2026-10-31 ABA comparison
 
 Authorized seed-1111 QMIX baseline versus W+V soft protection: Stalker 1M → Zealot 500k → Stalker 500k, 5v5. Protection applies in B only, with immediate full release on return A. Protocol and execution details: docs/EXPERIMENTS.md. Queue: scripts/run_aba.py; result directory: results/aba_WV_seed1111_20261031/. Launch is not completion evidence.
+
+2026-10-31 extended ABA authorized: Stalker 1M → Zealot 500k → Stalker 1M, seeds 3535 and 2222, QMIX baseline and W+V soft protection (four new runs). Entry: scripts/run_aba_two_seeds.py; results: results/aba_WV_A2_1M_seeds3535_2222_20261031/. See docs/EXPERIMENTS.md.
