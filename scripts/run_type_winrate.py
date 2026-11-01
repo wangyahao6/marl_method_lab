@@ -1,6 +1,6 @@
 import json,os,subprocess,time,tarfile,hashlib
 from pathlib import Path
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101_attempt002'
 def main():
  files=['scripts/type_ablation_winrate.py','scripts/summarize_type_winrate.py','scripts/run_type_winrate.py','docs/2S3Z_TYPE_WINRATE.md']
  identity=dict(commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),files={f:hashlib.sha256((ROOT/f).read_bytes()).hexdigest() for f in files})

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101'
+ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101_attempt002'
 def main():
  plan=json.loads((OUT/'plan.json').read_text());results={};errors=[]
  for task in plan['tasks']:

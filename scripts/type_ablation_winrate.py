@@ -12,7 +12,7 @@ from components.episode_buffer import EpisodeBatch
 from components.transforms import OneHot
 from smac.env import StarCraft2Env
 SOURCE=ROOT/'results/2s3z_type_matched_ablation_20261101'
-OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101'
+OUT=ROOT/'results/2s3z_type_ablation_winrate_20261101_attempt002'
 ENV_SEEDS=[81001,81002,81003,81004]
 
 def save(path,value):
@@ -43,7 +43,7 @@ def evaluate(task,package,output):
  mac=BasicMAC(batch.scheme,batch.groups,a);mac.agent.load_state_dict(package['agent']);mac.agent.eval()
  before=hashlib.sha256(b''.join(v.numpy().tobytes() for v in mac.agent.state_dict().values())).hexdigest()
  args=dict(a.env_args);args['map_name']='2s3z'
- schema=batch.scheme;groups=batch.groups;records=[];handles=[];current_types=[]
+ schema={k:v for k,v in batch.scheme.items() if k not in ['filled','actions_onehot']};groups=batch.groups;records=[];handles=[];current_types=[]
  if task['ids']:
   module=mac.agent.net[2 if task['layer']=='A1' else 4]
   def mask(m,i,o):
