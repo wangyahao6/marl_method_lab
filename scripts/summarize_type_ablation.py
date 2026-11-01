@@ -37,9 +37,9 @@ def main():
       v=r[metric] if r else np.nan;scale=100 if metric=='flip_rate' else 1
       values.append(v*scale);lower.append((v-r[metric+'_q05'])*scale if r else 0);upper.append((r[metric+'_q95']-v)*scale if r else 0)
      # Quantiles are repeat distributions, not training-seed confidence intervals.
-     ax.bar(np.arange(3)+(gidx-2)*.15,values,.15,label=name,color=color)
+     ax.bar(np.arange(3)+(gidx-2)*.15,values,.15,label=name,color=color,yerr=[lower,upper] if name=='random' else None,capsize=2)
     ax.set_xticks(range(3));ax.set_xticklabels(['1111','2222','3535']);ax.set_title(f'{layer}: source = recipient = {source}');ax.set_ylabel(label);ax.grid(axis='y',alpha=.2)
-  axes[0,0].legend(fontsize=8,ncol=2);fig.tight_layout();fig.savefig(OUT/(metric+'.png'),dpi=160);plt.close(fig)
+  handles,labels=axes[0,0].get_legend_handles_labels();fig.legend(handles,labels,loc='lower center',ncol=5,fontsize=9);fig.tight_layout(rect=[0,.05,1,1]);fig.savefig(OUT/(metric+'.png'),dpi=160);plt.close(fig)
  fig,axes=plt.subplots(2,3,figsize=(12,7))
  for i,layer in enumerate(['A1','A2']):
   for j,seed in enumerate([1111,2222,3535]):
@@ -52,7 +52,7 @@ def main():
    for u in range(2):
     for v in range(2):ax.text(v,u,'N/A' if np.isnan(matrix[u,v]) else f'{matrix[u,v]:+.1f}',ha='center',va='center')
    ax.set_xticks([0,1]);ax.set_xticklabels(['target Stalker','target Zealot']);ax.set_yticks([0,1]);ax.set_yticklabels(['source Stalker','source Zealot']);ax.set_title(f'{layer}, seed {seed}')
- fig.colorbar(im,ax=axes.ravel().tolist(),label='Type high minus overall high: action-change percentage points',shrink=.7);fig.subplots_adjust(wspace=.65,hspace=.45,right=.83);fig.savefig(OUT/'cross_type_difference.png',dpi=160);plt.close(fig)
+ fig.subplots_adjust(left=.12,wspace=.7,hspace=.5,right=.84);cax=fig.add_axes([.9,.15,.018,.7]);fig.colorbar(im,cax=cax,label='Type high minus overall high: action-change percentage points');fig.savefig(OUT/'cross_type_difference.png',dpi=160);plt.close(fig)
  for r in summary:
   if r['source']==r['recipient'] and r['group'] in ['type_low','overall_low']:
    print(r['seed'],r['layer'],r['source'],r['group'],'zero fraction',r['zero_fraction_selection'],r['zero_fraction_evaluation'])
