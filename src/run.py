@@ -169,9 +169,9 @@ def run_sequential(args, logger):
             return
 
     detector = None
-    if getattr(args, pure_detection, False):
+    if getattr(args, "pure_detection", False):
         import sys
-        sys.path.insert(0, str(__import__(pathlib).Path(__file__).resolve().parents[1] / drivers/continual))
+        sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "drivers/continual"))
         from static_detection import Detector
         detector = Detector(learner, args)
 
@@ -280,9 +280,9 @@ def run_sequential(args, logger):
             last_log_T = runner.t_env
 
     if detector is not None:
-        __import__(pathlib).Path(args.local_results_path, final_model).mkdir(exist_ok=True)
-        learner.save_models(str(__import__(pathlib).Path(args.local_results_path) / final_model))
-        __import__(pathlib).Path(args.local_results_path, training_complete.json).write_text(__import__(json).dumps(dict(t_env=runner.t_env)))
+        __import__("pathlib").Path(args.local_results_path, "final_model").mkdir(exist_ok=True)
+        learner.save_models(str(__import__("pathlib").Path(args.local_results_path) / "final_model"))
+        __import__("pathlib").Path(args.local_results_path, "training_complete.json").write_text(__import__("json").dumps(dict(t_env=runner.t_env)))
     runner.close_env()
     logger.console_logger.info("Finished Training")
 
