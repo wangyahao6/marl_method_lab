@@ -10,7 +10,7 @@ SEEDS=[1111,2222,3535]
 def main():
  OUT.mkdir(exist_ok=True,parents=True);rows=[];fig,ax=plt.subplots()
  for seed in SEEDS:
-  run=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt002'
+  run=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt003'
   files=list((run/'sacred').glob('*/info.json'))
   if files:
    info=json.loads(files[0].read_text());y=info.get('test_battle_won_mean',[]);x=info.get('test_battle_won_mean_T',[])
@@ -37,7 +37,13 @@ def main():
   w=csv.writer(f);w.writerow(['seed','step','layer','group','selected','overall_missed','temporal_jaccard','half_jaccard']);w.writerows(rows)
  states={}
  for seed in SEEDS:
-  run=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt002'
+  run=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt003'
   states[seed]={n:json.loads((run/n).read_text()) for n in ['launcher_status.json','training_complete.json'] if (run/n).exists()}
+  d=run/'detection'
+  readlines=lambda name: [json.loads(x) for x in (d/name).read_text().splitlines() if x.strip()] if (d/name).exists() else []
+  records=readlines('records.jsonl');audits=readlines('audit.jsonl');errors=readlines('errors.jsonl')
+  states[seed]['diagnostic_review']=dict(successful_detections=len(records),expected=20,errors=len(errors),audit_differences=sum(not x['training_state_unchanged'] or not x['rng_restored'] for x in audits),raw_windows=len(list(d.glob('*/input.th'))))
+  states[seed]['diagnostic_review']['complete']=len(records)==20 and not errors and len(audits)==20 and all(x['training_state_unchanged'] and x['rng_restored'] for x in audits)
+
  (OUT/'REPORT.md').write_text('# 2s3z QMIX pure detection\n\nCompletion evidence (training steps and process status):\n\n```json\n'+json.dumps(states,indent=2)+'\n```\n\nSee detection_summary.csv and per-seed curves/heatmaps. Raw snapshots and last-32-episode windows remain in runs/*/detection. Empty-set Jaccard is undefined. Per-group scores are separately normalized; missed sets describe threshold dilution, not causal importance. Temporal stability combines model and data-window changes; episode halves test within-window reproducibility. No neuron intervention or reset is enabled. Detection audit/errors must be inspected before drawing conclusions.\n')
 if __name__=='__main__':main()

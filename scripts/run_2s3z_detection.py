@@ -9,7 +9,7 @@ def main():
  OUT.mkdir(parents=True,exist_ok=True)
  processes={};status={}
  for seed in [1111,2222,3535]:
-  run_id=f'qmix_2s3z_detect_seed{seed}_20261101_attempt002'
+  run_id=f'qmix_2s3z_detect_seed{seed}_20261101_attempt003'
   if seed==1111 and a.adopt_1111:
    status[str(seed)]={'state':'running','adopted':True};continue
   cmd=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','smac','--algorithm','qmix','--method','baseline','--map','2s3z','--steps','2000000','--seed',str(seed),'--run-id',run_id,'--set','pure_detection=true','--set','test_interval=10000','--set','test_nepisode=32','--set','save_model_interval=100000']
@@ -22,7 +22,7 @@ def main():
     code=processes[seed].poll()
     if code is not None:status[str(seed)]={'state':'exited' if code==0 else 'failed','exit_code':code}
    else:
-    path=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt002/launcher_status.json'
+    path=ROOT/'runs'/f'qmix_2s3z_detect_seed{seed}_20261101_attempt003/launcher_status.json'
     try:
      value=json.loads(path.read_text())
      if value['state']!='running':status[str(seed)]=value

@@ -1,11 +1,13 @@
 """Pure snapshot detection on complete recent episodes; isolated model copies."""
-import copy,json,random,traceback
+import json,random,traceback
 from collections import deque
 from pathlib import Path
 import numpy as np
 import torch as th
 from protection import cpu_episode,combine,digest,rng_state
 from detection_common import sensitivity
+from controllers import REGISTRY as controllers
+from modules.mixers.qmix import QMixer
 
 def score(a):
     s=a/a.mean() if a.mean()>0 else None
@@ -42,8 +44,20 @@ class Detector:
             after=digest([self.learner.mac.agent.state_dict(),self.learner.mixer.state_dict(),self.learner.target_mac.agent.state_dict(),self.learner.target_mixer.state_dict(),self.learner.optimiser.state_dict(),self.learner.mac.hidden_states])
             with (self.out/'audit.jsonl').open('a') as f:f.write(json.dumps(dict(step=step,training_state_unchanged=before==after,rng_restored=digest(state)==digest(rng_state())))+'\n')
     def compute(self,step,nominal):
+        # Persist the exact source window before reconstruction or screening.
+        dest=self.out/str(step);dest.mkdir()
+        cpu_batch=combine([x[0] for x in self.fifo])
+        agent_state={k:v.detach().cpu().clone() for k,v in self.learner.mac.agent.state_dict().items()}
+        mixer_state={k:v.detach().cpu().clone() for k,v in self.learner.mixer.state_dict().items()}
+        th.save(dict(batch=cpu_batch,args=vars(self.args),agent=agent_state,mixer=mixer_state,
+                     types=[x[1] for x in self.fifo],step=step,nominal=nominal),dest/'input.th')
         batch=combine([x[0] for x in self.fifo]);batch.to(self.args.device)
-        mac=copy.deepcopy(self.learner.mac);mix=copy.deepcopy(self.learner.mixer)
+        # Reconstruct from parameters only: live controller hidden states and
+        # learner hook closures can hold non-leaf tensors after backpropagation.
+        mac=controllers[self.args.mac](batch.scheme,batch.groups,self.args)
+        mix=QMixer(self.args)
+        mac.agent.load_state_dict(agent_state);mix.load_state_dict(mixer_state)
+        mac.agent.to(self.args.device);mix.to(self.args.device)
         for network in [mac.agent,mix]:
             for module in network.modules():module._forward_hooks.clear()
         mac.agent.eval();mix.eval();capt={k:[] for k in ['A1','A2','H']};handles=[]
@@ -56,8 +70,6 @@ class Detector:
         lengths=batch['filled'].squeeze(-1).sum(1)-1
         good=mask & (th.arange(batch.max_seq_length-1,device=mask.device)[None,:]<lengths[:,None])
         c,_=sensitivity(mix,q[:,:-1][good],batch['actions'][:,:-1].squeeze(-1)[good],batch['avail_actions'][:,:-1][good],batch['state'][:,:-1][good])
-        dest=self.out/str(step);dest.mkdir()
-        th.save(dict(batch=combine([x[0] for x in self.fifo]),args=vars(self.args),agent={k:v.cpu() for k,v in mac.agent.state_dict().items()},mixer={k:v.cpu() for k,v in mix.state_dict().items()},types=[x[1] for x in self.fifo]),dest/'input.th')
         ep=np.broadcast_to(np.arange(batch.batch_size)[:,None],good.shape)[good.cpu().numpy()]
         typearr=np.array([x[1] for x in self.fifo])[ep]
         weights=c/c.mean() if c.mean()>0 else None
