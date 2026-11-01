@@ -168,6 +168,13 @@ def run_sequential(args, logger):
             evaluate_sequential(args, runner)
             return
 
+    detector = None
+    if getattr(args, pure_detection, False):
+        import sys
+        sys.path.insert(0, str(__import__(pathlib).Path(__file__).resolve().parents[1] / drivers/continual))
+        from static_detection import Detector
+        detector = Detector(learner, args)
+
     # start training
     episode = 0
     last_test_T = -args.test_interval - 1
@@ -205,6 +212,9 @@ def run_sequential(args, logger):
                     episode_sample.to(args.device)
 
                 learner.train(episode_sample, runner.t_env, episode)
+
+        if detector is not None:
+            detector.observe(episode_batch, runner.env, runner.t_env)
 
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
@@ -269,6 +279,10 @@ def run_sequential(args, logger):
             logger.print_recent_stats()
             last_log_T = runner.t_env
 
+    if detector is not None:
+        __import__(pathlib).Path(args.local_results_path, final_model).mkdir(exist_ok=True)
+        learner.save_models(str(__import__(pathlib).Path(args.local_results_path) / final_model))
+        __import__(pathlib).Path(args.local_results_path, training_complete.json).write_text(__import__(json).dumps(dict(t_env=runner.t_env)))
     runner.close_env()
     logger.console_logger.info("Finished Training")
 
