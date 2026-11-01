@@ -1,5 +1,5 @@
-"""Authorized shared-prefix + 20 branches, max two branches concurrently."""
-import json,os,subprocess,time
+"""Authorized shared-prefix + 20 branches, max four branches concurrently."""
+import argparse,json,os,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/hetero_agent_softprotect_3535_20261101';PARENT='hetero_Aprefix_seed3535_20261101_attempt001'
 def cmd(run,role,task='R',group='N'):
@@ -8,15 +8,23 @@ def cmd(run,role,task='R',group='N'):
  return result
 
 def main():
- OUT.mkdir(parents=True,exist_ok=True);status={'prefix':dict(run_id=PARENT,state='running'),'branches':{}}
+ parser=argparse.ArgumentParser();parser.add_argument('--adopt-prefix',action='store_true');options=parser.parse_args()
+ OUT.mkdir(parents=True,exist_ok=True);status={'max_concurrent_branches':4,'prefix':dict(run_id=PARENT,state='running',adopted=options.adopt_prefix),'branches':{}}
  def save():
   p=OUT/'queue_status.tmp';p.write_text(json.dumps(status,indent=2));p.replace(OUT/'queue_status.json')
- save();code=subprocess.call(cmd(PARENT,'prefix'),cwd=ROOT)
+ save()
+ if options.adopt_prefix:
+  while True:
+   entry=json.loads((ROOT/'runs'/PARENT/'launcher_status.json').read_text())
+   if entry['state']!='running':
+    code=entry.get('exit_code',1);break
+   time.sleep(5)
+ else:code=subprocess.call(cmd(PARENT,'prefix'),cwd=ROOT)
  status['prefix'].update(state='exited' if code==0 else 'failed',exit_code=code);save()
  if code!=0:return
  todo=[(task,g) for task in ['R','M'] for g in ['N','T1','G1','R1','T2','G2','R2','T12','G12','R12']];active={}
  while todo or active:
-  while todo and len(active)<2:
+  while todo and len(active)<4:
    task,g=todo.pop(0);run=f'hetero_{task}_{g}_seed3535_20261101_attempt001';p=subprocess.Popen(cmd(run,'branch',task,g),cwd=ROOT);active[run]=p;status['branches'][run]=dict(state='running',pid=p.pid);save()
   for run,p in list(active.items()):
    code=p.poll()
