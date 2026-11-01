@@ -1,0 +1,14 @@
+# Offline all-location and per-agent diagnostics (2026-11-01)
+
+Entry: `scripts/diagnose_all_locations.py --input <detection/input.th> [--input ...] --output <new-directory>`.
+This independent CPU analysis does not import the trainer, construct an environment or optimizer, apply protection, or change training code. It replays saved histories using their saved online Agent and Mixer. Input paths and SHA-256, script SHA-256, original-W/V agreement, and parameter invariance are recorded. Existing results are never overwritten.
+
+Initial output: `results/all_locations_detection_20261101/`. Inputs are A1-end 1M-step detection packages from `qmix_ABA_softprotect_seed1111_20261031` and `qmix_ABA_A2_1M_softprotect_seed{3535,2222}_20261031`. These precede the first soft-protection update; subsequent protection-trained models are not analyzed. Each uses its own last 32 Stalker episodes, not matched trajectories between seeds. No training or environment interaction was added.
+
+Main locations (64 coordinates each): A1=`agent.net[2]`, A2=`agent.net[4]`, H=GRU output; U=`mixer.hyper_w_1` post-ReLU; W=`hyper_w_final[2]`; V=`V[2]`; M=the actual mixing hidden ELU. Identity ActivateLayers are not separate learned representations. Agent `fc1` is unused in forward (only used to create a zero initial hidden-state tensor). GRU internal gates are not treated as independent hidden-neuron layers. Generated weights/biases and Q outputs are recorded separately as output coordinates, not pooled into hidden-neuron comparisons; supplementary Q coordinates include unavailable actions and are not a behavioral importance test.
+
+Primary statistics retain `omega=c/mean(c)`, absolute activation, layer-mean normalization, strict score >3, and all-five-agent mean before weighting. Per-agent scores use the same states and weights, normalized within each agent/layer; different normalizers must not be mistaken for a common absolute importance scale. Supplementary eligible statistics retain only agent moments with >1 available action; their state/sample population differs and cannot replace the primary counts without a protocol change.
+
+Exploratory controls: alternating-episode halves, and 200 episode-wise random permutations of agent identity (analysis RNG seed 20261101, not a training seed). The permutation preserves pooled responses and temporal trajectories within episodes. Tail fractions are descriptive, uncorrected, and not a claim of significant role specialization; exchangeability is limited by observation, identity input, position and availability differences. Results establish only score dilution/heterogeneity, not causal importance or soft-protection benefit. Time, task and seed generalization remain untested beyond these A1 snapshots.
+
+User elected to inspect offline results before deciding on retraining. No new training queued.
