@@ -12,7 +12,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -22,6 +22,10 @@ def main():
     p.add_argument('--scenario',choices=['task_drift','task_switch'])
     p.add_argument('--protocol',default='configs/continual/knife_fig6.json')
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
+    p.add_argument('--hetero-role',choices=['prefix','branch'])
+    p.add_argument('--parent')
+    p.add_argument('--branch-task',choices=['R','M'],default='R')
+    p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',a.run_id): p.error('run-id must be a simple directory name')
@@ -53,6 +57,14 @@ def main():
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
+    elif a.suite=='hetero':
+        if a.algorithm!='qmix' or not a.hetero_role:p.error('hetero requires qmix and --hetero-role')
+        if a.hetero_role=='branch' and not a.parent:p.error('branch requires --parent')
+        protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
+        env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/hetero_train.py'),'--role',a.hetero_role,'--seed',str(a.seed),'--task',a.branch_task,'--group',a.group]
+        if a.parent:command+=['--parent',a.parent]
+        details={'protocol':protocol,'parent':a.parent,'branch_task':a.branch_task,'group':a.group,'steps':1000000 if a.hetero_role=='prefix' else 1500000}
     else:
         if a.algorithm!='qmix' or a.method not in ['baseline','softprotect']:p.error('continual driver currently supports QMIX baseline/softprotect only')
         if not a.scenario:p.error('continual requires --scenario')
