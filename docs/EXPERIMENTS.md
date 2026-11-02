@@ -78,3 +78,7 @@ VDN baseline, A1_linear, A2_linear; three full TS4 paths, 1M/500k/500k/1M each, 
 
 
 2026-11-02 21:50 +08:00 scheduling update: user authorized parallel execution. Resource check: GPU 1402/12053MiB, available RAM116GiB, CPU load0.93. Max concurrency changed from1 to3. Existing baseline training/launcher preserved and adopted by replacement supervisor; A1/A2 each starts its own original full3M path. Seed4242, threshold>3, training, screening, protection and evaluation unchanged. Original run snapshots remain immutable; results/ts4_vdn_agent_4242_20261102/parallel_transition_20261102.json records handover.
+
+## TS3 VDN A2 top-3 (2026-11-02)
+
+Authorized seeds1234/4567, each stage2M, baseline and history-union protection only. [Protocol](TS3_VDN_TOP3_PROTOCOL.md), queue `scripts/run_ts3_vdn_top3.py`. Shared unprotected A per seed, nominal36M actual steps (40M path-equivalent), max4 new processes. Detection uses exact VDN sensitivity and overall A2 top3, no threshold. Direct offline check: explicit summed-Q counterfactual equality, real VDN learner, exact top3, unchanged model/optimizer/hidden/RNG during screening and union/slice mappings. No extra environment training.

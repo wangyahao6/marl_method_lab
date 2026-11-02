@@ -40,3 +40,7 @@ Authorized seed3535 five-task retention experiment: baseline, A1/A2 each with la
 ## 2026-11-02 TS4 VDN
 
 Authorized VDN baseline, A1 and A2 separate soft-protection paths, seed4242. One training process at a time; 3M per path. Both-layer longitudinal detection and old-task win-rate retention. See [protocol](docs/TS4_VDN_PROTOCOL.md), queue scripts/run_ts4_vdn.py, results results/ts4_vdn_agent_4242_20261102/.
+
+## 2026-11-02 TS3 VDN top-3
+
+New authorized run: seeds1234/4567, five2M stages, VDN baseline versus A2 top3 historical union. See [protocol](docs/TS3_VDN_TOP3_PROTOCOL.md). Results `results/ts3_vdn_A2_top3_1234_4567_20261102/`; max4 new processes, other running workloads unchanged.

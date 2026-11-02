@@ -67,19 +67,21 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
     elif a.suite=='ts3':
-        if a.algorithm!='qmix' or not a.ts3_role:p.error('ts3 requires qmix and --ts3-role')
+        if a.algorithm not in ['qmix','vdn'] or not a.ts3_role:p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
         expected='baseline' if a.ts3_group=='N' else 'softprotect'
         if a.method!=expected:p.error('ts3 group and method must agree')
         protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
+        if a.suite=='ts3' and a.algorithm!=protocol.get('algorithm','qmix'):p.error('algorithm must match named ts3 protocol')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]
-        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':1000000 if a.ts3_role=='prefix' else 4000000}
+        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':protocol['thresholds'][0] if a.ts3_role=='prefix' else protocol['thresholds'][-1]-protocol['thresholds'][0]}
     elif a.suite=='hetero':
         if a.algorithm!='qmix' or not a.hetero_role:p.error('hetero requires qmix and --hetero-role')
         if a.hetero_role=='branch' and not a.parent:p.error('branch requires --parent')
         protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
+        if a.suite=='ts3' and a.algorithm!=protocol.get('algorithm','qmix'):p.error('algorithm must match named ts3 protocol')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/hetero_train.py'),'--role',a.hetero_role,'--seed',str(a.seed),'--task',a.branch_task,'--group',a.group]
         if a.parent:command+=['--parent',a.parent]

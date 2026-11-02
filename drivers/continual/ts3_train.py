@@ -5,7 +5,8 @@ from collections import deque
 from types import SimpleNamespace
 import hetero_train as h
 from hetero_environment import TEAMS
-from hetero_protection import select
+from hetero_protection import select as qmix_select
+from ts3_vdn_detection import select as vdn_select
 from ts3_protection import TS3Protection
 from protection import cpu_episode,rng_state,digest
 import numpy as np
@@ -20,7 +21,11 @@ def main():
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
-        cfg=h.config(o.seed,out);cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
+        cfg=h.config(o.seed,out)
+        algorithm=P.get('algorithm','qmix')
+        if algorithm=='vdn':base.merge(cfg,__import__('yaml').safe_load((ROOT/'src/config/algs/vdn.yaml').read_text()))
+        cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
+        cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
         args=SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
         def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
@@ -64,7 +69,7 @@ def main():
             status()
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
-            try:result=select(learner,args,fifo,dest)
+            try:result=(vdn_select if algorithm=='vdn' else qmix_select)(learner,args,fifo,dest)
             except Exception:
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
             write(dest/'result.json',result)
