@@ -7,6 +7,7 @@ import hetero_train as h
 from hetero_environment import TEAMS
 from hetero_protection import select as qmix_select
 from ts3_vdn_detection import select as vdn_select
+from ts3_vdn_type_detection import select as vdn_type_select
 from ts3_protection import TS3Protection
 from protection import cpu_episode,rng_state,digest
 import numpy as np
@@ -69,7 +70,7 @@ def main():
             status()
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
-            try:result=(vdn_select if algorithm=='vdn' else qmix_select)(learner,args,fifo,dest)
+            try:result=(vdn_type_select if algorithm=='vdn' and P.get('selection')=='type_threshold_union' else vdn_select if algorithm=='vdn' else qmix_select)(learner,args,fifo,dest)
             except Exception:
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
             write(dest/'result.json',result)
