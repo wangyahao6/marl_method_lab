@@ -12,7 +12,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -28,6 +28,7 @@ def main():
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch'])
     p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union'],default='N')
+    p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',a.run_id): p.error('run-id must be a simple directory name')
@@ -59,6 +60,12 @@ def main():
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
+    elif a.suite=='ts4':
+        if a.algorithm!='vdn' or a.method!=('baseline' if a.ts4_group=='N' else 'softprotect'):p.error('ts4 requires VDN and matching group/method')
+        protocol=json.loads((ROOT/a.protocol).read_text())
+        env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
+        details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
     elif a.suite=='ts3':
         if a.algorithm!='qmix' or not a.ts3_role:p.error('ts3 requires qmix and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')

@@ -71,3 +71,7 @@ Results/status: `results/aba_WV_A2_1M_seeds3535_2222_20261031/`. After training,
 ## Authorized TS3 seed3535 (2026-11-02)
 
 Five stages, 1M each; five comparison paths (common baseline, A1_linear/A1_union/A2_linear/A2_union), shared A prefix. Up to five branches concurrently after prefix. Queue `.venv/bin/python scripts/run_ts3_agent.py` uses `scripts/run.py --suite ts3`; unique attempt001 IDs. See [TS3 protocol](TS3_AGENT_PROTOCOL.md) for budget, evaluation, parameter mappings and state-restoration limits. Direct checks used real RMSprop offline and five exact-team resets without policy training; shapes obs92/state130/actions11 for all tasks. No performance gate or added training budget.
+
+## Authorized TS4 VDN seed4242 (2026-11-02)
+
+VDN baseline, A1_linear, A2_linear; three full TS4 paths, 1M/500k/500k/1M each, single new training process at a time. User delegated seed choice and specified separate A1/A2 arms and old-task win-rate retests. See [TS4 protocol](TS4_VDN_PROTOCOL.md). Queue: .venv/bin/python scripts/run_ts4_vdn.py through scripts/run.py --suite ts4. Results: results/ts4_vdn_agent_4242_20261102/. No chat wakeup configured. Offline arithmetic/RMSprop and pure-team environment reset checks passed without validation training.

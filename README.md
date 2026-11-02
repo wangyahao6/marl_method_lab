@@ -36,3 +36,7 @@ Authorized seed-1111 QMIX baseline versus W+V soft protection: Stalker 1M → Ze
 ## 2026-11-02 TS3 single-layer protection
 
 Authorized seed3535 five-task retention experiment: baseline, A1/A2 each with latest-selection linear recovery or permanent historical union. Shared unprotected A prefix 1M; five 4M branches, nominal actual 21M steps. Protocol, evaluation and limits: [TS3 protocol](docs/TS3_AGENT_PROTOCOL.md). Queue `scripts/run_ts3_agent.py`, live result directory `results/ts3_agent_3535_20261102/`. Start/completion are distinct.
+
+## 2026-11-02 TS4 VDN
+
+Authorized VDN baseline, A1 and A2 separate soft-protection paths, seed4242. One training process at a time; 3M per path. Both-layer longitudinal detection and old-task win-rate retention. See [protocol](docs/TS4_VDN_PROTOCOL.md), queue scripts/run_ts4_vdn.py, results results/ts4_vdn_agent_4242_20261102/.
