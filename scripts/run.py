@@ -12,7 +12,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -26,6 +26,8 @@ def main():
     p.add_argument('--parent')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
+    p.add_argument('--ts3-role',choices=['prefix','branch'])
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union'],default='N')
     p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',a.run_id): p.error('run-id must be a simple directory name')
@@ -57,6 +59,16 @@ def main():
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
+    elif a.suite=='ts3':
+        if a.algorithm!='qmix' or not a.ts3_role:p.error('ts3 requires qmix and --ts3-role')
+        if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
+        expected='baseline' if a.ts3_group=='N' else 'softprotect'
+        if a.method!=expected:p.error('ts3 group and method must agree')
+        protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
+        env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
+        if a.parent:command+=['--parent',a.parent]
+        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':1000000 if a.ts3_role=='prefix' else 4000000}
     elif a.suite=='hetero':
         if a.algorithm!='qmix' or not a.hetero_role:p.error('hetero requires qmix and --hetero-role')
         if a.hetero_role=='branch' and not a.parent:p.error('branch requires --parent')

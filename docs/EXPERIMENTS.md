@@ -67,3 +67,7 @@ New runs from scratch: QMIX baseline and W+V soft protection for each seed 3535,
 Protocol: `configs/continual/aba_WV_A2_1M_3535_2222.json`. Queue: `.venv/bin/python scripts/run_aba_two_seeds.py`; maximum two concurrent runs, paired methods for 3535 then 2222. Single-run failures do not cancel the remaining requested runs; no automatic retries. Unique IDs: `qmix_ABA_A2_1M_{baseline,softprotect}_seed{3535,2222}_20261031`.
 
 Results/status: `results/aba_WV_A2_1M_seeds3535_2222_20261031/`. After training, independent final A evaluation (32 episodes/run) and per-seed curves/CSV/reports are generated under seed3535/ and seed2222/. The seed1111 2M schedule remains separate. Reusable run_aba.summarize now reads the seed and final phase budget from actual run config, rather than hardcoding the previous schedule. Direct checks: syntax and dry-run protocol; training/method code unchanged. No extra verification training or chat notification.
+
+## Authorized TS3 seed3535 (2026-11-02)
+
+Five stages, 1M each; five comparison paths (common baseline, A1_linear/A1_union/A2_linear/A2_union), shared A prefix. Up to five branches concurrently after prefix. Queue `.venv/bin/python scripts/run_ts3_agent.py` uses `scripts/run.py --suite ts3`; unique attempt001 IDs. See [TS3 protocol](TS3_AGENT_PROTOCOL.md) for budget, evaluation, parameter mappings and state-restoration limits. Direct checks used real RMSprop offline and five exact-team resets without policy training; shapes obs92/state130/actions11 for all tasks. No performance gate or added training budget.

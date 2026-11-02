@@ -32,3 +32,7 @@ A/W/V soft protection is configurable; see docs/METHODS.md and docs/EXPERIMENTS.
 Authorized seed-1111 QMIX baseline versus W+V soft protection: Stalker 1M → Zealot 500k → Stalker 500k, 5v5. Protection applies in B only, with immediate full release on return A. Protocol and execution details: docs/EXPERIMENTS.md. Queue: scripts/run_aba.py; result directory: results/aba_WV_seed1111_20261031/. Launch is not completion evidence.
 
 2026-10-31 extended ABA authorized: Stalker 1M → Zealot 500k → Stalker 1M, seeds 3535 and 2222, QMIX baseline and W+V soft protection (four new runs). Entry: scripts/run_aba_two_seeds.py; results: results/aba_WV_A2_1M_seeds3535_2222_20261031/. See docs/EXPERIMENTS.md.
+
+## 2026-11-02 TS3 single-layer protection
+
+Authorized seed3535 five-task retention experiment: baseline, A1/A2 each with latest-selection linear recovery or permanent historical union. Shared unprotected A prefix 1M; five 4M branches, nominal actual 21M steps. Protocol, evaluation and limits: [TS3 protocol](docs/TS3_AGENT_PROTOCOL.md). Queue `scripts/run_ts3_agent.py`, live result directory `results/ts3_agent_3535_20261102/`. Start/completion are distinct.

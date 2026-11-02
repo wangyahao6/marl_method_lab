@@ -1,0 +1,72 @@
+{
+  "id": "ts3_agent_single_layer_3535_20261102",
+  "seed": 3535,
+  "tasks": {
+    "A": [
+      2,
+      3
+    ],
+    "B": [
+      4,
+      1
+    ],
+    "C": [
+      1,
+      4
+    ],
+    "D": [
+      3,
+      2
+    ],
+    "E": [
+      5,
+      0
+    ]
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "thresholds": [
+    1000000,
+    2000000,
+    3000000,
+    4000000,
+    5000000
+  ],
+  "groups": [
+    "N",
+    "A1_linear",
+    "A1_union",
+    "A2_linear",
+    "A2_union"
+  ],
+  "screen_episodes": 32,
+  "beta": 3,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "overall_agent_mean_state_weighted_activity",
+  "weight_formula": "c/mean(c); zero mean undefined",
+  "shared_prefix": true,
+  "nominal_actual_training_steps": 21000000,
+  "full_path_equivalent_steps": 25000000,
+  "max_parallel_branches": 5,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "cumulative_epsilon"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset"
+}
