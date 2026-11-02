@@ -22,7 +22,7 @@
   "beta": 3,
   "step_scale": 0.1,
   "recovery_steps": 100000,
-  "max_parallel": 1,
+  "max_parallel": 3,
   "weight_formula": "c/mean(c), c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
   "screening": "overall state-weighted agent activation; within-layer mean normalization >3",
   "phase_boundary": "whole_episode_after_cumulative_threshold",

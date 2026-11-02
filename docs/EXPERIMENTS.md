@@ -75,3 +75,6 @@ Five stages, 1M each; five comparison paths (common baseline, A1_linear/A1_union
 ## Authorized TS4 VDN seed4242 (2026-11-02)
 
 VDN baseline, A1_linear, A2_linear; three full TS4 paths, 1M/500k/500k/1M each, single new training process at a time. User delegated seed choice and specified separate A1/A2 arms and old-task win-rate retests. See [TS4 protocol](TS4_VDN_PROTOCOL.md). Queue: .venv/bin/python scripts/run_ts4_vdn.py through scripts/run.py --suite ts4. Results: results/ts4_vdn_agent_4242_20261102/. No chat wakeup configured. Offline arithmetic/RMSprop and pure-team environment reset checks passed without validation training.
+
+
+2026-11-02 21:50 +08:00 scheduling update: user authorized parallel execution. Resource check: GPU 1402/12053MiB, available RAM116GiB, CPU load0.93. Max concurrency changed from1 to3. Existing baseline training/launcher preserved and adopted by replacement supervisor; A1/A2 each starts its own original full3M path. Seed4242, threshold>3, training, screening, protection and evaluation unchanged. Original run snapshots remain immutable; results/ts4_vdn_agent_4242_20261102/parallel_transition_20261102.json records handover.
