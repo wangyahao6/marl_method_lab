@@ -27,3 +27,5 @@ Protocol `configs/continual/history.json`; immutable per-node config in result f
 ## Queue concurrency override
 
 The 2026-11-03 queue was handed over to the resumable scheduler with six parallel slots. Existing launchers are adopted by PID and run ID. Dependencies and protocols continue to come from the original queue snapshot. The snapshot records the effective slot count. For a handover, stop the previous scheduler alone and verify that its child launchers match the running entries before starting the replacement.
+
+Adjust the live limit with `.venv/bin/python scripts/run_history.py --set-parallel N`. The scheduler reloads this setting each scheduling cycle. Lowering it lets existing training finish and prevents new starts until slots are available. Raising it admits eligible pending tasks in queue order.

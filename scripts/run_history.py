@@ -5,6 +5,8 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'results/vdn_task_history_20261103'
 def write(path,obj):
     temp=path.with_suffix('.tmp');temp.write_text(json.dumps(obj,indent=2));temp.replace(path)
+CONTROL=OUT/'parallel_limit.json'
+
 def initialize():
     OUT.mkdir(parents=True,exist_ok=False)
     master=json.loads((ROOT/'configs/continual/history.json').read_text());write(OUT/'protocol.json',master)
@@ -48,9 +50,20 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--max-parallel', type=int)
+    parser.add_argument('--set-parallel', type=int, help='Update the live queue slot limit')
     options=parser.parse_args()
     if options.max_parallel is not None and options.max_parallel < 1:
         parser.error('--max-parallel must be positive')
+    if options.set_parallel is not None:
+        if options.set_parallel < 1 or options.resume or options.max_parallel is not None:
+            parser.error('--set-parallel requires a positive integer and is used alone')
+        if not (OUT/'queue_status.json').is_file():
+            parser.error('queue has not been initialized')
+        temp=CONTROL.with_name(f'.parallel_limit.{os.getpid()}.tmp')
+        temp.write_text(json.dumps({'max_parallel':options.set_parallel})+'\n')
+        temp.replace(CONTROL)
+        print(f'Queue slot limit set to {options.set_parallel}')
+        return
     if options.resume:
         state=json.loads((OUT/'queue_status.json').read_text())
         old=Path(f"/proc/{state['pid']}/stat")
@@ -65,7 +78,22 @@ def main():
     active={run:AdoptedLauncher(run,node['pid']) for run,node in nodes.items() if node['state']=='running'}
     def save():write(OUT/'queue_status.json',state)
     save()
+    last_control_error=None
     while True:
+        if CONTROL.exists():
+            try:
+                limit=json.loads(CONTROL.read_text())['max_parallel']
+                if type(limit) is not int or limit < 1:
+                    raise ValueError('max_parallel must be a positive integer')
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                if str(exc)!=last_control_error:
+                    print(f'Keeping slot limit {state["max_parallel"]}: {exc}', flush=True)
+                    last_control_error=str(exc)
+            else:
+                last_control_error=None
+                if limit!=state['max_parallel']:
+                    state['max_parallel']=limit
+                    save()
         for run,proc in list(active.items()):
             code=proc.poll()
             if code is None:continue
