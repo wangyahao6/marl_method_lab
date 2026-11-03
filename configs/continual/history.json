@@ -1,0 +1,21 @@
+{
+  "id": "vdn_task_history_20261103",
+  "algorithm": "vdn",
+  "seeds": [
+    3535,
+    2222,
+    1111
+  ],
+  "max_parallel": 2,
+  "stage_steps": 2000000,
+  "groups": [
+    "N"
+  ],
+  "screen_episodes": 32,
+  "beta": 3,
+  "screening": "existing ts4_diagnostics.score; overall state-weighted activity",
+  "phase_boundary": "whole_episode_after_cumulative_threshold",
+  "weight_formula": "existing VDN c/mean(c); normalized weighted activity; score>3",
+  "top_k": 3,
+  "nominal_actual_training_steps": 90000000
+}

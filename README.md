@@ -44,3 +44,7 @@ Authorized VDN baseline, A1 and A2 separate soft-protection paths, seed4242. One
 ## 2026-11-02 TS3 VDN top-3
 
 New authorized run: seeds1234/4567, five2M stages, VDN baseline versus A2 top3 historical union. See [protocol](docs/TS3_VDN_TOP3_PROTOCOL.md). Results `results/ts3_vdn_A2_top3_1234_4567_20261102/`; max4 new processes, other running workloads unchanged.
+
+## 2026-11-03 VDN task/history analysis
+
+Authorized three seeds3535/2222/1111, mirror S/Z/C,2M per stage, all six permutations. Shared-prefix tree90M actual nominal steps; max2 new workers. See [protocol](docs/HISTORY_PROTOCOL.md), queue scripts/run_history.py, results results/vdn_task_history_20261103/. No intervention; A1/A2 endpoint scores. Launch is not completion.
