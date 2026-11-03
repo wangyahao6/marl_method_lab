@@ -1,11 +1,11 @@
 """Authorized three-seed VDN S/Z/C prefix tree; at most two new workers."""
-import itertools,json,os,subprocess,time,traceback
+import argparse,itertools,json,os,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'results/vdn_task_history_20261103'
 def write(path,obj):
     temp=path.with_suffix('.tmp');temp.write_text(json.dumps(obj,indent=2));temp.replace(path)
-def main():
+def initialize():
     OUT.mkdir(parents=True,exist_ok=False)
     master=json.loads((ROOT/'configs/continual/history.json').read_text());write(OUT/'protocol.json',master)
     tasks={'S':'stalker','Z':'zealot','C':'colossus'};nodes={}
@@ -17,7 +17,52 @@ def main():
                 cfg=dict(master,seed=seed,path=path,order=[tasks[x] for x in seq],thresholds=[2000000*i for i in range(1,length+1)])
                 cp=OUT/f'{run}.json';write(cp,cfg)
                 nodes[run]=dict(seed=seed,path=path,parent=parent,protocol=str(cp),state='pending')
-    state=dict(status='running',pid=os.getpid(),max_parallel=master['max_parallel'],runs=nodes);active={}
+    return dict(status='running',pid=os.getpid(),max_parallel=master['max_parallel'],runs=nodes)
+
+class AdoptedLauncher:
+    def __init__(self, run, pid):
+        self.run, self.pid = run, pid
+
+    def poll(self):
+        directory=ROOT/'runs'/self.run
+        try:
+            launcher=json.loads((directory/'launcher_status.json').read_text())
+        except (OSError, ValueError):
+            launcher={}
+        if launcher.get('exit_code') is not None:
+            return launcher['exit_code']
+        try:
+            stat=Path(f'/proc/{self.pid}/stat').read_text().rsplit(')',1)[1].split()
+            argv=Path(f'/proc/{self.pid}/cmdline').read_bytes().split(b'\0')
+            if stat[0]!='Z' and self.run.encode() in argv:
+                return None
+        except FileNotFoundError:
+            pass
+        # The launcher writes its exit status before exiting.
+        try:
+            return json.loads((directory/'launcher_status.json').read_text()).get('exit_code',1)
+        except (OSError, ValueError):
+            return 1
+
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--resume', action='store_true')
+    parser.add_argument('--max-parallel', type=int)
+    options=parser.parse_args()
+    if options.max_parallel is not None and options.max_parallel < 1:
+        parser.error('--max-parallel must be positive')
+    if options.resume:
+        state=json.loads((OUT/'queue_status.json').read_text())
+        old=Path(f"/proc/{state['pid']}/stat")
+        if old.exists() and old.read_text().rsplit(')',1)[1].split()[0] not in ('T','Z'):
+            parser.error('previous scheduler must be stopped before handover')
+    else:
+        state=initialize()
+    state.update(pid=os.getpid(),status='running')
+    if options.max_parallel is not None:
+        state['max_parallel']=options.max_parallel
+    nodes=state['runs']
+    active={run:AdoptedLauncher(run,node['pid']) for run,node in nodes.items() if node['state']=='running'}
     def save():write(OUT/'queue_status.json',state)
     save()
     while True:

@@ -23,3 +23,7 @@ Current task32 greedy evaluation episodes at phase start/every25k steps; stage e
 Resource snapshot at setup:24 logical CPUs,87GiB RAM available,480GiB disk free; six existing GPU jobs use7731/12053MiB, GPU utilization82%. Run at most TWO new training processes, one Torch/OMP/MKL thread each. Existing jobs unchanged. Queue `scripts/run_history.py` starts each node through `scripts/run.py --suite history`. A failed node marks its dependents unavailable; unrelated nodes continue, no silent retries.
 
 Protocol `configs/continual/history.json`; immutable per-node config in result folder and each run. Source/Git snapshots via standard launcher. Runs `runs/vdnh_<prefix>_seed<seed>_20261103_attempt001`; main output `results/vdn_task_history_20261103/`. Continuation checkpoints at single/pair nodes include replay and remain remote; terminal nodes save model/score inputs. Summary at queue termination via `scripts/summarize_history.py`; training completion and diagnostic completeness reported separately. Queue completion requires later review; no chat notification or recurring monitoring configured.
+
+## Queue concurrency override
+
+The 2026-11-03 queue was handed over to the resumable scheduler with six parallel slots. Existing launchers are adopted by PID and run ID. Dependencies and protocols continue to come from the original queue snapshot. The snapshot records the effective slot count. For a handover, stop the previous scheduler alone and verify that its child launchers match the running entries before starting the replacement.
