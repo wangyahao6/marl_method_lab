@@ -16,6 +16,15 @@ base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
+def select_scope(result):
+    if P.get('selection') == 'overall_threshold_union':
+        layer = result['A2']
+        chosen = layer['sets']['overall_threshold']
+        layer['sets']['overall'] = chosen
+        layer['selection'] = 'overall_threshold_union'
+        layer['defined'] = chosen is not None
+    return result
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
@@ -45,7 +54,7 @@ def main():
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
             learner.optimiser.load_state_dict(state['optimizer']);buffer=state['buffer'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
-            selection=json.loads((parent/'selection.json').read_text())
+            selection=select_scope(json.loads((parent/'selection.json').read_text()))
             write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
             del state
         layer,mode=(None,'baseline') if o.group=='N' else o.group.split('_')
@@ -70,7 +79,12 @@ def main():
             status()
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
-            try:result=(vdn_type_select if algorithm=='vdn' and P.get('selection')=='type_threshold_union' else vdn_select if algorithm=='vdn' else qmix_select)(learner,args,fifo,dest)
+            try:
+                if algorithm == 'vdn':
+                    detector = vdn_type_select if P.get('selection') in ('type_threshold_union', 'overall_threshold_union') else vdn_select
+                else:
+                    detector = qmix_select
+                result=select_scope(detector(learner,args,fifo,dest))
             except Exception:
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
             write(dest/'result.json',result)

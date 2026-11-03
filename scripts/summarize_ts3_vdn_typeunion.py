@@ -1,5 +1,5 @@
 """Summarize TS3 actual completion, all stage-end wins and plasticity/retention."""
-import csv,json
+import argparse,csv,json
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -15,9 +15,18 @@ def dump_csv(path,rows):
     with path.open('w') as f:
         w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
 def main():
-    OUT.mkdir(parents=True,exist_ok=True);rows=[];summaries=[];curves=[];fig,axes=plt.subplots(1,2,figsize=(10,4),sharey=True)
+    global OUT, GROUPS
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--overall-run')
+    args=parser.parse_args()
+    if args.overall_run:
+        OUT=ROOT/'results/ts3_vdn_A2_overallunion_3535_20261103'
+        GROUPS=GROUPS+['3535_overall_union']
+    OUT.mkdir(parents=True,exist_ok=True);rows=[];summaries=[];curves=[];fig,axes=plt.subplots(1,len(GROUPS),figsize=(5*len(GROUPS),4),sharey=True)
     for ax,group in zip(axes,GROUPS):
-        seed,g=group.split('_',1);parent=ROOT/'runs'/f'ts3_vdn_typeunion_Aprefix_seed{seed}_20261102_attempt001';run=ROOT/'runs'/f'ts3_vdn_typeunion_{g}_seed{seed}_20261102_attempt001';ev=read(parent/'evaluations.jsonl')+read(run/'evaluations.jsonl');matrix=np.full((5,5),np.nan)
+        seed,g=group.split('_',1);parent=ROOT/'runs'/f'ts3_vdn_typeunion_Aprefix_seed{seed}_20261102_attempt001';run=ROOT/'runs'/f'ts3_vdn_typeunion_{g}_seed{seed}_20261102_attempt001'
+        if g=='overall_union':run=ROOT/'runs'/args.overall_run
+        ev=read(parent/'evaluations.jsonl')+read(run/'evaluations.jsonl');matrix=np.full((5,5),np.nan)
         for x in ev:
             if x['label']=='stage_end' and x['focus']:
                 i=x['phase'];j='ABCDE'.index(x['task']);matrix[i,j]=100*x['win_rate'];rows.append(dict(group=group,trained_task='ABCDE'[i],evaluated_task=x['task'],t_env=x['t_env'],wins=x['wins'],episodes=x['episodes'],win_rate_percent=100*x['win_rate']))
@@ -53,6 +62,11 @@ def main():
         diff={k:None if n[k] is None or u[k] is None else u[k]-n[k] for k in ['final_old_mean_percent','BWT_E_pp','final_all_mean_percent']}
         contrasts.append(dict(seed=seed,**diff));lines.append(f'{seed}: {diff}')
     lines+=['','Single training seed. Paired contrasts are descriptive; tasks/episodes are not training replicates.']
+    if args.overall_run:
+        overall=summaries[-1]
+        diff={k:None if overall[k] is None or u[k] is None else overall[k]-u[k] for k in ['final_old_mean_percent','BWT_E_pp','final_all_mean_percent']}
+        contrasts.append(dict(seed=seed,comparison='overall_union_minus_type_union',**diff))
+        lines.append(f'Overall union minus type union: {diff}')
     (OUT/'paired_contrasts.json').write_text(json.dumps(contrasts,indent=2))
     (OUT/'REPORT.md').write_text('\n'.join(lines)+'\n')
 if __name__=='__main__':main()
