@@ -1,4 +1,4 @@
-"""Authorized local-GEM method branches only; resource-aware max3 supervisor."""
+"""Authorized local-GEM method branches only; resource-aware max5 supervisor."""
 import json,os,subprocess,sys,time,traceback
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/ts3_vdn_A2_local_gem_20261104'

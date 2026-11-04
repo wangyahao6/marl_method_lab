@@ -71,7 +71,7 @@
   ],
   "selection": "top_k",
   "top_k": 21,
-  "max_parallel": 3,
+  "max_parallel": 5,
   "intervention": "a2_local_gem",
   "sources": {
     "1234": {
