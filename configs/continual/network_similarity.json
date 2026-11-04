@@ -1,0 +1,15 @@
+{
+  "id": "vdn_network_similarity_20261104_attempt001",
+  "seeds": [3535, 2222, 1111],
+  "source_queue": "results/vdn_task_history_20261103/queue_status.json",
+  "models": "completed endpoints only at startup; frozen manifest; no automatic inclusion of later completions",
+  "targets": ["S", "Z", "C"],
+  "groups": ["scratch target", "one prior then target", "two priors then target", "prior only without target"],
+  "probes": "scratch S/Z/C saved final32 training episodes per seed",
+  "device": "cpu",
+  "threads": 1,
+  "training": false,
+  "primary": "A1/A2 linear centered CKA",
+  "secondary": ["parameter cosine/symmetric normalized L2", "legal greedy agreement", "legal Q RMSE", "legal centered Q RMSE"],
+  "source_mutation": false
+}

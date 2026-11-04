@@ -12,7 +12,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','history'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -60,6 +60,12 @@ def main():
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
+    elif a.suite=='network_similarity':
+        if a.algorithm!='vdn' or a.method!='baseline':p.error('network similarity requires frozen VDN baseline models')
+        protocol=json.loads((ROOT/a.protocol).read_text())
+        env['OMP_NUM_THREADS']='1';env['MKL_NUM_THREADS']='1'
+        command=[sys.executable,str(ROOT/'scripts/network_similarity.py'),'--protocol',str(out/'protocol.json'),'--output',str(out)]
+        details={'protocol':protocol,'steps':0,'mode':'read-only offline analysis of saved models'}
     elif a.suite=='history':
         if a.algorithm!='vdn' or a.method!='baseline':p.error('history requires VDN baseline')
         protocol=json.loads((ROOT/a.protocol).read_text())

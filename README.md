@@ -48,3 +48,7 @@ New authorized run: seeds1234/4567, five2M stages, VDN baseline versus A2 top3 h
 ## 2026-11-03 VDN task/history analysis
 
 Authorized three seeds3535/2222/1111, mirror S/Z/C,2M per stage, all six permutations. Shared-prefix tree90M actual nominal steps; max2 new workers. See [protocol](docs/HISTORY_PROTOCOL.md), queue scripts/run_history.py, results results/vdn_task_history_20261103/. No intervention; A1/A2 endpoint scores. Launch is not completion.
+
+## 2026-11-04 independent network similarity
+
+Offline CPU comparison of completed VDN S/Z/C endpoints, scratch/one-prior/two-prior/prior-only. See [protocol](docs/NETWORK_SIMILARITY_PROTOCOL.md). No new training. Results runs/vdn_network_similarity_20261104_attempt001/.
