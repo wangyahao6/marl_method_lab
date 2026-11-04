@@ -1,0 +1,73 @@
+{
+  "id": "ts3_vdn_A2_top3_seed3535_matched_20261104",
+  "tasks": {
+    "A": [
+      2,
+      3
+    ],
+    "B": [
+      4,
+      1
+    ],
+    "C": [
+      1,
+      4
+    ],
+    "D": [
+      3,
+      2
+    ],
+    "E": [
+      5,
+      0
+    ]
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000
+  ],
+  "groups": [
+    "A2_union"
+  ],
+  "screen_episodes": 32,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "A2 overall state-weighted activation top3; no threshold",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": true,
+  "nominal_actual_training_steps": 8000000,
+  "full_path_equivalent_steps": 10000000,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "cumulative_epsilon"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn",
+  "seeds": [
+    3535
+  ],
+  "selection": "top_k",
+  "top_k": 3,
+  "max_parallel": 1,
+  "prefix_selection_override": "results/ts3_vdn_selection_matched_20261104/prefix_selection_seed3535.json"
+}

@@ -82,3 +82,7 @@ VDN baseline, A1_linear, A2_linear; three full TS4 paths, 1M/500k/500k/1M each, 
 ## TS3 VDN A2 top-3 (2026-11-02)
 
 Authorized seeds1234/4567, each stage2M, baseline and history-union protection only. [Protocol](TS3_VDN_TOP3_PROTOCOL.md), queue `scripts/run_ts3_vdn_top3.py`. Shared unprotected A per seed, nominal36M actual steps (40M path-equivalent), max4 new processes. Detection uses exact VDN sensitivity and overall A2 top3, no threshold. Direct offline check: explicit summed-Q counterfactual equality, real VDN learner, exact top3, unchanged model/optimizer/hidden/RNG during screening and union/slice mappings. No extra environment training.
+
+## TS3 VDN matched screening-rule completion (2026-11-04)
+
+Authorized three missing branches only:3535 overall top3,1234/4567 overall strict score>3; A2 historical union, same original2M prefix per seed,24M nominal new steps. Queue `scripts/run_ts3_vdn_selection_matched.py`, serial alongside existing workloads. [Protocol](TS3_VDN_SELECTION_MATCHED_PROTOCOL.md); results `results/ts3_vdn_selection_matched_20261104/`. Existing baselines and opposite-rule paths reused. Initial A selections are recomputed from saved overall scores, with immutable original prefixes and explicit provenance. No validation training or extra budgets.
