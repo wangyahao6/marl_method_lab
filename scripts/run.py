@@ -14,7 +14,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -26,8 +26,8 @@ def main():
     p.add_argument('--parent')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
-    p.add_argument('--ts3-role',choices=['prefix','branch'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union'],default='N')
+    p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt'])
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
@@ -36,6 +36,7 @@ def main():
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
+    if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     if a.suite=='smac':
         if not a.map or a.steps is None or a.steps<=0: p.error('smac requires --map and positive --steps')
         if a.scenario or a.method=='softprotect': p.error('softprotect currently uses the continual driver')
@@ -82,14 +83,17 @@ def main():
     elif a.suite=='ts3':
         if a.algorithm not in ['qmix','vdn'] or not a.ts3_role:p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
-        expected='baseline' if a.ts3_group=='N' else 'softprotect'
+        expected='gem' if a.ts3_group.startswith('GEM_') else ('baseline' if a.ts3_group=='N' else 'softprotect')
         if a.method!=expected:p.error('ts3 group and method must agree')
+        if a.ts3_role=='eval_fwt' and (a.algorithm!='vdn' or a.ts3_group!='N' or not a.parent):p.error('FWT evaluation requires VDN baseline and parent')
         protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
         if a.suite=='ts3' and a.algorithm!=protocol.get('algorithm','qmix'):p.error('algorithm must match named ts3 protocol')
+        if a.method=='gem' and protocol.get('intervention')!='a2_local_gem':p.error('gem requires a named a2_local_gem protocol')
+        if a.ts3_role=='eval_fwt' and protocol.get('intervention')!='a2_local_gem':p.error('eval_fwt requires the local GEM protocol')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]
-        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':protocol['thresholds'][0] if a.ts3_role=='prefix' else protocol['thresholds'][-1]-protocol['thresholds'][0]}
+        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':0 if a.ts3_role=='eval_fwt' else (protocol['thresholds'][0] if a.ts3_role=='prefix' else protocol['thresholds'][-1]-protocol['thresholds'][0])}
     elif a.suite=='hetero':
         if a.algorithm!='qmix' or not a.hetero_role:p.error('hetero requires qmix and --hetero-role')
         if a.hetero_role=='branch' and not a.parent:p.error('branch requires --parent')
