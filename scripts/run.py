@@ -116,6 +116,11 @@ def main():
     plan={'request':vars(a),'command':command,'output':str(out),'details':details}
     if a.dry_run:
         print(json.dumps(plan,ensure_ascii=False,indent=2));return
+    if (ROOT/'runtime/scheduler/enabled').exists():
+        sys.path.insert(0,str(ROOT/'scheduler'))
+        from service import forward_run
+        task_type='evaluation' if a.ts3_role=='eval_fwt' or a.suite=='network_similarity' else 'training'
+        forward_run(a.run_id,[sys.executable,'scripts/run.py']+sys.argv[1:],ROOT,out,task_type)
     out.mkdir(parents=True,exist_ok=False)
     if a.suite=='smac':save(out/'config.json',cfg)
     else:save(out/'protocol.json',protocol)

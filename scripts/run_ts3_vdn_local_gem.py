@@ -14,6 +14,10 @@ def resources():
     return dict(free_gpu_mib=free,gpu_compute_processes=processes,available_ram_mib=ram,time=time.time())
 
 def main():
+    if (ROOT/'runtime/scheduler/enabled').exists() and '--dry-run' not in sys.argv:
+        sys.path.insert(0,str(ROOT/'scheduler'))
+        from legacy import submit_queue
+        return submit_queue('local_gem')
     plan=json.loads((OUT/'plan.json').read_text())
     if '--dry-run' in sys.argv:
         for item in plan['items']:

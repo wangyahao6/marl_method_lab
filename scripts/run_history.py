@@ -54,6 +54,10 @@ def main():
     options=parser.parse_args()
     if options.max_parallel is not None and options.max_parallel < 1:
         parser.error('--max-parallel must be positive')
+    if options.set_parallel is not None and (ROOT/'runtime/scheduler/enabled').exists():
+        if options.set_parallel < 1:
+            parser.error('--set-parallel requires a positive integer')
+        raise SystemExit(subprocess.call([str(ROOT/'.venv/bin/python'),'scheduler/service.py','limit',str(options.set_parallel)],cwd=ROOT))
     if options.set_parallel is not None:
         if options.set_parallel < 1 or options.resume or options.max_parallel is not None:
             parser.error('--set-parallel requires a positive integer and is used alone')

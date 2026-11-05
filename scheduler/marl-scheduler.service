@@ -1,0 +1,16 @@
+[Unit]
+Description=MARL unified experiment scheduler
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/wyh/marl_method_lab
+ExecStart=/usr/bin/python3 -u /home/wyh/marl_method_lab/scheduler/service.py serve
+Restart=on-failure
+RestartSec=5
+KillMode=process
+TimeoutStopSec=15
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

@@ -6,6 +6,10 @@ OUT=ROOT/'results/ts3_vdn_selection_matched_20261104'
 def command(item):
     return [str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts3','--algorithm','vdn','--method','softprotect','--seed',str(item['seed']),'--run-id',item['run'],'--protocol',item['protocol'],'--ts3-role','branch','--ts3-group','A2_union','--parent',str(ROOT/'runs'/item['parent'])]
 def main():
+    if (ROOT/'runtime/scheduler/enabled').exists() and '--dry-run' not in sys.argv:
+        sys.path.insert(0,str(ROOT/'scheduler'))
+        from legacy import submit_queue
+        return submit_queue('selection_matched')
     plan=json.loads((OUT/'plan.json').read_text())
     if '--dry-run' in sys.argv:
         for item in plan['items']:

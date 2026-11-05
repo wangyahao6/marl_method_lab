@@ -6,7 +6,7 @@
     2222,
     1111
   ],
-  "max_parallel": 7,
+  "max_parallel": 6,
   "stage_steps": 2000000,
   "groups": [
     "N"
