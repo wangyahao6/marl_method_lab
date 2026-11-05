@@ -94,8 +94,12 @@ def tick(db, database, launch=True):
         attempt = attempts.get(row['id'])
         if attempt and is_alive(attempt):
             owned.update(descendants(attempt['pid'], processes))
-    external = external_occupancy(processes, owned)
     measured = resources()
+    external = external_occupancy(processes, owned)
+    external_covered = set(owned)
+    for pid in external:
+        external_covered.update(descendants(pid, processes))
+    external.update(pid for pid in measured['gpu_processes'] if pid not in external_covered)
     limit = json.loads(db.execute("SELECT value FROM settings WHERE key='max_parallel'").fetchone()[0])
     states = {row['id']: row['state'] for row in tasks}
     for row in tasks:
@@ -185,7 +189,7 @@ def serve(database):
 
 def forward_run(run_id, argv, cwd, run_dir, task_type):
     """Called by the normal launcher. Wait for the central attempt's exit."""
-    db = connect()
+    db = connect(Path(os.environ.get('MARL_SCHEDULER_DB', str(DEFAULT_DB))))
     token = os.environ.get('MARL_SCHEDULER_ATTEMPT')
     if token:
         attempt = db.execute('SELECT * FROM attempts WHERE id=?', (token,)).fetchone()

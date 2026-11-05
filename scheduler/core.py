@@ -146,6 +146,24 @@ def validate_plan(plan):
     return normalized
 
 
+def provenance(item):
+    try:
+        revision = subprocess.check_output(['git', '-C', item['cwd'], 'rev-parse', 'HEAD'],
+                                           text=True, stderr=subprocess.DEVNULL, timeout=3).strip()
+    except (OSError, subprocess.SubprocessError):
+        revision = None
+    inputs = {}
+    argv = item['argv']
+    for index, arg in enumerate(argv[:-1]):
+        if arg in ('--protocol', '--config'):
+            path = Path(item['cwd']) / argv[index+1]
+            try:
+                inputs[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+            except OSError:
+                inputs[str(path)] = None
+    return json.dumps(dict(source_git=revision, input_sha256=inputs))
+
+
 def submit(db, plan, imports=None):
     items = validate_plan(plan)
     imports = imports or {}
@@ -184,7 +202,7 @@ def submit(db, plan, imports=None):
             db.execute('INSERT INTO tasks VALUES (?,?,?,?,?,?,?,?)',
                        (item['id'], fingerprint, raw, state, '', now()+index*0.000001, now(), item['priority']))
             db.execute('INSERT INTO events(task,time,state,detail) VALUES (?,?,?,?)',
-                       (item['id'], now(), state, 'imported' if imported else 'submitted'))
+                       (item['id'], now(), state, provenance(item)))
             if imported.get('pid'):
                 process = identity(imported['pid'])
                 if not process:

@@ -72,6 +72,40 @@ class SchedulerTests(unittest.TestCase):
         core.reconcile(self.db)
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM attempts').fetchone()[0],1)
 
+    def test_worker_authorized_launcher_and_recovery(self):
+        run_dir = str(Path(self.temp.name)/'run')
+        program = (
+            "import sys,time;sys.path.insert(0,"+repr(str(Path(service.__file__).parent))+");"
+            "from service import forward_run;"
+            "from pathlib import Path;"
+            "assert forward_run('gate',[],Path("+repr(self.temp.name)+"),Path("+repr(run_dir)+"),'evaluation') is False;"
+            "time.sleep(.3)"
+        )
+        task = self.task('gate', run_dir=run_dir, type='evaluation')
+        task['argv'] = ['/usr/bin/python3','-c',program]
+        core.submit(self.db,dict(tasks=[task]))
+        with self.db:
+            self.db.execute("UPDATE tasks SET state='starting'")
+            self.db.execute("INSERT INTO attempts(id,task,created,log) VALUES ('auth','gate',?,?)",
+                            (time.time(),str(Path(self.temp.name)/'worker.log')))
+        worker = subprocess.Popen(['/usr/bin/python3', service.__file__, '--db',str(self.path),'worker','auth'])
+        try:
+            for _ in range(100):
+                if core.read_tasks(self.db)[0]['state']=='running':
+                    break
+                time.sleep(.01)
+            self.db.close()
+            self.db = core.connect(self.path)
+            core.reconcile(self.db)
+            self.assertEqual(core.read_tasks(self.db)[0]['state'],'running')
+            self.assertEqual(worker.wait(timeout=5),0)
+            self.assertEqual(core.read_tasks(self.db)[0]['state'],'completed')
+            self.assertEqual(self.db.execute('SELECT COUNT(*) FROM attempts').fetchone()[0],1)
+        finally:
+            if worker.poll() is None:
+                worker.kill()
+                worker.wait()
+
     def test_lost_start_is_not_relaunched(self):
         core.submit(self.db,dict(tasks=[self.task('a')]))
         with self.db:
