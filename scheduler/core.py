@@ -313,7 +313,7 @@ def reconcile(db):
         launcher = read_json(artifact/'launcher_status.json') if artifact else {}
         status = read_json(artifact/'status.json') if artifact else {}
         code = launcher.get('exit_code')
-        if code == 0 and (row['spec']['type'] != 'training' or status.get('status') == 'completed'):
+        if code == 0 and (row['spec']['type'] != 'training' or status.get('status') in (None, 'completed')):
             state = 'completed'
         elif code is not None or status.get('status') == 'failed':
             state = 'failed'

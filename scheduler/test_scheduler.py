@@ -81,7 +81,7 @@ class SchedulerTests(unittest.TestCase):
             "assert forward_run('gate',[],Path("+repr(self.temp.name)+"),Path("+repr(run_dir)+"),'evaluation') is False;"
             "time.sleep(.3)"
         )
-        task = self.task('gate', run_dir=run_dir, type='evaluation')
+        task = self.task('gate', run_dir=run_dir, type='training')
         task['argv'] = ['/usr/bin/python3','-c',program]
         core.submit(self.db,dict(tasks=[task]))
         with self.db:

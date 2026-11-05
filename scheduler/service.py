@@ -51,7 +51,7 @@ def worker(database, attempt_id):
             state = 'completed' if code == 0 else 'failed'
             if state == 'completed' and spec['type'] == 'training' and spec.get('run_dir'):
                 status = read_json(Path(spec['run_dir'])/'status.json')
-                if status.get('status') != 'completed':
+                if status.get('status') not in (None, 'completed'):
                     state = 'unknown'
             with transaction(db):
                 db.execute('UPDATE attempts SET ended=?,exit_code=? WHERE id=?', (now(), code, attempt_id))
