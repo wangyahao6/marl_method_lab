@@ -69,6 +69,13 @@ def main():
         committed=True
         for pid in frozen:
             os.kill(pid,signal.SIGKILL)
+        for old in supervisors:
+            directory=ROOT/'results'/old['folder']
+            marker=dict(state='managed_by_scheduler',scheduler_database=str(DEFAULT_DB),
+                        snapshot_before_migration=str(directory/'queue_status.pre_unified_20261105.json'))
+            temp=directory/'queue_status.tmp'
+            temp.write_text(json.dumps(marker,indent=2))
+            temp.replace(directory/'queue_status.json')
         print(json.dumps(dict(adopted=sorted(expected),tasks=len(all_items),limit=6)))
     finally:
         if not committed:

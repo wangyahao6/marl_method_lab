@@ -71,6 +71,15 @@ class SchedulerTests(unittest.TestCase):
         self.db = core.connect(self.path)
         core.reconcile(self.db)
         self.assertEqual(self.db.execute('SELECT COUNT(*) FROM attempts').fetchone()[0],1)
+        with patch.object(service, 'resources', return_value=measured), patch.object(service, 'process_tree', return_value={}):
+            summary=service.tick(self.db,self.path)
+            self.assertEqual(summary['active'],1)
+        for _ in range(100):
+            if core.read_tasks(self.db)[1]['state']=='completed':
+                break
+            time.sleep(.05)
+        self.assertEqual(core.read_tasks(self.db)[1]['state'],'completed')
+        self.assertEqual(self.db.execute('SELECT COUNT(*) FROM attempts').fetchone()[0],2)
 
     def test_worker_authorized_launcher_and_recovery(self):
         run_dir = str(Path(self.temp.name)/'run')

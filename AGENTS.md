@@ -12,3 +12,5 @@
 - 原 ReBorn README 与 LICENSE 的许可证表述不一致，保留原文，公开前确认；不自行替换许可。
 
 - 代码有实质变更后更新相关说明并提交远端本机Git版本；启动时留存实际源码快照，修改不反写已运行实验。任何上传或公开需要用户后续授权。
+
+- 已授权实验统一经 scheduler/service.py 的完整计划或 scripts/run.py 入口提交，全局默认 6 个槽位；新批次应提前发布完整任务及依赖。调度运行记录在 runtime/scheduler/state.sqlite3，操作见 docs/SCHEDULER.md。
