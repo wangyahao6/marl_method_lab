@@ -46,3 +46,11 @@ The values above illustrate the manifest structure. A real plan must use the use
 With `runtime/scheduler/enabled` present, normal `scripts/run.py` calls submit and wait on the global scheduler before creating training artifacts. Its dry-run path remains a configuration preview. The two migrated queue scripts submit complete plans. Older scripts that launch through `run.py` also share the global limit, although their not-yet-submitted future steps are visible only when their script publishes them. Arbitrary training started directly outside these entry points is discovered conservatively and occupies visible slots. All new project entry points should submit a complete plan to obtain full queue visibility.
 
 Training parameters and methods are defined in each task's protocol. The scheduler controls admission and records failures. It does not add training assertions, modify budgets, or stop training based on resource readings. Closing the local read-only monitor has no effect on dispatch.
+
+## Scheduler retention
+
+The runtime policy is `runtime/scheduler/retention.json`. The main SQLite database has a 512 MiB page limit, applied on each connection. Event history expires after 90 days. Task specifications, dependencies and exit summaries remain available for scheduling, duplicate detection and provenance. At 80% used capacity, the maintenance status raises a warning. Reaching the hard database limit can reject new writes, so this warning requires operator attention.
+
+The user timer `marl-scheduler-maintenance.timer` runs daily at 03:30 server local time and catches up after downtime. It removes expired events and checkpoints available WAL pages. Only inactive `runtime/scheduler/logs/*.log` files are eligible for deletion, at 14 days or to keep inactive/active combined log use within 50 MiB where possible. Active logs are protected, so log usage may temporarily exceed this target. Experiment run directories, models and original logs are excluded.
+
+The SQLite WAL has an 8 MiB post-checkpoint retention target. WAL, SHM, journal storage and active logs are additional to the main database limit. Maintenance writes a single replaceable `maintenance.json` status file. View results with `journalctl --user -u marl-scheduler-maintenance -n 10`.

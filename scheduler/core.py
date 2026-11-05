@@ -27,6 +27,13 @@ def connect(path=DEFAULT_DB):
     db.row_factory = sqlite3.Row
     db.execute('PRAGMA journal_mode=WAL')
     db.execute('PRAGMA foreign_keys=ON')
+    db.execute('PRAGMA journal_size_limit=8388608')
+    policy = path.parent/'retention.json'
+    limit = json.loads(policy.read_text()).get('database_mib', 512) if policy.exists() else 512
+    if type(limit) is not int or limit < 1:
+        raise ValueError('database_mib must be a positive integer')
+    page_size = db.execute('PRAGMA page_size').fetchone()[0]
+    db.execute('PRAGMA max_page_count={}'.format(limit*1048576//page_size))
     db.executescript("""
         CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS tasks (
