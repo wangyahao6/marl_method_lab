@@ -6,16 +6,27 @@ from smacv2.env.starcraft2.wrapper import StarCraftCapabilityEnvWrapper
 
 TEAMS={'A':(2,3),'R':(4,1),'M':(1,4)}
 class ExactTeams:
-    def __init__(self):self.task='A'
+    def __init__(self, rosters=None):
+        self.rosters = rosters
+        self.task = "A"
+
     def generate(self):
+        if getattr(self, 'rosters', None) is not None:
+            units = ('stalker', 'zealot', 'colossus')
+            roster = self.rosters[self.task]
+            teams = {
+                f'{side}_team': [unit for unit, count in zip(units, roster[side]) for _ in range(count)]
+                for side in ('ally', 'enemy')
+            }
+            return {'team_gen': dict(teams, id=0)}
         s,z=TEAMS[self.task]
         return {'team_gen':dict(ally_team=['stalker']*2+['zealot']*3,enemy_team=['stalker']*s+['zealot']*z,id=0)}
 class ExactProtoss:
-    def __init__(self,**kwargs):
+    def __init__(self,rosters=None,**kwargs):
         self.wrapped=StarCraftCapabilityEnvWrapper(**kwargs)
         sequence=np.random.SeedSequence(kwargs['seed'])
         for d in self.wrapped.env_key_to_distribution_map.values():seed_distributions(d,sequence)
-        self.wrapped.env_key_to_distribution_map['team_gen']=ExactTeams()
+        self.wrapped.env_key_to_distribution_map['team_gen']=ExactTeams(rosters)
         self.last_info={};self.audit=None;self.set_task('A')
     def __getattr__(self,name):return getattr(self.wrapped,name)
     def set_task(self,task):self.task=task;self.wrapped.env_key_to_distribution_map['team_gen'].task=task

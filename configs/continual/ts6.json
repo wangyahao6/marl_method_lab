@@ -1,0 +1,190 @@
+{
+  "id": "ts6",
+  "tasks": {
+    "A": {
+      "id": "P5_ally2S3Z_enemy2S3Z_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "B": {
+      "id": "P5_ally2S3Z_enemy4S1Z_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        4,
+        1,
+        0
+      ]
+    },
+    "C": {
+      "id": "P5_ally2S3Z_enemy1S4Z_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        1,
+        4,
+        0
+      ]
+    },
+    "D": {
+      "id": "P5_ally2S3Z_enemy3S2Z_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        3,
+        2,
+        0
+      ]
+    },
+    "E": {
+      "id": "P5_ally2S3Z_enemy5S0Z_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "F": {
+      "id": "P5_ally2S3Z_enemy4S0Z1C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        4,
+        0,
+        1
+      ]
+    },
+    "G": {
+      "id": "P5_ally2S3Z_enemy3S1Z1C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        3,
+        1,
+        1
+      ]
+    },
+    "H": {
+      "id": "P5_ally2S3Z_enemy2S2Z1C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        2,
+        1
+      ]
+    },
+    "I": {
+      "id": "P5_ally2S3Z_enemy1S3Z1C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        1,
+        3,
+        1
+      ]
+    },
+    "J": {
+      "id": "P5_ally2S3Z_enemy0S4Z1C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        0,
+        4,
+        1
+      ]
+    }
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000,
+    12000000,
+    14000000,
+    16000000,
+    18000000,
+    20000000
+  ],
+  "groups": [
+    "N",
+    "A2_union"
+  ],
+  "screen_episodes": 32,
+  "screening": "A2 overall state-weighted activation top3; historical union; update scale 0.1",
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128
+  },
+  "algorithm": "vdn",
+  "top_k": 3,
+  "selection": "top_k",
+  "resume_screen_episodes": 32,
+  "history": {
+    "1234": {
+      "prefix": "runs/ts3_vdn_top3_Aprefix_seed1234_20261102_attempt001",
+      "baseline_fwt": "runs/ts3_vdn_localgem_baseline_fwt_seed1234_20261104_attempt001"
+    },
+    "4567": {
+      "prefix": "runs/ts3_vdn_top3_Aprefix_seed4567_20261102_attempt001",
+      "baseline_fwt": "runs/ts3_vdn_localgem_baseline_fwt_seed4567_20261104_attempt001"
+    },
+    "3535": {
+      "prefix": "runs/ts3_vdn_typeunion_Aprefix_seed3535_20261102_attempt001",
+      "baseline_fwt": "runs/ts3_vdn_localgem_baseline_fwt_seed3535_20261104_attempt001"
+    }
+  }
+}

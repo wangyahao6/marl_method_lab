@@ -1,0 +1,175 @@
+{
+  "id": "ts7",
+  "tasks": {
+    "A": {
+      "id": "P5_ally5S0Z0C_enemy5S0Z0C_v1",
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "B": {
+      "id": "P5_ally0S5Z0C_enemy0S5Z0C_v1",
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "C": {
+      "id": "P5_ally0S0Z5C_enemy0S0Z5C_v1",
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    },
+    "D": {
+      "id": "P5_ally2S3Z0C_enemy2S3Z0C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "E": {
+      "id": "P5_ally0S2Z3C_enemy0S2Z3C_v1",
+      "ally": [
+        0,
+        2,
+        3
+      ],
+      "enemy": [
+        0,
+        2,
+        3
+      ]
+    },
+    "F": {
+      "id": "P5_ally3S2Z0C_enemy3S2Z0C_v1",
+      "ally": [
+        3,
+        2,
+        0
+      ],
+      "enemy": [
+        3,
+        2,
+        0
+      ]
+    },
+    "G": {
+      "id": "P5_ally1S0Z4C_enemy1S0Z4C_v1",
+      "ally": [
+        1,
+        0,
+        4
+      ],
+      "enemy": [
+        1,
+        0,
+        4
+      ]
+    },
+    "H": {
+      "id": "P5_ally3S1Z1C_enemy3S1Z1C_v1",
+      "ally": [
+        3,
+        1,
+        1
+      ],
+      "enemy": [
+        3,
+        1,
+        1
+      ]
+    },
+    "I": {
+      "id": "P5_ally0S4Z1C_enemy0S4Z1C_v1",
+      "ally": [
+        0,
+        4,
+        1
+      ],
+      "enemy": [
+        0,
+        4,
+        1
+      ]
+    },
+    "J": {
+      "id": "P5_ally2S0Z3C_enemy2S0Z3C_v1",
+      "ally": [
+        2,
+        0,
+        3
+      ],
+      "enemy": [
+        2,
+        0,
+        3
+      ]
+    }
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000,
+    12000000,
+    14000000,
+    16000000,
+    18000000,
+    20000000
+  ],
+  "groups": [
+    "N",
+    "A2_union"
+  ],
+  "screen_episodes": 32,
+  "screening": "A2 overall state-weighted activation top3; historical union; update scale 0.1",
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128
+  },
+  "algorithm": "vdn",
+  "top_k": 3,
+  "selection": "top_k"
+}

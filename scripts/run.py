@@ -12,7 +12,7 @@ def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','history','network_similarity'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts6','ts7','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -26,7 +26,7 @@ def main():
     p.add_argument('--parent')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
-    p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt'])
+    p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume'])
     p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
@@ -80,8 +80,24 @@ def main():
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
+    elif a.suite in ('ts6','ts7'):
+        roles = ('resume',) if a.suite=='ts6' else ('prefix','branch')
+        if a.algorithm!='vdn' or a.ts3_role not in roles:
+            p.error(f'{a.suite} requires VDN and one of {roles}')
+        if a.ts3_group not in ('N','A2_union') or a.method!=('baseline' if a.ts3_group=='N' else 'softprotect'):
+            p.error('group and method must agree')
+        if bool(a.parent) != (a.ts3_role!='prefix') or (a.ts3_role=='prefix' and a.ts3_group!='N'):
+            p.error('use a shared baseline prefix and pass --parent for continuation')
+        protocol=json.loads((ROOT/a.protocol).read_text())
+        if protocol.get('id')!=a.suite:p.error('suite must match named protocol')
+        env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
+        if a.parent:command+=['--parent',a.parent]
+        thresholds=protocol['thresholds']
+        steps={'prefix':thresholds[0],'branch':thresholds[-1]-thresholds[0],'resume':thresholds[-1]-thresholds[4]}[a.ts3_role]
+        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':steps}
     elif a.suite=='ts3':
-        if a.algorithm not in ['qmix','vdn'] or not a.ts3_role:p.error('ts3 requires qmix/vdn and --ts3-role')
+        if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
         expected='gem' if a.ts3_group.startswith('GEM_') else ('baseline' if a.ts3_group=='N' else 'softprotect')
         if a.method!=expected:p.error('ts3 group and method must agree')

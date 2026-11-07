@@ -1,4 +1,4 @@
-"""TS3 five-task training with shared A prefix and single-layer protection branches."""
+"""Exact-roster sequence training with shared prefixes and optional soft protection."""
 import argparse,copy,json,logging,os,random,time,traceback
 from pathlib import Path
 from collections import deque
@@ -14,7 +14,9 @@ import numpy as np
 import torch as th
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
-TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
+EXTENDED = P['id'] in ('ts6', 'ts7')
+if not EXTENDED:
+    TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
 def select_scope(result):
     if P.get('selection') == 'overall_threshold_union':
@@ -25,8 +27,40 @@ def select_scope(result):
         layer['defined'] = chosen is not None
     return result
 
+def sequence_metrics(order, sources):
+    """Join immutable prefix and current evaluation rows, then calculate stage metrics."""
+    stages, initial, before = {}, {}, {}
+    for source, labels in sources:
+        for line in (source/'evaluations.jsonl').read_text().splitlines():
+            row = json.loads(line)
+            task, label, win_rate = (row[k] for k in ('task', 'label', 'win_rate'))
+            if label not in labels:
+                continue
+            if label == 'stage_end':
+                stages.setdefault(order[row['phase']], {})[task] = win_rate
+            elif label == 'initial_reference':
+                initial[task] = win_rate
+            elif label == 'next_unseen':
+                before[task] = win_rate
+    metrics = {}
+    for i, task in enumerate(order):
+        row = stages.get(task, {})
+        seen, old = order[:i+1], order[:i]
+        acc = sum(row[j] for j in seen) / len(seen) if all(j in row for j in seen) else None
+        bwt = [row[j] - stages[j][j] for j in old if j in row and j in stages.get(j, {})]
+        fwt_tasks = [j for j in old + [task] if j != order[0] and j in initial and j in before]
+        fwt = [before[j] - initial[j] for j in fwt_tasks]
+        metrics[task] = dict(
+            acc_percent=None if acc is None else 100 * acc,
+            bwt_pp=100 * sum(bwt) / len(bwt) if bwt and len(bwt) == len(old) else None,
+            fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == i else None,
+            fwt_tasks=fwt_tasks)
+    return dict(stage_win_rates=stages, initial_reference=initial, before_first_training=before,
+                metrics=metrics, sources=[str(source/'evaluations.jsonl') for source, _ in sources])
+
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt'],required=True)
+    parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
     try:
@@ -36,6 +70,8 @@ def main():
         if algorithm=='vdn':base.merge(cfg,__import__('yaml').safe_load((ROOT/'src/config/algs/vdn.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
+        if EXTENDED:
+            cfg['env_args']['rosters'] = P['tasks']
         args=SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
         def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
@@ -50,7 +86,7 @@ def main():
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode else None
+        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (EXTENDED and o.role in ('prefix', 'resume')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
@@ -63,6 +99,23 @@ def main():
                 write(out/'prefix_selection.json', dict(selection=selection, source=str(selection_path), source_sha256=hashlib.sha256(selection_path.read_bytes()).hexdigest(), parent_original=str(parent/'selection.json'), parent_original_sha256=hashlib.sha256((parent/'selection.json').read_bytes()).hexdigest()))
             write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
             del state
+        if o.role == 'resume':
+            parent = Path(o.parent)
+            learner.load_models(str(parent))
+            state = th.load(parent/'targets.th', map_location='cpu')
+            learner.target_mac.agent.load_state_dict(state['target_agent'])
+            learner.target_mixer.load_state_dict(state['target_mixer'])
+            runner.t_env, episode, updates = (state[k] for k in ('t_env', 'episode', 'updates'))
+            interval = args.target_update_interval
+            learner.last_target_update_episode = ((episode - 1) // interval) * interval
+            learner.log_stats_t = runner.t_env
+            mac.action_selector.epsilon = mac.action_selector.schedule.eval(runner.t_env)
+            phase = P['order'].index('E')
+            write(out/'checkpoint_restore.json', dict(
+                checkpoint=str(parent), t_env=runner.t_env, episode=episode, updates=updates,
+                last_target_update_episode_inferred=learner.last_target_update_episode,
+                epsilon=mac.action_selector.epsilon, replay='empty', rng='reseeded',
+                parameter_hash=base.parameter_hash(learner)))
         gem_band=o.group.split('_',1)[1] if o.group.startswith('GEM_') else None
         layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_')
         protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x))
@@ -104,6 +157,59 @@ def main():
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
             write(dest/'result.json',result)
             return result
+        if EXTENDED:
+            if o.role == 'prefix':
+                for unseen in P['order'][1:]:
+                    evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
+            elif o.role == 'resume':
+                t_resume = runner.t_env
+                runner.t_env = 0
+                # Same initializer and seed as TS3. The original initial checkpoint was not archived.
+                write(out/'initial_reference_identity.json', dict(
+                    seed=o.seed, reconstructed_model_hash=digest(initial_agent)))
+                history = P['history'][str(o.seed)]
+                historical_fwt = ROOT/history['baseline_fwt']
+                historical_identity = json.loads((historical_fwt/'initial_reference_identity.json').read_text())
+                matching_reference = digest(initial_agent) == historical_identity['reconstructed_model_hash']
+                # On a changed initializer, collect every initial reference using the same model.
+                for unseen in P['order'][5 if matching_reference else 1:]:
+                    evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
+                if layer:
+                    # B's reference comes from the shared A prefix. C-E use this branch's own models.
+                    for phase in range(1, 4):
+                        saved_model = next(parent.parent.glob(f'phase{phase}_*'))
+                        runner.t_env = int(saved_model.name.rsplit('_', 1)[1])
+                        agent = th.load(saved_model/'agent.th', map_location='cpu')
+                        evaluate(P['order'][phase+1], True, 'next_unseen', agent, reference_phase=phase)
+                phase = P['order'].index('E')
+                runner.t_env = t_resume
+                if layer:
+                    saved_protection = json.loads((parent/'protection.json').read_text())
+                    protector.schedule.replace(saved_protection['protected'], t_resume)
+                    sample_seed = o.seed + 500000
+                    saved_rng = rng_state()
+                    fifo = deque(maxlen=P['resume_screen_episodes'])
+                    try:
+                        sample_args = copy.deepcopy(args)
+                        sample_args.env_args['seed'] = sample_seed
+                        sample_runner = base.EpisodeRunner(sample_args, logger)
+                        try:
+                            sample_runner.env.set_task('E')
+                            sample_runner.setup(scheme, groups, preprocess, mac)
+                            with th.no_grad():
+                                for _ in range(fifo.maxlen):
+                                    sample_runner.t_env = t_resume
+                                    fifo.append((cpu_episode(sample_runner.run(test_mode=False)), None))
+                        finally:
+                            sample_runner.close_env()
+                    finally:
+                        h.restore_rng(saved_rng)
+                    selection = screen('E')
+                    append(out/'selection_history.jsonl', dict(
+                        source_task='E', next_task='F', sample_seed=sample_seed,
+                        resampled_episodes=len(fifo), source_checkpoint=str(parent),
+                        **protector.update(selection, t_resume)))
+                evaluate('F', True, 'next_unseen', reference_phase=phase)
         if gem_mode:
             # Shared per-seed initial reference (not claimed as an archived original initializer).
             # Evaluation RNG is restored; it never touches replay or takes gradient steps.
@@ -133,7 +239,11 @@ def main():
                 status('completed',finished=time.time(),evaluation_only=True,new_training_steps=0);return
             if o.role=='branch':
                 phase=0;evaluate('B',True,'next_unseen',reference_phase=0)
-        phases=range(1) if o.role=='prefix' else range(1,5)
+        if o.role == 'prefix':
+            phases = range(1)
+        else:
+            phases = range(phase + 1, len(P['order']))
+        last_phase = len(P['order']) - 1
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=P['screen_episodes'])
             append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None if not layer else protector.schedule.state(begin),gem_band=gem_band))
@@ -144,7 +254,11 @@ def main():
             while runner.t_env<end:
                 with th.no_grad():batch=runner.run(test_mode=False)
                 if o.role=='prefix' or layer or gem:
-                    raw=runner.env.wrapped.env;types=['stalker' if raw.agents[i].unit_type==raw.stalker_id else 'zealot' for i in range(args.n_agents)];fifo.append((cpu_episode(batch),types))
+                    types = None
+                    if not EXTENDED:
+                        raw = runner.env.wrapped.env
+                        types = ['stalker' if raw.agents[i].unit_type==raw.stalker_id else 'zealot' for i in range(args.n_agents)]
+                    fifo.append((cpu_episode(batch), types))
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
                     sample=buffer.sample(args.batch_size);sample=sample[:,:sample.max_t_filled()];sample.to(args.device);protector.t_env=runner.t_env
@@ -162,8 +276,8 @@ def main():
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
             for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
-            if gem and phase<4:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
-            if phase<4 and (o.role=='prefix' or layer or gem):
+            if (gem or EXTENDED) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
+            if phase<last_phase and (o.role=='prefix' or layer or gem):
                 selection=screen(task)
                 if gem:
                     from protection import combine
@@ -174,6 +288,16 @@ def main():
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
             th.save(state,out/'prefix_state.th')
         if gem:gem.flush()
+        if EXTENDED and o.role != 'prefix':
+            all_labels = ('stage_end', 'initial_reference', 'next_unseen')
+            if o.role == 'resume':
+                sources = [(ROOT/history['prefix'], ('stage_end',)),
+                           (parent.parent.parent, ('stage_end',)),
+                           (historical_fwt, tuple(label for label, use in (
+                               ('initial_reference', matching_reference), ('next_unseen', True)) if use))]
+            else:
+                sources = [(Path(o.parent), all_labels)]
+            write(out/'retention.json', sequence_metrics(P['order'], sources + [(out, all_labels)]))
         status('completed',finished=time.time())
     except BaseException:
         write(out/'status.json',dict(status='failed',t_env=runner.t_env if runner else 0,phase=phase,updates=updates,error=traceback.format_exc()));raise
