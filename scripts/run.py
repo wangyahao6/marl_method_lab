@@ -13,7 +13,7 @@ def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts6','ts7','history','network_similarity'],required=True)
-    p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn'],required=True)
+    p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)

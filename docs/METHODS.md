@@ -19,6 +19,18 @@
 - ReDo是ReBorn仓库自己的回收实现，不宣称与ReDo原作者代码逐项相同。KNIFE尚未实现。
 - Agent保留ReBorn两层ReLU MLP后接GRU，以及其ActivateLayer，不能默认等于其他PyMARL网络结构。
 
+## 单层前馈 VDN
+
+| 原版 SMAC 静态任务 baseline 配置 | GRU 前的隐藏层 | 前馈与 GRU 宽度 |
+| --- | --- | --- |
+| `vdn` | ReBorn 的两层 Linear + ReLU | 64（默认） |
+| `vdn_1ff` | 单层 Linear + ReLU | 64 |
+| `vdn_1ff_128` | 单层 Linear + ReLU | 128 |
+
+单层配置的 Agent 路径为 Linear → ReLU → A 诊断门 → GRUCell → 线性 Q 输出头。A 门为原仓库的冻结全一门，用于采集活动值。两套配置沿用 VDN 的共享控制器、求和 Mixer、QLearner 与其他训练参数。宽度同时作用于前馈层和 GRU，因此 64 与 128 的对比涉及两处容量变化。每种结构使用各自的 checkpoint。
+
+通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。现有连续任务方案继续使用各自的 Agent 结构与层位置定义，单层变体当前接入静态 SMAC baseline。
+
 ## 用户方法
 
 `drivers/continual/protection.py`、`release_schedule.py`、`detection_common.py`为状态加权Mixer W/V软保护；`neuron_records.py`为名单和频次记录。导入自已停止的latest_ramp工程，不导入其旧队列或结果。
