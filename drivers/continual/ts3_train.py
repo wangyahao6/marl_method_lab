@@ -12,6 +12,7 @@ from ts3_protection import TS3Protection
 from protection import cpu_episode,rng_state,digest
 import numpy as np
 import torch as th
+import yaml
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts6', 'ts7')
@@ -60,14 +61,16 @@ def sequence_metrics(order, sources):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume'],required=True)
+    parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume','full'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=h.config(o.seed,out)
         algorithm=P.get('algorithm','qmix')
-        if algorithm=='vdn':base.merge(cfg,__import__('yaml').safe_load((ROOT/'src/config/algs/vdn.yaml').read_text()))
+        detection = P['single_ff_detection'] if o.role == 'full' else None
+        if algorithm != 'qmix':
+            base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
         if EXTENDED:
@@ -86,7 +89,7 @@ def main():
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (EXTENDED and o.role in ('prefix', 'resume')) else None
+        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (EXTENDED and o.role in ('prefix', 'resume', 'full')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
@@ -157,8 +160,22 @@ def main():
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
             write(dest/'result.json',result)
             return result
+        def detect_single_ff(task, nominal, boundary):
+            record = dict(task=task, phase=phase, t_env=runner.t_env, nominal_t_env=nominal,
+                          stage_end=boundary, episodes=len(fifo), layer='A', layer_path='agent.net[2]',
+                          width=args.rnn_hidden_dim, threshold=detection['threshold'])
+            try:
+                layer = vdn_select(learner, args, fifo, save_input=False)['A']
+                scores = layer['scores']
+                layer['sets']['above_threshold'] = (
+                    None if scores is None else [i for i, value in enumerate(scores)
+                                                  if value > detection['threshold']])
+                append(out/'neuron_detections.jsonl', dict(record, **layer))
+            except Exception:
+                append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
+
         if EXTENDED:
-            if o.role == 'prefix':
+            if o.role in ('prefix', 'full'):
                 for unseen in P['order'][1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
             elif o.role == 'resume':
@@ -241,6 +258,8 @@ def main():
                 phase=0;evaluate('B',True,'next_unseen',reference_phase=0)
         if o.role == 'prefix':
             phases = range(1)
+        elif o.role == 'full':
+            phases = range(len(P['order']))
         else:
             phases = range(phase + 1, len(P['order']))
         last_phase = len(P['order']) - 1
@@ -251,9 +270,12 @@ def main():
             def audit(x):
                 if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
             runner.env.audit=audit;status();evaluate(task,False,'phase_start');next_test=(runner.t_env//25000+1)*25000
+            if detection:
+                interval = detection['interval']
+                next_detection = (begin // interval + 1) * interval
             while runner.t_env<end:
                 with th.no_grad():batch=runner.run(test_mode=False)
-                if o.role=='prefix' or layer or gem:
+                if o.role=='prefix' or layer or gem or detection:
                     types = None
                     if not EXTENDED:
                         raw = runner.env.wrapped.env
@@ -266,6 +288,9 @@ def main():
                     learner.train(sample,runner.t_env,episode);updates+=1;del sample
                 episode+=1
                 if episode%25==0:status()
+                if detection and runner.t_env >= min(next_detection, end):
+                    detect_single_ff(task, min(next_detection, end), runner.t_env >= end)
+                    next_detection += interval
                 if runner.t_env>=end:break
                 if runner.t_env>=next_test:
                     evaluate(task,False,'periodic')
@@ -295,6 +320,8 @@ def main():
                            (parent.parent.parent, ('stage_end',)),
                            (historical_fwt, tuple(label for label, use in (
                                ('initial_reference', matching_reference), ('next_unseen', True)) if use))]
+            elif o.role == 'full':
+                sources = []
             else:
                 sources = [(Path(o.parent), all_labels)]
             write(out/'retention.json', sequence_metrics(P['order'], sources + [(out, all_labels)]))

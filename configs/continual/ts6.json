@@ -170,6 +170,10 @@
     "focus_episodes": 128
   },
   "algorithm": "vdn",
+  "single_ff_detection": {
+    "interval": 100000,
+    "threshold": 3.0
+  },
   "top_k": 3,
   "selection": "top_k",
   "resume_screen_episodes": 32,

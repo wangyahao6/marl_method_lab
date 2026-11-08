@@ -26,7 +26,7 @@ def main():
     p.add_argument('--parent')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
-    p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume'])
+    p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
     p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
@@ -81,20 +81,26 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
     elif a.suite in ('ts6','ts7'):
-        roles = ('resume',) if a.suite=='ts6' else ('prefix','branch')
-        if a.algorithm!='vdn' or a.ts3_role not in roles:
+        single_ff = a.suite=='ts6' and a.algorithm in ('vdn_1ff','vdn_1ff_128')
+        roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
+        if (not single_ff and a.algorithm!='vdn') or a.ts3_role not in roles:
             p.error(f'{a.suite} requires VDN and one of {roles}')
         if a.ts3_group not in ('N','A2_union') or a.method!=('baseline' if a.ts3_group=='N' else 'softprotect'):
             p.error('group and method must agree')
-        if bool(a.parent) != (a.ts3_role!='prefix') or (a.ts3_role=='prefix' and a.ts3_group!='N'):
-            p.error('use a shared baseline prefix and pass --parent for continuation')
+        if bool(a.parent) != (a.ts3_role in ('branch','resume')):
+            p.error('pass --parent only for continuation')
+        if a.ts3_role in ('prefix','full') and a.ts3_group!='N':
+            p.error('fresh sequence training requires baseline group N')
         protocol=json.loads((ROOT/a.protocol).read_text())
         if protocol.get('id')!=a.suite:p.error('suite must match named protocol')
+        if single_ff:
+            protocol.update(algorithm=a.algorithm, groups=['N'],
+                            screening='read-only VDN state-weighted activity at Agent A')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]
         thresholds=protocol['thresholds']
-        steps={'prefix':thresholds[0],'branch':thresholds[-1]-thresholds[0],'resume':thresholds[-1]-thresholds[4]}[a.ts3_role]
+        steps={'prefix':thresholds[0],'branch':thresholds[-1]-thresholds[0],'resume':thresholds[-1]-thresholds[4],'full':thresholds[-1]}[a.ts3_role]
         details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':steps}
     elif a.suite=='ts3':
         if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
