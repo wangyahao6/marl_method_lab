@@ -1,4 +1,4 @@
-"""Task-wise TD-loss GEM, projecting only equal-size A2 parameter slices.
+"""Task-wise TD-loss GEM, projecting selected A2 parameter slices.
 
 RL/RMSprop adaptation of Lopez-Paz & Ranzato (2017), eq.8. No upstream code
 copied. The unselected increment is unconstrained; this is LOCAL, not full GEM.
@@ -18,6 +18,16 @@ def partition(activity, width=64, count=21):
     return dict(high=sorted(order[:count]),middle=sorted(order[count:2*count]),
                 low=sorted(order[-count:]),excluded=sorted(order[2*count:-count]),
                 descending_order=order)
+
+
+def above_threshold(item, threshold):
+    scores = item.get('scores')
+    if scores is None:
+        scores = item.get('group_statistics', {}).get('overall', {}).get('scores')
+    scores = np.asarray(scores, dtype=float)
+    if scores.shape != (64,) or not np.isfinite(scores).all():
+        return None
+    return np.flatnonzero(scores > threshold).tolist()
 
 
 def indices_for(agent, ids):
@@ -84,7 +94,8 @@ def td_loss(mac,target_mac,batch,args):
 
 
 class A2LocalGEM:
-    def __init__(self,learner,band,record,error_record):
+    def __init__(self,learner,band,record,error_record,*,score_threshold=None):
+        self.score_threshold = score_threshold
         self.learner=learner;self.band=band;self.record=record;self.error_record=error_record
         self.reference=copy.deepcopy(learner.mac);self.target=copy.deepcopy(learner.target_mac)
         self.reference.agent.eval();self.target.agent.eval()
@@ -99,15 +110,28 @@ class A2LocalGEM:
     def update(self,task,selection,cpu_batch,t_env):
         self.flush();self.memories[task]=copy.deepcopy(cpu_batch)
         device=copy.deepcopy(cpu_batch);device.to(self.learner.args.device);self.device_memories[task]=device
-        item=selection.get('A2',{});activity=item.get('activity')
-        if activity is None:activity=item.get('group_statistics',{}).get('overall',{}).get('activity')
-        groups=partition(activity)
-        if groups is not None:
-            self.ids=groups[self.band];self.indices,self.dim=indices_for(self.learner.mac.agent,self.ids)
-        return dict(source_task=task,t_env=t_env,band=self.band,defined=groups is not None,
-                    ids=self.ids,unique_parameters=int(self.indices.numel()),groups=groups,
+        item = selection.get('A2', {})
+        if self.score_threshold is None:
+            activity = item.get('activity')
+            if activity is None:
+                activity = item.get('group_statistics', {}).get('overall', {}).get('activity')
+            groups = partition(activity)
+            defined = groups is not None
+            if defined:
+                self.ids = groups[self.band]
+                self.indices, self.dim = indices_for(self.learner.mac.agent, self.ids)
+            screening = dict(groups=groups, scheduling='latest boundary, no history union; undefined retains previous ids')
+        else:
+            selected = above_threshold(item, self.score_threshold)
+            defined = selected is not None
+            self.ids = selected if defined else []
+            self.indices, self.dim = indices_for(self.learner.mac.agent, self.ids)
+            screening = dict(score_threshold=self.score_threshold,
+                             scheduling='latest boundary, no history union; undefined disables projection')
+        return dict(source_task=task,t_env=t_env,band=self.band,defined=defined,
+                    ids=self.ids,unique_parameters=int(self.indices.numel()),
                     memory_tasks=list(self.memories),memory_episodes={k:int(v.batch_size) for k,v in self.memories.items()},
-                    scheduling='latest boundary, no history union; undefined retains previous ids')
+                    **screening)
 
     def train(self,batch,t_env,episode_num,**kwargs):
         self.t_env=t_env;start=time.monotonic();self.reference_rows=[]

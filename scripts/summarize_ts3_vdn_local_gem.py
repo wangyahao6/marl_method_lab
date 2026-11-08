@@ -1,5 +1,5 @@
 """Per-seed stage matrix/ACC/BWT/FWT and method-baseline contrasts; no fake completion."""
-import csv,json
+import argparse,csv,json
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -13,13 +13,23 @@ def csvout(name,rows):
         with (OUT/name).open('w') as f:
             w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
 def main():
+    global OUT
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--result-dir', type=Path, default=OUT)
+    OUT = ROOT / parser.parse_args().result_dir
     plan=json.loads((OUT/'plan.json').read_text());protocol=json.loads((ROOT/plan['items'][0]['protocol']).read_text())
-    summaries=[];matrix_rows=[];curves=[];diags=[];fig,axes=plt.subplots(3,4,figsize=(16,12),sharex=True,sharey=True)
+    branches = {(str(item['seed']), item['band']): item['run']
+                for item in plan['items'] if item['role'] == 'branch'}
+    bands = list(dict.fromkeys(band for _, band in branches))
+    groups = ['N', *bands]
+    summaries=[];matrix_rows=[];curves=[];diags=[];fig,axes=plt.subplots(
+        len(protocol['sources']),len(groups),figsize=(4*len(groups),12),sharex=True,sharey=True,squeeze=False)
     for row,(seed,source) in enumerate(protocol['sources'].items()):
         prefix=ROOT/'runs'/source['prefix'];baseline=ROOT/'runs'/source['baseline']
         aux=ROOT/'runs'/f'ts3_vdn_localgem_baseline_fwt_seed{seed}_20261104_attempt001'
         entries=[('N',baseline,read(aux/'evaluations.jsonl'))]
-        for band in ['high','middle','low']:entries.append((band,ROOT/'runs'/f'ts3_vdn_localgem_{band}_seed{seed}_20261104_attempt001',[]))
+        for band in bands:
+            entries.append((band, ROOT/'runs'/branches[seed,band], []))
         for col,(group,run,auxev) in enumerate(entries):
             ev=read(prefix/'evaluations.jsonl')+read(run/'evaluations.jsonl')+auxev
             matrix=np.full((5,5),np.nan);init={};future={}
@@ -54,7 +64,7 @@ def main():
     csvout('paired_contrasts.csv',contrast)
     auc=[]
     for seed in protocol['seeds']:
-        for group in ['N','high','middle','low']:
+        for group in groups:
             for task in TASKS:
                 points={x['t_env']:x['win_rate_percent'] for x in curves if x['seed']==seed and x['group']==group and x['task']==task}
                 times=sorted(points)
@@ -64,12 +74,19 @@ def main():
     for row,seed in enumerate(protocol['seeds']):
         for col,task in enumerate(TASKS):
             ax=axes[row,col]
-            for group in ['N','high','middle','low']:
+            for group in groups:
                 xs=sorted([x for x in curves if x['seed']==seed and x['task']==task and x['group']==group],key=lambda x:x['t_env'])
                 if xs:ax.plot([(x['t_env']-col*2000000)/1e6 for x in xs],[x['win_rate_percent'] for x in xs],label=group)
             ax.set_title(f'{seed} / {task}');ax.set_ylim(0,100)
     axes[0,-1].legend();fig.tight_layout();fig.savefig(OUT/'current_task_learning.png',dpi=170);plt.close(fig)
     lines=['# TS3 VDN A2 local GEM: equal high/middle/low bands','', 'Existing VDN baseline and A prefixes reused. No baseline or A-prefix training added. New methods: local actual RMSprop increment projection, not full-network GEM and not 0.1 soft protection. Each band21units, ranks1-21/22-42/44-64; rank43 excluded. Latest boundary grouping, no neuronal history union.','', '| Seed | Group | State | Matrix/15 | ACC % | Old mean % | BWT pp | FWT pp |','|---|---|---|---:|---:|---:|---:|---:|']
+    if protocol.get('gem_score_threshold') is not None:
+        lines[:3] = [
+            '# TS3 VDN A2 local GEM: overall score strictly above 3', '',
+            'Each seed reuses its original VDN baseline, A prefix, and initial FWT reference. '
+            'At each boundary the selected A2 slice is replaced by the units with score > 3. '
+            'An empty or undefined selection gives ordinary VDN updates for that stage.',
+        ]
     for x in summaries:lines.append('| '+' | '.join(str(x[k]) for k in ['seed','group','status','matrix_points','ACC_percent','old_mean_percent','BWT_pp','FWT_pp'])+' |')
     lines+=['','FWT uses an explicit same-seed untrained reference reconstructed by the current initializer, not an archived historical initializer. Baseline next-unseen evaluation uses archived checkpoints; no learning. Missing values are N/A. Auxiliary numerical residuals/errors do not establish victory retention or terminate the queue. Incomplete runs are not completion evidence. Three seeds only; tasks and episodes are not training replicates.','', 'See paired_contrasts.csv, gem_diagnostics.json and original runs. Independently review training terminal status, exit codes and evaluation completeness before claiming completion.']
     (OUT/'REPORT.md').write_text('\n'.join(lines)+'\n')

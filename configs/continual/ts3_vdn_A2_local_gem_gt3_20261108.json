@@ -1,0 +1,91 @@
+{
+  "id": "ts3_vdn_A2_local_gem_gt3_20261108",
+  "tasks": {
+    "A": [
+      2,
+      3
+    ],
+    "B": [
+      4,
+      1
+    ],
+    "C": [
+      1,
+      4
+    ],
+    "D": [
+      3,
+      2
+    ],
+    "E": [
+      5,
+      0
+    ]
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000
+  ],
+  "groups": [
+    "GEM_gt3"
+  ],
+  "screen_episodes": 32,
+  "screening": "overall A2 normalized score strictly above 3",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": true,
+  "nominal_actual_training_steps": 24000000,
+  "full_path_equivalent_steps": 30000000,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "cumulative_epsilon"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn",
+  "seeds": [
+    1234,
+    4567,
+    3535
+  ],
+  "selection": "overall_threshold",
+  "top_k": null,
+  "max_parallel": 5,
+  "intervention": "a2_local_gem",
+  "sources": {
+    "1234": {
+      "prefix": "ts3_vdn_top3_Aprefix_seed1234_20261102_attempt001",
+      "baseline": "ts3_vdn_top3_N_seed1234_20261102_attempt001"
+    },
+    "4567": {
+      "prefix": "ts3_vdn_top3_Aprefix_seed4567_20261102_attempt001",
+      "baseline": "ts3_vdn_top3_N_seed4567_20261102_attempt001"
+    },
+    "3535": {
+      "prefix": "ts3_vdn_typeunion_Aprefix_seed3535_20261102_attempt001",
+      "baseline": "ts3_vdn_typeunion_N_seed3535_20261102_attempt001"
+    }
+  },
+  "gem_memory_episodes_per_task": 32,
+  "gem_projection": "local actual RMSprop increment; per-task TD gradient; zero RHS; latest threshold mask",
+  "initial_reference_cache": "results/ts3_vdn_A2_local_gem_20261104/initial_references",
+  "gem_score_threshold": 3
+}

@@ -73,6 +73,8 @@ def main():
             base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
+        if 'gem_score_threshold' in P:
+            cfg['gem_score_threshold'] = P['gem_score_threshold']
         if EXTENDED:
             cfg['env_args']['rosters'] = P['tasks']
         args=SimpleNamespace(**cfg)
@@ -125,7 +127,9 @@ def main():
         gem=None
         if gem_band:
             from a2_local_gem import A2LocalGEM
-            gem=A2LocalGEM(learner,gem_band,lambda x:append(out/'gem_audit.jsonl',x),lambda x:append(out/'gem_errors.jsonl',x))
+            gem=A2LocalGEM(learner,gem_band,lambda x:append(out/'gem_audit.jsonl',x),
+                           lambda x:append(out/'gem_errors.jsonl',x),
+                           score_threshold=P.get('gem_score_threshold'))
             source=next((Path(o.parent)/'detections').glob('A_*/screen_input.th'))
             source_batch=th.load(source,map_location='cpu')['batch']
             append(out/'gem_selection_history.jsonl',gem.update('A',selection,source_batch,runner.t_env))

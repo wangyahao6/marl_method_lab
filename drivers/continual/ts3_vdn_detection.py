@@ -1,4 +1,4 @@
-"""VDN state-weighted activity and overall top-k for one feedforward layer."""
+"""VDN state-weighted activity and optional overall top-k for one feedforward layer."""
 import copy
 import torch as th
 from controllers import REGISTRY as controllers
@@ -26,6 +26,9 @@ def select(learner,args,fifo,out=None,*,save_input=True):
         z=th.stack([v.reshape(batch.batch_size,args.n_agents,-1) for v in captured],1)[:,:-1][good].abs().mean(1)
         activity=(z*(c/cm)[:,None]).mean(0).cpu().numpy().astype(float) if cm>0 else None
         scores=activity/activity.mean() if activity is not None and activity.mean()>0 else None
-        ids=sorted(sorted(range(len(activity)),key=lambda j:(-activity[j],j))[:args.top_k]) if activity is not None else None
-        return {layer:dict(sets={'overall':ids},activity=None if activity is None else activity.tolist(),scores=None if scores is None else scores.tolist(),states=int(good.sum()),c_mean=cm,k=args.top_k,tie_break='ascending index',selection='top_k',defined=ids is not None)}
+        top_k = args.top_k
+        ids = None
+        if activity is not None and top_k is not None:
+            ids = sorted(sorted(range(len(activity)), key=lambda j: (-activity[j], j))[:top_k])
+        return {layer:dict(sets={'overall':ids},activity=None if activity is None else activity.tolist(),scores=None if scores is None else scores.tolist(),states=int(good.sum()),c_mean=cm,k=top_k,tie_break='ascending index',selection='scores_only' if top_k is None else 'top_k',defined=scores is not None if top_k is None else ids is not None)}
     finally:restore_rng(saved)
