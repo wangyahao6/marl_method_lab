@@ -1,4 +1,5 @@
 import copy
+from contextlib import nullcontext
 
 import torch
 from components.episode_buffer import EpisodeBatch
@@ -8,6 +9,7 @@ import torch as th
 import numpy
 from torch.optim import RMSprop, Adam
 from modules.layers.act_layer import ActivateLayer
+from modules.layers.trhr import TRHRReLU
 from torch.nn import Linear
 from torch.nn import GRU
 
@@ -16,6 +18,7 @@ class QLearner:
         self.args = args
         self.mac = mac
         self.logger = logger
+        self.trhr = next((layer for layer in mac.agent.modules() if isinstance(layer, TRHRReLU)), None)
 
         self.params = list(mac.parameters())
         self.device = th.device('cuda' if args.use_cuda else 'cpu')
@@ -81,9 +84,11 @@ class QLearner:
         # Calculate estimated Q-Values
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
-        for t in range(batch.max_seq_length):
-            agent_outs = self.mac.forward(batch, t=t)
-            mac_out.append(agent_outs)
+        capture = self.trhr.capture() if self.trhr is not None and not check else nullcontext()
+        with capture as trhr_signs:
+            for t in range(batch.max_seq_length):
+                agent_outs = self.mac.forward(batch, t=t)
+                mac_out.append(agent_outs)
         mac_out = th.stack(mac_out, dim=1)  # Concat over time
 
         # Pick the Q-Values for the actions taken by each agent
@@ -123,6 +128,7 @@ class QLearner:
         # Td-error
         td_error = (chosen_action_qvals - targets.detach())
 
+        transition_mask = mask
         mask = mask.expand_as(td_error)
 
         # 0-out the targets that came from padded data
@@ -141,6 +147,8 @@ class QLearner:
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
         self.optimiser.step()
+        if trhr_signs is not None:
+            self.trhr.observe(trhr_signs, transition_mask, batch, self.logger, t_env)
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()

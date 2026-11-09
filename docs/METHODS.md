@@ -57,6 +57,10 @@ For A, each state's activity is the mean absolute activation over agent historie
 
 Continual soft protection accepts zero-based `method.active_phases` and `method.detection_phases`. Outside active_phases, enter() clears both protected and recovering sets immediately (all increments scale 1), while retaining detection identities for provenance. detection_phases limits boundary screening. Omitting these keys preserves existing behavior. The ABA experiment explicitly selects W/V, screens phase 0 and protects phase 1 only; see docs/EXPERIMENTS.md.
 
+## TRHR A2
+
+The standalone TRHR intervention uses the existing two-layer VDN Agent on static SMAC and TS3 VDN branches. It adds bounded per-unit bias compensation at the second ReLU based on sustained low activation in training replay. See [TRHR A2](TRHR.md) for the update rule, conditional screening, checkpoint behavior and launcher options.
+
 ## TS3 Agent schedules (2026-11-02)
 
 `ts3_protection.py` adds single-layer A1/A2 actual RMSprop scaling with either existing ReleaseSchedule linear recovery or permanent history union. Shared protection parameters and overall state-weighted screening, no per-type selector in this experiment. See [TS3 protocol](TS3_AGENT_PROTOCOL.md). This does not change old heterogeneous ABA semantics.

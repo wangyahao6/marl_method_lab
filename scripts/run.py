@@ -10,11 +10,32 @@ def merge(a,b):
     return a
 def save(p,v): p.write_text(json.dumps(v,ensure_ascii=False,indent=2,default=str)+'\n')
 def git(*args): return subprocess.check_output(['git','-C',str(ROOT),*args],text=True).strip()
+def trhr_settings(parser, overrides):
+    settings = dict(target_rate=0.05, window_updates=100, low_windows=3,
+                    min_condition_samples=128, ema_weight=0.25, gain=0.1, max_offset=0.25)
+    for item in overrides:
+        key, separator, value = item.partition('=')
+        name = key[5:]
+        if not separator or not key.startswith('trhr.') or name not in settings:
+            parser.error('TRHR overrides require --set trhr.FIELD=VALUE (see docs/TRHR.md)')
+        settings[name] = yaml.safe_load(value)
+    for name in ('window_updates', 'low_windows', 'min_condition_samples'):
+        if type(settings[name]) is not int or settings[name] <= 0:
+            parser.error(f'trhr.{name} must be a positive integer')
+    for name in ('target_rate', 'ema_weight', 'gain', 'max_offset'):
+        value = settings[name]
+        if type(value) not in (int, float) or not 0 < value < float('inf'):
+            parser.error(f'trhr.{name} must be finite and positive')
+    if settings['target_rate'] >= 1 or settings['ema_weight'] > 1:
+        parser.error('trhr.target_rate must be below 1 and trhr.ema_weight at most 1')
+    return settings
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts6','ts7','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -37,10 +58,22 @@ def main():
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
+    trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
+    trhr = None
+    if a.method == 'trhr':
+        if a.algorithm != 'vdn' or a.suite not in ('smac', 'ts3'):
+            p.error('TRHR A2 supports two-layer VDN in SMAC and TS3')
+        if a.suite == 'ts3' and (a.ts3_role != 'branch' or a.ts3_group != 'N'):
+            p.error('TRHR TS3 requires --ts3-role branch and --ts3-group N')
+        if a.suite == 'ts3' and len(trhr_overrides) != len(a.set):
+            p.error('TS3 TRHR only accepts --set overrides under trhr.*')
+        trhr = trhr_settings(p, trhr_overrides)
+    elif trhr_overrides:
+        p.error('trhr.* overrides require --method trhr')
     if a.suite=='smac':
         if not a.map or a.steps is None or a.steps<=0: p.error('smac requires --map and positive --steps')
         if a.scenario or a.method=='softprotect': p.error('softprotect currently uses the continual driver')
-        suffix={'baseline':'','reborn':'_b','redo':'_r','reset':'_s'}[a.method]
+        suffix={'baseline':'','reborn':'_b','redo':'_r','reset':'_s','trhr':''}[a.method]
         preset=a.algorithm+suffix
         f=ROOT/'src/config/algs'/f'{preset}.yaml'
         if not f.exists():p.error('No upstream preset for this combination; see docs/METHODS.md')
@@ -51,6 +84,8 @@ def main():
         cfg.update(seed=a.seed,t_max=a.steps,local_results_path=str(out),save_model=True)
         cfg['env_args'].update(map_name=a.map,seed=a.seed)
         for item in a.set:
+            if item in trhr_overrides:
+                continue
             if '=' not in item:p.error('--set requires KEY=VALUE')
             key,value=item.split('=',1);d=cfg
             if key.split('.')[0] in ['name','seed','t_max','local_results_path','unique_token','evaluate','checkpoint_path']:p.error('use the dedicated training arguments; evaluation is a separate command')
@@ -58,6 +93,12 @@ def main():
             keys=key.split('.')
             for k in keys[:-1]: d=d.setdefault(k,{})
             d[keys[-1]]=yaml.safe_load(value)
+        if trhr is not None:
+            if (cfg['env'], cfg['mac'], cfg['agent'], cfg['learner'], cfg['mixer']) != (
+                'sc2', 'basic_mac', 'rnn', 'q_learner', 'vdn'
+            ):
+                p.error('TRHR requires the standard SMAC VDN controller, agent and learner')
+            cfg['trhr'] = trhr
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
@@ -106,10 +147,17 @@ def main():
         if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
         expected='gem' if a.ts3_group.startswith('GEM_') else ('baseline' if a.ts3_group=='N' else 'softprotect')
-        if a.method!=expected:p.error('ts3 group and method must agree')
+        if a.method!=expected and trhr is None:p.error('ts3 group and method must agree')
         if a.ts3_role=='eval_fwt' and (a.algorithm!='vdn' or a.ts3_group!='N' or not a.parent):p.error('FWT evaluation requires VDN baseline and parent')
         protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
         if a.suite=='ts3' and a.algorithm!=protocol.get('algorithm','qmix'):p.error('algorithm must match named ts3 protocol')
+        if trhr is not None:
+            if (protocol['id'] in ('ts6', 'ts7') or 'N' not in protocol['groups']
+                    or protocol.get('intervention')):
+                p.error('TRHR needs a TS3 VDN protocol with group N and no other intervention')
+            protocol['trhr'] = trhr
+        elif 'trhr' in protocol:
+            p.error('a TS3 TRHR protocol requires --method trhr')
         if a.method=='gem' and protocol.get('intervention')!='a2_local_gem':p.error('gem requires a named a2_local_gem protocol')
         if a.method == 'gem' and a.ts3_group not in protocol['groups']:
             p.error('GEM group must match named TS3 protocol')
