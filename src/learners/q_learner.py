@@ -72,7 +72,9 @@ class QLearner:
         self.a2_trace = None
         if getattr(args, "a2_trace", False) and not getattr(args, "evaluate", False):
             window = args.trhr["window_updates"] if self.trhr is not None else 100
-            self.a2_trace = A2Trace(mac.agent, self.trhr, args.local_results_path, window)
+            single_ff = args.agent == "single_ff_rnn"
+            self.a2_trace = A2Trace(mac.agent, self.trhr, args.local_results_path, window,
+                                    single_ff=single_ff, stages=getattr(args, "trace_stages", 0))
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False):
         # Get the relevant quantities

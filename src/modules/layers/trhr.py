@@ -39,6 +39,7 @@ class TRHRReLU(nn.ReLU):
         super().__init__()
         self.settings = settings
         self.register_buffer("offset", th.zeros(width))
+        self.register_buffer("protected", th.zeros(width, dtype=th.bool), persistent=False)
         self.register_buffer("rate", th.zeros(width))
         self.register_buffer("condition_rate", th.zeros(n_agents, 2, width))
         self.register_buffer("condition_seen", th.zeros(n_agents, 2, dtype=th.bool))
@@ -54,7 +55,8 @@ class TRHRReLU(nn.ReLU):
         # The baseline ReLU has no state. An old checkpoint starts TRHR at zero.
         if not any(key.startswith(prefix) for key in state_dict):
             for name, buffer in self.named_buffers():
-                state_dict[prefix + name] = th.zeros_like(buffer)
+                if name not in self._non_persistent_buffers_set:
+                    state_dict[prefix + name] = th.zeros_like(buffer)
         super()._load_from_state_dict(state_dict, prefix, *args)
 
     @th.no_grad()
@@ -99,7 +101,7 @@ class TRHRReLU(nn.ReLU):
             supported.unsqueeze(-1)
             & ((group_rate >= target) | (self.condition_rate >= target))
         ).flatten(0, 1).any(dim=0)
-        low = enough_data & (self.rate < target) & (window_rate < target) & ~condition_active
+        low = enough_data & (self.rate < target) & (window_rate < target) & ~condition_active & ~self.protected
         self.low_windows.copy_(
             th.where(low, (self.low_windows + 1).clamp_max(settings["low_windows"]), 0)
         )

@@ -1,6 +1,7 @@
 import torch.nn as nn
 
 from modules.layers.act_layer import ActivateLayer
+from modules.layers.trhr import TRHRReLU
 
 
 class SingleFFRNNAgent(nn.Module):
@@ -14,6 +15,8 @@ class SingleFFRNNAgent(nn.Module):
             nn.ReLU(inplace=True),
             ActivateLayer(self.hidden_dim, "A"),
         )
+        if getattr(args, "trhr", None):
+            self.net[1] = TRHRReLU(self.hidden_dim, args.n_agents, args.trhr)
         self.rnn = nn.GRUCell(self.hidden_dim, self.hidden_dim)
         self.fc2 = nn.Linear(self.hidden_dim, args.n_actions)
 

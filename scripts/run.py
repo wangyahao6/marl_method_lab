@@ -35,7 +35,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts6','ts7','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -48,7 +48,7 @@ def main():
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3'],default='N')
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     a=p.parse_args()
@@ -60,7 +60,12 @@ def main():
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None
-    if a.method == 'trhr':
+    factorial = a.suite == 'ts3' and a.algorithm == 'vdn_1ff_128'
+    if a.method == 'softprotect_trhr' and not factorial:
+        p.error('combined soft protection and TRHR requires the TS3 128-unit protocol')
+    if factorial and a.set:
+        p.error('TS3 factorial settings belong in the named protocol')
+    if a.method == 'trhr' and not factorial:
         if a.algorithm != 'vdn' or a.suite not in ('smac', 'ts3'):
             p.error('TRHR A2 supports two-layer VDN in SMAC and TS3')
         if a.suite == 'ts3' and (a.ts3_role != 'branch' or a.ts3_group != 'N'):
@@ -149,6 +154,24 @@ def main():
         thresholds=protocol['thresholds']
         steps={'prefix':thresholds[0],'branch':thresholds[-1]-thresholds[0],'resume':thresholds[-1]-thresholds[4],'full':thresholds[-1]}[a.ts3_role]
         details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':steps}
+    elif factorial:
+        protocol=json.loads((ROOT/a.protocol).read_text())
+        methods = {'N': 'baseline', 'A_union': 'softprotect',
+                   'TRHR': 'trhr', 'A_union_TRHR': 'softprotect_trhr'}
+        if (protocol.get('intervention') != 'single_ff_trhr_factorial'
+                or protocol.get('algorithm') != a.algorithm or a.seed not in protocol['seeds']):
+            p.error('use the named TS3 128-unit TRHR protocol and its seed')
+        if (a.ts3_role not in ('prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch')
+                or methods.get(a.ts3_group) != a.method
+                or (a.ts3_role == 'prefix' and a.ts3_group != 'N')):
+            p.error('use prefix/N or a branch with its matching method and parent')
+        env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,
+                 '--seed',str(a.seed),'--group',a.ts3_group]
+        if a.parent:command+=['--parent',a.parent]
+        end=protocol['thresholds']
+        details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,
+                 'steps':end[0] if a.ts3_role=='prefix' else end[-1]-end[0]}
     elif a.suite=='ts3':
         if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')

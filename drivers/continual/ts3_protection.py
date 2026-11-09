@@ -5,7 +5,7 @@ from release_schedule import ReleaseSchedule
 class TS3Protection:
     def __init__(self, learner, layer, mode, record):
         self.learner=learner; self.layer=layer; self.mode=mode; self.record=record
-        self.schedule=ReleaseSchedule({layer:64}, .1, 100000) if layer else None
+        self.schedule=ReleaseSchedule({layer:learner.args.rnn_hidden_dim}, .1, 100000) if layer else None
         self.t_env=0; self.count=0
         self.original=learner.optimiser.step
         if layer: learner.optimiser.step=self.step
@@ -23,7 +23,11 @@ class TS3Protection:
         agent=self.learner.mac.agent; result={}
         if not self.layer:return result
         v=th.tensor(self.schedule.values(t_env)[self.layer],device=agent.net[0].weight.device)
-        if self.layer=='A1':
+        if self.layer=='A':
+            result={'net.0.weight':v[:,None].expand_as(agent.net[0].weight),
+                    'net.0.bias':v,
+                    'rnn.weight_ih':v[None,:].expand_as(agent.rnn.weight_ih)}
+        elif self.layer=='A1':
             result={'net.0.weight':v[:,None].expand_as(agent.net[0].weight),
                     'net.0.bias':v,'net.3.weight':v[None,:].expand_as(agent.net[3].weight)}
         else:

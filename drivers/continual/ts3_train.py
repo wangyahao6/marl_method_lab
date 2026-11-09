@@ -16,11 +16,20 @@ import yaml
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts6', 'ts7')
+FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 if not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
 def select_scope(result):
-    if P.get('selection') == 'overall_threshold_union':
+    if FACTORIAL:
+        item = result['A']
+        scores = item['scores']
+        item['sets']['overall'] = None if scores is None else [
+            i for i, score in enumerate(scores) if score > P['threshold_beta']
+        ]
+        item['selection'] = 'overall_threshold_union'
+        item['defined'] = scores is not None
+    elif P.get('selection') == 'overall_threshold_union':
         layer = result['A2']
         chosen = layer['sets']['overall_threshold']
         layer['sets']['overall'] = chosen
@@ -30,7 +39,7 @@ def select_scope(result):
 
 def sequence_metrics(order, sources):
     """Join immutable prefix and current evaluation rows, then calculate stage metrics."""
-    stages, initial, before = {}, {}, {}
+    stages, initial, before, curves = {}, {}, {}, {}
     for source, labels in sources:
         for line in (source/'evaluations.jsonl').read_text().splitlines():
             row = json.loads(line)
@@ -43,6 +52,8 @@ def sequence_metrics(order, sources):
                 initial[task] = win_rate
             elif label == 'next_unseen':
                 before[task] = win_rate
+            if label in ('phase_start', 'periodic', 'stage_end') and task == order[row['phase']]:
+                curves.setdefault(task, {})[row['t_env']] = win_rate
     metrics = {}
     for i, task in enumerate(order):
         row = stages.get(task, {})
@@ -56,6 +67,14 @@ def sequence_metrics(order, sources):
             bwt_pp=100 * sum(bwt) / len(bwt) if bwt and len(bwt) == len(old) else None,
             fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == i else None,
             fwt_tasks=fwt_tasks)
+        if FACTORIAL:
+            points = sorted(curves.get(task, {}).items())
+            metrics[task]['old_mean_percent'] = (100 * sum(row[j] for j in old) / len(old)
+                if old and all(j in row for j in old) else None)
+            metrics[task]['learning_auc_percent'] = (
+                100 * float(np.trapz([y for _, y in points], [x for x, _ in points]))
+                / (points[-1][0] - points[0][0]) if task in row and len(points) > 1 else None)
+            metrics[task]['learning_curve'] = points
     return dict(stage_win_rates=stages, initial_reference=initial, before_first_training=before,
                 metrics=metrics, sources=[str(source/'evaluations.jsonl') for source, _ in sources])
 
@@ -72,7 +91,11 @@ def main():
         if algorithm != 'qmix':
             base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
-        if 'trhr' in P:
+        if FACTORIAL:
+            cfg.update(a2_trace=True, trace_stages=len(P['order']))
+            if o.group in ('TRHR', 'A_union_TRHR'):
+                cfg['trhr'] = P['trhr_settings']
+        elif 'trhr' in P:
             cfg['trhr'] = P['trhr']
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
         if 'gem_score_threshold' in P:
@@ -86,6 +109,8 @@ def main():
         runner=base.EpisodeRunner(args,logger);info=runner.get_env_info();args.n_agents=info['n_agents'];args.n_actions=info['n_actions'];args.state_shape=info['state_shape']
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
         scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
+        if FACTORIAL:
+            scheme['source_phase'] = dict(vshape=(1,), dtype=th.long, episode_const=True)
         groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
         buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
@@ -93,7 +118,7 @@ def main():
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (EXTENDED and o.role in ('prefix', 'resume', 'full')) else None
+        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or ((EXTENDED or FACTORIAL) and o.role in ('prefix', 'resume', 'full')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
@@ -106,6 +131,14 @@ def main():
                     import hashlib
                     write(out/'prefix_selection.json', dict(selection=selection, source=str(selection_path), source_sha256=hashlib.sha256(selection_path.read_bytes()).hexdigest(), parent_original=str(parent/'selection.json'), parent_original_sha256=hashlib.sha256((parent/'selection.json').read_bytes()).hexdigest()))
             write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
+            if FACTORIAL:
+                names = [name for name, _ in mac.agent.named_parameters()]
+                write(out/'branch_parameter_identity.json', dict(
+                    online_matches_prefix=all(th.equal(p.detach().cpu(), state['agent'][k])
+                        for k, p in mac.agent.named_parameters()),
+                    target_matches_prefix=all(th.equal(p.detach().cpu(), state['target_agent'][k])
+                        for k, p in learner.target_mac.agent.named_parameters()),
+                    parameters=names))
             del state
         if o.role == 'resume':
             parent = Path(o.parent)
@@ -125,7 +158,19 @@ def main():
                 epsilon=mac.action_selector.epsilon, replay='empty', rng='reseeded',
                 parameter_hash=base.parameter_hash(learner)))
         gem_band=o.group.split('_',1)[1] if o.group.startswith('GEM_') else None
-        layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_')
+        if FACTORIAL:
+            layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR') else (None, 'baseline')
+        else:
+            layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_')
+        historical = set()
+
+        def remember(result):
+            chosen = result.get('A', {}).get('sets', {}).get('overall')
+            if chosen is not None:
+                historical.update(chosen)
+
+        if FACTORIAL and o.role == 'branch':
+            remember(selection)
         protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x))
         gem=None
         if gem_band:
@@ -158,13 +203,13 @@ def main():
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
             try:
-                if algorithm == 'vdn':
+                if algorithm in ('vdn', 'vdn_1ff_128'):
                     detector = vdn_type_select if P.get('selection') in ('type_threshold_union', 'overall_threshold_union') else vdn_select
                 else:
                     detector = qmix_select
                 result=select_scope(detector(learner,args,fifo,dest))
             except Exception:
-                write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A1','A2']}
+                write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A','A1','A2']}
             write(dest/'result.json',result)
             return result
         def detect_single_ff(task, nominal, boundary):
@@ -181,7 +226,7 @@ def main():
             except Exception:
                 append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
 
-        if EXTENDED:
+        if EXTENDED or FACTORIAL:
             if o.role in ('prefix', 'full'):
                 for unseen in P['order'][1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
@@ -272,6 +317,15 @@ def main():
         last_phase = len(P['order']) - 1
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=P['screen_episodes'])
+            if FACTORIAL:
+                trace = learner.a2_trace
+                trace.phase = phase
+                trace.history = sorted(historical)
+                trace.protected = sorted(protector.schedule.protected[layer]) if layer else []
+                trace.streak.zero_()
+                if learner.trhr is not None:
+                    learner.trhr.protected.zero_()
+                    learner.trhr.protected[trace.protected] = True
             base.log_task_epsilon(runner, out, phase, task, 'start')
             append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None if not layer else protector.schedule.state(begin),gem_band=gem_band))
             audited=[False]
@@ -283,9 +337,11 @@ def main():
                 next_detection = (begin // interval + 1) * interval
             while runner.t_env<end:
                 with th.no_grad():batch=runner.run(test_mode=False)
-                if o.role=='prefix' or layer or gem or detection:
+                if FACTORIAL:
+                    batch.update({'source_phase': [[phase]]}, mark_filled=False)
+                if FACTORIAL or o.role=='prefix' or layer or gem or detection:
                     types = None
-                    if not EXTENDED:
+                    if not EXTENDED and not FACTORIAL:
                         raw = runner.env.wrapped.env
                         types = ['stalker' if raw.agents[i].unit_type==raw.stalker_id else 'zealot' for i in range(args.n_agents)]
                     fifo.append((cpu_episode(batch), types))
@@ -303,6 +359,8 @@ def main():
                 if runner.t_env>=next_test:
                     evaluate(task,False,'periodic')
                     while next_test<=runner.t_env:next_test+=25000
+            if FACTORIAL:
+                trace.flush(runner.t_env)
             base.log_task_epsilon(runner, out, phase, task, 'end')
             append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
             dest=out/'models'/f'phase{phase}_{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False);learner.save_models(str(dest))
@@ -310,9 +368,13 @@ def main():
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
             for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
-            if (gem or EXTENDED) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
-            if phase<last_phase and (o.role=='prefix' or layer or gem):
+            if (gem or EXTENDED or FACTORIAL) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
+            if phase<last_phase and (FACTORIAL or o.role=='prefix' or layer or gem):
                 selection=screen(task)
+                if FACTORIAL:
+                    remember(selection)
+                    append(out/'historical_selection.jsonl', dict(task=task, t_env=runner.t_env,
+                           selected=selection['A']['sets']['overall'], union=sorted(historical)))
                 if gem:
                     from protection import combine
                     append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
@@ -322,8 +384,10 @@ def main():
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
             th.save(state,out/'prefix_state.th')
         if gem:gem.flush()
-        if EXTENDED and o.role != 'prefix':
+        if (EXTENDED or FACTORIAL) and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
+            if FACTORIAL:
+                all_labels += ('phase_start', 'periodic')
             if o.role == 'resume':
                 sources = [(ROOT/history['prefix'], ('stage_end',)),
                            (parent.parent.parent, ('stage_end',)),
