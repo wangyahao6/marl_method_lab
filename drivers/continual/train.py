@@ -49,6 +49,18 @@ def append(path, value):
         stream.write(json.dumps(value, allow_nan=False) + '\n')
 
 
+def log_task_epsilon(runner, out, phase, task, event):
+    selector = runner.mac.action_selector
+    mode = runner.args.epsilon_on_switch
+    if event == 'start' and mode == 'per_task':
+        selector.reset_exploration(runner.t_env)
+    append(out / 'task_epsilon.jsonl', dict(
+        event=event, phase=phase, task=task, t_env=runner.t_env,
+        exploration_steps=selector.exploration_steps(runner.t_env),
+        epsilon=selector.training_epsilon(runner.t_env), schedule=mode,
+    ))
+
+
 def merge(a, b):
     for k, v in b.items():
         a[k] = merge(a.get(k, {}), v) if isinstance(v, dict) else v
@@ -110,7 +122,7 @@ def main():
         cfg['scenario'] = o.scenario
         cfg.update(protocol_id=PROTOCOL['id'], condition=o.condition, phases=phases, interventions=PROTOCOL['interventions'] if o.condition=='softprotect' else [],
                    replay_on_switch='retain', optimizer_on_switch='retain',
-                   epsilon_on_switch='cumulative_no_restart',
+                   epsilon_on_switch=PROTOCOL.get('epsilon_on_switch', 'per_task'),
                    phase_boundary='exact_step_time_limit_bootstrap')
         write(out / 'config.json', cfg)
         if (ROOT / 'evidence/source_manifest.json').exists():
@@ -167,6 +179,7 @@ def main():
             protection.enter(unit, phase, runner.t_env)
             runner.env.set_task(unit)
             runner.env.phase = phase
+            log_task_epsilon(runner, out, phase, unit, 'start')
             runner.env.audit = lambda x: append(out / 'environment_audit.jsonl', dict(phase=phase, t_env=runner.t_env, **x)) if o.smoke else None
             # Record first actual reset of each phase, all resets in smoke.
             audited = [False]
@@ -218,6 +231,7 @@ def main():
                 if runner.t_env >= next_test:
                     evaluate('phase_end' if runner.t_env == end else 'periodic')
                     next_test = min(next_test + args.test_interval, end)
+            log_task_epsilon(runner, out, phase, unit, 'end')
             save_model(f'phase{phase}_{end}')
             if phase < len(phases)-1 and phase in PROTOCOL['method'].get('detection_phases', range(len(phases)-1)):
                 protection.detect(unit, end, args, enumerate_check=o.smoke)

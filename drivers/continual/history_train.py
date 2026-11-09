@@ -91,6 +91,7 @@ def main():
         phases=[len(P['order'])-1]
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=P['screen_episodes'])
+            base.log_task_epsilon(runner, out, phase, task, 'start')
             append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None))
             audited=[False]
             def audit(x):
@@ -108,6 +109,7 @@ def main():
                 if runner.t_env>=next_test:
                     evaluate(task,False,'periodic')
                     while next_test<=runner.t_env:next_test+=25000
+            base.log_task_epsilon(runner, out, phase, task, 'end')
             append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
             dest=out/'models'/f'phase{phase}_{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False);learner.save_models(str(dest))
             th.save(dict(target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),t_env=runner.t_env,episode=episode,updates=updates),dest/'targets.th')

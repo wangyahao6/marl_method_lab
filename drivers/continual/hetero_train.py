@@ -18,6 +18,7 @@ def config(seed,out):
     cfg={}
     for f in ['src/config/default.yaml','vendor/smacv2/smacv2/examples/configs/sc2_gen_protoss.yaml','src/config/algs/qmix.yaml']:base.merge(cfg,yaml.safe_load((ROOT/f).read_text()))
     cfg.update(seed=seed,device='cuda:0',use_cuda=True,env='hetero_protoss',batch_size=32,buffer_size=5000,lr=.0005,target_update_interval=200,hypernet_embed=64,test_nepisode=32,test_interval=25000,t_max=2500000,local_results_path=str(out),unique_token=out.name,save_model=False)
+    cfg['epsilon_on_switch'] = base.PROTOCOL.get('epsilon_on_switch', 'per_task')
     cfg['env_args'].update(seed=seed,game_version='4.10');return cfg
 
 
@@ -78,6 +79,7 @@ def main():
         else:phases=[(1500000,o.task,1),(2500000,'A',2)]
         for end,task,phase in phases:
             begin=runner.t_env;runner.env.set_task(task);protection.active=phase==1 and o.group!='N'
+            base.log_task_epsilon(runner, out, phase, task, 'start')
             append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,active=protection.active,scale=.1 if protection.active else 1.,buffer_episodes=buffer.episodes_in_buffer,model_hash=base.parameter_hash(learner)))
             audited=[False]
             def audit(x):
@@ -101,6 +103,7 @@ def main():
                     evaluate('A',False,'retention')
                     while next_old<=t:next_old+=100000
                 if episode%100==0:status()
+            base.log_task_epsilon(runner, out, phase, task, 'end')
             append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
             models(f'phase{phase}_{runner.t_env}')
             if phase==1:evaluate(task,True,'B_end');evaluate('A',True,'return_A_before_update')

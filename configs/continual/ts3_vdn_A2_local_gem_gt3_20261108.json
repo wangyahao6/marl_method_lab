@@ -1,5 +1,6 @@
 {
   "id": "ts3_vdn_A2_local_gem_gt3_20261108",
+  "epsilon_on_switch": "cumulative_no_restart",
   "tasks": {
     "A": [
       2,

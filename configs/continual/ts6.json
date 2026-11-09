@@ -1,5 +1,6 @@
 {
   "id": "ts6",
+  "epsilon_on_switch": "cumulative_no_restart",
   "tasks": {
     "A": {
       "id": "P5_ally2S3Z_enemy2S3Z_v1",
