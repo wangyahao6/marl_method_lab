@@ -49,7 +49,8 @@ def matched(windows, targets):
 
 
 def plot(curves, trace, out):
-    fig, axes = plt.subplots(1, 3, figsize=(13, 4), sharey=True, squeeze=False)
+    n = len(curves)
+    fig, axes = plt.subplots(1, n, figsize=(max(6, 4.3*n), 4), sharey=True, squeeze=False)
     for ax, (seed, groups) in zip(axes[0], curves.items()):
         for group, (x, y) in groups.items():
             if len(x):
@@ -112,8 +113,9 @@ def difference(result, a, b):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--plan", type=Path, required=True)
-    out = p.parse_args().plan.parent
-    plan = read(out / "plan.json")
+    plan_path = p.parse_args().plan
+    out = plan_path.parent
+    plan = read(plan_path)
     results, units, curves, plot_rows = {}, [], {}, {}
     for pair in plan["pairs"]:
         seed = pair["seed"]
@@ -172,7 +174,7 @@ def main():
     (out / "results.json").write_text(json.dumps(results, indent=2, allow_nan=False) + "\n")
     lines = [
         "# TRHR 单任务实验一", "",
-        "原版 SMAC 5m_vs_6m，两层前馈 VDN，三组配对训练。独立终点评价每条件 128 局，四个环境种子块。", "",
+        f"原版 SMAC 5m_vs_6m，两层前馈 VDN，{len(results)} 组配对训练。独立终点评价每条件 128 局，四个环境种子块。", "",
         "| 种子 | 实际步数 B / T | 初始化相同 | 调节 / 唤醒单元 | 独立终点胜率 B / T | 胜率 AUC B / T | 连续三次测试 ≥50% 的步数 B / T |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
@@ -197,7 +199,7 @@ def main():
     final_deltas = [x for x in final_deltas if x is not None]
     if final_deltas:
         lines += ["", f"终点配对差值（TRHR 减基线）为 {', '.join(f'{x:+.2f}' for x in final_deltas)} 个百分点，"
-                  f"已完成 {len(final_deltas)}/3 对，均值 {np.mean(final_deltas):+.2f} 个百分点。"]
+                  f"已完成 {len(final_deltas)}/{len(results)} 对，均值 {np.mean(final_deltas):+.2f} 个百分点。"]
     if auc_deltas:
         lines += ["", f"共同覆盖区间的归一化胜率 AUC 配对差均值为 {np.mean(auc_deltas):+.2f} 个百分点。"]
     if any(entry["sustained_recovery"] is not None for entry in units):
@@ -223,6 +225,8 @@ def main():
                   "（对照胜率减唤醒单元替换胜率）。固定回放均值替换用于考察输入相关变化对终点策略的贡献。"]
     lines += ["", "训练回放分布会随策略改变，逐单元基线编号仅为同初始化参照。"
               "激活、梯度和更新、固定回放的输入响应、独立胜率应分别判断。"]
+    if len(results) == 1:
+        lines += ["", "本轮只有种子 1234 的配对结果，种子间稳定性无法评估。"]
     if len(final_deltas) < len(results):
         lines += ["", "部分训练或独立评价暂无完整结果。缺失项不计为零。"]
     (out / "REPORT.md").write_text("\n".join(lines) + "\n")
