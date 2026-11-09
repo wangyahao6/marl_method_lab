@@ -1,0 +1,29 @@
+{
+  "repository": "https://github.com/TTomilin/MEAL",
+  "commit": "8e7857c76eedc44623a7bfe987235f2a9aadb626",
+  "retrieved": "2026-11-09",
+  "purpose": "Static design references only; not imported by training",
+  "license": "MIT; see LICENSE",
+  "files": [
+    {
+      "path": "upstream/experiments/algos/vdn.py",
+      "sha256": "423e0f9886ac3f7184c64d5f5304f5ef6fbbd48e5eaf39a7e30c54db17783026"
+    },
+    {
+      "path": "upstream/experiments/continual/agem.py",
+      "sha256": "27e12edf276c0d960669346aee5b271f5f84abd6eb2bb1ffc53c7f3c551d49bd"
+    },
+    {
+      "path": "upstream/experiments/continual/ewc.py",
+      "sha256": "79bdbcf2eca49198784c2545a2f2bc133a1f839506ad18e00c590e8d8f511e75"
+    },
+    {
+      "path": "upstream/experiments/continual/mas.py",
+      "sha256": "1d6dbf958751820f39f42666569fa9ae40da71a551ad5ad3feb57791d124eb5d"
+    },
+    {
+      "path": "upstream/experiments/continual/cbp.py",
+      "sha256": "384d2b1c8d312e01a6df6dd42496fdd57a32140aab83629e862f14a0f69e85b7"
+    }
+  ]
+}

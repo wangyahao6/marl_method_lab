@@ -19,3 +19,7 @@
 当前仅远端本地Git，无origin、无推送。旧实验工程未迁移、未改写。此次建立只做静态核对，不产生训练结果。
 
 Continuous SMACv2 runs use runtime/SMACv2StarCraftII -> /home/wyh/stagnant_figure2/runtime/StarCraftII (existing SC2 4.10 task-switch runtime including SMACv2 maps). The static SMAC runtime/StarCraftII remains unchanged. Both are read-only reused dependencies.
+
+## MEAL 设计参考材料（2026-11-09）
+
+`references/meal/` 收录 TTomilin/MEAL 固定提交 `8e7857c76eedc44623a7bfe987235f2a9aadb626` 的五个重点源码文件，仅作静态参考，不被训练导入。原作者 MIT 许可保存在该目录 LICENSE；来源及 SHA-256 见 SOURCE.json。不改变本仓库既有来源和许可记录，不声称完成 MEAL 复现或实现这些方法。设计用途及当前模块对应关系见 [MEAL 设计参考](MEAL_DESIGN_REFERENCE.md)。
