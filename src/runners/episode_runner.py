@@ -45,7 +45,7 @@ class EpisodeRunner:
         self.env.reset()
         self.t = 0
 
-    def run(self, test_mode=False, mask_mode=False, recycle_mode=False):
+    def run(self, test_mode=False, mask_mode=False, recycle_mode=False, max_steps=None):
         self.reset()
 
         terminated = False
@@ -67,6 +67,10 @@ class EpisodeRunner:
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
 
             reward, terminated, env_info = self.env.step(actions[0])
+            if max_steps is not None and self.t + 1 == max_steps and not terminated:
+                # Budget boundary is a time limit. The final state still bootstraps.
+                terminated = True
+                env_info = dict(env_info, episode_limit=True)
             episode_return += reward
 
             post_transition_data = {
@@ -92,6 +96,8 @@ class EpisodeRunner:
 
         cur_stats = self.test_stats if test_mode else self.train_stats
         cur_returns = self.test_returns if test_mode else self.train_returns
+
+        self.last_episode_info = env_info
 
         log_prefix = ""
         if test_mode:

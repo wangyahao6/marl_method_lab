@@ -1,6 +1,8 @@
 import datetime
+import json
 import os
 import pprint
+from pathlib import Path
 import time
 import threading
 import torch as th
@@ -63,6 +65,17 @@ def run(_run, _config, _log):
 
     # sacred is on by default
     logger.setup_sacred(_run)
+
+    if getattr(args, "a2_trace", False) and not args.evaluate:
+        metric_path = Path(args.local_results_path) / "metrics.jsonl"
+        log_stat = logger.log_stat
+
+        def record(key, value, step, **kwargs):
+            log_stat(key, value, step, **kwargs)
+            with metric_path.open("a") as stream:
+                stream.write(json.dumps(dict(key=key, value=float(value), t_env=int(step))) + "\n")
+
+        logger.log_stat = record
 
     # Run and train
     run_sequential(args=args, logger=logger)
@@ -191,10 +204,15 @@ def run_sequential(args, logger):
     T = 2
     if hasattr(args, 'T'):
         T = args.T
-    while runner.t_env <= args.t_max:
+    trace = getattr(learner, "a2_trace", None)
+    limit = args.t_max if trace is not None else args.t_max + 1
+    while runner.t_env < limit:
 
         # Run for a whole episode at a time
-        episode_batch = runner.run(test_mode=False)
+        if trace is not None:
+            episode_batch = runner.run(test_mode=False, max_steps=args.t_max - runner.t_env)
+        else:
+            episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
         radio = 1
         if hasattr(args, 'radio'):
@@ -279,10 +297,15 @@ def run_sequential(args, logger):
             logger.print_recent_stats()
             last_log_T = runner.t_env
 
-    if detector is not None:
-        __import__("pathlib").Path(args.local_results_path, "final_model").mkdir(exist_ok=True)
-        learner.save_models(str(__import__("pathlib").Path(args.local_results_path) / "final_model"))
-        __import__("pathlib").Path(args.local_results_path, "training_complete.json").write_text(__import__("json").dumps(dict(t_env=runner.t_env)))
+    if trace is not None:
+        trace.flush(runner.t_env)
+    if detector is not None or trace is not None:
+        final = Path(args.local_results_path, "final_model")
+        final.mkdir(exist_ok=True)
+        learner.save_models(str(final))
+        (final.parent / "training_complete.json").write_text(
+            json.dumps(dict(t_env=runner.t_env, episodes=episode))
+        )
     runner.close_env()
     logger.console_logger.info("Finished Training")
 

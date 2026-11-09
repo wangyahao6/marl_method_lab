@@ -5,6 +5,35 @@ import torch as th
 from torch import nn
 
 
+@contextmanager
+def capture_activity(layer):
+    """Capture detached activation signs for one online learner unroll."""
+    signs = []
+
+    def collect(_module, _inputs, output):
+        signs.append(output.detach() > 0)
+
+    hook = layer.register_forward_hook(collect)
+    try:
+        yield signs
+    finally:
+        hook.remove()
+
+
+def valid_a2_rows(signs, mask, batch):
+    available = batch["avail_actions"][:, :-1].bool()
+    # The final stored state is only a bootstrap input, including at time limits.
+    valid = mask.bool() & batch["filled"][:, 1:].bool()
+    alive = available[..., 1:].any(dim=-1)
+    valid = valid & alive
+    target_available = available[..., 6:].any(dim=-1)
+    batch_size, time_steps, n_agents = valid.shape
+    active = th.stack(signs[:-1]).reshape(time_steps, batch_size, n_agents, -1)
+    active = active.transpose(0, 1)
+
+    return valid, target_available, active
+
+
 class TRHRReLU(nn.ReLU):
     def __init__(self, width, n_agents, settings):
         super().__init__()
@@ -28,31 +57,9 @@ class TRHRReLU(nn.ReLU):
                 state_dict[prefix + name] = th.zeros_like(buffer)
         super()._load_from_state_dict(state_dict, prefix, *args)
 
-    @contextmanager
-    def capture(self):
-        """Capture detached activation signs for one online learner unroll."""
-        signs = []
-
-        def collect(_module, _inputs, output):
-            signs.append(output.detach() > 0)
-
-        hook = self.register_forward_hook(collect)
-        try:
-            yield signs
-        finally:
-            hook.remove()
-
     @th.no_grad()
     def observe(self, signs, mask, batch, logger, t_env):
-        available = batch["avail_actions"][:, :-1].bool()
-        # The final stored state is only a bootstrap input, including at time limits.
-        valid = mask.bool() & batch["filled"][:, 1:].bool()
-        alive = available[..., 1:].any(dim=-1)
-        valid = valid & alive
-        target_available = available[..., 6:].any(dim=-1)
-        batch_size, time_steps, n_agents = valid.shape
-        active = th.stack(signs[:-1]).reshape(time_steps, batch_size, n_agents, -1)
-        active = active.transpose(0, 1)
+        valid, target_available, active = valid_a2_rows(signs, mask, batch)
 
         for index, condition in enumerate((~target_available, target_available)):
             rows = valid & condition

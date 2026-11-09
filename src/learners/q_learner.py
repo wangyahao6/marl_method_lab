@@ -9,7 +9,8 @@ import torch as th
 import numpy
 from torch.optim import RMSprop, Adam
 from modules.layers.act_layer import ActivateLayer
-from modules.layers.trhr import TRHRReLU
+from modules.layers.trhr import TRHRReLU, capture_activity
+from utils.a2_trace import A2Trace
 from torch.nn import Linear
 from torch.nn import GRU
 
@@ -68,6 +69,10 @@ class QLearner:
         self.target_mac = copy.deepcopy(mac)
 
         self.log_stats_t = -self.args.learner_log_interval - 1
+        self.a2_trace = None
+        if getattr(args, "a2_trace", False) and not getattr(args, "evaluate", False):
+            window = args.trhr["window_updates"] if self.trhr is not None else 100
+            self.a2_trace = A2Trace(mac.agent, self.trhr, args.local_results_path, window)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False):
         # Get the relevant quantities
@@ -84,7 +89,8 @@ class QLearner:
         # Calculate estimated Q-Values
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
-        capture = self.trhr.capture() if self.trhr is not None and not check else nullcontext()
+        observed_layer = self.a2_trace.layer if self.a2_trace is not None else self.trhr
+        capture = capture_activity(observed_layer) if observed_layer is not None and not check else nullcontext()
         with capture as trhr_signs:
             for t in range(batch.max_seq_length):
                 agent_outs = self.mac.forward(batch, t=t)
@@ -146,9 +152,12 @@ class QLearner:
         self.optimiser.zero_grad()
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
+        snapshot = self.a2_trace.before_step() if self.a2_trace is not None else None
         self.optimiser.step()
-        if trhr_signs is not None:
+        if self.trhr is not None:
             self.trhr.observe(trhr_signs, transition_mask, batch, self.logger, t_env)
+        if self.a2_trace is not None:
+            self.a2_trace.observe(trhr_signs, transition_mask, batch, snapshot, t_env)
 
         if (episode_num - self.last_target_update_episode) / self.args.target_update_interval >= 1.0:
             self._update_targets()

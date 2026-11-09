@@ -99,6 +99,12 @@ def main():
             ):
                 p.error('TRHR requires the standard SMAC VDN controller, agent and learner')
             cfg['trhr'] = trhr
+        if cfg.get('a2_trace') and (
+            a.method not in ('baseline', 'trhr') or
+            (cfg['env'], cfg['mac'], cfg['agent'], cfg['learner'], cfg['mixer'], cfg['runner'])
+            != ('sc2', 'basic_mac', 'rnn', 'q_learner', 'vdn', 'episode')
+        ):
+            p.error('a2_trace requires static SMAC two-layer VDN baseline or TRHR')
         # Supply a fully merged config to Sacred through a simple dedicated entrypoint.
         command=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
         details={'config':cfg,'preset':preset}
