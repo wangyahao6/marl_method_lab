@@ -17,7 +17,8 @@ class TS3Protection:
             if self.mode=='union': chosen=sorted(set(chosen)|self.schedule.protected[self.layer])
             self.schedule.replace({self.layer:chosen},t_env)
         return dict(self.schedule.state(t_env),mode=self.mode,layer=self.layer,
-                    detection_defined=chosen is not None,latest_selected=item.get('sets',{}).get('overall'))
+                    detection_defined=item.get('defined', chosen is not None) if self.mode=='chi' else chosen is not None,
+                    latest_selected=item.get('sets',{}).get('overall'))
 
     def scales(self, t_env):
         agent=self.learner.mac.agent; result={}

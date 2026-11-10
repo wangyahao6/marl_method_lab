@@ -35,7 +35,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -48,7 +48,7 @@ def main():
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR'],default='N')
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_chi','A1_chi','A2_chi'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
@@ -71,7 +71,8 @@ def main():
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None
-    factorial = a.suite == 'ts3' and a.algorithm == 'vdn_1ff_128'
+    chi = a.method == 'softprotect_chi'
+    factorial = a.suite == 'ts3' and a.algorithm == 'vdn_1ff_128' and not chi
     if a.method == 'softprotect_trhr' and not factorial:
         p.error('combined soft protection and TRHR requires the TS3 128-unit protocol')
     if factorial and a.set:
@@ -86,7 +87,41 @@ def main():
         trhr = trhr_settings(p, trhr_overrides)
     elif trhr_overrides:
         p.error('trhr.* overrides require --method trhr')
-    if a.suite=='smac':
+    if chi:
+        if a.suite not in ('ts3', 'ts5', 'ts6', 'ts7') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
+            p.error('CHI requires shared-Agent VDN in TS3, TS5, TS6 or TS7')
+        if a.set or a.steps is not None:
+            p.error('CHI settings belong in the named protocol')
+        groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi',)
+        if a.ts3_role not in ('full', 'prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch'):
+            p.error('CHI requires full, prefix, or branch with --parent')
+        if a.ts3_group not in (('N',) if a.ts3_role == 'prefix' else groups):
+            p.error('CHI uses N for a prefix and a CHI group matching the Agent for full or branch')
+        protocol = json.loads((ROOT/a.protocol).read_text())
+        protocol_id = protocol.get('id', '')
+        if not (protocol_id == a.suite or (a.suite == 'ts3' and protocol_id.startswith('ts3_'))):
+            p.error('suite must match named protocol')
+        if protocol.get('selection') == 'type_threshold_union':
+            p.error('CHI requires overall selection')
+        top_k = protocol.get('top_k')
+        threshold = protocol.get('threshold_beta', protocol.get('single_ff_detection', {}).get('threshold'))
+        if top_k is None and threshold is None:
+            p.error('CHI requires top_k or threshold_beta in the named protocol')
+        if a.parent and not (Path(a.parent)/'chi_probes'/'phase0.th').is_file():
+            p.error('CHI branch requires a prefix with a saved fixed probe')
+        protocol.update(algorithm=a.algorithm, groups=['N', *groups], intervention='vdn_chi',
+                        threshold_beta=threshold, screening='CHI fixed-probe reassessment with overall VDN activity')
+        env['MARL_PROTOCOL']=str(out/'protocol.json')
+        env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+        command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,
+                 '--seed',str(a.seed),'--group',a.ts3_group]
+        if a.parent:
+            command += ['--parent', a.parent]
+        thresholds = protocol['thresholds']
+        steps = {'prefix': thresholds[0], 'branch': thresholds[-1]-thresholds[0],
+                 'full': thresholds[-1]}[a.ts3_role]
+        details = dict(protocol=protocol, parent=a.parent, group=a.ts3_group, steps=steps)
+    elif a.suite=='smac':
         if not a.map or a.steps is None or a.steps<=0: p.error('smac requires --map and positive --steps')
         if a.scenario or a.method=='softprotect': p.error('softprotect currently uses the continual driver')
         suffix={'baseline':'','reborn':'_b','redo':'_r','reset':'_s','trhr':''}[a.method]

@@ -65,6 +65,16 @@ The standalone TRHR intervention uses the existing two-layer VDN Agent on static
 
 `ts3_protection.py` adds single-layer A1/A2 actual RMSprop scaling with either existing ReleaseSchedule linear recovery or permanent history union. Shared protection parameters and overall state-weighted screening, no per-type selector in this experiment. See [TS3 protocol](TS3_AGENT_PROTOCOL.md). This does not change old heterogeneous ABA semantics.
 
+## VDN 历史探测集重评估（CHI）
+
+在 TS3、TS5、TS6、TS7 的共享 Agent 序列驱动中，通过 `scripts/run.py --method softprotect_chi` 启用。两层 VDN 使用 `--ts3-group A1_chi` 或 `A2_chi`，单层 VDN 使用 `A_chi`。支持 `--ts3-role full` 从 A 开始训练，也支持用同一方法以 `--ts3-role prefix --ts3-group N` 保存 A 的探测集，再以 `--ts3-role branch --parent <prefix目录>` 从 A 续训。分支引用父运行的固定探测集。仅持有模型权重的旧检查点缺少固定探测集，无法用来还原原训练轨迹及权重。
+
+每个阶段保留最近至多 32 局完整训练轨迹。阶段末用在线 Agent 计算 VDN 单智能体替换动作的最大 Q 差，在有效存活智能体间取均值作为状态协作敏感度 `c`，再按该探测集的有效状态均值计算 `omega = c / mean(c)`。将轨迹及对齐的权重保存为 `chi_probes/phase*.th`，与训练 replay 分离。重评估时逐局从零隐状态开始，按时序重放观测、动作历史和 agent ID，复用固定权重。排除死亡智能体、无效动作、padding 和仅用于 bootstrap 的末状态。
+
+每个任务先计算 `mean_state(omega * mean_live_agent(abs(activation)))`，再除以本任务的层内均值。对本轮各任务的归一化分数逐神经元取最大值。选择沿用配置的全层 top-k 或严格阈值，分数并列时优先较小索引。下一阶段保护名单以本轮结果替换，选中神经元的实际 RMSprop 参数增量系数为 0.1，退出名单后沿用 100000 环境步的线性恢复。本轮无有效分数时使用空名单，探测或重评估异常另记 `chi_errors.jsonl`。每轮逐任务分数、最大值和名单写入 `chi_assessments.jsonl`。
+
+设计借鉴 SPG §3.2 中随网络变化重新评估历史任务重要性的思路。VDN 使用共享 Q 输出和各历史任务自己的固定探测集，以无梯度的响应统计评估。参见 [Parameter-Level Soft-Masking for Continual Learning](https://proceedings.mlr.press/v202/konishi23a.html)。
+
 ## TS4 VDN (2026-11-02)
 
 --suite ts4 --algorithm vdn supports baseline and A1/A2 single-layer soft protection; additive-VDN sensitivity replaces QMIX hypernetwork calculation. Other continual suite restrictions remain unchanged. See [protocol](TS4_VDN_PROTOCOL.md).

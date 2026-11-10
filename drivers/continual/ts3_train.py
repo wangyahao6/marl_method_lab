@@ -9,6 +9,7 @@ from hetero_protection import select as qmix_select
 from ts3_vdn_detection import select as vdn_select
 from ts3_vdn_type_detection import select as vdn_type_select
 from ts3_protection import TS3Protection
+import vdn_chi
 from protection import cpu_episode,rng_state,digest
 import numpy as np
 import torch as th
@@ -18,6 +19,7 @@ base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7')
 FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
+CHI = P.get('intervention') == 'vdn_chi'
 if not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
@@ -88,7 +90,7 @@ def main():
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=h.config(o.seed,out)
         algorithm=P.get('algorithm','qmix')
-        detection = P['single_ff_detection'] if o.role == 'full' else None
+        detection = P['single_ff_detection'] if o.role == 'full' and not CHI else None
         if algorithm != 'qmix':
             base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
@@ -100,6 +102,9 @@ def main():
         elif 'trhr' in P:
             cfg['trhr'] = P['trhr']
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
+        if CHI:
+            cfg.update(intervention='vdn_chi', chi_probe_episodes=vdn_chi.PROBE_EPISODES,
+                       chi_threshold=P.get('threshold_beta'))
         if 'gem_score_threshold' in P:
             cfg['gem_score_threshold'] = P['gem_score_threshold']
         if EXTENDED:
@@ -126,7 +131,7 @@ def main():
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
             learner.optimiser.load_state_dict(state['optimizer']);buffer=state['buffer'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
-            if 'trhr' not in P:
+            if 'trhr' not in P and not CHI:
                 selection_path = ROOT / P['prefix_selection_override'] if P.get('prefix_selection_override') else parent/'selection.json'
                 selection=select_scope(json.loads(selection_path.read_text()))
                 if P.get('prefix_selection_override'):
@@ -184,6 +189,30 @@ def main():
             source_batch=th.load(source,map_location='cpu')['batch']
             append(out/'gem_selection_history.jsonl',gem.update('A',selection,source_batch,runner.t_env))
             del source_batch
+        chi_probes = {}
+        if CHI and o.role == 'branch':
+            chi_probes[0] = parent/'chi_probes'/'phase0.th'
+
+        def refresh_chi(phase, task, *, episodes=None):
+            try:
+                if episodes is not None:
+                    path = out/'chi_probes'/f'phase{phase}.th'
+                    chi_probes[phase] = path
+                    vdn_chi.save_probe(mac, episodes, path)
+                if not layer:
+                    return None
+                result = vdn_chi.reassess(mac, chi_probes, layer, top_k=args.top_k,
+                                          threshold=args.chi_threshold)
+                append(out/'chi_assessments.jsonl', dict(phase=phase, task=task,
+                       t_env=runner.t_env, layers=result))
+                return result
+            except Exception:
+                append(out/'chi_errors.jsonl', dict(phase=phase, task=task, t_env=runner.t_env,
+                       error=traceback.format_exc()))
+                return {layer: dict(sets={'overall': []}, defined=False)} if layer else None
+
+        if CHI and o.role == 'branch':
+            selection = refresh_chi(0, P['order'][0])
         if o.role=='branch' and layer:append(out/'selection_history.jsonl',dict(source_task='A',next_task='B',**protector.update(selection,runner.t_env)))
         def status(state='running',**extra):write(out/'status.json',dict(status=state,pid=os.getpid(),t_env=runner.t_env,phase=phase,task=P['order'][phase],updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
         def evaluate_block(task, envseed, per, agent_state):
@@ -366,7 +395,7 @@ def main():
             phases = range(phase + 1, len(P['order']))
         last_phase = len(P['order']) - 1
         for phase in phases:
-            end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=P['screen_episodes'])
+            end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=vdn_chi.PROBE_EPISODES if CHI else P['screen_episodes'])
             if FACTORIAL:
                 trace = learner.a2_trace
                 trace.phase = phase
@@ -389,9 +418,9 @@ def main():
                 with th.no_grad():batch=runner.run(test_mode=False)
                 if FACTORIAL:
                     batch.update({'source_phase': [[phase]]}, mark_filled=False)
-                if FACTORIAL or o.role=='prefix' or layer or gem or detection:
+                if CHI or FACTORIAL or o.role=='prefix' or layer or gem or detection:
                     types = None
-                    if not EXTENDED and not FACTORIAL:
+                    if not CHI and not EXTENDED and not FACTORIAL:
                         raw = runner.env.wrapped.env
                         types = ['stalker' if raw.agents[i].unit_type==raw.stalker_id else 'zealot' for i in range(args.n_agents)]
                     fifo.append((cpu_episode(batch), types))
@@ -419,7 +448,12 @@ def main():
             if gem:gem.save(dest/'gem_state.th')
             for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
             if (gem or EXTENDED or FACTORIAL) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
-            if phase<last_phase and (FACTORIAL or o.role=='prefix' or layer or gem):
+            if CHI:
+                selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
+                if phase < last_phase and layer:
+                    append(out/'selection_history.jsonl', dict(source_task=task, next_task=P['order'][phase+1],
+                           **protector.update(selection, runner.t_env)))
+            elif phase<last_phase and (FACTORIAL or o.role=='prefix' or layer or gem):
                 selection=screen(task)
                 if FACTORIAL:
                     remember(selection)
@@ -430,7 +464,8 @@ def main():
                     append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
                 if layer:append(out/'selection_history.jsonl',dict(source_task=task,next_task=P['order'][phase+1],**protector.update(selection,runner.t_env)))
         if o.role=='prefix':
-            write(out/'selection.json',selection)
+            if not CHI:
+                write(out/'selection.json',selection)
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
             th.save(state,out/'prefix_state.th')
         if gem:gem.flush()

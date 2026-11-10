@@ -6,10 +6,13 @@ from controllers import REGISTRY as controllers
 from protection import combine,rng_state
 from hetero_train import restore_rng
 
-def vdn_sensitivity(q,actions,avail):
+def vdn_sensitivity(q,actions,avail,valid_agents=None):
     chosen=q.gather(2,actions.unsqueeze(-1))
     allowed=avail.bool().clone();allowed.scatter_(2,actions.unsqueeze(-1),False)
-    return ((q-chosen).abs()*allowed).max(-1).values.mean(-1)
+    changes = ((q-chosen).abs()*allowed).max(-1).values
+    if valid_agents is None:
+        return changes.mean(-1)
+    return changes.masked_fill(~valid_agents, 0).sum(-1) / valid_agents.sum(-1)
 
 @th.no_grad()
 def score(learner,args,cpu):
