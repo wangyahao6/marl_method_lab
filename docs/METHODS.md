@@ -87,3 +87,5 @@ Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method br
 ## 方法设计参考
 
 [MEAL 机制参考](MEAL_DESIGN_REFERENCE.md)及[固定版本源码](../references/meal/README.md)用于自己的神经元机制和持续学习设计。EWC/MAS/A-GEM/CBP 在这里是参考材料，不是新增的可运行方法或待执行对照。方法确定并取得初步结果后再考虑对照实验。
+
+`configs/continual/ts3_vdn_1ff_chi.json` 与 `ts5_vdn_1ff_chi.json` 为种子 3535 的 64 宽度配对实验。每套序列共享无干预 A 前缀，前缀保存固定探测集与原版阈值选择，B–E 分别运行 CHI 与原版历史并集软保护。两组严格使用层内分数 >3，各任务 2M 环境步，评价含初始未见任务、阶段末全部已见任务和下一未见任务。Windows 使用其已安装的 SC2 版本，两组在同一主机运行。

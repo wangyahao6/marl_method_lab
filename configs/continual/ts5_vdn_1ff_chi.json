@@ -1,0 +1,106 @@
+{
+  "id": "ts5",
+  "tasks": {
+    "A": {
+      "id": "P5_ally5S0Z0C_enemy5S0Z0C_v1",
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "B": {
+      "id": "P5_ally0S5Z0C_enemy0S5Z0C_v1",
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "C": {
+      "id": "P5_ally0S0Z5C_enemy0S0Z5C_v1",
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    },
+    "D": {
+      "id": "P5_ally2S3Z0C_enemy2S3Z0C_v1",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "E": {
+      "id": "P5_ally0S2Z3C_enemy0S2Z3C_v1",
+      "ally": [
+        0,
+        2,
+        3
+      ],
+      "enemy": [
+        0,
+        2,
+        3
+      ]
+    }
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000
+  ],
+  "groups": [
+    "N",
+    "A_chi",
+    "A_union"
+  ],
+  "screen_episodes": 32,
+  "screening": "Agent A overall normalized state-weighted activity strictly >3",
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128
+  },
+  "algorithm": "vdn_1ff",
+  "top_k": null,
+  "selection": "overall_threshold_union",
+  "epsilon_on_switch": "per_task",
+  "evaluation_sc2_retries": 2,
+  "threshold_beta": 3,
+  "intervention": "single_ff_chi_comparison",
+  "sc2_game_version": null
+}

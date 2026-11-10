@@ -20,11 +20,13 @@ P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7')
 FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 CHI = P.get('intervention') == 'vdn_chi'
+CHI_COMPARISON = P.get('chi_comparison', False)
+SINGLE_FF_CONTROL = P.get('intervention') == 'single_ff_softprotect'
 if not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
 def select_scope(result):
-    if FACTORIAL:
+    if FACTORIAL or CHI_COMPARISON:
         item = result['A']
         scores = item.get('scores')
         item['sets']['overall'] = None if scores is None else [
@@ -102,11 +104,15 @@ def main():
         elif 'trhr' in P:
             cfg['trhr'] = P['trhr']
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
+        if SINGLE_FF_CONTROL:
+            cfg['intervention'] = 'single_ff_softprotect'
         if CHI:
             cfg.update(intervention='vdn_chi', chi_probe_episodes=vdn_chi.PROBE_EPISODES,
                        chi_threshold=P.get('threshold_beta'))
         if 'gem_score_threshold' in P:
             cfg['gem_score_threshold'] = P['gem_score_threshold']
+        if 'sc2_game_version' in P:
+            cfg['env_args']['game_version'] = P['sc2_game_version']
         if EXTENDED:
             cfg['env_args']['rosters'] = P['tasks']
         args=SimpleNamespace(**cfg)
@@ -125,7 +131,7 @@ def main():
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or ((EXTENDED or FACTORIAL) and o.role in ('prefix', 'resume', 'full')) else None
+        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or ((EXTENDED or FACTORIAL or CHI_COMPARISON) and o.role in ('prefix', 'resume', 'full')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
@@ -278,9 +284,9 @@ def main():
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
             try:
-                if FACTORIAL:
+                if FACTORIAL or CHI_COMPARISON:
                     result = vdn_select(learner, args, fifo, dest,
-                                        state_weighted=args.state_weighted_screening)
+                                        state_weighted=getattr(args, 'state_weighted_screening', True))
                 elif algorithm == 'vdn':
                     detector = vdn_type_select if P.get('selection') in ('type_threshold_union', 'overall_threshold_union') else vdn_select
                     result = detector(learner, args, fifo, dest)
@@ -305,7 +311,7 @@ def main():
             except Exception:
                 append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
 
-        if EXTENDED or FACTORIAL:
+        if EXTENDED or FACTORIAL or CHI_COMPARISON:
             if o.role in ('prefix', 'full'):
                 for unseen in P['order'][1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
@@ -447,9 +453,11 @@ def main():
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
             for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
-            if (gem or EXTENDED or FACTORIAL) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
+            if (gem or EXTENDED or FACTORIAL or CHI_COMPARISON) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
+                if CHI_COMPARISON and o.role == 'prefix':
+                    selection = screen(task)
                 if phase < last_phase and layer:
                     append(out/'selection_history.jsonl', dict(source_task=task, next_task=P['order'][phase+1],
                            **protector.update(selection, runner.t_env)))
@@ -464,12 +472,12 @@ def main():
                     append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
                 if layer:append(out/'selection_history.jsonl',dict(source_task=task,next_task=P['order'][phase+1],**protector.update(selection,runner.t_env)))
         if o.role=='prefix':
-            if not CHI:
+            if not CHI or CHI_COMPARISON:
                 write(out/'selection.json',selection)
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
             th.save(state,out/'prefix_state.th')
         if gem:gem.flush()
-        if (EXTENDED or FACTORIAL) and o.role != 'prefix':
+        if (EXTENDED or FACTORIAL or CHI_COMPARISON) and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
             if FACTORIAL:
                 all_labels += ('phase_start', 'periodic')

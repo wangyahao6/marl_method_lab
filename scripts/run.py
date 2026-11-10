@@ -87,7 +87,8 @@ def main():
         trhr = trhr_settings(p, trhr_overrides)
     elif trhr_overrides:
         p.error('trhr.* overrides require --method trhr')
-    if chi:
+    chi_control = a.algorithm == 'vdn_1ff' and a.method == 'softprotect' and a.ts3_group == 'A_union'
+    if chi or chi_control:
         if a.suite not in ('ts3', 'ts5', 'ts6', 'ts7') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
             p.error('CHI requires shared-Agent VDN in TS3, TS5, TS6 or TS7')
         if a.set or a.steps is not None:
@@ -95,6 +96,8 @@ def main():
         groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi',)
         if a.ts3_role not in ('full', 'prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch'):
             p.error('CHI requires full, prefix, or branch with --parent')
+        if chi_control:
+            groups = ('A_union',)
         if a.ts3_group not in (('N',) if a.ts3_role == 'prefix' else groups):
             p.error('CHI uses N for a prefix and a CHI group matching the Agent for full or branch')
         protocol = json.loads((ROOT/a.protocol).read_text())
@@ -109,8 +112,14 @@ def main():
             p.error('CHI requires top_k or threshold_beta in the named protocol')
         if a.parent and not (Path(a.parent)/'chi_probes'/'phase0.th').is_file():
             p.error('CHI branch requires a prefix with a saved fixed probe')
-        protocol.update(algorithm=a.algorithm, groups=['N', *groups], intervention='vdn_chi',
-                        threshold_beta=threshold, screening='CHI fixed-probe reassessment with overall VDN activity')
+        matched = protocol.get('intervention') == 'single_ff_chi_comparison'
+        if chi_control and (not matched or a.ts3_role != 'branch'):
+            p.error('the matched soft protection control requires a CHI comparison protocol and prefix')
+        intervention = 'single_ff_softprotect' if chi_control else 'vdn_chi'
+        screening = ('latest-task threshold selection with historical union' if chi_control
+                     else 'CHI fixed-probe reassessment with overall VDN activity')
+        protocol.update(algorithm=a.algorithm, groups=['N', *groups], intervention=intervention,
+                        chi_comparison=matched, threshold_beta=threshold, screening=screening)
         env['MARL_PROTOCOL']=str(out/'protocol.json')
         env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,

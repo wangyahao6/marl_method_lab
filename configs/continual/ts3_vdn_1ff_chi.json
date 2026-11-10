@@ -1,0 +1,76 @@
+{
+  "id": "ts3_vdn_1ff_chi",
+  "tasks": {
+    "A": [
+      2,
+      3
+    ],
+    "B": [
+      4,
+      1
+    ],
+    "C": [
+      1,
+      4
+    ],
+    "D": [
+      3,
+      2
+    ],
+    "E": [
+      5,
+      0
+    ]
+  },
+  "order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "thresholds": [
+    2000000,
+    4000000,
+    6000000,
+    8000000,
+    10000000
+  ],
+  "groups": [
+    "N",
+    "A_chi",
+    "A_union"
+  ],
+  "screen_episodes": 32,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "Agent A overall normalized state-weighted activity strictly >3",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": true,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "per_task_epsilon_reset"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn_1ff",
+  "seeds": [
+    3535
+  ],
+  "selection": "overall_threshold_union",
+  "threshold_beta": 3,
+  "intervention": "single_ff_chi_comparison",
+  "epsilon_on_switch": "per_task",
+  "top_k": null,
+  "evaluation_sc2_retries": 2,
+  "sc2_game_version": null
+}
