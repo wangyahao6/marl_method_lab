@@ -187,8 +187,8 @@ def main():
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
-    elif a.suite in ('ts5','ts6','ts7'):
-        single_ff = a.suite in ('ts5','ts6') and a.algorithm in ('vdn_1ff','vdn_1ff_128')
+    elif a.suite in ('ts5','ts6','ts7') or (a.suite == 'ts3' and a.algorithm == 'vdn_1ff'):
+        single_ff = a.algorithm in ('vdn_1ff', 'vdn_1ff_128') and a.suite != 'ts7'
         roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
         if a.suite=='ts5' and not single_ff:
             p.error('ts5 requires a single-feedforward VDN baseline')
@@ -201,7 +201,16 @@ def main():
         if a.ts3_role in ('prefix','full') and a.ts3_group!='N':
             p.error('fresh sequence training requires baseline group N')
         protocol=json.loads((ROOT/a.protocol).read_text())
-        if protocol.get('id')!=a.suite:p.error('suite must match named protocol')
+        if a.suite == 'ts3':
+            if (protocol.get('id') != 'ts3_vdn_1ff_chi'
+                    or protocol.get('intervention') != 'single_ff_chi_comparison'
+                    or a.seed not in protocol['seeds']):
+                p.error('use the named TS3 single-feedforward comparison protocol and its seed')
+            protocol.pop('intervention')
+            protocol.update(top_k=3, single_ff_detection={'interval': 100000,
+                                                         'threshold': protocol['threshold_beta']})
+        elif protocol.get('id')!=a.suite:
+            p.error('suite must match named protocol')
         if single_ff:
             protocol.update(algorithm=a.algorithm, groups=['N'],
                             screening='read-only VDN state-weighted activity at Agent A')

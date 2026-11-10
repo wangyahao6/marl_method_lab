@@ -88,6 +88,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume','full'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
+    track_retention = EXTENDED or FACTORIAL or CHI_COMPARISON or o.role == 'full'
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=h.config(o.seed,out)
@@ -131,7 +132,7 @@ def main():
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or ((EXTENDED or FACTORIAL or CHI_COMPARISON) and o.role in ('prefix', 'resume', 'full')) else None
+        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (track_retention and o.role in ('prefix', 'resume', 'full')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
@@ -311,7 +312,7 @@ def main():
             except Exception:
                 append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
 
-        if EXTENDED or FACTORIAL or CHI_COMPARISON:
+        if track_retention:
             if o.role in ('prefix', 'full'):
                 for unseen in P['order'][1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
@@ -453,7 +454,7 @@ def main():
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
             for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
-            if (gem or EXTENDED or FACTORIAL or CHI_COMPARISON) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
+            if (gem or track_retention) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
                 if CHI_COMPARISON and o.role == 'prefix':
@@ -477,7 +478,7 @@ def main():
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
             th.save(state,out/'prefix_state.th')
         if gem:gem.flush()
-        if (EXTENDED or FACTORIAL or CHI_COMPARISON) and o.role != 'prefix':
+        if track_retention and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
             if FACTORIAL:
                 all_labels += ('phase_start', 'periodic')
