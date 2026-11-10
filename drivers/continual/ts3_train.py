@@ -13,6 +13,7 @@ from protection import cpu_episode,rng_state,digest
 import numpy as np
 import torch as th
 import yaml
+from pysc2.lib.protocol import ConnectionError as SC2ConnectionError
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts6', 'ts7')
@@ -185,21 +186,65 @@ def main():
             del source_batch
         if o.role=='branch' and layer:append(out/'selection_history.jsonl',dict(source_task='A',next_task='B',**protector.update(selection,runner.t_env)))
         def status(state='running',**extra):write(out/'status.json',dict(status=state,pid=os.getpid(),t_env=runner.t_env,phase=phase,task=P['order'][phase],updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
-        def evaluate(task,focus,label,agent_state=None,reference_phase=None):
-            saved=rng_state();wins=0;idx=P['order'].index(task);blocks=[91101+idx*100+j for j in range(4)] if focus else [91001+idx*100+j for j in range(2)];per=32 if focus else 16
+        def evaluate_block(task, envseed, per, agent_state):
+            ea = copy.deepcopy(args)
+            ea.device = 'cpu'
+            ea.use_cuda = False
+            ea.env_args['seed'] = envseed
+            emac = base.controllers[args.mac](buffer.scheme, groups, ea)
+            emac.agent.load_state_dict(mac.agent.state_dict() if agent_state is None else agent_state)
+            emac.agent.eval()
+            er = base.EpisodeRunner(ea, base.Logger(logging.getLogger('eval')))
+            episodes = []
+            try:
+                er.env.set_task(task)
+                er.setup(scheme, groups, preprocess, emac)
+                with th.no_grad():
+                    for j in range(per):
+                        er.run(test_mode=True)
+                        episodes.append(dict(env_seed=envseed, episode=j,
+                            won=bool(er.env.last_info.get('battle_won', False)), length=er.t))
+            finally:
+                er.close_env()
+            return episodes
+
+        def evaluate(task, focus, label, agent_state=None, reference_phase=None):
+            saved = rng_state()
+            idx = P['order'].index(task)
+            blocks = [91101 + idx*100 + j for j in range(4)] if focus else [
+                91001 + idx*100 + j for j in range(2)]
+            per = 32 if focus else 16
+            retries = P.get('evaluation_sc2_retries', 0)
+            common = dict(t_env=runner.t_env, phase=phase, trained_task=P['order'][phase],
+                          reference_phase=reference_phase, task=task, label=label, focus=focus)
+            episodes = []
             try:
                 for envseed in blocks:
-                    ea=copy.deepcopy(args);ea.device='cpu';ea.use_cuda=False;ea.env_args=copy.deepcopy(args.env_args);ea.env_args['seed']=envseed
-                    emac=base.controllers[args.mac](buffer.scheme,groups,ea);emac.agent.load_state_dict(mac.agent.state_dict() if agent_state is None else agent_state);emac.agent.eval()
-                    er=base.EpisodeRunner(ea,base.Logger(logging.getLogger('eval')));er.env.set_task(task);er.setup(scheme,groups,preprocess,emac)
-                    try:
-                        with th.no_grad():
-                            for j in range(per):
-                                er.run(test_mode=True);won=bool(er.env.last_info.get('battle_won',False));wins+=won
-                                append(out/'test_episodes.jsonl',dict(t_env=runner.t_env,phase=phase,trained_task=P['order'][phase],reference_phase=reference_phase,task=task,label=label,focus=focus,env_seed=envseed,episode=j,won=won,length=er.t))
-                    finally:er.close_env()
-                append(out/'evaluations.jsonl',dict(t_env=runner.t_env,phase=phase,trained_task=P['order'][phase],reference_phase=reference_phase,task=task,label=label,focus=focus,wins=int(wins),episodes=per*len(blocks),win_rate=wins/(per*len(blocks))))
-            finally:h.restore_rng(saved)
+                    block_rng = rng_state() if retries else None
+                    for attempt in range(retries + 1):
+                        try:
+                            episodes.extend(evaluate_block(task, envseed, per, agent_state))
+                            break
+                        except SC2ConnectionError as error:
+                            will_retry = attempt < retries
+                            if retries:
+                                append(out/'evaluation_sc2_errors.jsonl', dict(
+                                    **common, env_seed=envseed, attempt=attempt+1,
+                                    will_retry=will_retry, error=str(error)))
+                            if will_retry:
+                                h.restore_rng(block_rng)
+                            elif retries and label == 'periodic':
+                                status()
+                                return
+                            else:
+                                raise
+                for episode_result in episodes:
+                    append(out/'test_episodes.jsonl', dict(**common, **episode_result))
+                wins = sum(result['won'] for result in episodes)
+                append(out/'evaluations.jsonl', dict(
+                    **common, wins=wins, episodes=len(episodes), win_rate=wins/len(episodes)))
+            finally:
+                h.restore_rng(saved)
             status()
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
