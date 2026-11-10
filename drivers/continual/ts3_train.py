@@ -16,7 +16,7 @@ import yaml
 from pysc2.lib.protocol import ConnectionError as SC2ConnectionError
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
-EXTENDED = P['id'] in ('ts6', 'ts7')
+EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7')
 FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 if not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})

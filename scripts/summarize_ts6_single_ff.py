@@ -1,4 +1,4 @@
-"""Summarize the six TS6 single-layer runs after they reach a terminal state."""
+"""Summarize the planned single-feedforward VDN runs after they reach a terminal state."""
 import argparse
 import json
 from pathlib import Path

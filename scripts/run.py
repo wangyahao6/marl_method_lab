@@ -33,7 +33,7 @@ def trhr_settings(parser, overrides):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts6','ts7','history','network_similarity'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -143,9 +143,11 @@ def main():
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
-    elif a.suite in ('ts6','ts7'):
-        single_ff = a.suite=='ts6' and a.algorithm in ('vdn_1ff','vdn_1ff_128')
+    elif a.suite in ('ts5','ts6','ts7'):
+        single_ff = a.suite in ('ts5','ts6') and a.algorithm in ('vdn_1ff','vdn_1ff_128')
         roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
+        if a.suite=='ts5' and not single_ff:
+            p.error('ts5 requires a single-feedforward VDN baseline')
         if (not single_ff and a.algorithm!='vdn') or a.ts3_role not in roles:
             p.error(f'{a.suite} requires VDN and one of {roles}')
         if a.ts3_group not in ('N','A2_union') or a.method!=('baseline' if a.ts3_group=='N' else 'softprotect'):
@@ -192,7 +194,7 @@ def main():
         protocol_path=(ROOT/a.protocol).resolve();protocol=json.loads(protocol_path.read_text())
         if a.suite=='ts3' and a.algorithm!=protocol.get('algorithm','qmix'):p.error('algorithm must match named ts3 protocol')
         if trhr is not None:
-            if (protocol['id'] in ('ts6', 'ts7') or 'N' not in protocol['groups']
+            if (protocol['id'] in ('ts5', 'ts6', 'ts7') or 'N' not in protocol['groups']
                     or protocol.get('intervention')):
                 p.error('TRHR needs a TS3 VDN protocol with group N and no other intervention')
             protocol['trhr'] = trhr

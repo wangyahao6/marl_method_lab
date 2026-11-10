@@ -29,7 +29,7 @@
 
 单层配置的 Agent 路径为 Linear → ReLU → A 诊断门 → GRUCell → 线性 Q 输出头。A 门为原仓库的冻结全一门，用于采集活动值。两套配置沿用 VDN 的共享控制器、求和 Mixer、QLearner 与其他训练参数。宽度同时作用于前馈层和 GRU，因此 64 与 128 的对比涉及两处容量变化。每种结构使用各自的 checkpoint。
 
-通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。TS6 单层基线通过 `scripts/run.py --suite ts6 --method baseline --ts3-role full --protocol configs/continual/ts6.json` 使用。从 A 起训到 J，每阶段 2M，保留连续回放与优化器状态。全程复用 VDN 训练及 TS6 独立评估。按每 100k 步和阶段末取当前任务最近 32 局，用当前模型复算唯一前馈层 A（`agent.net[2]`）的状态加权活动。记录全宽归一化分数、top-3 和严格 >3 名单，不改变训练。
+通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。TS6 单层基线通过 `scripts/run.py --suite ts6 --method baseline --ts3-role full --protocol configs/continual/ts6.json` 使用。从 A 起训到 J，每阶段 2M，保留连续回放与优化器状态。全程复用 VDN 训练及连续任务独立评估。TS5 单层基线使用 `--suite ts5 --protocol configs/continual/ts5.json`，按 TS7 的 A–E 双边精确阵容从头训练，每阶段 2M，使用逐任务 ε 衰减。按每 100k 步和阶段末取当前任务最近 32 局，用当前模型复算唯一前馈层 A（`agent.net[2]`）的状态加权活动。记录全宽归一化分数、top-3 和严格 >3 名单，不改变训练。
 
 ## 用户方法
 
