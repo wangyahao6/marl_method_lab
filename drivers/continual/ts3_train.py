@@ -23,7 +23,7 @@ if not EXTENDED:
 def select_scope(result):
     if FACTORIAL:
         item = result['A']
-        scores = item['scores']
+        scores = item.get('scores')
         item['sets']['overall'] = None if scores is None else [
             i for i, score in enumerate(scores) if score > P['threshold_beta']
         ]
@@ -203,7 +203,9 @@ def main():
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
             try:
-                if algorithm in ('vdn', 'vdn_1ff_128'):
+                if FACTORIAL:
+                    detector = vdn_select
+                elif algorithm == 'vdn':
                     detector = vdn_type_select if P.get('selection') in ('type_threshold_union', 'overall_threshold_union') else vdn_select
                 else:
                     detector = qmix_select
