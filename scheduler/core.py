@@ -10,6 +10,8 @@ import subprocess
 import time
 from pathlib import Path
 
+from experiment_metadata import GROUP_FIELDS, fields, inherit
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT / 'runtime/scheduler/state.sqlite3'
 ACTIVE = ('starting', 'running')
@@ -126,6 +128,13 @@ def validate_plan(plan):
         item.setdefault('dependencies', [])
         if not isinstance(item['dependencies'], list) or not all(isinstance(x, str) for x in item['dependencies']):
             raise ValueError('dependencies must be a list of IDs')
+        defaults = {key: value for key, value in fields(plan.get('metadata', {})).items() if key in GROUP_FIELDS}
+        if defaults or 'metadata' in item:
+            metadata = item.get('metadata', {})
+            explicit = fields(metadata)
+            if explicit.get('experiment_group_id', defaults.get('experiment_group_id')) != defaults.get('experiment_group_id'):
+                defaults = {}
+            item['metadata'] = dict(defaults, **metadata)
         item.setdefault('queue', plan.get('id', 'default'))
         item.setdefault('queue_limit', 6)
         item.setdefault('cooldown_seconds', 0)
@@ -190,6 +199,11 @@ def submit(db, plan, imports=None):
             visiting.add(key)
             for parent in graph[key]['dependencies']:
                 visit(parent)
+            if key not in existing or graph[key] is not existing[key]:
+                inherit(graph[key], {parent: graph[parent].get('metadata', {}) for parent in graph[key]['dependencies']})
+                metadata = fields(graph[key].get('metadata', {}))
+                if 'branch_id' in metadata and 'experiment_group_id' not in metadata:
+                    raise ValueError('branch_id requires experiment_group_id')
             visiting.remove(key)
             visited.add(key)
         for key in graph:

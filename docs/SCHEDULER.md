@@ -54,3 +54,11 @@ The runtime policy is `runtime/scheduler/retention.json`. The main SQLite databa
 The user timer `marl-scheduler-maintenance.timer` runs daily at 03:30 server local time and catches up after downtime. It removes expired events and checkpoints available WAL pages. Only inactive `runtime/scheduler/logs/*.log` files are eligible for deletion, at 14 days or to keep inactive/active combined log use within 50 MiB where possible. Active logs are protected, so log usage may temporarily exceed this target. Experiment run directories, models and original logs are excluded.
 
 The SQLite WAL has an 8 MiB post-checkpoint retention target. WAL, SHM, journal storage and active logs are additional to the main database limit. Maintenance writes a single replaceable `maintenance.json` status file. View results with `journalctl --user -u marl-scheduler-maintenance -n 10`.
+
+## Conversation and branch metadata
+
+Place the stable conversation ID in `experiment_group_id`. The optional display fields are `experiment_group_title`, `conversation_title` and `conversation_url`. These four fields may be set at plan level or in each task's `metadata`. Add `branch_id`, `branch_title` and a positive integer `attempt` in the task metadata. Reuse the conversation and branch IDs across batches, seeds and retries. The scheduler continues to use `queue` for dispatch.
+
+Evaluation and summary tasks inherit shared conversation and branch metadata from their dependencies. A summary spanning several branches inherits the conversation only. Explicit task fields take precedence. To inherit from one specific dependency, set `metadata.inherit_from` to that task ID. Attempt numbers are supplied per execution.
+
+For direct launch, `scripts/run.py --experiment-metadata '<JSON object>'` forwards the same fields to the scheduler. The launcher records them in `launch.json` once the task starts. For a manifest, set the fields on the task's `metadata` so the monitor can display them before execution.

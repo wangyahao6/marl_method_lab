@@ -187,7 +187,7 @@ def serve(database):
                 time.sleep(.5)
 
 
-def forward_run(run_id, argv, cwd, run_dir, task_type):
+def forward_run(run_id, argv, cwd, run_dir, task_type, metadata=None):
     """Called by the normal launcher. Wait for the central attempt's exit."""
     db = connect(Path(os.environ.get('MARL_SCHEDULER_DB', str(DEFAULT_DB))))
     token = os.environ.get('MARL_SCHEDULER_ATTEMPT')
@@ -196,8 +196,12 @@ def forward_run(run_id, argv, cwd, run_dir, task_type):
         if attempt and attempt['pid'] == os.getppid() and is_alive(attempt):
             row = db.execute('SELECT spec FROM tasks WHERE id=?', (attempt['task'],)).fetchone()
             if row and json.loads(row['spec'])['run_dir'] == str(run_dir):
-                return False
+                if metadata is None:
+                    return False
+                return json.loads(row['spec']).get('metadata', {})
     raw = dict(id=run_id, argv=argv, cwd=str(cwd), run_dir=str(run_dir), type=task_type)
+    if metadata:
+        raw['metadata'] = metadata
     existing = db.execute('SELECT spec FROM tasks WHERE id=?', (run_id,)).fetchone()
     if existing:
         spec = json.loads(existing['spec'])

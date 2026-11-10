@@ -51,7 +51,18 @@ def main():
     p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
+    p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
     a=p.parse_args()
+    metadata={}
+    if a.experiment_metadata is not None:
+        sys.path.insert(0,str(ROOT/'scheduler'))
+        from experiment_metadata import fields
+        try:
+            metadata=fields(json.loads(a.experiment_metadata))
+            if 'branch_id' in metadata and 'experiment_group_id' not in metadata:
+                raise ValueError('branch_id requires experiment_group_id')
+        except ValueError as exc:
+            p.error(str(exc))
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*',a.run_id): p.error('run-id must be a simple directory name')
     out=ROOT/'runs'/a.run_id
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
@@ -217,13 +228,17 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/train.py'),'--algorithm',a.algorithm,'--condition',a.method,'--scenario',a.scenario,'--seed',str(a.seed)]
         details={'protocol':protocol,'scenario':a.scenario,'steps':protocol['scenarios'][a.scenario][-1][0]}
     plan={'request':vars(a),'command':command,'output':str(out),'details':details}
+    if metadata:
+        plan['metadata']=metadata
     if a.dry_run:
         print(json.dumps(plan,ensure_ascii=False,indent=2));return
     if (ROOT/'runtime/scheduler/enabled').exists():
         sys.path.insert(0,str(ROOT/'scheduler'))
         from service import forward_run
         task_type='evaluation' if a.ts3_role=='eval_fwt' or a.suite=='network_similarity' else 'training'
-        forward_run(a.run_id,[sys.executable,'scripts/run.py']+sys.argv[1:],ROOT,out,task_type)
+        scheduled=forward_run(a.run_id,[sys.executable,'scripts/run.py']+sys.argv[1:],ROOT,out,task_type,metadata)
+        if scheduled or metadata:
+            plan['metadata']=dict(metadata,**scheduled)
     out.mkdir(parents=True,exist_ok=False)
     if a.suite=='smac':save(out/'config.json',cfg)
     else:save(out/'protocol.json',protocol)
