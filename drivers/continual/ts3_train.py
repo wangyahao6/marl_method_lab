@@ -92,7 +92,8 @@ def main():
             base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
         if FACTORIAL:
-            cfg.update(a2_trace=True, trace_stages=len(P['order']))
+            cfg.update(a2_trace=True, trace_stages=len(P['order']),
+                       state_weighted_screening=P.get('state_weighted_screening', True))
             if o.group in ('TRHR', 'A_union_TRHR'):
                 cfg['trhr'] = P['trhr_settings']
         elif 'trhr' in P:
@@ -204,12 +205,14 @@ def main():
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
             try:
                 if FACTORIAL:
-                    detector = vdn_select
+                    result = vdn_select(learner, args, fifo, dest,
+                                        state_weighted=args.state_weighted_screening)
                 elif algorithm == 'vdn':
                     detector = vdn_type_select if P.get('selection') in ('type_threshold_union', 'overall_threshold_union') else vdn_select
+                    result = detector(learner, args, fifo, dest)
                 else:
-                    detector = qmix_select
-                result=select_scope(detector(learner,args,fifo,dest))
+                    result = qmix_select(learner, args, fifo, dest)
+                result = select_scope(result)
             except Exception:
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A','A1','A2']}
             write(dest/'result.json',result)

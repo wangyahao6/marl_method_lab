@@ -1,4 +1,4 @@
-"""Collect the four TS3 paths and summarize available stage and neuron evidence."""
+"""Collect TS3 single-layer VDN paths and summarize available stage and neuron evidence."""
 import argparse
 import json
 from collections import defaultdict
@@ -65,8 +65,8 @@ def main():
     bundle = dict(groups=out, shared_prefix=dict(run=str(prefix), status=read(prefix/'status.json', {}),
         neuron_summary=neuron_summary(prefix/'a_windows.jsonl')))
     (output/'results.json').write_text(json.dumps(bundle, ensure_ascii=False, indent=2) + '\n')
-    lines = ['# TS3 VDN 1FF 128 · TRHR × 软保护', '',
-             '种子 3535。四组共享无干预 A 前缀，B–E 应用各自方法。', '',
+    lines = [f"# {plan.get('report_title', 'TS3 VDN 1FF 128 · TRHR × 软保护')}", '',
+             plan.get('report_setup', '种子 3535。四组共享无干预 A 前缀，B–E 应用各自方法。'), '',
              '| 组别 | 阶段 | A 胜率 | B 胜率 | C 胜率 | D 胜率 | E 胜率 | 旧任务均值 | ACC | BWT | FWT | 当前任务 AUC |',
              '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |']
     for group, result in out.items():
@@ -81,7 +81,7 @@ def main():
             lines.append('| ' + ' | '.join([group, stage, *rates, *(show(m.get(k)) for k in keys)]) + ' |')
     lines += ['', '胜率、ACC、旧任务均值和 AUC 使用百分数，BWT/FWT 使用百分点。',
               '训练和评价原始日志见计划各 run。逐阶段神经元与回放汇总见 results.json。', '',
-              '组合组需同时对照单独软保护和单独 TRHR。单种子结果不能估计跨种子稳定性。']
+              plan.get('report_scope', '组合组需同时对照单独软保护和单独 TRHR。单种子结果不能估计跨种子稳定性。')]
     (output/'REPORT.md').write_text('\n'.join(lines) + '\n')
 
 
