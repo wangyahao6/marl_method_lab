@@ -76,10 +76,10 @@
   },
   "suite": "ts4",
   "stage_labels": [
-    "A\u2081",
+    "A1",
     "B",
     "C",
-    "A\u2082"
+    "A2"
   ],
   "evaluation_sc2_retries": 2,
   "sc2_game_version": null
