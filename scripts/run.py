@@ -233,7 +233,13 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]
         thresholds=protocol['thresholds']
-        steps={'prefix':thresholds[0],'branch':thresholds[-1]-thresholds[0],'resume':thresholds[-1]-thresholds[4],'full':thresholds[-1]}[a.ts3_role]
+        steps = thresholds[-1]
+        if a.ts3_role == 'prefix':
+            steps = thresholds[0]
+        elif a.ts3_role == 'branch':
+            steps -= thresholds[0]
+        elif a.ts3_role == 'resume':
+            steps -= thresholds[4]
         details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,'steps':steps}
     elif factorial:
         protocol=json.loads((ROOT/a.protocol).read_text())
