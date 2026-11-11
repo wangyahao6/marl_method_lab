@@ -24,7 +24,10 @@ FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 CHI = P.get('intervention') == 'vdn_chi'
 CHI_COMPARISON = P.get('chi_comparison', False)
 SINGLE_FF_CONTROL = P.get('intervention') == 'single_ff_softprotect'
-if not EXTENDED:
+TS4_FACTORIAL = FACTORIAL and P.get('suite') == 'ts4'
+if TS4_FACTORIAL:
+    import ts4_train  # registers the TS4 environment
+elif not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
 
 def select_scope(result):
@@ -47,6 +50,7 @@ def select_scope(result):
 def sequence_metrics(order, sources):
     """Join immutable prefix and current evaluation rows, then calculate stage metrics."""
     stages, initial, before, curves = {}, {}, {}, {}
+    stage_labels = P.get('stage_labels', order)
     for source, labels in sources:
         for line in (source/'evaluations.jsonl').read_text().splitlines():
             row = json.loads(line)
@@ -54,34 +58,42 @@ def sequence_metrics(order, sources):
             if label not in labels:
                 continue
             if label == 'stage_end':
-                stages.setdefault(order[row['phase']], {})[task] = win_rate
+                stages.setdefault(stage_labels[row['phase']], {})[task] = win_rate
             elif label == 'initial_reference':
                 initial[task] = win_rate
             elif label == 'next_unseen':
                 before[task] = win_rate
             if label in ('phase_start', 'periodic', 'stage_end') and task == order[row['phase']]:
-                curves.setdefault(task, {})[row['t_env']] = win_rate
+                curves.setdefault(stage_labels[row['phase']], {})[row['t_env']] = win_rate
     metrics = {}
-    for i, task in enumerate(order):
-        row = stages.get(task, {})
-        seen, old = order[:i+1], order[:i]
+    for i, (task, stage) in enumerate(zip(order, stage_labels)):
+        row = stages.get(stage, {})
+        seen = list(dict.fromkeys(order[:i+1]))
+        old = [j for j in seen if j != task]
+        previous = dict(zip(order[:i], stage_labels[:i]))
         acc = sum(row[j] for j in seen) / len(seen) if all(j in row for j in seen) else None
-        bwt = [row[j] - stages[j][j] for j in old if j in row and j in stages.get(j, {})]
-        fwt_tasks = [j for j in old + [task] if j != order[0] and j in initial and j in before]
+        bwt = [row[j] - stages[previous[j]][j] for j in old
+               if j in row and j in stages.get(previous[j], {})]
+        fwt_tasks = [j for j in seen[1:] if j in initial and j in before]
         fwt = [before[j] - initial[j] for j in fwt_tasks]
-        metrics[task] = dict(
+        metrics[stage] = dict(
             acc_percent=None if acc is None else 100 * acc,
             bwt_pp=100 * sum(bwt) / len(bwt) if bwt and len(bwt) == len(old) else None,
-            fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == i else None,
+            fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == len(seen)-1 else None,
             fwt_tasks=fwt_tasks)
         if FACTORIAL:
-            points = sorted(curves.get(task, {}).items())
-            metrics[task]['old_mean_percent'] = (100 * sum(row[j] for j in old) / len(old)
+            points = sorted(curves.get(stage, {}).items())
+            metrics[stage]['old_mean_percent'] = (100 * sum(row[j] for j in old) / len(old)
                 if old and all(j in row for j in old) else None)
-            metrics[task]['learning_auc_percent'] = (
+            metrics[stage]['learning_auc_percent'] = (
                 100 * float(np.trapz([y for _, y in points], [x for x, _ in points]))
                 / (points[-1][0] - points[0][0]) if task in row and len(points) > 1 else None)
-            metrics[task]['learning_curve'] = points
+            metrics[stage]['learning_curve'] = points
+            if task in previous:
+                pre_return = stages.get(stage_labels[i-1], {}).get(task)
+                metrics[stage]['before_revisit_percent'] = None if pre_return is None else 100 * pre_return
+                metrics[stage]['revisit_gain_pp'] = (
+                    100 * (row[task] - pre_return) if pre_return is not None and task in row else None)
     return dict(stage_win_rates=stages, initial_reference=initial, before_first_training=before,
                 metrics=metrics, sources=[str(source/'evaluations.jsonl') for source, _ in sources])
 
@@ -101,7 +113,7 @@ def main():
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
         if FACTORIAL:
             cfg.update(a2_trace=True, trace_stages=len(P['order']),
-                       state_weighted_screening=P.get('state_weighted_screening', True))
+                       state_weighted_screening=(o.group != 'A_equal_union' and P.get('state_weighted_screening', True)))
             if o.group in ('TRHR', 'A_union_TRHR'):
                 cfg['trhr'] = P['trhr_settings']
         elif 'trhr' in P:
@@ -118,6 +130,9 @@ def main():
             cfg['env_args']['game_version'] = P['sc2_game_version']
         if EXTENDED:
             cfg['env_args']['rosters'] = P['tasks']
+        if TS4_FACTORIAL:
+            cfg['env'] = 'ts4_protoss'
+            cfg['env_args']['capability_config']['team_gen']['weights'] = [1., 0., 0.]
         args=SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
         def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
@@ -142,6 +157,8 @@ def main():
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
             if 'trhr' not in P and not CHI:
                 selection_path = ROOT / P['prefix_selection_override'] if P.get('prefix_selection_override') else parent/'selection.json'
+                if TS4_FACTORIAL and o.group == 'A_equal_union':
+                    selection_path = parent/'selection_equal.json'
                 selection=select_scope(json.loads(selection_path.read_text()))
                 if P.get('prefix_selection_override'):
                     import hashlib
@@ -175,7 +192,7 @@ def main():
                 parameter_hash=base.parameter_hash(learner)))
         gem_band=o.group.split('_',1)[1] if o.group.startswith('GEM_') else None
         if FACTORIAL:
-            layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR') else (None, 'baseline')
+            layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR', 'A_equal_union') else (None, 'baseline')
         else:
             layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_')
         historical = set()
@@ -222,7 +239,7 @@ def main():
 
         if CHI and o.role == 'branch':
             selection = refresh_chi(0, P['order'][0])
-        if o.role=='branch' and layer:append(out/'selection_history.jsonl',dict(source_task='A',next_task='B',**protector.update(selection,runner.t_env)))
+        if o.role=='branch' and layer:append(out/'selection_history.jsonl',dict(source_task=P['order'][0],next_task=P['order'][1],**protector.update(selection,runner.t_env)))
         def status(state='running',**extra):write(out/'status.json',dict(status=state,pid=os.getpid(),t_env=runner.t_env,phase=phase,task=P['order'][phase],updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
         def evaluate_block(task, envseed, per, agent_state):
             ea = copy.deepcopy(args)
@@ -320,7 +337,7 @@ def main():
 
         if track_retention:
             if o.role in ('prefix', 'full'):
-                for unseen in P['order'][1:]:
+                for unseen in list(dict.fromkeys(P['order']))[1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
             elif o.role == 'resume':
                 t_resume = runner.t_env
@@ -399,7 +416,7 @@ def main():
                     evaluate(P['order'][phase+1],True,'next_unseen',model,reference_phase=phase)
                 status('completed',finished=time.time(),evaluation_only=True,new_training_steps=0);return
             if o.role=='branch':
-                phase=0;evaluate('B',True,'next_unseen',reference_phase=0)
+                phase=0;evaluate(P['order'][1],True,'next_unseen',reference_phase=0)
         if o.role == 'prefix':
             phases = range(1)
         elif o.role == 'full':
@@ -459,8 +476,11 @@ def main():
             th.save(dict(target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),t_env=runner.t_env,episode=episode,updates=updates),dest/'targets.th')
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
-            for seen in P['order'][:phase+1]:evaluate(seen,True,'stage_end')
-            if (gem or track_retention) and phase<last_phase:evaluate(P['order'][phase+1],True,'next_unseen',reference_phase=phase)
+            seen_tasks = list(dict.fromkeys(P['order'][:phase+1]))
+            for seen in seen_tasks:
+                evaluate(seen, True, 'stage_end')
+            if (gem or track_retention) and phase < last_phase and P['order'][phase+1] not in seen_tasks:
+                evaluate(P['order'][phase+1], True, 'next_unseen', reference_phase=phase)
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
                 if CHI_COMPARISON and o.role == 'prefix':
@@ -470,6 +490,14 @@ def main():
                            **protector.update(selection, runner.t_env)))
             elif phase<last_phase and (FACTORIAL or o.role=='prefix' or layer or gem):
                 selection=screen(task)
+                if TS4_FACTORIAL and o.role == 'prefix':
+                    try:
+                        equal = select_scope(vdn_select(learner, args, fifo,
+                                                        save_input=False, state_weighted=False))
+                    except Exception:
+                        write(out/'selection_equal_error.json', dict(error=traceback.format_exc()))
+                        equal = {'A': dict(sets={'overall': None})}
+                    write(out/'selection_equal.json', equal)
                 if FACTORIAL:
                     remember(selection)
                     append(out/'historical_selection.jsonl', dict(task=task, t_env=runner.t_env,

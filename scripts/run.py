@@ -48,7 +48,7 @@ def main():
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_chi','A1_chi','A2_chi'],default='N')
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_chi','A1_chi','A2_chi'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
@@ -72,11 +72,11 @@ def main():
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None
     chi = a.method == 'softprotect_chi'
-    factorial = a.suite == 'ts3' and a.algorithm == 'vdn_1ff_128' and not chi
+    factorial = a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff_128' and not chi
     if a.method == 'softprotect_trhr' and not factorial:
-        p.error('combined soft protection and TRHR requires the TS3 128-unit protocol')
+        p.error('combined soft protection and TRHR requires a TS3 or TS4 128-unit protocol')
     if factorial and a.set:
-        p.error('TS3 factorial settings belong in the named protocol')
+        p.error('Factorial settings belong in the named protocol')
     if a.method == 'trhr' and not factorial:
         if a.algorithm != 'vdn' or a.suite not in ('smac', 'ts3'):
             p.error('TRHR A2 supports two-layer VDN in SMAC and TS3')
@@ -181,7 +181,7 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/history_train.py'),'--seed',str(a.seed)]
         if a.parent:command+=['--parent',a.parent]
         details={'protocol':protocol,'parent':a.parent,'steps':2000000}
-    elif a.suite=='ts4':
+    elif a.suite=='ts4' and not factorial:
         if a.algorithm!='vdn' or a.method!=('baseline' if a.ts4_group=='N' else 'softprotect'):p.error('ts4 requires VDN and matching group/method')
         protocol=json.loads((ROOT/a.protocol).read_text())
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
@@ -223,12 +223,14 @@ def main():
     elif factorial:
         protocol=json.loads((ROOT/a.protocol).read_text())
         methods = {'N': 'baseline', 'A_union': 'softprotect',
-                   'TRHR': 'trhr', 'A_union_TRHR': 'softprotect_trhr'}
+                   'TRHR': 'trhr', 'A_union_TRHR': 'softprotect_trhr',
+                   'A_equal_union': 'softprotect'}
         if (protocol.get('intervention') != 'single_ff_trhr_factorial'
+                or protocol.get('suite', 'ts3') != a.suite
                 or protocol.get('algorithm') != a.algorithm or a.seed not in protocol['seeds']):
-            p.error('use the named TS3 128-unit TRHR protocol and its seed')
+            p.error('use the named 128-unit TRHR protocol for this suite and seed')
         if (a.ts3_role not in ('prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch')
-                or methods.get(a.ts3_group) != a.method
+                or a.ts3_group not in protocol['groups'] or methods.get(a.ts3_group) != a.method
                 or (a.ts3_role == 'prefix' and a.ts3_group != 'N')):
             p.error('use prefix/N or a branch with its matching method and parent')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')

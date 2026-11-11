@@ -14,6 +14,13 @@ import torch as th
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 class TS4Protoss(SequentialProtoss):
+    def distribution_state(self):
+        return copy.deepcopy(self.wrapped.env_key_to_distribution_map)
+
+    def restore_distribution(self, state):
+        self.wrapped.env_key_to_distribution_map = copy.deepcopy(state)
+        self.set_task(self.unit)
+
     def reset(self):
         audit=self.audit;self.audit=None
         try:result=super().reset()

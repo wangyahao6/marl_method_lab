@@ -18,7 +18,7 @@ def neuron_summary(path):
             row = json.loads(line)
             phase = row['phase']
             n = row['window_updates']
-            entry = phases.setdefault(phase, dict(sampled_episodes=[0]*5, adjusted=set(),
+            entry = phases.setdefault(phase, dict(sampled_episodes=[0]*len(row['source_episodes']), adjusted=set(),
                 newly_woken=set(), historical=row['historical_units'], protected=row['protected_units'],
                 groups=defaultdict(lambda: dict(unit_updates=0, sums=[0.]*4))))
             for i, count in enumerate(row['source_episodes']):
@@ -65,19 +65,26 @@ def main():
     bundle = dict(groups=out, shared_prefix=dict(run=str(prefix), status=read(prefix/'status.json', {}),
         neuron_summary=neuron_summary(prefix/'a_windows.jsonl')))
     (output/'results.json').write_text(json.dumps(bundle, ensure_ascii=False, indent=2) + '\n')
+    tasks = plan.get('report_tasks', list('ABCDE'))
+    columns = ['组别', '阶段', *(f'{task} 胜率' for task in tasks), '旧任务均值', 'ACC',
+               'BWT', 'FWT', '当前任务 AUC']
+    if plan.get('report_revisit'):
+        columns += ['回访前胜率', '回访增量']
     lines = [f"# {plan.get('report_title', 'TS3 VDN 1FF 128 · TRHR × 软保护')}", '',
              plan.get('report_setup', '种子 3535。四组共享无干预 A 前缀，B–E 应用各自方法。'), '',
-             '| 组别 | 阶段 | A 胜率 | B 胜率 | C 胜率 | D 胜率 | E 胜率 | 旧任务均值 | ACC | BWT | FWT | 当前任务 AUC |',
-             '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |']
+             '| ' + ' | '.join(columns) + ' |',
+             '| ' + ' | '.join(['---'] * len(columns)) + ' |']
     for group, result in out.items():
         retention = result['retention']
         if not retention:
-            lines.append(f'| {group} | {result["status"].get("status", "无终态结果")} | | | | | | | | | | |')
+            lines.append(f'| {group} | {result["status"].get("status", "无终态结果")} |' + ' |' * (len(columns)-2))
             continue
         for stage, m in retention['metrics'].items():
             row = retention['stage_win_rates'].get(stage, {})
-            rates = [show(100 * row[t]) if t in row else 'N/A' for t in 'ABCDE']
+            rates = [show(100 * row[t]) if t in row else 'N/A' for t in tasks]
             keys = ['old_mean_percent', 'acc_percent', 'bwt_pp', 'fwt_pp', 'learning_auc_percent']
+            if plan.get('report_revisit'):
+                keys += ['before_revisit_percent', 'revisit_gain_pp']
             lines.append('| ' + ' | '.join([group, stage, *rates, *(show(m.get(k)) for k in keys)]) + ' |')
     lines += ['', '胜率、ACC、旧任务均值和 AUC 使用百分数，BWT/FWT 使用百分点。',
               '训练和评价原始日志见计划各 run。逐阶段神经元与回放汇总见 results.json。', '',
