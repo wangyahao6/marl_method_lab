@@ -48,7 +48,7 @@ def main():
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_chi','A1_chi','A2_chi',
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_union_input','A_chi','A1_chi','A2_chi',
                                              'A_chi_union','A_chi_input','A_chi_union_input'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
@@ -245,7 +245,7 @@ def main():
         protocol=json.loads((ROOT/a.protocol).read_text())
         methods = {'N': 'baseline', 'A_union': 'softprotect',
                    'TRHR': 'trhr', 'A_union_TRHR': 'softprotect_trhr',
-                   'A_equal_union': 'softprotect'}
+                   'A_equal_union': 'softprotect', 'A_union_input': 'softprotect'}
         if (protocol.get('intervention') != 'single_ff_trhr_factorial'
                 or protocol.get('suite', 'ts3') != a.suite
                 or protocol.get('algorithm') != a.algorithm or a.seed not in protocol['seeds']):

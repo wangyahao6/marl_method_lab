@@ -194,7 +194,7 @@ def main():
                 parameter_hash=base.parameter_hash(learner)))
         gem_band=o.group.split('_',1)[1] if o.group.startswith('GEM_') else None
         if FACTORIAL:
-            layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR', 'A_equal_union') else (None, 'baseline')
+            layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR', 'A_equal_union', 'A_union_input') else (None, 'baseline')
         else:
             layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_', 1)
         if CHI and mode.endswith('_input'):
@@ -208,8 +208,9 @@ def main():
 
         if FACTORIAL and o.role == 'branch':
             remember(selection)
+        protect_output = (args.chi_protect_output if CHI else o.group != 'A_union_input')
         protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x),
-                                protect_output=not CHI or args.chi_protect_output)
+                                protect_output=protect_output)
         gem=None
         if gem_band:
             from a2_local_gem import A2LocalGEM

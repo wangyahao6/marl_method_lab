@@ -1,0 +1,86 @@
+{
+  "id": "ts4_vdn_1ff_128_softprotect_windows",
+  "tasks": {
+    "stalker": [
+      5,
+      0,
+      0
+    ],
+    "zealot": [
+      0,
+      5,
+      0
+    ],
+    "colossus": [
+      0,
+      0,
+      5
+    ]
+  },
+  "order": [
+    "stalker",
+    "zealot",
+    "colossus",
+    "stalker"
+  ],
+  "thresholds": [
+    1000000,
+    1500000,
+    2000000,
+    3000000
+  ],
+  "groups": [
+    "A_union_input",
+    "A_union"
+  ],
+  "screen_episodes": 32,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "Agent A overall VDN state-weighted score strictly >3 then historical union",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": true,
+  "nominal_actual_training_steps": 4000000,
+  "full_path_equivalent_steps": 3000000,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "per_task_epsilon_reset"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn_1ff_128",
+  "seeds": [
+    3535
+  ],
+  "selection": "overall_threshold_union",
+  "max_parallel": 2,
+  "threshold_beta": 3,
+  "intervention": "single_ff_trhr_factorial",
+  "epsilon_on_switch": "per_task",
+  "trhr_settings": {
+    "target_rate": 0.05,
+    "window_updates": 100,
+    "low_windows": 3,
+    "min_condition_samples": 128,
+    "ema_weight": 0.25,
+    "gain": 0.1,
+    "max_offset": 0.25
+  },
+  "suite": "ts4",
+  "stage_labels": [
+    "A\u2081",
+    "B",
+    "C",
+    "A\u2082"
+  ],
+  "evaluation_sc2_retries": 2,
+  "sc2_game_version": null
+}
