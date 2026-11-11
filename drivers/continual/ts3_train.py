@@ -103,6 +103,9 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume','full'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
+    save_branch_prefix = o.role == 'branch' and P.get('save_branch_prefix', False)
+    if o.role == 'branch':
+        phase = P.get('branch_start_phase', 1) - 1
     track_retention = EXTENDED or FACTORIAL or TS4 or CHI_COMPARISON or o.role == 'full'
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
@@ -246,7 +249,9 @@ def main():
 
         if CHI and o.role == 'branch':
             selection = refresh_chi(0, P['order'][0])
-        if o.role=='branch' and layer:append(out/'selection_history.jsonl',dict(source_task=P['order'][0],next_task=P['order'][1],**protector.update(selection,runner.t_env)))
+        if o.role == 'branch' and layer:
+            append(out/'selection_history.jsonl', dict(source_task=P['order'][phase],
+                   next_task=P['order'][phase+1], **protector.update(selection, runner.t_env)))
         def status(state='running',**extra):write(out/'status.json',dict(status=state,pid=os.getpid(),t_env=runner.t_env,phase=phase,task=P['order'][phase],updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
         def evaluate_block(task, envseed, per, agent_state):
             ea = copy.deepcopy(args)
@@ -495,7 +500,8 @@ def main():
                 if phase < last_phase and layer:
                     append(out/'selection_history.jsonl', dict(source_task=task, next_task=P['order'][phase+1],
                            **protector.update(selection, runner.t_env)))
-            elif phase<last_phase and (FACTORIAL or o.role=='prefix' or layer or gem):
+            elif ((phase < last_phase and (FACTORIAL or o.role == 'prefix' or layer or gem))
+                  or (phase == last_phase and save_branch_prefix)):
                 selection=screen(task)
                 if TS4_FACTORIAL and o.role == 'prefix':
                     try:
@@ -513,7 +519,7 @@ def main():
                     from protection import combine
                     append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
                 if layer:append(out/'selection_history.jsonl',dict(source_task=task,next_task=P['order'][phase+1],**protector.update(selection,runner.t_env)))
-        if o.role=='prefix':
+        if o.role == 'prefix' or save_branch_prefix:
             if not CHI or CHI_COMPARISON:
                 write(out/'selection.json',selection)
             state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
@@ -532,6 +538,8 @@ def main():
                 sources = []
             else:
                 sources = [(Path(o.parent), all_labels)]
+                if P.get('earlier_evaluation_source'):
+                    sources.insert(0, (ROOT/P['earlier_evaluation_source'], all_labels))
             write(out/'retention.json', sequence_metrics(P['order'], sources + [(out, all_labels)]))
         status('completed',finished=time.time())
     except BaseException:

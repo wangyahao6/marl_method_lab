@@ -259,8 +259,9 @@ def main():
                  '--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]
         end=protocol['thresholds']
+        branch_start = protocol.get('branch_start_phase', 1)
         details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,
-                 'steps':end[0] if a.ts3_role=='prefix' else end[-1]-end[0]}
+                 'steps':end[0] if a.ts3_role=='prefix' else end[-1]-end[branch_start-1]}
     elif a.suite=='ts3':
         if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')
