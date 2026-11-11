@@ -48,7 +48,8 @@ def main():
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
-    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_chi','A1_chi','A2_chi'],default='N')
+    p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_chi','A1_chi','A2_chi',
+                                             'A_chi_union','A_chi_input','A_chi_union_input'],default='N')
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
@@ -89,11 +90,11 @@ def main():
         p.error('trhr.* overrides require --method trhr')
     chi_control = a.algorithm == 'vdn_1ff' and a.method == 'softprotect' and a.ts3_group == 'A_union'
     if chi or chi_control:
-        if a.suite not in ('ts3', 'ts5', 'ts6', 'ts7') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
-            p.error('CHI requires shared-Agent VDN in TS3, TS5, TS6 or TS7')
+        if a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
+            p.error('CHI requires shared-Agent VDN in TS3–TS7')
         if a.set or a.steps is not None:
             p.error('CHI settings belong in the named protocol')
-        groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi',)
+        groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi', 'A_chi_union', 'A_chi_input', 'A_chi_union_input')
         if a.ts3_role not in ('full', 'prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch'):
             p.error('CHI requires full, prefix, or branch with --parent')
         if chi_control:
@@ -102,7 +103,9 @@ def main():
             p.error('CHI uses N for a prefix and a CHI group matching the Agent for full or branch')
         protocol = json.loads((ROOT/a.protocol).read_text())
         protocol_id = protocol.get('id', '')
-        if not (protocol_id == a.suite or (a.suite == 'ts3' and protocol_id.startswith('ts3_'))):
+        if not (protocol_id == a.suite or (a.suite == 'ts3' and protocol_id.startswith('ts3_'))
+                or (a.suite == 'ts4' and protocol.get('suite') == 'ts4'
+                    and protocol.get('algorithm') == a.algorithm and a.ts3_group in protocol['groups'])):
             p.error('suite must match named protocol')
         if protocol.get('selection') == 'type_threshold_union':
             p.error('CHI requires overall selection')
@@ -110,7 +113,8 @@ def main():
         threshold = protocol.get('threshold_beta', protocol.get('single_ff_detection', {}).get('threshold'))
         if top_k is None and threshold is None:
             p.error('CHI requires top_k or threshold_beta in the named protocol')
-        if a.parent and not (Path(a.parent)/'chi_probes'/'phase0.th').is_file():
+        probe = protocol.get('chi_prefix_probe')
+        if a.parent and not (ROOT/probe if probe else Path(a.parent)/'chi_probes'/'phase0.th').is_file():
             p.error('CHI branch requires a prefix with a saved fixed probe')
         matched = protocol.get('intervention') == 'single_ff_chi_comparison'
         if chi_control and (not matched or a.ts3_role != 'branch'):
@@ -181,13 +185,13 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/history_train.py'),'--seed',str(a.seed)]
         if a.parent:command+=['--parent',a.parent]
         details={'protocol':protocol,'parent':a.parent,'steps':2000000}
-    elif a.suite=='ts4' and not factorial:
+    elif a.suite=='ts4' and a.algorithm=='vdn':
         if a.algorithm!='vdn' or a.method!=('baseline' if a.ts4_group=='N' else 'softprotect'):p.error('ts4 requires VDN and matching group/method')
         protocol=json.loads((ROOT/a.protocol).read_text())
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
-    elif a.suite in ('ts5','ts6','ts7') or (a.suite == 'ts3' and a.algorithm == 'vdn_1ff'):
+    elif a.suite in ('ts5','ts6','ts7') or (a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff'):
         single_ff = a.algorithm in ('vdn_1ff', 'vdn_1ff_128') and a.suite != 'ts7'
         roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
         if a.suite=='ts5' and not single_ff:
@@ -209,6 +213,17 @@ def main():
             protocol.pop('intervention')
             protocol.update(top_k=3, single_ff_detection={'interval': 100000,
                                                          'threshold': protocol['threshold_beta']})
+        elif a.suite == 'ts4':
+            if (protocol.get('suite') != 'ts4'
+                    or protocol.get('intervention') != 'single_ff_trhr_factorial'
+                    or a.seed not in protocol['seeds']):
+                p.error('use the named TS4 single-feedforward comparison protocol and its seed')
+            protocol.pop('intervention')
+            protocol.pop('trhr_settings')
+            protocol.pop('nominal_actual_training_steps', None)
+            protocol.update(shared_prefix=False, top_k=3,
+                            single_ff_detection={'interval': 100000,
+                                                 'threshold': protocol['threshold_beta']})
         elif protocol.get('id')!=a.suite:
             p.error('suite must match named protocol')
         if single_ff:

@@ -24,8 +24,9 @@ FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 CHI = P.get('intervention') == 'vdn_chi'
 CHI_COMPARISON = P.get('chi_comparison', False)
 SINGLE_FF_CONTROL = P.get('intervention') == 'single_ff_softprotect'
-TS4_FACTORIAL = FACTORIAL and P.get('suite') == 'ts4'
-if TS4_FACTORIAL:
+TS4 = P.get('suite') == 'ts4'
+TS4_FACTORIAL = FACTORIAL and TS4
+if TS4:
     import ts4_train  # registers the TS4 environment
 elif not EXTENDED:
     TEAMS.update({key:tuple(value) for key,value in P['tasks'].items()})
@@ -81,7 +82,7 @@ def sequence_metrics(order, sources):
             bwt_pp=100 * sum(bwt) / len(bwt) if bwt and len(bwt) == len(old) else None,
             fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == len(seen)-1 else None,
             fwt_tasks=fwt_tasks)
-        if FACTORIAL:
+        if FACTORIAL or TS4:
             points = sorted(curves.get(stage, {}).items())
             metrics[stage]['old_mean_percent'] = (100 * sum(row[j] for j in old) / len(old)
                 if old and all(j in row for j in old) else None)
@@ -102,7 +103,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--role',choices=['prefix','branch','eval_fwt','resume','full'],required=True)
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
-    track_retention = EXTENDED or FACTORIAL or CHI_COMPARISON or o.role == 'full'
+    track_retention = EXTENDED or FACTORIAL or TS4 or CHI_COMPARISON or o.role == 'full'
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=h.config(o.seed,out)
@@ -123,14 +124,15 @@ def main():
             cfg['intervention'] = 'single_ff_softprotect'
         if CHI:
             cfg.update(intervention='vdn_chi', chi_probe_episodes=vdn_chi.PROBE_EPISODES,
-                       chi_threshold=P.get('threshold_beta'))
+                       chi_threshold=P.get('threshold_beta'),
+                       chi_protect_output=not o.group.endswith('_input'))
         if 'gem_score_threshold' in P:
             cfg['gem_score_threshold'] = P['gem_score_threshold']
         if 'sc2_game_version' in P:
             cfg['env_args']['game_version'] = P['sc2_game_version']
         if EXTENDED:
             cfg['env_args']['rosters'] = P['tasks']
-        if TS4_FACTORIAL:
+        if TS4:
             cfg['env'] = 'ts4_protoss'
             cfg['env_args']['capability_config']['team_gen']['weights'] = [1., 0., 0.]
         args=SimpleNamespace(**cfg)
@@ -140,7 +142,7 @@ def main():
         runner=base.EpisodeRunner(args,logger);info=runner.get_env_info();args.n_agents=info['n_agents'];args.n_actions=info['n_actions'];args.state_shape=info['state_shape']
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
         scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
-        if FACTORIAL:
+        if FACTORIAL or (TS4 and CHI):
             scheme['source_phase'] = dict(vshape=(1,), dtype=th.long, episode_const=True)
         groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
         buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
@@ -194,7 +196,9 @@ def main():
         if FACTORIAL:
             layer, mode = ('A', 'union') if o.group in ('A_union', 'A_union_TRHR', 'A_equal_union') else (None, 'baseline')
         else:
-            layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_')
+            layer,mode=(None,'baseline') if o.group=='N' or gem_band else o.group.split('_', 1)
+        if CHI and mode.endswith('_input'):
+            mode = mode[:-len('_input')]
         historical = set()
 
         def remember(result):
@@ -204,7 +208,8 @@ def main():
 
         if FACTORIAL and o.role == 'branch':
             remember(selection)
-        protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x))
+        protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x),
+                                protect_output=not CHI or args.chi_protect_output)
         gem=None
         if gem_band:
             from a2_local_gem import A2LocalGEM
@@ -217,7 +222,8 @@ def main():
             del source_batch
         chi_probes = {}
         if CHI and o.role == 'branch':
-            chi_probes[0] = parent/'chi_probes'/'phase0.th'
+            chi_probes[0] = (ROOT/P['chi_prefix_probe'] if P.get('chi_prefix_probe')
+                             else parent/'chi_probes'/'phase0.th')
 
         def refresh_chi(phase, task, *, episodes=None):
             try:
@@ -446,7 +452,7 @@ def main():
                 next_detection = (begin // interval + 1) * interval
             while runner.t_env<end:
                 with th.no_grad():batch=runner.run(test_mode=False)
-                if FACTORIAL:
+                if FACTORIAL or (TS4 and CHI):
                     batch.update({'source_phase': [[phase]]}, mark_filled=False)
                 if CHI or FACTORIAL or o.role=='prefix' or layer or gem or detection:
                     types = None
@@ -514,7 +520,7 @@ def main():
         if gem:gem.flush()
         if track_retention and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
-            if FACTORIAL:
+            if FACTORIAL or TS4:
                 all_labels += ('phase_start', 'periodic')
             if o.role == 'resume':
                 sources = [(ROOT/history['prefix'], ('stage_end',)),
