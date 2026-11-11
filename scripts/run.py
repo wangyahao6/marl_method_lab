@@ -35,7 +35,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi','softprotect_chi_trhr'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -72,7 +72,8 @@ def main():
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None
-    chi = a.method == 'softprotect_chi'
+    chi_trhr = a.method == 'softprotect_chi_trhr'
+    chi = a.method == 'softprotect_chi' or chi_trhr
     factorial = a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff_128' and not chi
     if a.method == 'softprotect_trhr' and not factorial:
         p.error('combined soft protection and TRHR requires a TS3 or TS4 128-unit protocol')
@@ -90,6 +91,9 @@ def main():
         p.error('trhr.* overrides require --method trhr')
     chi_control = a.algorithm == 'vdn_1ff' and a.method == 'softprotect' and a.ts3_group == 'A_union'
     if chi or chi_control:
+        if chi_trhr and (a.suite, a.algorithm, a.ts3_role, a.ts3_group) != (
+                'ts4', 'vdn_1ff_128', 'branch', 'A_chi_union'):
+            p.error('CHI + TRHR requires the TS4 128-unit A_chi_union branch')
         if a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
             p.error('CHI requires shared-Agent VDN in TS3–TS8')
         if a.set or a.steps is not None:
@@ -102,6 +106,10 @@ def main():
         if a.ts3_group not in (('N',) if a.ts3_role == 'prefix' else groups):
             p.error('CHI uses N for a prefix and a CHI group matching the Agent for full or branch')
         protocol = json.loads((ROOT/a.protocol).read_text())
+        if chi_trhr:
+            if not protocol.get('trhr_settings') or a.seed not in protocol.get('seeds', []):
+                p.error('use a named TS4 CHI protocol with TRHR settings and the matching seed')
+            protocol['trhr'] = protocol['trhr_settings']
         protocol_id = protocol.get('id', '')
         if not (protocol_id == a.suite or (a.suite == 'ts3' and protocol_id.startswith('ts3_'))
                 or (a.suite == 'ts4' and protocol.get('suite') == 'ts4'
@@ -262,10 +270,11 @@ def main():
                 or protocol.get('suite', 'ts3') != a.suite
                 or protocol.get('algorithm') != a.algorithm or a.seed not in protocol['seeds']):
             p.error('use the named 128-unit TRHR protocol for this suite and seed')
-        if (a.ts3_role not in ('prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch')
+        roles = ('prefix', 'branch', 'full') if a.suite == 'ts4' and a.ts3_group == 'TRHR' else ('prefix', 'branch')
+        if (a.ts3_role not in roles or bool(a.parent) != (a.ts3_role == 'branch')
                 or a.ts3_group not in protocol['groups'] or methods.get(a.ts3_group) != a.method
                 or (a.ts3_role == 'prefix' and a.ts3_group != 'N')):
-            p.error('use prefix/N or a branch with its matching method and parent')
+            p.error('use prefix/N, a matching branch with parent, or full/TRHR on TS4')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,
                  '--seed',str(a.seed),'--group',a.ts3_group]
@@ -273,7 +282,8 @@ def main():
         end=protocol['thresholds']
         branch_start = protocol.get('branch_start_phase', 1)
         details={'protocol':protocol,'parent':a.parent,'group':a.ts3_group,
-                 'steps':end[0] if a.ts3_role=='prefix' else end[-1]-end[branch_start-1]}
+                 'steps':{'prefix':end[0], 'branch':end[-1]-end[branch_start-1],
+                          'full':end[-1]}[a.ts3_role]}
     elif a.suite=='ts3':
         if a.algorithm not in ['qmix','vdn'] or a.ts3_role not in ('prefix','branch','eval_fwt'):p.error('ts3 requires qmix/vdn and --ts3-role')
         if a.ts3_role=='branch' and not a.parent:p.error('ts3 branch requires --parent')

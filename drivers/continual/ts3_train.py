@@ -22,6 +22,8 @@ P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7', 'ts8')
 FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 CHI = P.get('intervention') == 'vdn_chi'
+CHI_TRHR = CHI and 'trhr' in P
+TRACE = FACTORIAL or CHI_TRHR
 CHI_COMPARISON = P.get('chi_comparison', False)
 SINGLE_FF_CONTROL = P.get('intervention') == 'single_ff_softprotect'
 TS4 = P.get('suite') == 'ts4'
@@ -114,7 +116,7 @@ def main():
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=h.config(o.seed,out)
         algorithm=P.get('algorithm','qmix')
-        detection = P['single_ff_detection'] if o.role == 'full' and not CHI else None
+        detection = P['single_ff_detection'] if o.role == 'full' and not CHI and not FACTORIAL else None
         if algorithm != 'qmix':
             base.merge(cfg, yaml.safe_load((ROOT/'src/config/algs'/f'{algorithm}.yaml').read_text()))
         cfg['algorithm']=algorithm;cfg['top_k']=P.get('top_k')
@@ -125,6 +127,8 @@ def main():
                 cfg['trhr'] = P['trhr_settings']
         elif 'trhr' in P:
             cfg['trhr'] = P['trhr']
+        if CHI_TRHR:
+            cfg.update(a2_trace=True, trace_stages=len(P['order']))
         cfg.update(t_max=P['thresholds'][-1],protocol_id=P['id'],role=o.role,parent=o.parent,group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['tasks'],thresholds=P['thresholds'])
         if SINGLE_FF_CONTROL:
             cfg['intervention'] = 'single_ff_softprotect'
@@ -172,7 +176,7 @@ def main():
                     import hashlib
                     write(out/'prefix_selection.json', dict(selection=selection, source=str(selection_path), source_sha256=hashlib.sha256(selection_path.read_bytes()).hexdigest(), parent_original=str(parent/'selection.json'), parent_original_sha256=hashlib.sha256((parent/'selection.json').read_bytes()).hexdigest()))
             write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
-            if FACTORIAL:
+            if TRACE:
                 names = [name for name, _ in mac.agent.named_parameters()]
                 write(out/'branch_parameter_identity.json', dict(
                     online_matches_prefix=all(th.equal(p.detach().cpu(), state['agent'][k])
@@ -252,6 +256,8 @@ def main():
 
         if CHI and o.role == 'branch':
             selection = refresh_chi(0, P['order'][0])
+            if CHI_TRHR:
+                remember(selection)
         if o.role == 'branch' and layer:
             append(out/'selection_history.jsonl', dict(source_task=P['order'][phase],
                    next_task=P['order'][phase+1], **protector.update(selection, runner.t_env)))
@@ -441,7 +447,7 @@ def main():
         last_phase = len(P['order']) - 1
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=vdn_chi.PROBE_EPISODES if CHI else P['screen_episodes'])
-            if FACTORIAL:
+            if TRACE:
                 trace = learner.a2_trace
                 trace.phase = phase
                 trace.history = sorted(historical)
@@ -483,7 +489,7 @@ def main():
                 if runner.t_env>=next_test:
                     evaluate(task,False,'periodic')
                     while next_test<=runner.t_env:next_test+=25000
-            if FACTORIAL:
+            if TRACE:
                 trace.flush(runner.t_env)
             base.log_task_epsilon(runner, out, phase, task, 'end')
             append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
@@ -498,6 +504,8 @@ def main():
                 evaluate(P['order'][phase+1], True, 'next_unseen', reference_phase=phase)
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
+                if CHI_TRHR:
+                    remember(selection)
                 if CHI_COMPARISON and o.role == 'prefix':
                     selection = screen(task)
                 if phase < last_phase and layer:
