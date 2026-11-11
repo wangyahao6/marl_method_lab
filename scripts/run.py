@@ -33,7 +33,7 @@ def trhr_settings(parser, overrides):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','history','network_similarity'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
     p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi'],required=True)
     p.add_argument('--seed',required=True,type=int)
@@ -90,8 +90,8 @@ def main():
         p.error('trhr.* overrides require --method trhr')
     chi_control = a.algorithm == 'vdn_1ff' and a.method == 'softprotect' and a.ts3_group == 'A_union'
     if chi or chi_control:
-        if a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
-            p.error('CHI requires shared-Agent VDN in TS3–TS7')
+        if a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
+            p.error('CHI requires shared-Agent VDN in TS3–TS8')
         if a.set or a.steps is not None:
             p.error('CHI settings belong in the named protocol')
         groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi', 'A_chi_union', 'A_chi_input', 'A_chi_union_input')
@@ -107,6 +107,9 @@ def main():
                 or (a.suite == 'ts4' and protocol.get('suite') == 'ts4'
                     and protocol.get('algorithm') == a.algorithm and a.ts3_group in protocol['groups'])):
             p.error('suite must match named protocol')
+        if a.suite == 'ts8' and (protocol.get('algorithm') != a.algorithm
+                                  or a.ts3_group not in protocol['groups']):
+            p.error('use the named TS8 protocol and its Agent and group')
         if protocol.get('selection') == 'type_threshold_union':
             p.error('CHI requires overall selection')
         top_k = protocol.get('top_k')

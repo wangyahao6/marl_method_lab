@@ -19,13 +19,14 @@ from pysc2.lib.remote_controller import ConnectError as SC2ConnectError, Request
 from s2clientprotocol import sc2api_pb2 as sc_pb
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
-EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7')
+EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7', 'ts8')
 FACTORIAL = P.get('intervention') == 'single_ff_trhr_factorial'
 CHI = P.get('intervention') == 'vdn_chi'
 CHI_COMPARISON = P.get('chi_comparison', False)
 SINGLE_FF_CONTROL = P.get('intervention') == 'single_ff_softprotect'
 TS4 = P.get('suite') == 'ts4'
 TS4_FACTORIAL = FACTORIAL and TS4
+RETURN_SEQUENCE = TS4 or P.get('suite') == 'ts8'
 if TS4:
     import ts4_train  # registers the TS4 environment
 elif not EXTENDED:
@@ -84,7 +85,7 @@ def sequence_metrics(order, sources):
             bwt_pp=100 * sum(bwt) / len(bwt) if bwt and len(bwt) == len(old) else None,
             fwt_pp=100 * sum(fwt) / len(fwt) if fwt and len(fwt) == len(seen)-1 else None,
             fwt_tasks=fwt_tasks)
-        if FACTORIAL or TS4:
+        if FACTORIAL or RETURN_SEQUENCE:
             points = sorted(curves.get(stage, {}).items())
             metrics[stage]['old_mean_percent'] = (100 * sum(row[j] for j in old) / len(old)
                 if old and all(j in row for j in old) else None)
@@ -147,7 +148,7 @@ def main():
         runner=base.EpisodeRunner(args,logger);info=runner.get_env_info();args.n_agents=info['n_agents'];args.n_actions=info['n_actions'];args.state_shape=info['state_shape']
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
         scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
-        if FACTORIAL or (TS4 and CHI):
+        if FACTORIAL or (TS4 and (CHI or CHI_COMPARISON)):
             scheme['source_phase'] = dict(vshape=(1,), dtype=th.long, episode_const=True)
         groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
         buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
@@ -460,7 +461,7 @@ def main():
                 next_detection = (begin // interval + 1) * interval
             while runner.t_env<end:
                 with th.no_grad():batch=runner.run(test_mode=False)
-                if FACTORIAL or (TS4 and CHI):
+                if FACTORIAL or (TS4 and (CHI or CHI_COMPARISON)):
                     batch.update({'source_phase': [[phase]]}, mark_filled=False)
                 if CHI or FACTORIAL or o.role=='prefix' or layer or gem or detection:
                     types = None
@@ -529,7 +530,7 @@ def main():
         if gem:gem.flush()
         if track_retention and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
-            if FACTORIAL or TS4:
+            if FACTORIAL or RETURN_SEQUENCE:
                 all_labels += ('phase_start', 'periodic')
             if o.role == 'resume':
                 sources = [(ROOT/history['prefix'], ('stage_end',)),

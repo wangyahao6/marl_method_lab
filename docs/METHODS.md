@@ -99,3 +99,5 @@ Windows 启动器为每次运行设置独立的 `runs/<run-id>/tmp`，并将 TEM
 TS4 的 `ts4_vdn_1ff_128_chi.json` 使用同一个种子 3535 的 A₁ 前缀比较四组。所有组按当前网络重新评估固定探测集，使用严格 `>3`。`A_chi` 和 `A_chi_input` 替换保护名单并对退出单元线性恢复。`A_chi_union` 和 `A_chi_union_input` 将每轮入选单元加入永久保护并集。带 `_input` 的组缩放前馈层输入权重行和偏置，其他两组同时缩放对应的 GRU 输入列。保护中的实际 RMSprop 增量系数均为 0.1。A₁ 探测集从已有前缀的最后 32 局及其阶段末模型离线生成，与前缀原始产物分别保存。
 
 TS4 等数量筛选对照在 `results/ts4_chi_selection_matched_3535_20261111/plan.json`。从已有 A₁ 前缀按普通软保护复跑一次 B 并保存完整续训状态，三组从同一 B 末状态训练 C。保护名单在 C 内固定，分别使用普通 5 单元、CHI 7 单元及普通排序补足的 7 单元。主要比较 C 末 stalker 和 zealot 相对 B 末的胜率变化，同时记录 C 的胜率。
+
+TS4 和 TS8 的 64 单元配对实验使用 `ts4_vdn_1ff_chi_comparison.json` 和 `ts8_vdn_1ff_chi_comparison.json`。各序列共享一个无保护的 A₁ 前缀，普通软保护和 CHI 都使用阈值严格大于 3、历史入选并集及全参数范围保护。TS8 用精确镜像阵容运行 S、Z、C、2S3Z、2Z3C、3S2C、S，累计阈值为 1M、1.5M、2M、2.5M、3M、3.5M、4.5M。A₂ 按同一任务回访统计。

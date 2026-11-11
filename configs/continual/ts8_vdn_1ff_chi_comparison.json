@@ -1,0 +1,148 @@
+{
+  "id": "ts8",
+  "tasks": {
+    "stalker": {
+      "id": "TS8_stalker",
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "zealot": {
+      "id": "TS8_zealot",
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "colossus": {
+      "id": "TS8_colossus",
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    },
+    "2s3z": {
+      "id": "TS8_2s3z",
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "2z3c": {
+      "id": "TS8_2z3c",
+      "ally": [
+        0,
+        2,
+        3
+      ],
+      "enemy": [
+        0,
+        2,
+        3
+      ]
+    },
+    "3s2c": {
+      "id": "TS8_3s2c",
+      "ally": [
+        3,
+        0,
+        2
+      ],
+      "enemy": [
+        3,
+        0,
+        2
+      ]
+    }
+  },
+  "order": [
+    "stalker",
+    "zealot",
+    "colossus",
+    "2s3z",
+    "2z3c",
+    "3s2c",
+    "stalker"
+  ],
+  "thresholds": [
+    1000000,
+    1500000,
+    2000000,
+    2500000,
+    3000000,
+    3500000,
+    4500000
+  ],
+  "groups": [
+    "N",
+    "A_union",
+    "A_chi_union"
+  ],
+  "screen_episodes": 32,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "State-weighted Agent A activation with strict threshold >3 and historical union",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": true,
+  "full_path_equivalent_steps": 4500000,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "per_task_epsilon_reset"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn_1ff",
+  "seeds": [
+    3535
+  ],
+  "selection": "overall_threshold_union",
+  "threshold_beta": 3,
+  "intervention": "single_ff_chi_comparison",
+  "epsilon_on_switch": "per_task",
+  "suite": "ts8",
+  "stage_labels": [
+    "A₁",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "A₂"
+  ],
+  "evaluation_sc2_retries": 2,
+  "top_k": null
+}
