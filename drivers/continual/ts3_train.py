@@ -34,6 +34,8 @@ elif not EXTENDED:
 def select_scope(result):
     if FACTORIAL or CHI_COMPARISON:
         item = result['A']
+        if item.get('selection') == 'fixed_mask':
+            return result
         scores = item.get('scores')
         item['sets']['overall'] = None if scores is None else [
             i for i, score in enumerate(scores) if score > P['threshold_beta']
