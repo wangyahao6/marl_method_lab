@@ -91,3 +91,7 @@ Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method br
 `configs/continual/ts3_vdn_1ff_chi.json` 与 `ts5_vdn_1ff_chi.json` 为种子 3535 的 64 宽度配对实验。每套序列共享无干预 A 前缀，前缀保存固定探测集与原版阈值选择，B–E 分别运行 CHI 与原版历史并集软保护。两组严格使用层内分数 >3，各任务 2M 环境步，评价含初始未见任务、阶段末全部已见任务和下一未见任务。Windows 使用其已安装的 SC2 版本，两组在同一主机运行。
 
 TS3 的 64 宽单前馈基线使用 `--suite ts3 --algorithm vdn_1ff --method baseline --ts3-role full --protocol configs/continual/ts3_vdn_1ff_chi.json`。沿用该协议的任务表、预算、探索和评估，从 A 训练到 E。每 100k 步及阶段末记录 Agent A 的状态加权活动、top-3 和严格阈值名单。
+
+Windows 启动器为每次运行设置独立的 `runs/<run-id>/tmp`，并将 TEMP/TMP 传给训练与评估子进程，隔离 SC2 的 `StarCraft II/TempLaunchMap.SC2Map`。TS3 共享驱动的评估重试覆盖协议断连、启动连接失败与创建地图的 InvalidMapData。重试仍使用同一环境种子，并恢复该种子块起始 RNG。周期评估重试耗尽时记录错误并跳过该次评估，正式阶段评估仍按原规则报告失败。
+
+2026-11-11 Windows 配对实验的 attempt001 前缀分别在 TS3 的 525002 步和 TS5 的 800013 步因上述评估异常失败，四条方法分支尚未开始。阶段内未保存训练检查点，修复后以新 attempt002 从 A 重新训练，失败产物保留。

@@ -295,6 +295,10 @@ def main():
         if scheduled or metadata:
             plan['metadata']=dict(metadata,**scheduled)
     out.mkdir(parents=True,exist_ok=False)
+    if os.name == 'nt':
+        temp = out/'tmp'
+        temp.mkdir()
+        env.update(TEMP=str(temp), TMP=str(temp))
     if a.suite=='smac':save(out/'config.json',cfg)
     else:save(out/'protocol.json',protocol)
     tracked=subprocess.check_output(['git','-C',str(ROOT),'ls-files','-z']).decode().split('\0')
@@ -302,7 +306,7 @@ def main():
     for folder in ['src','scripts','drivers','configs']:
         files.update(str(x.relative_to(ROOT)) for x in (ROOT/folder).rglob('*') if x.is_file() and '__pycache__' not in x.parts and x.suffix!='.pyc')
     hashes={x:hashlib.sha256((ROOT/x).read_bytes()).hexdigest() for x in sorted(files)}
-    save(out/'launch.json',dict(plan,git_commit=git('rev-parse','HEAD'),git_status=git('status','--porcelain'),source_sha256=hashes,started=datetime.datetime.now(datetime.timezone.utc).isoformat(),python=sys.executable,sc2path=env['SC2PATH']))
+    save(out/'launch.json',dict(plan,git_commit=git('rev-parse','HEAD'),git_status=git('status','--porcelain'),source_sha256=hashes,started=datetime.datetime.now(datetime.timezone.utc).isoformat(),python=sys.executable,sc2path=env['SC2PATH'],temp_dir=env.get('TEMP')))
     with tarfile.open(out/'source.tar.gz','w:gz') as tar:
         for name in sorted(files):tar.add(ROOT/name,arcname=name,recursive=False)
     status={'state':'running','meaning':'process execution only; experiment completion requires result review'}

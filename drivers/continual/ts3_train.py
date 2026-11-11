@@ -15,6 +15,8 @@ import numpy as np
 import torch as th
 import yaml
 from pysc2.lib.protocol import ConnectionError as SC2ConnectionError
+from pysc2.lib.remote_controller import ConnectError as SC2ConnectError, RequestError as SC2RequestError
+from s2clientprotocol import sc2api_pb2 as sc_pb
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
 P=base.PROTOCOL
 EXTENDED = P['id'] in ('ts5', 'ts6', 'ts7')
@@ -261,7 +263,11 @@ def main():
                         try:
                             episodes.extend(evaluate_block(task, envseed, per, agent_state))
                             break
-                        except SC2ConnectionError as error:
+                        except (SC2ConnectionError, SC2ConnectError, SC2RequestError) as error:
+                            if isinstance(error, SC2RequestError) and not (
+                                    isinstance(error.res, sc_pb.ResponseCreateGame)
+                                    and error.res.error == sc_pb.ResponseCreateGame.InvalidMapData):
+                                raise
                             will_retry = attempt < retries
                             if retries:
                                 append(out/'evaluation_sc2_errors.jsonl', dict(
