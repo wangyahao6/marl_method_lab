@@ -3,9 +3,10 @@ import torch as th
 from release_schedule import ReleaseSchedule
 
 class TS3Protection:
-    def __init__(self, learner, layer, mode, record):
+    def __init__(self, learner, layer, mode, record, *, protect_output=True):
         self.learner=learner; self.layer=layer; self.mode=mode; self.record=record
         self.schedule=ReleaseSchedule({layer:learner.args.rnn_hidden_dim}, .1, 100000) if layer else None
+        self.protect_output = protect_output
         self.t_env=0; self.count=0
         self.original=learner.optimiser.step
         if layer: learner.optimiser.step=self.step
@@ -14,10 +15,10 @@ class TS3Protection:
         if not self.layer: return {'mode':'baseline','t_env':t_env}
         item=selection[self.layer]; chosen=item.get('sets',{}).get('overall')
         if chosen is not None:
-            if self.mode=='union': chosen=sorted(set(chosen)|self.schedule.protected[self.layer])
+            if self.mode in ('union', 'chi_union'): chosen=sorted(set(chosen)|self.schedule.protected[self.layer])
             self.schedule.replace({self.layer:chosen},t_env)
         return dict(self.schedule.state(t_env),mode=self.mode,layer=self.layer,
-                    detection_defined=item.get('defined', chosen is not None) if self.mode=='chi' else chosen is not None,
+                    detection_defined=item.get('defined', chosen is not None) if self.mode in ('chi', 'chi_union') else chosen is not None,
                     latest_selected=item.get('sets',{}).get('overall'))
 
     def scales(self, t_env):
@@ -34,6 +35,8 @@ class TS3Protection:
         else:
             result={'net.3.weight':v[:,None].expand_as(agent.net[3].weight),
                     'net.3.bias':v,'rnn.weight_ih':v[None,:].expand_as(agent.rnn.weight_ih)}
+        if not self.protect_output:
+            del result['net.3.weight' if self.layer == 'A1' else 'rnn.weight_ih']
         return result
 
     @th.no_grad()

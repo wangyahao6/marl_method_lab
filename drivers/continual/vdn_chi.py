@@ -57,7 +57,11 @@ def forward(mac, batch, layer=None):
 
 @th.no_grad()
 def save_probe(mac, episodes, path):
-    cpu = combine(episodes)
+    save_probe_batch(mac, combine(episodes), path)
+
+
+@th.no_grad()
+def save_probe_batch(mac, cpu, path):
     batch = copy.deepcopy(cpu)
     batch.to(mac.args.device)
     states, agents = decision_masks(batch)

@@ -95,3 +95,5 @@ TS3 的 64 宽单前馈基线使用 `--suite ts3 --algorithm vdn_1ff --method ba
 Windows 启动器为每次运行设置独立的 `runs/<run-id>/tmp`，并将 TEMP/TMP 传给训练与评估子进程，隔离 SC2 的 `StarCraft II/TempLaunchMap.SC2Map`。TS3 共享驱动的评估重试覆盖协议断连、启动连接失败与创建地图的 InvalidMapData。重试仍使用同一环境种子，并恢复该种子块起始 RNG。周期评估重试耗尽时记录错误并跳过该次评估，正式阶段评估仍按原规则报告失败。
 
 2026-11-11 Windows 配对实验的 attempt001 前缀分别在 TS3 的 525002 步和 TS5 的 800013 步因上述评估异常失败，四条方法分支尚未开始。阶段内未保存训练检查点，修复后以新 attempt002 从 A 重新训练，失败产物保留。
+
+TS4 的 `ts4_vdn_1ff_128_chi.json` 使用同一个种子 3535 的 A₁ 前缀比较四组。所有组按当前网络重新评估固定探测集，使用严格 `>3`。`A_chi` 和 `A_chi_input` 替换保护名单并对退出单元线性恢复。`A_chi_union` 和 `A_chi_union_input` 将每轮入选单元加入永久保护并集。带 `_input` 的组缩放前馈层输入权重行和偏置，其他两组同时缩放对应的 GRU 输入列。保护中的实际 RMSprop 增量系数均为 0.1。A₁ 探测集从已有前缀的最后 32 局及其阶段末模型离线生成，与前缀原始产物分别保存。
