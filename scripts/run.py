@@ -194,11 +194,11 @@ def main():
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
-    elif a.suite in ('ts5','ts6','ts7') or (a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff'):
+    elif a.suite in ('ts5','ts6','ts7','ts8') or (a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff'):
         single_ff = a.algorithm in ('vdn_1ff', 'vdn_1ff_128') and a.suite != 'ts7'
         roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
-        if a.suite=='ts5' and not single_ff:
-            p.error('ts5 requires a single-feedforward VDN baseline')
+        if a.suite in ('ts5', 'ts8') and not single_ff:
+            p.error(f'{a.suite} requires a single-feedforward VDN baseline')
         if (not single_ff and a.algorithm!='vdn') or a.ts3_role not in roles:
             p.error(f'{a.suite} requires VDN and one of {roles}')
         if a.ts3_group not in ('N','A2_union') or a.method!=('baseline' if a.ts3_group=='N' else 'softprotect'):
@@ -225,6 +225,15 @@ def main():
             protocol.pop('trhr_settings')
             protocol.pop('nominal_actual_training_steps', None)
             protocol.update(shared_prefix=False, top_k=3,
+                            single_ff_detection={'interval': 100000,
+                                                 'threshold': protocol['threshold_beta']})
+        elif a.suite == 'ts8':
+            if (protocol.get('id') != 'ts8'
+                    or protocol.get('intervention') != 'single_ff_chi_comparison'
+                    or a.seed not in protocol['seeds']):
+                p.error('use the named TS8 single-feedforward comparison protocol and its seed')
+            protocol.pop('intervention')
+            protocol.update(shared_prefix=False, top_k=3, selection='top_k',
                             single_ff_detection={'interval': 100000,
                                                  'threshold': protocol['threshold_beta']})
         elif protocol.get('id')!=a.suite:
