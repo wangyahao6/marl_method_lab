@@ -1,6 +1,6 @@
-# VDN 可接受动作集合偏好约束
+# 可接受动作集合偏好回放（ASPR）
 
-在连续任务中，用每个已完成任务的阶段末 Agent 给成功轨迹标记可接受动作集合。新阶段在当前任务上执行原 VDN TD 更新，同时重新展开旧任务轨迹，约束当前 Agent 对旧任务动作的排序。
+Action-Set Preference Replay（ASPR）用每个已完成任务的阶段末 Agent 给成功轨迹标记可接受动作集合。新阶段在当前任务上执行原 VDN TD 更新，同时重新展开旧任务轨迹，约束当前 Agent 对旧任务动作的排序。
 
 ## 启动与配置
 
@@ -20,14 +20,16 @@ cd /home/wyh/marl_method_lab
 | `action_set.weight` | λ，默认 1。设为 0 时禁用记忆采集和偏好损失。示例值尚未校准。 |
 | `action_set.margin` | 偏好间隔 m，默认 0。m=0 允许两组的最大 Q 打平。 |
 | `action_set.batch_episodes` | 每次 learner 更新采样的历史 episode 总数，默认 8。 |
-| `action_set.delta_by_task` | 启用时为每个阶段用到的任务显式设置绝对 Q 差阈值 δ。示例的 0 只保留并列最优动作。 |
+| `action_set.delta_by_task` | 为各任务显式设置绝对 Q 差阈值 δ。设置 0 只保留并列最优动作。 |
+| `action_set.second_gap_quantile` | 缺少显式 δ 时，从本阶段成功记忆中取有至少两个合法动作的有效决策的最优－次优 Q 差分位数。阶段末计算一次并冻结。无可用差值时记录并使用 0。 |
+| `action_set.probe_episodes_per_seed` | 从首次标记该阶段任务的阶段末评估中每个种子块保存前 N 局作为独立固定轨迹，默认 0。 |
 | `action_set.delta_candidates_by_task` | 同一批胜局上统计候选 δ 的集合大小、单元素占比和覆盖全部合法动作的占比。正式标记使用配置中的任务级 δ。 |
 | `action_set.success_episodes` | 每阶段目标胜局数，默认 100。 |
 | `action_set.seed_offsets` | 至少两个采集种子偏移，实际种子为训练种子加偏移后对 2³¹ 取模。 |
 | `action_set.attempts_per_seed` | 每个采集种子的最大局数，默认 125。按种子块递增分配累计目标，最后一块可补前面块的不足。 |
 | `evaluation.seeds`、`episodes_per_seed`、`interval` | 独立贪心评价使用固定种子和每种子局数。阶段内定期评价当前任务，interval=0 关闭定期评价。 |
 
-每阶段重新分配当前任务的 TD replay 并重置 ε 衰减计数。在线网络、目标网络、优化器和全局步数跨阶段延续。阶段末评价所有已见任务，并在新任务首次训练前保存对应评价；结合初始模型评价计算 ACC、BWT、FWT。最终检查点可用 `scripts/evaluate.py --run <run-dir> --episodes <n>` 独立评价所有已见任务，`n` 是每个任务的总局数。
+每阶段重新分配当前任务的 TD replay。ε 可逐任务重置（默认）或累计退火。阶段阈值可按本阶段步数或全序列累计步数计算。在线网络、目标网络、优化器和全局步数跨阶段延续。阶段末评价所有已见任务，并在新任务首次训练前保存对应评价；结合初始模型评价计算 ACC、BWT、FWT。最终检查点可用 `scripts/evaluate.py --run <run-dir> --episodes <n>` 独立评价所有已见任务，`n` 是每个任务的总局数。
 
 当前使用同一个 SMACv2 `10gen_protoss` 5v5 布局。仓库环境按 unit type 和位置分配本局 ally slots，Agent ID 的 one-hot 对应本局 slot。动作 0 为死亡单位 no-op，1 为停止，2–5 为移动，6–10 按本局敌方 slot 攻击。slot 表示局内索引，阵容变化会改变该 slot 对应的单位。旧轨迹保留自己的观测和合法动作掩码。真实 5v5 测得 state 130、obs 92、Agent 数 5、动作数 11。改变队伍规模或动作布局需要先定义新的输入及动作映射。
 
@@ -58,7 +60,7 @@ cd /home/wyh/marl_method_lab
 
 每个有效状态计算 `relu(m + max_bad(Q) - max_good(Q))`。先对一个任务内的有效状态求平均，再对本次采样中至少有一个有效状态的任务等权平均；没有有效历史状态时偏好项为零。联合目标为 `TD_loss + weight * preference_loss`，一次反传。历史数据只进入偏好项；当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
 
-`action_set_updates.jsonl` 每次更新记录 TD、偏好、总损失，以及采样任务、源阶段、池大小、episode 编号与数量。任务级记录包括有效状态数、good/bad 的最大 Q 均值、违约比例（hinge 内部大于零）、集合大小和两种占比。没有定义的比率或最大值记 null。另记录历史分支准备耗时、CUDA 历史前向时间和完整 learner 更新耗时；联合反传的边际耗时可用同协议 baseline 对照估计。常规 learner 和 runner 指标沿用 `metrics.jsonl`。
+`action_set_updates.jsonl` 每次更新记录 TD、偏好、总损失，以及采样任务、源阶段、池大小、episode 编号与数量。任务级记录包括有效状态数、good/bad 的最大 Q 均值、违约比例（hinge 内部大于零）、合法贪心动作落在集合外的比例、集合大小和两种占比。没有定义的比率或最大值记 null。另记录历史分支准备耗时、CUDA 历史前向时间和完整 learner 更新耗时；联合反传的边际耗时可用同协议 baseline 对照估计。常规 learner 和 runner 指标沿用 `metrics.jsonl`。
 
 ## 代码位置与验证
 

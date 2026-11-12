@@ -4,8 +4,9 @@ from math import isfinite
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 DEFAULTS = dict(weight=1.0, margin=0.0, batch_episodes=8, success_episodes=100,
                 seed_offsets=[301001, 302001, 303001, 304001], attempts_per_seed=125,
-                delta_candidates_by_task={})
-EVAL_DEFAULTS = dict(seeds=[91101, 91102], episodes_per_seed=16, interval=25000)
+                delta_candidates_by_task={}, second_gap_quantile=None, probe_episodes_per_seed=0)
+EVAL_DEFAULTS = dict(seeds=[91101, 91102], episodes_per_seed=16, interval=25000,
+                     focus_seeds=None, focus_episodes_per_seed=None, task_seed_stride=0)
 
 
 def nonnegative(value):
@@ -45,10 +46,23 @@ def validate(protocol, algorithm, method):
                 or not positive_integer(stage["steps"])):
             raise ValueError("each stage needs a configured task and a positive integer step budget")
 
+    if protocol.get("phase_boundary", "relative") not in ("relative", "cumulative"):
+        raise ValueError("phase_boundary must be relative or cumulative")
+    if protocol.get("epsilon_on_switch", "per_task") not in ("per_task", "cumulative_no_restart"):
+        raise ValueError("invalid epsilon_on_switch")
+
     evaluation = settings_with_defaults(protocol.get("evaluation", {}), EVAL_DEFAULTS)
     if (not valid_seeds(evaluation["seeds"]) or not positive_integer(evaluation["episodes_per_seed"])
             or type(evaluation["interval"]) is not int or evaluation["interval"] < 0):
         raise ValueError("evaluation needs unique seeds, a positive episode count, and a nonnegative interval")
+
+    if (evaluation["focus_seeds"] is None) != (evaluation["focus_episodes_per_seed"] is None):
+        raise ValueError("focus_seeds and focus_episodes_per_seed must be set together")
+    if evaluation["focus_seeds"] is not None and (not valid_seeds(evaluation["focus_seeds"])
+            or not positive_integer(evaluation["focus_episodes_per_seed"])):
+        raise ValueError("invalid focus evaluation seeds or episode count")
+    if type(evaluation["task_seed_stride"]) is not int or evaluation["task_seed_stride"] < 0:
+        raise ValueError("task_seed_stride must be a nonnegative integer")
 
     settings = settings_with_defaults(protocol.get("action_set", {}), DEFAULTS, ("delta_by_task",))
     for key in ("weight", "margin"):
@@ -63,10 +77,17 @@ def validate(protocol, algorithm, method):
     if (not isinstance(deltas, dict) or deltas.keys() - tasks.keys()
             or any(not nonnegative(delta) for delta in deltas.values())):
         raise ValueError("action_set.delta_by_task requires finite nonnegative thresholds keyed by task")
-    if method == "action_set_preference" and settings["weight"]:
+    quantile = settings["second_gap_quantile"]
+    if quantile is not None and (not nonnegative(quantile) or quantile > 1):
+        raise ValueError("action_set.second_gap_quantile must be between 0 and 1")
+    probes = settings["probe_episodes_per_seed"]
+    if type(probes) is not int or probes < 0:
+        raise ValueError("action_set.probe_episodes_per_seed must be a nonnegative integer")
+    if method == "action_set_preference" and settings["weight"] and quantile is None:
         missing = {stage["task"] for stage in stages} - deltas.keys()
         if missing:
             raise ValueError(f"action_set.delta_by_task is missing {sorted(missing)}")
+    settings["delta_by_task"] = deltas
     candidates = settings["delta_candidates_by_task"]
     if (not isinstance(candidates, dict) or candidates.keys() - tasks.keys()
             or any(not isinstance(values, list) or any(not nonnegative(v) for v in values)

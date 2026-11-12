@@ -30,14 +30,23 @@ def decision_masks(batch):
     return legal, decision & alive
 
 
-def make_good_mask(batch, reference_q, delta):
-    legal, decision = decision_masks(batch)
+def reference_gaps(batch, reference_q):
+    legal, _ = decision_masks(batch)
     best = reference_q.masked_fill(~legal, -th.inf).amax(dim=-1, keepdim=True)
-    gaps = best - reference_q
+    return (best - reference_q).masked_fill(~legal, th.inf)
+
+
+def good_mask_from_gaps(batch, gaps, delta):
+    legal, decision = decision_masks(batch)
     good = legal & decision.unsqueeze(-1) & (gaps <= delta)
     # Keep the serialized time axis aligned with the full EpisodeBatch.
     final = th.zeros_like(batch["avail_actions"][:, -1:], dtype=th.bool)
-    return th.cat((good, final), dim=1), gaps
+    return th.cat((good, final), dim=1)
+
+
+def make_good_mask(batch, reference_q, delta):
+    gaps = reference_gaps(batch, reference_q)
+    return good_mask_from_gaps(batch, gaps, delta), gaps
 
 
 def set_counts(legal, decisions, good):
@@ -66,10 +75,20 @@ def preference_loss(mac, batch, good, margin):
     loss_sum = slack.relu().masked_fill(~valid, 0).sum()
     count = valid.sum()
     denominator = count.clamp_min(1)
+    greedy = q.detach().masked_fill(~legal, -th.inf).argmax(dim=-1, keepdim=True)
+    outside = valid & ~good.gather(-1, greedy).squeeze(-1)
     stats = th.stack((loss_sum.detach(), q_good.detach().sum(), q_bad.detach().sum(),
-                      (valid & (slack > 0)).sum())) / denominator
+                      (valid & (slack > 0)).sum(), outside.sum())) / denominator
     return loss_sum / denominator, count, th.cat((stats, count.reshape(1),
                                                    set_counts(legal, decision, good)))
+
+
+def preference_statistics(summary):
+    loss, q_good, q_bad, violation, outside, count, *set_stats = summary
+    return dict(loss=loss if count else None, q_good_max=q_good if count else None,
+                q_bad_max=q_bad if count else None, violation_ratio=violation if count else None,
+                greedy_outside_ratio=outside if count else None,
+                valid_states=int(count), **set_statistics(*set_stats))
 
 
 def pack_episode(batch, length, **metadata):
@@ -160,11 +179,8 @@ class ActionSetPreference:
         update_seconds = perf_counter() - self.update_started
         forward_cuda_seconds = events[0].elapsed_time(events[1]) / 1000 if events else None
         for i, row in enumerate(rows):
-            offset = 3 + 9 * i
-            loss, q_good, q_bad, violation, count, *set_stats = values[offset:offset + 9]
-            row.update(loss=loss if count else None, q_good_max=q_good if count else None,
-                       q_bad_max=q_bad if count else None, violation_ratio=violation if count else None,
-                       valid_states=int(count), **set_statistics(*set_stats))
+            offset = 3 + 10 * i
+            row.update(preference_statistics(values[offset:offset + 10]))
         self.log(dict(phase=self.phase, task=self.task, t_env=t_env, td_loss=values[0],
                       total_loss=values[1], preference_loss=values[2], historical_tasks=rows,
                       historical_episode_count=sum(row["sampled_episodes"] for row in rows),

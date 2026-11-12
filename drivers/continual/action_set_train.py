@@ -14,8 +14,8 @@ from types import SimpleNamespace
 import train as base
 from hetero_environment import ExactProtoss
 from learners.action_set_preference import (
-    ActionSetPreference, decision_masks, make_good_mask, pack_episode,
-    set_counts, set_statistics, unroll,
+    ActionSetPreference, batch_episodes, decision_masks, pack_episode, preference_loss,
+    preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
 from action_set_protocol import validate
 import numpy as np
@@ -37,7 +37,8 @@ def config(protocol, seed, out):
                device="cuda:0" if use_cuda else "cpu", local_results_path=str(out),
                algorithm=protocol["algorithm"], method=protocol["method"],
                t_max=sum(stage["steps"] for stage in protocol["stages"]),
-               epsilon_on_switch="per_task", action_set=protocol["action_set"])
+               epsilon_on_switch=protocol.get("epsilon_on_switch", "per_task"),
+               action_set=protocol["action_set"])
     cfg["env_args"].update(seed=seed, game_version=protocol.get("sc2_game_version", "4.10"),
                            rosters=protocol["tasks"])
     return cfg
@@ -104,11 +105,52 @@ def greedy_runner(args, spec, expected_layout, agent_state, task, seed):
         runner.close_env()
 
 
+def reference_record(runner, batch, episode):
+    batch = batch[:, :runner.t + 1]
+    q = unroll(runner.mac, batch, runner.t)
+    _, decision = decision_masks(batch)
+    return episode, reference_gaps(batch, q)[0], decision[0]
+
+
+def label_records(records, delta, candidates=()):
+    counts = {value: th.zeros(4, dtype=th.long) for value in candidates}
+    episodes = []
+    for episode, gaps, decision in records:
+        legal = episode["data"]["avail_actions"][:-1].bool()
+        eligible = legal & decision.unsqueeze(-1)
+        good = eligible & (gaps <= delta)
+        if (decision & ~good.any(dim=-1)).any():
+            raise ValueError(f"empty reference good set, seed {episode['seed']}, episode {episode['index']}")
+        final = th.zeros_like(good[:1])
+        episodes.append(dict(episode, good_mask=th.cat((good, final), dim=0)))
+        for value in candidates:
+            counts[value] += set_counts(legal, decision, eligible & (gaps <= value))
+    return episodes, [dict(delta=value, **set_statistics(*count.tolist()))
+                      for value, count in counts.items()]
+
+
+def calibrate_delta(records, settings, task):
+    second_gaps = []
+    for _, gaps, decision in records:
+        gap = gaps.topk(2, largest=False, dim=-1).values[..., 1]
+        second_gaps.append(gap[decision & gap.isfinite()])
+    values = th.cat(second_gaps) if second_gaps else th.empty(0)
+    levels = [0.1, 0.25, 0.5, 0.75, 0.9]
+    quantiles = th.quantile(values, th.tensor(levels)).tolist() if values.numel() else [None] * len(levels)
+    explicit = settings["delta_by_task"].get(task)
+    requested = settings["second_gap_quantile"]
+    if explicit is not None:
+        delta, source = explicit, "configured"
+    elif values.numel():
+        delta, source = th.quantile(values, requested).item(), "second_gap_quantile"
+    else:
+        delta, source = 0.0, "no_two_action_decisions"
+    return delta, dict(source=source, requested_quantile=requested, decision_states=values.numel(),
+                       quantiles=dict(zip(map(str, levels), quantiles)))
+
+
 def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out):
     start = perf_counter()
-    delta = settings["delta_by_task"][task]
-    candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
-    counts = {value: th.zeros(4, dtype=th.long) for value in candidates}
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"]
@@ -133,18 +175,11 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     wins += 1
                     if len(successful) >= target:
                         continue
-                    batch = batch[:, :runner.t + 1]
-                    q = unroll(runner.mac, batch, runner.t)
-                    good, gaps = make_good_mask(batch, q, delta)
-                    legal, decision = decision_masks(batch)
-                    if (decision & ~good[:, :-1].any(dim=-1)).any():
-                        raise ValueError(f"empty reference good set in {task}, seed {seed}, episode {index}")
-                    eligible = legal & decision.unsqueeze(-1)
-                    for value in candidates:
-                        counts[value] += set_counts(legal, decision, eligible & (gaps <= value))
-                    episode["good_mask"] = good[0].clone()
-                    successful.append(episode)
+                    successful.append(reference_record(runner, batch, episode))
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
+    delta, calibration = calibrate_delta(successful, settings, task)
+    candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
+    successful, statistics = label_records(successful, delta, candidates)
     path = out / "action_set_memory" / f"phase{phase:04d}"
     path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
@@ -156,11 +191,22 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
         task=task, phase=phase, delta=delta, reference_checkpoint=checkpoint_path,
         requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
         failed=len(failed), blocks=blocks, collection_seconds=perf_counter() - start,
-        candidates=[dict(delta=value, **set_statistics(*counts[value].tolist())) for value in candidates]))
+        calibration=calibration, candidates=statistics))
     return pool
 
 
-def evaluate_task(args, spec, expected_layout, reference, task, evaluation, episodes=None):
+def evaluation_settings(protocol, task, focus):
+    settings = protocol["evaluation"]
+    order = list(dict.fromkeys(stage["task"] for stage in protocol["stages"]))
+    offset = order.index(task) * settings["task_seed_stride"]
+    seeds, count = settings["seeds"], settings["episodes_per_seed"]
+    if focus and settings.get("focus_seeds") is not None:
+        seeds, count = settings["focus_seeds"], settings["focus_episodes_per_seed"]
+    return dict(seeds=[seed + offset for seed in seeds], episodes_per_seed=count)
+
+
+def evaluate_task(args, spec, expected_layout, reference, task, evaluation, episodes=None,
+                  probe_records=None, probe_limit=0, log_probe_error=None):
     results = []
     with isolated_rollouts():
         remaining = episodes
@@ -171,9 +217,15 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
                 break
             with greedy_runner(args, spec, expected_layout, reference, task, seed) as runner:
                 for index in range(count):
-                    runner.run(test_mode=True)
-                    results.append(dict(seed=seed, index=index, length=runner.t,
-                                        won=bool(runner.last_episode_info.get("battle_won", False))))
+                    batch = runner.run(test_mode=True)
+                    won = bool(runner.last_episode_info.get("battle_won", False))
+                    results.append(dict(seed=seed, index=index, length=runner.t, won=won))
+                    if probe_records is not None and index < probe_limit:
+                        try:
+                            episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
+                            probe_records.append(reference_record(runner, batch, episode))
+                        except Exception:
+                            log_probe_error(traceback.format_exc())
             if remaining is not None:
                 remaining -= count
     wins = sum(row["won"] for row in results)
@@ -224,6 +276,8 @@ def train_sequence(protocol, seed, out):
         stages = protocol["stages"]
         evaluation = protocol["evaluation"]
         initial, before, latest, results = {}, {}, {}, []
+        probes = {}
+        nominal_end = 0
 
         def status(state, **extra):
             base.write(out / "status.json", dict(status=state, phase=phase, t_env=runner.t_env,
@@ -232,8 +286,15 @@ def train_sequence(protocol, seed, out):
         def agent_snapshot():
             return {name: value.detach().cpu().clone() for name, value in mac.agent.state_dict().items()}
 
-        def evaluate(reference, task, label):
-            row = evaluate_task(args, spec, expected_layout, reference, task, evaluation)
+        def probe_error(task, error):
+            base.append(out / "action_set_probe_errors.jsonl", dict(phase=phase, task=task, error=error))
+
+        def evaluate(reference, task, label, probe_records=None):
+            focus = label in ("stage_end", "initial_reference", "next_unseen")
+            row = evaluate_task(args, spec, expected_layout, reference, task,
+                                evaluation_settings(protocol, task, focus), probe_records=probe_records,
+                                probe_limit=settings["probe_episodes_per_seed"],
+                                log_probe_error=lambda error: probe_error(task, error))
             base.append(out / "evaluations.jsonl", dict(phase=phase, label=label, t_env=runner.t_env, **row))
             return row["win_rate"]
 
@@ -245,7 +306,8 @@ def train_sequence(protocol, seed, out):
         for phase, stage in enumerate(stages):
             task = stage["task"]
             begin = runner.t_env
-            end = begin + stage["steps"]
+            nominal_end += stage["steps"]
+            end = nominal_end if protocol.get("phase_boundary") == "cumulative" else begin + stage["steps"]
             # Only current-task training episodes enter the TD buffer.
             buffer = base.ReplayBuffer(scheme, groups, args.buffer_size, info["episode_limit"] + 1,
                                        preprocess=preprocess, device="cpu")
@@ -280,7 +342,8 @@ def train_sequence(protocol, seed, out):
             checkpoint.mkdir(parents=True, exist_ok=False)
             learner.save_models(str(checkpoint))
             reference = agent_snapshot()
-            row = {seen: evaluate(reference, seen, "stage_end")
+            probe_records = [] if preference is not None and settings["probe_episodes_per_seed"] else None
+            row = {seen: evaluate(reference, seen, "stage_end", probe_records if seen == task else None)
                    for seen in dict.fromkeys(stage["task"] for stage in stages[:phase + 1])}
             latest[task] = row[task]
             bwt = [value - latest[seen] for seen, value in row.items() if seen != task]
@@ -298,8 +361,29 @@ def train_sequence(protocol, seed, out):
                                                    before_first_training=before))
             if preference is not None:
                 status("collecting_memory")
-                preference.history[phase] = collect_memory(
-                    args, spec, expected_layout, reference, checkpoint, task, phase, settings, out)
+                pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
+                                      task, phase, settings, out)
+                preference.history[phase] = pool
+                if probe_records:
+                    try:
+                        labeled, _ = label_records(probe_records, pool["delta"])
+                        probe = dict(task=task, source_phase=phase, delta=pool["delta"], episodes=labeled)
+                        th.save(probe, out / "action_set_memory" / f"phase{phase:04d}" / "probe.th")
+                        probes[phase] = probe
+                    except Exception:
+                        probe_error(task, traceback.format_exc())
+                for probe in probes.values():
+                    try:
+                        with th.no_grad():
+                            probe_batch, good = batch_episodes(probe["episodes"], augmented, groups, args.device)
+                            _, _, stats = preference_loss(mac, probe_batch, good, settings["margin"])
+                        metrics = preference_statistics(stats.cpu().tolist())
+                        base.append(out / "action_set_probes.jsonl", dict(
+                            phase=phase, t_env=runner.t_env, task=probe["task"],
+                            source_phase=probe["source_phase"], delta=probe["delta"],
+                            episodes=len(probe["episodes"]), win_rate=row[probe["task"]], **metrics))
+                    except Exception:
+                        probe_error(probe["task"], traceback.format_exc())
         status("completed")
     except BaseException:
         status("failed", error=traceback.format_exc())
@@ -318,7 +402,7 @@ def evaluate_final(run, output, episodes, protocol):
     final = json.loads((run / "retention.json").read_text())["stages"][-1]
     reference = th.load(run / final["checkpoint"] / "agent.th", map_location="cpu")
     rows = [evaluate_task(args, spec, info["action_layout"],
-                          reference, task, protocol["evaluation"], episodes)
+                          reference, task, evaluation_settings(protocol, task, focus=True), episodes)
             for task in final["win_rates"]]
     base.write(output / "results.json", dict(checkpoint=final["checkpoint"], t_env=final["t_env"], tasks=rows))
 

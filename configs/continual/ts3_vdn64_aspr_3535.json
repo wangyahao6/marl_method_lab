@@ -1,0 +1,152 @@
+{
+  "id": "ts3_vdn64_aspr_3535_20261112",
+  "tasks": {
+    "A": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "B": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        4,
+        1,
+        0
+      ]
+    },
+    "C": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        1,
+        4,
+        0
+      ]
+    },
+    "D": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        3,
+        2,
+        0
+      ]
+    },
+    "E": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    }
+  },
+  "stages": [
+    {
+      "task": "A",
+      "steps": 2000000
+    },
+    {
+      "task": "B",
+      "steps": 2000000
+    },
+    {
+      "task": "C",
+      "steps": 2000000
+    },
+    {
+      "task": "D",
+      "steps": 2000000
+    },
+    {
+      "task": "E",
+      "steps": 2000000
+    }
+  ],
+  "phase_boundary": "cumulative",
+  "epsilon_on_switch": "cumulative_no_restart",
+  "action_set": {
+    "weight": 1.0,
+    "margin": 0.0,
+    "batch_episodes": 8,
+    "success_episodes": 100,
+    "seed_offsets": [
+      301001,
+      302001,
+      303001,
+      304001
+    ],
+    "attempts_per_seed": 125,
+    "second_gap_quantile": 0.5,
+    "probe_episodes_per_seed": 4,
+    "delta_candidates_by_task": {
+      "A": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "B": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "C": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "D": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "E": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ]
+    }
+  },
+  "evaluation": {
+    "seeds": [
+      91001,
+      91002
+    ],
+    "episodes_per_seed": 16,
+    "focus_seeds": [
+      91101,
+      91102,
+      91103,
+      91104
+    ],
+    "focus_episodes_per_seed": 32,
+    "task_seed_stride": 100,
+    "interval": 25000
+  }
+}

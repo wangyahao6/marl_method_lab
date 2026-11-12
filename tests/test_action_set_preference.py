@@ -82,6 +82,8 @@ class ActionSetTest(unittest.TestCase):
         protocol["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0)
         protocol["action_set"].update(weight=0.5, margin=0.25, success_episodes=2,
                                       seed_offsets=[101, 102], attempts_per_seed=2)
+        protocol["action_set"].update(second_gap_quantile=0.5, delta_by_task={},
+                                      probe_episodes_per_seed=1)
         original_config = driver.config
         original_train = QLearner.train
         td_tasks = []
@@ -114,7 +116,8 @@ class ActionSetTest(unittest.TestCase):
                 driver.train_sequence(driver.validate(disabled, "vdn", "action_set_preference"), 8, zero)
                 offline = Path(tmp) / "evaluation"
                 offline.mkdir()
-                driver.evaluate_final(out, offline, 3, protocol)
+                driver.evaluate_final(out, offline, 3,
+                                      driver.validate(protocol, "vdn", "action_set_preference"))
             for path in (out, baseline, zero):
                 self.assertEqual(json.loads((path / "status.json").read_text())["status"], "completed")
             for path in (baseline, zero):
@@ -142,6 +145,11 @@ class ActionSetTest(unittest.TestCase):
                 pool_dir = out / "action_set_memory" / f"phase{phase:04d}"
                 successful = th.load(pool_dir / "success.th")
                 failures = th.load(pool_dir / "failure.th")
+                summary = json.loads((pool_dir / "summary.json").read_text())
+                self.assertEqual(summary["calibration"]["source"], "second_gap_quantile")
+                self.assertEqual(summary["delta"], summary["calibration"]["quantiles"]["0.5"])
+                probes = th.load(pool_dir / "probe.th")
+                self.assertEqual({ep["seed"] for ep in probes["episodes"]}, {3, 4})
                 self.assertEqual({ep["seed"] for ep in successful["episodes"]}, {109, 110})
                 self.assertEqual(len(failures["episodes"]), 2)
                 self.assertTrue(all(not ep["won"] and "good_mask" not in ep for ep in failures["episodes"]))
@@ -174,6 +182,10 @@ class ActionSetTest(unittest.TestCase):
                             sorted((zero / "models").glob("*/agent.th"))):
                 a_state, b_state = th.load(a), th.load(b)
                 self.assertTrue(all(th.equal(a_state[k], b_state[k]) for k in a_state))
+            probe_rows = jsonlines(out / "action_set_probes.jsonl")
+            self.assertEqual([(row["phase"], row["source_phase"]) for row in probe_rows],
+                             [(0, 0), (1, 0), (1, 1), (2, 0), (2, 1), (2, 2)])
+            self.assertFalse((out / "action_set_probe_errors.jsonl").exists())
             retention = json.loads((out / "retention.json").read_text())
             self.assertEqual(set(retention["stages"][-1]["win_rates"]), set(protocol["tasks"]))
             offline_rows = json.loads((offline / "results.json").read_text())["tasks"]
