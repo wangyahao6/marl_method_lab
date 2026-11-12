@@ -71,7 +71,7 @@ cd /home/wyh/marl_method_lab
 
 ## 完整动作排序与 Top-1 偏好保持
 
-`full_rank_preference`（Exp-1）和 `top1_preference`（Exp-2）与 ASPR 共用 `vdn_action_set` 驱动。两者沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。首次抽到某个历史池时，从其 `reference_checkpoint` 加载并缓存该阶段的冻结 Agent。冻结和在线 Agent 分别初始化 GRU，从同一历史局的起点展开到最后一个决策步，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
+全排序偏好回放（FRPR，`full_rank_preference`）和首选偏好回放（T1PR，`top1_preference`）与 ASPR 共用 `vdn_action_set` 驱动。两者沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。首次抽到某个历史池时，从其 `reference_checkpoint` 加载并缓存该阶段的冻结 Agent。冻结和在线 Agent 分别初始化 GRU，从同一历史局的起点展开到最后一个决策步，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
 
 对每个智能体决策，令 `s = max(std(Q_old[合法动作]), q_scale_floor)`，标准差使用总体口径。旧模型的筛选间隔和当前模型的排序间隔均除以同一个冻结尺度 `s`。尺度下限保留了近似平局的识别能力。固定旧尺度使两个合法动作的情况也能通过当前 Q 间隔获得梯度。
 
@@ -106,3 +106,11 @@ cd /home/wyh/marl_method_lab
 `.venv/bin/python -m unittest discover -s tests -v` 验证两种损失和四种方法的三阶段 CPU 集成。测试使用真实 VDN/GRU 和脚本化 SMAC 风格环境，并检查参考模型冻结、采样一致性和联合损失。
 
 真实环境检查使用既有 TS3 双层 VDN seed 3535 的 B、C 阶段末检查点。在 SMACv2 5v5 收集一条 B 胜局（73 步）和一条 C 局（49 步），四种方法各执行一次 CPU learner 更新。两种排序方法的 TD loss 同为 0.154165。Exp-1 有 281 个有效决策和 2070 个动作对，Exp-2 有 108 个有效决策和 522 个动作对。四种方法均产生有限梯度并更新当前 GRU。未执行正式训练或保留效果评估。
+
+## TS4 回访配对实验
+
+种子 3535，双层 64 宽共享 VDN。双方 5v5 纯追猎者 → 纯狂热者 → 纯巨像 → 纯追猎者，按累计 1M、1.5M、2M、3M 阈值整局切换。两种方法各训练一次前三阶段；首阶段无历史约束，从 B 开始使用各自默认参数。C 末从同一状态分出两条 A₂ 路径。继续组仍回放 B/C 历史，取消组从回访起只使用 VDN-TD。首次 A 的胜局仍保留在前缀，但 A₂ 时同任务池不进入偏好采样。四条 A₂ 分支与两个前缀合计名义训练量 8M。
+
+使用 `configs/continual/ts4_vdn64_ranking_return_3535.json`。训练入口是 `scripts/run.py --suite vdn_action_set --algorithm vdn`，配合对应 `--method` 和 `--preference-role prefix` 保存前三阶段。两条回访使用 `--preference-role keep` 或 `--preference-role release`，加 `--parent` 指向对应前缀的绝对运行目录。前缀在 C 末保存在线网络、目标网络、优化器、更新计数、累计探索状态、训练及历史采样随机状态、环境分布状态和各历史池。分支重新启动 SC2 进程，恢复可保存的环境分布状态。TD replay 沿用偏好驱动的逐阶段新建协议，A₂ 两组都使用空的当前任务 TD buffer。端点评估每任务 128 局，定期当前任务评估 32 局，每 25k 步一次。前缀的 C 末三任务结果作为回访更新前的共同参考；分支的 `retention.json` 保留该前缀结果。
+
+调度计划存于 `results/ts4_vdn64_ranking_return_3535_20261112/plan.json`，回访任务依赖对应方法前缀成功退出。`branch_restore.json` 保存恢复来源及模型指纹，正式结果按三任务阶段矩阵、A₂ 恢复及 B/C 保留比较。

@@ -12,6 +12,7 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import RANK_DEFAULTS, RANK_METHODS
+from protection import digest
 from learners.ranking_preference import RankingPreference, full_rank_preference, top1_preference
 
 
@@ -177,6 +178,61 @@ class RankingTest(unittest.TestCase):
                 self.assertTrue(all(th.equal(saved[k], v) for k, v in reference.agent.state_dict().items()))
                 self.assertTrue(all(not p.requires_grad and p.grad is None for p in reference.agent.parameters()))
                 self.assertIsNone(reference.hidden_states)
+
+    def test_keep_branch_matches_uninterrupted_sequence(self):
+        raw = json.loads(PROTOCOL_PATH.read_text())
+        raw["stages"].append(dict(task="stalker", steps=16))
+        for stage in raw["stages"]:
+            stage["steps"] = 16
+        raw.update(phase_boundary="cumulative", epsilon_on_switch="cumulative_no_restart")
+        raw["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0)
+        raw["action_set"].update(batch_episodes=4, success_episodes=2,
+                                 seed_offsets=[101, 102], attempts_per_seed=2)
+        raw["full_rank_preference"] = dict(min_gap=0)
+        protocol = driver.validate(raw, "vdn", "full_rank_preference")
+
+        class ForkableScriptedProtoss(ScriptedProtoss):
+            def distribution_state(self):
+                return self.episodes
+
+            def restore_distribution(self, episodes):
+                self.episodes = episodes
+
+        original_config = driver.config
+
+        def tiny_config(*args):
+            return dict(original_config(*args), buffer_size=8, batch_size=2, target_update_interval=3)
+
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(
+            driver.base.environments, {"action_set_protoss": ForkableScriptedProtoss}
+        ), patch.object(driver, "config", tiny_config), patch.object(
+            th.cuda, "is_available", return_value=False
+        ), np.testing.suppress_warnings() as quiet:
+            quiet.filter(UserWarning)
+            full, prefix, keep, release = [Path(tmp) / name for name in ("full", "prefix", "keep", "release")]
+            for run in (full, prefix, keep, release):
+                run.mkdir()
+            driver.train_sequence(protocol, 8, full)
+            driver.train_sequence(protocol, 8, prefix, role="prefix")
+            for branch in (keep, release):
+                driver.train_sequence(protocol, 8, branch, role=branch.name, parent=prefix)
+                restored = json.loads((branch / "branch_restore.json").read_text())
+                self.assertEqual(restored["model_hash"], restored["parent_model_hash"])
+                transitions = jsonlines(branch / "transitions.jsonl")
+                self.assertEqual(len(transitions), 1)
+                self.assertEqual(transitions[0]["phase"], 3)
+                self.assertEqual(transitions[0]["start"], restored["t_env"])
+                self.assertEqual(transitions[0]["target"], 64)
+            for name in ("agent.th", "opt.th"):
+                continued = th.load(next((full / "models").glob(f"phase0003_*/{name}")))
+                branched = th.load(next((keep / "models").glob(f"phase0003_*/{name}")))
+                self.assertEqual(digest(continued), digest(branched))
+            keep_rows = jsonlines(keep / "full_rank_preference_updates.jsonl")
+            self.assertTrue(keep_rows)
+            self.assertTrue(all({entry["task"] for entry in row["historical_tasks"]} ==
+                                {"zealot", "colossus"} for row in keep_rows))
+            self.assertFalse((release / "full_rank_preference_updates.jsonl").exists())
+            self.assertFalse((release / "action_set_memory").exists())
 
 
 if __name__ == "__main__":

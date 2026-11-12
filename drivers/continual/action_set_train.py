@@ -18,7 +18,9 @@ from learners.action_set_preference import (
     preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
 from learners.ranking_preference import RankingPreference
-from action_set_protocol import RANK_METHODS, validate
+from action_set_protocol import RANK_METHODS, validate, validate_fork
+from hetero_train import restore_rng
+from protection import rng_state
 import numpy as np
 import torch as th
 import yaml
@@ -240,11 +242,16 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
     return dict(task=task, wins=wins, episodes=len(results), win_rate=wins / len(results), outcomes=results)
 
 
-def train_sequence(protocol, seed, out):
+def train_sequence(protocol, seed, out, role=None, parent=None):
+    validate_fork(protocol, role, parent)
     random.seed(seed)
     np.random.seed(seed)
     th.manual_seed(seed)
     args = SimpleNamespace(**config(protocol, seed, out))
+    if role:
+        args.preference_role = role
+        args.parent = str(parent) if parent else None
+        args.preference_weight = 0.0 if role == "release" else protocol[protocol["method"]]["weight"]
     logger = base.Logger(logging.getLogger(out.name))
     original_log = logger.log_stat
 
@@ -281,7 +288,7 @@ def train_sequence(protocol, seed, out):
         if method == "action_set_preference" and settings["weight"]:
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
                                              lambda row: base.append(out / "action_set_updates.jsonl", row))
-        elif method in RANK_METHODS and protocol[method]["weight"]:
+        elif method in RANK_METHODS and protocol[method]["weight"] and role != "release":
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             preference = RankingPreference(method, out, ranking, np.random.default_rng(seed), augmented, groups,
                                             lambda row: base.append(out / f"{method}_updates.jsonl", row))
@@ -311,12 +318,54 @@ def train_sequence(protocol, seed, out):
             base.append(out / "evaluations.jsonl", dict(phase=phase, label=label, t_env=runner.t_env, **row))
             return row["win_rate"]
 
+        first_phase = 0
+        if parent:
+            state = th.load(parent / "return_state.th", map_location="cpu")
+            if state["protocol"] != protocol or state["seed"] != seed:
+                raise ValueError("preference branch must match its prefix protocol and seed")
+            report = json.loads((parent / "retention.json").read_text())
+            initial, before = report["initial_reference"], report["before_first_training"]
+            for entry in report["stages"]:
+                latest[entry["task"]] = entry["win_rates"][entry["task"]]
+                results.append(dict(entry, checkpoint=str(parent / entry["checkpoint"])))
+            first_phase = len(results)
+            phase = first_phase
+            nominal_end = sum(stage["steps"] for stage in stages[:first_phase])
+            learner.load_models(results[-1]["checkpoint"])
+            learner.target_mac.agent.load_state_dict(state["target_agent"])
+            learner.last_target_update_episode = state["last_target_update_episode"]
+            learner.log_stats_t = state["learner_log_t"]
+            runner.t_env, episode, updates = state["t_env"], state["episode"], state["updates"]
+            runner.train_returns = state["train_returns"]
+            runner.train_stats = state["train_stats"]
+            runner.log_train_stats_t = state["runner_log_t"]
+            mac.action_selector.exploration_start = state["exploration_start"]
+            mac.action_selector.epsilon = state["epsilon"]
+            runner.env.restore_distribution(state["environment_distributions"])
+            if preference is not None:
+                preference.rng.bit_generator.state = state["preference_rng"]
+                for old_phase in range(first_phase):
+                    path = parent / "action_set_memory" / f"phase{old_phase:04d}" / "success.th"
+                    pool = th.load(path, map_location="cpu")
+                    pool["reference_checkpoint"] = str(parent / pool["reference_checkpoint"])
+                    preference.history[old_phase] = pool
+            restore_rng(state["rng"])
+            base.write(out / "branch_restore.json", dict(
+                parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
+                preference_weight=args.preference_weight,
+                t_env=runner.t_env, episode=episode, updates=updates,
+                last_target_update_episode=learner.last_target_update_episode,
+                model_hash=base.parameter_hash(learner), parent_model_hash=state["model_hash"],
+                engine="new SC2 process, distribution RNG restored"))
         status("running")
-        reference = agent_snapshot()
-        for task in dict.fromkeys(stage["task"] for stage in stages if stage["task"] != stages[0]["task"]):
-            initial[task] = evaluate(reference, task, "initial_reference")
+        if not parent:
+            reference = agent_snapshot()
+            for task in dict.fromkeys(stage["task"] for stage in stages if stage["task"] != stages[0]["task"]):
+                initial[task] = evaluate(reference, task, "initial_reference")
 
-        for phase, stage in enumerate(stages):
+        stop_phase = len(stages) - 1 if role == "prefix" else len(stages)
+        for phase in range(first_phase, stop_phase):
+            stage = stages[phase]
             task = stage["task"]
             begin = runner.t_env
             nominal_end += stage["steps"]
@@ -398,6 +447,17 @@ def train_sequence(protocol, seed, out):
                             episodes=len(probe["episodes"]), win_rate=row[probe["task"]], **metrics))
                     except Exception:
                         probe_error(probe["task"], traceback.format_exc())
+        if role == "prefix":
+            th.save(dict(
+                protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
+                target_agent=learner.target_mac.agent.state_dict(),
+                last_target_update_episode=learner.last_target_update_episode,
+                learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
+                train_returns=runner.train_returns, train_stats=runner.train_stats,
+                epsilon=mac.action_selector.epsilon, exploration_start=mac.action_selector.exploration_start,
+                environment_distributions=runner.env.distribution_state(), rng=rng_state(),
+                preference_rng=preference.rng.bit_generator.state, model_hash=base.parameter_hash(learner),
+            ), out / "return_state.th")
         status("completed")
     except BaseException:
         status("failed", error=traceback.format_exc())
@@ -427,6 +487,8 @@ def main():
     mode.add_argument("--seed", type=int)
     mode.add_argument("--evaluate-run", type=Path)
     parser.add_argument("--episodes", type=int)
+    parser.add_argument("--preference-role", choices=("prefix", "keep", "release"))
+    parser.add_argument("--parent", type=lambda path: Path(path).resolve())
     args = parser.parse_args()
     out = Path(os.environ["MARL_RUN_DIR"])
     protocol = base.PROTOCOL
@@ -436,7 +498,7 @@ def main():
     if args.evaluate_run:
         evaluate_final(args.evaluate_run, out, args.episodes, protocol)
     else:
-        train_sequence(protocol, args.seed, out)
+        train_sequence(protocol, args.seed, out, role=args.preference_role, parent=args.parent)
 
 
 if __name__ == "__main__":

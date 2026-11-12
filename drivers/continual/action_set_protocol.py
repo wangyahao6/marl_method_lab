@@ -108,6 +108,18 @@ def validate(protocol, algorithm, method):
                 action_set=settings, **ranking)
 
 
+def validate_fork(protocol, role, parent):
+    if bool(parent) != (role in ("keep", "release")):
+        raise ValueError("keep and release require --parent; prefix and full runs take no parent")
+    if role:
+        method = protocol["method"]
+        if method not in RANK_METHODS or not protocol[method]["weight"]:
+            raise ValueError("preference forks require an enabled ranking method")
+        stages = protocol["stages"]
+        if stages[-1]["task"] not in {stage["task"] for stage in stages[:-1]}:
+            raise ValueError("the final stage of a preference fork must revisit a trained task")
+
+
 def valid_seeds(seeds):
     return (isinstance(seeds, list) and bool(seeds)
             and all(type(seed) is int and 0 <= seed < 2**31 for seed in seeds)

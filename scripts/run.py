@@ -46,6 +46,7 @@ def main():
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
     p.add_argument('--hetero-role',choices=['prefix','branch'])
     p.add_argument('--parent')
+    p.add_argument('--preference-role', choices=['prefix', 'keep', 'release'])
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
@@ -76,6 +77,8 @@ def main():
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
+    if a.preference_role and a.suite != 'vdn_action_set':
+        p.error('--preference-role requires --suite vdn_action_set')
     if a.method in preference_methods and a.suite != 'vdn_action_set':
         p.error(f'{a.method} requires --suite vdn_action_set')
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
@@ -164,19 +167,28 @@ def main():
         details = dict(protocol=protocol, parent=a.parent, group=a.ts3_group, steps=steps)
     elif a.suite == 'vdn_action_set':
         if (a.protocol == p.get_default('protocol') or a.map or a.steps is not None or a.set
-                or a.parent or a.ts3_role or a.hetero_role or a.scenario or a.ts3_group != 'N'
+                or a.ts3_role or a.hetero_role or a.scenario or a.ts3_group != 'N'
                 or a.ts4_group != 'N' or a.group != 'N'):
             p.error('vdn_action_set takes its complete sequence and settings from a named --protocol JSON')
         sys.path.insert(0, str(ROOT / 'drivers/continual'))
-        from action_set_protocol import validate
+        from action_set_protocol import validate, validate_fork
         try:
             protocol = validate(json.loads((ROOT / a.protocol).read_text()), a.algorithm, a.method)
+            validate_fork(protocol, a.preference_role, a.parent)
         except (ValueError, OSError) as exc:
             p.error(str(exc))
         env['MARL_PROTOCOL'] = str(out / 'protocol.json')
         env['SC2PATH'] = str(ROOT / 'runtime/SMACv2StarCraftII')
         command = [sys.executable, str(ROOT / 'drivers/continual/action_set_train.py'), '--seed', str(a.seed)]
-        details = dict(protocol=protocol, steps=sum(stage['steps'] for stage in protocol['stages']))
+        stages = protocol['stages']
+        if a.preference_role:
+            command += ['--preference-role', a.preference_role]
+            stages = stages[-1:] if a.parent else stages[:-1]
+        if a.parent:
+            command += ['--parent', str(Path(a.parent).resolve())]
+        details = dict(protocol=protocol, steps=sum(stage['steps'] for stage in stages))
+        if a.preference_role:
+            details.update(preference_role=a.preference_role, parent=a.parent)
     elif a.suite=='smac':
         if not a.map or a.steps is None or a.steps<=0: p.error('smac requires --map and positive --steps')
         if a.scenario or a.method=='softprotect': p.error('softprotect currently uses the continual driver')
