@@ -76,7 +76,9 @@ class QLearner:
             self.a2_trace = A2Trace(mac.agent, self.trhr, args.local_results_path, window,
                                     single_ff=single_ff, stages=getattr(args, "trace_stages", 0))
 
-    def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False):
+    def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False, preference=None):
+        if preference is not None and not check:
+            preference.begin_update()
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
         actions = batch["actions"][:, :-1]
@@ -150,12 +152,19 @@ class QLearner:
             self.optimiser.zero_grad()
             return
 
+        td_loss = loss
+        pref_loss = preference(self.mac) if preference is not None else None
+        if pref_loss is not None:
+            loss = td_loss + preference.settings["weight"] * pref_loss
+
         # Optimise
         self.optimiser.zero_grad()
         loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
         snapshot = self.a2_trace.before_step() if self.a2_trace is not None else None
         self.optimiser.step()
+        if preference is not None:
+            preference.record(td_loss, loss, pref_loss, t_env)
         if self.trhr is not None:
             self.trhr.observe(trhr_signs, transition_mask, batch, self.logger, t_env)
         if self.a2_trace is not None:

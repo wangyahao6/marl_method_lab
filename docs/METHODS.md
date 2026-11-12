@@ -31,6 +31,10 @@
 
 通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。TS6 单层基线通过 `scripts/run.py --suite ts6 --method baseline --ts3-role full --protocol configs/continual/ts6.json` 使用。从 A 起训到 J，每阶段 2M，保留连续回放与优化器状态。全程复用 VDN 训练及连续任务独立评估。TS5 单层基线使用 `--suite ts5 --protocol configs/continual/ts5.json`，按 TS7 的 A–E 双边精确阵容从头训练，每阶段 2M，使用逐任务 ε 衰减。按每 100k 步和阶段末取当前任务最近 32 局，用当前模型复算唯一前馈层 A（`agent.net[2]`）的状态加权活动。记录全宽归一化分数、top-3 和严格 >3 名单，不改变训练。
 
+## VDN 可接受动作集合偏好约束
+
+[方法与协议](VDN_ACTION_SET_PREFERENCE.md)使用历史成功轨迹约束当前 Agent 的局部 Q 排序，支持任意长度的 5v5 Protoss 任务序列。训练入口为 `--suite vdn_action_set --method action_set_preference`，同入口的 `--method baseline` 提供对照。
+
 ## 用户方法
 
 `drivers/continual/protection.py`、`release_schedule.py`、`detection_common.py`为状态加权Mixer W/V软保护；`neuron_records.py`为名单和频次记录。导入自已停止的latest_ramp工程，不导入其旧队列或结果。

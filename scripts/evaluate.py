@@ -17,6 +17,11 @@ if suite=='smac':
     if len(choices)!=1:p.error('expected a single checkpoint family; inspect runs/<id>/models')
     cfg.update(evaluate=True,save_model=False,checkpoint_path=str(choices[0]),load_step=a.step,test_nepisode=a.episodes,local_results_path=str(out))
     cmd=[sys.executable,str(ROOT/'scripts/smac_entry.py'),str(out/'config.json')]
+elif suite=='vdn_action_set':
+    if a.step:p.error('action-set evaluation uses the final checkpoint')
+    env['MARL_PROTOCOL']=str(run/'protocol.json')
+    env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
+    cmd=[sys.executable,str(ROOT/'drivers/continual/action_set_train.py'),'--evaluate-run',str(run),'--episodes',str(a.episodes)]
 else:
     if a.step:p.error('continual evaluator currently evaluates its final checkpoint only')
     env['MARL_PROTOCOL']=str(run/'protocol.json')

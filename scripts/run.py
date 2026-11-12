@@ -33,9 +33,9 @@ def trhr_settings(parser, overrides):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity'],required=True)
+    p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi','softprotect_chi_trhr'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi','softprotect_chi_trhr','action_set_preference'],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -75,6 +75,8 @@ def main():
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
+    if a.method == 'action_set_preference' and a.suite != 'vdn_action_set':
+        p.error('action_set_preference requires --suite vdn_action_set')
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None
@@ -159,6 +161,21 @@ def main():
         steps = {'prefix': thresholds[0], 'branch': thresholds[-1]-thresholds[0],
                  'full': thresholds[-1]}[a.ts3_role]
         details = dict(protocol=protocol, parent=a.parent, group=a.ts3_group, steps=steps)
+    elif a.suite == 'vdn_action_set':
+        if (a.protocol == p.get_default('protocol') or a.map or a.steps is not None or a.set
+                or a.parent or a.ts3_role or a.hetero_role or a.scenario or a.ts3_group != 'N'
+                or a.ts4_group != 'N' or a.group != 'N'):
+            p.error('vdn_action_set takes its complete sequence and settings from a named --protocol JSON')
+        sys.path.insert(0, str(ROOT / 'drivers/continual'))
+        from action_set_protocol import validate
+        try:
+            protocol = validate(json.loads((ROOT / a.protocol).read_text()), a.algorithm, a.method)
+        except (ValueError, OSError) as exc:
+            p.error(str(exc))
+        env['MARL_PROTOCOL'] = str(out / 'protocol.json')
+        env['SC2PATH'] = str(ROOT / 'runtime/SMACv2StarCraftII')
+        command = [sys.executable, str(ROOT / 'drivers/continual/action_set_train.py'), '--seed', str(a.seed)]
+        details = dict(protocol=protocol, steps=sum(stage['steps'] for stage in protocol['stages']))
     elif a.suite=='smac':
         if not a.map or a.steps is None or a.steps<=0: p.error('smac requires --map and positive --steps')
         if a.scenario or a.method=='softprotect': p.error('softprotect currently uses the continual driver')
