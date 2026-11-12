@@ -3,9 +3,9 @@ import torch as th
 from release_schedule import ReleaseSchedule
 
 class TS3Protection:
-    def __init__(self, learner, layer, mode, record, *, protect_output=True):
+    def __init__(self, learner, layer, mode, record, *, protect_output=True, recovery_steps=100000):
         self.learner=learner; self.layer=layer; self.mode=mode; self.record=record
-        self.schedule=ReleaseSchedule({layer:learner.args.rnn_hidden_dim}, .1, 100000) if layer else None
+        self.schedule=ReleaseSchedule({layer:learner.args.rnn_hidden_dim}, .1, recovery_steps) if layer else None
         self.protect_output = protect_output
         self.t_env=0; self.count=0
         self.original=learner.optimiser.step

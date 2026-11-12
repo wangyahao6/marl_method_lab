@@ -3,7 +3,7 @@
 
 class ReleaseSchedule:
     def __init__(self, widths, protected_scale=0.1, recovery_steps=100000):
-        assert 0 < protected_scale < 1 and recovery_steps > 0
+        assert 0 < protected_scale < 1 and recovery_steps >= 0
         self.widths = dict(widths)
         self.scale = protected_scale
         self.duration = recovery_steps
@@ -32,7 +32,8 @@ class ReleaseSchedule:
             assert all(0 <= j < width for j in chosen)
             # Only newly exiting units start a ramp; existing ramps keep their clock.
             for j in self.protected[label]-chosen:
-                self.recovering[label][j] = dict(start=t_env, scale=old_values[label][j])
+                if self.duration:
+                    self.recovering[label][j] = dict(start=t_env, scale=old_values[label][j])
             for j in chosen:
                 self.recovering[label].pop(j, None)
             self.protected[label] = chosen

@@ -109,8 +109,17 @@ def main():
     parser.add_argument('--parent');parser.add_argument('--group',choices=P['groups'],default='N');parser.add_argument('--seed',type=int,required=True);o=parser.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);started=time.time();runner=None;updates=episode=phase=0
     save_branch_prefix = o.role == 'branch' and P.get('save_branch_prefix', False)
+    release_search = P.get('chi_release_search', False)
+    release_trial = P.get('chi_release_trial', False)
+    release_event = None
     if o.role == 'branch':
         phase = P.get('branch_start_phase', 1) - 1
+    if release_trial:
+        release_event = json.loads((Path(o.parent)/'release_event.json').read_text())
+        if release_event['phase'] is None:
+            write(out/'status.json', dict(status='skipped', reason='no CHI exit in TS8'))
+            return
+        phase = release_event['phase']
     track_retention = EXTENDED or FACTORIAL or TS4 or CHI_COMPARISON or o.role == 'full'
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
@@ -220,7 +229,8 @@ def main():
             remember(selection)
         protect_output = (args.chi_protect_output if CHI else o.group != 'A_union_input')
         protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x),
-                                protect_output=protect_output)
+                                protect_output=protect_output,
+                                recovery_steps=P['recovery_steps'] if release_trial else 100000)
         gem=None
         if gem_band:
             from a2_local_gem import A2LocalGEM
@@ -233,8 +243,11 @@ def main():
             del source_batch
         chi_probes = {}
         if CHI and o.role == 'branch':
-            chi_probes[0] = (ROOT/P['chi_prefix_probe'] if P.get('chi_prefix_probe')
-                             else parent/'chi_probes'/'phase0.th')
+            if release_trial:
+                chi_probes = {int(i): Path(path) for i, path in release_event['probes'].items()}
+            else:
+                chi_probes[0] = (ROOT/P['chi_prefix_probe'] if P.get('chi_prefix_probe')
+                                 else parent/'chi_probes'/'phase0.th')
 
         def refresh_chi(phase, task, *, episodes=None):
             try:
@@ -255,7 +268,15 @@ def main():
                 return {layer: dict(sets={'overall': []}, defined=False)} if layer else None
 
         if CHI and o.role == 'branch':
-            selection = refresh_chi(0, P['order'][0])
+            if release_trial:
+                selection = {layer: dict(sets={'overall': release_event['selected']},
+                                         defined=release_event['defined'])}
+                protector.schedule.replace({layer: release_event['previous']}, runner.t_env)
+                if P.get('chi_keep_exiting'):
+                    selection[layer]['sets']['overall'] = sorted(
+                        set(release_event['selected']) | set(release_event['exiting']))
+            else:
+                selection = refresh_chi(0, P['order'][0])
             if CHI_TRHR:
                 remember(selection)
         if o.role == 'branch' and layer:
@@ -313,7 +334,7 @@ def main():
                                     will_retry=will_retry, error=str(error)))
                             if will_retry:
                                 h.restore_rng(block_rng)
-                            elif retries and label == 'periodic':
+                            elif retries and label in ('periodic', 'release_window', 'release_old'):
                                 status()
                                 return
                             else:
@@ -445,6 +466,19 @@ def main():
         else:
             phases = range(phase + 1, len(P['order']))
         last_phase = len(P['order']) - 1
+
+        def save_continuation():
+            state = dict(agent=mac.agent.state_dict(), mixer=learner.mixer.state_dict(),
+                         target_agent=learner.target_mac.agent.state_dict(),
+                         target_mixer=learner.target_mixer.state_dict(),
+                         optimizer=learner.optimiser.state_dict(), buffer=buffer,
+                         t_env=runner.t_env, episode=episode, updates=updates,
+                         last_target_update_episode=learner.last_target_update_episode,
+                         log_stats_t=learner.log_stats_t, epsilon=mac.action_selector.epsilon,
+                         rng=rng_state(), environment_distributions=runner.env.distribution_state(),
+                         model_hash=base.parameter_hash(learner))
+            th.save(state, out/'prefix_state.th')
+
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=vdn_chi.PROBE_EPISODES if CHI else P['screen_episodes'])
             if TRACE:
@@ -461,7 +495,12 @@ def main():
             audited=[False]
             def audit(x):
                 if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
-            runner.env.audit=audit;status();evaluate(task,False,'phase_start');next_test=(runner.t_env//25000+1)*25000
+            runner.env.audit = audit
+            status()
+            evaluate(task, release_trial, 'phase_start')
+            next_test = begin + 25000 if release_trial else (begin//25000+1)*25000
+            if release_trial:
+                old_tasks = [seen for seen in dict.fromkeys(P['order'][:phase]) if seen != task]
             if detection:
                 interval = detection['interval']
                 next_detection = (begin // interval + 1) * interval
@@ -487,8 +526,16 @@ def main():
                     next_detection += interval
                 if runner.t_env>=end:break
                 if runner.t_env>=next_test:
-                    evaluate(task,False,'periodic')
-                    while next_test<=runner.t_env:next_test+=25000
+                    elapsed = next_test - begin
+                    if release_trial and elapsed <= 200000:
+                        evaluate(task, True, 'release_window', reference_phase=elapsed)
+                        if elapsed in (50000, 100000, 200000):
+                            for seen in old_tasks:
+                                evaluate(seen, True, 'release_old', reference_phase=elapsed)
+                    else:
+                        evaluate(task, False, 'periodic')
+                    while next_test <= runner.t_env:
+                        next_test += 25000
             if TRACE:
                 trace.flush(runner.t_env)
             base.log_task_epsilon(runner, out, phase, task, 'end')
@@ -502,8 +549,23 @@ def main():
                 evaluate(seen, True, 'stage_end')
             if (gem or track_retention) and phase < last_phase and P['order'][phase+1] not in seen_tasks:
                 evaluate(P['order'][phase+1], True, 'next_unseen', reference_phase=phase)
+            if release_trial:
+                break
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
+                if release_search and phase < last_phase:
+                    previous = protector.schedule.protected[layer]
+                    item = selection[layer]
+                    chosen = set(item['sets']['overall'])
+                    exiting = previous - chosen
+                    if exiting:
+                        save_continuation()
+                        write(out/'release_event.json', dict(
+                            phase=phase, t_env=runner.t_env, previous=sorted(previous),
+                            selected=sorted(chosen), exiting=sorted(exiting),
+                            defined=item.get('defined', True),
+                            probes={i: str(path) for i, path in chi_probes.items()}))
+                        break
                 if CHI_TRHR:
                     remember(selection)
                 if CHI_COMPARISON and o.role == 'prefix':
@@ -533,8 +595,9 @@ def main():
         if o.role == 'prefix' or save_branch_prefix:
             if not CHI or CHI_COMPARISON:
                 write(out/'selection.json',selection)
-            state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
-            th.save(state,out/'prefix_state.th')
+            save_continuation()
+        if release_search and not (out/'release_event.json').exists():
+            write(out/'release_event.json', dict(phase=None, t_env=runner.t_env))
         if gem:gem.flush()
         if track_retention and o.role != 'prefix':
             all_labels = ('stage_end', 'initial_reference', 'next_unseen')
@@ -551,6 +614,11 @@ def main():
                 sources = [(Path(o.parent), all_labels)]
                 if P.get('earlier_evaluation_source'):
                     sources.insert(0, (ROOT/P['earlier_evaluation_source'], all_labels))
+                if release_trial:
+                    launch = json.loads((parent/'launch.json').read_text())
+                    earlier_parent = launch['request'].get('parent')
+                    if earlier_parent:
+                        sources.insert(0, (Path(earlier_parent), all_labels))
             write(out/'retention.json', sequence_metrics(P['order'], sources + [(out, all_labels)]))
         status('completed',finished=time.time())
     except BaseException:
