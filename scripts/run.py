@@ -131,8 +131,13 @@ def main():
         if top_k is None and threshold is None:
             threshold = 3
         probe = protocol.get('chi_prefix_probe')
-        if a.parent and not (ROOT/probe if probe else Path(a.parent)/'chi_probes'/'phase0.th').is_file():
-            p.error('CHI branch requires a prefix with a saved fixed probe')
+        if a.parent:
+            if protocol.get('chi_release_trial'):
+                event = Path(a.parent)/'release_event.json'
+                if not event.is_file():
+                    p.error('CHI release trial requires the parent release event record')
+            elif not (ROOT/probe if probe else Path(a.parent)/'chi_probes'/'phase0.th').is_file():
+                p.error('CHI branch requires a prefix with a saved fixed probe')
         matched = protocol.get('intervention') == 'single_ff_chi_comparison'
         if chi_control and (not matched or a.ts3_role != 'branch'):
             p.error('the matched soft protection control requires a CHI comparison protocol and prefix')
