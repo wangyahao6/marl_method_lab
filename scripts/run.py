@@ -97,9 +97,9 @@ def main():
         p.error('trhr.* overrides require --method trhr')
     chi_control = a.algorithm == 'vdn_1ff' and a.method == 'softprotect' and a.ts3_group == 'A_union'
     if chi or chi_control:
-        if chi_trhr and (a.suite, a.algorithm, a.ts3_role, a.ts3_group) != (
-                'ts4', 'vdn_1ff_128', 'branch', 'A_chi_union'):
-            p.error('CHI + TRHR requires the TS4 128-unit A_chi_union branch')
+        if chi_trhr and ((a.suite, a.algorithm, a.ts3_group) != ('ts4', 'vdn_1ff_128', 'A_chi_union')
+                         or a.ts3_role not in ('branch', 'full')):
+            p.error('CHI + TRHR requires TS4 128-unit A_chi_union with full or branch')
         if a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8') or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128'):
             p.error('CHI requires shared-Agent VDN in TS3–TS8')
         if a.set or a.steps is not None:
@@ -116,6 +116,9 @@ def main():
             if not protocol.get('trhr_settings') or a.seed not in protocol.get('seeds', []):
                 p.error('use a named TS4 CHI protocol with TRHR settings and the matching seed')
             protocol['trhr'] = protocol['trhr_settings']
+            if a.ts3_role == 'full':
+                protocol['shared_prefix'] = False
+                protocol.pop('chi_prefix_probe', None)
         protocol_id = protocol.get('id', '')
         if not (protocol_id == a.suite or (a.suite == 'ts3' and protocol_id.startswith('ts3_'))
                 or (a.suite == 'ts4' and protocol.get('suite') == 'ts4'
