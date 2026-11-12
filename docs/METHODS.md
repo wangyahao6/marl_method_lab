@@ -67,11 +67,13 @@ The standalone TRHR intervention uses the existing two-layer VDN Agent on static
 
 ## VDN 历史探测集重评估（CHI）
 
-在 TS3、TS5、TS6、TS7 的共享 Agent 序列驱动中，通过 `scripts/run.py --method softprotect_chi` 启用。两层 VDN 使用 `--ts3-group A1_chi` 或 `A2_chi`，单层 VDN 使用 `A_chi`。支持 `--ts3-role full` 从 A 开始训练，也支持用同一方法以 `--ts3-role prefix --ts3-group N` 保存 A 的探测集，再以 `--ts3-role branch --parent <prefix目录>` 从 A 续训。分支引用父运行的固定探测集。仅持有模型权重的旧检查点缺少固定探测集，无法用来还原原训练轨迹及权重。
+项目默认软保护采用 CHI 重评估与历史入选并集。两层 VDN 默认保护 A2，使用整体 top-3；参考协议为 `configs/continual/ts3_vdn_a2_chi_top3.json`。单层 VDN 的对应位置为 A，筛选规则以所选协议为准。
+
+通过 `scripts/run.py --method softprotect_chi` 启用。使用 `--ts3-role full` 或 `branch` 时，两层和单层 VDN 分别默认选择 `A2_chi_union` 和 `A_chi_union`。使用 `--ts3-role prefix` 保存无保护 A 前缀及固定探测集，续训用 `--ts3-role branch --parent <prefix目录>`。仅持有模型权重的检查点无法提供原训练探测集。
 
 每个阶段保留最近至多 32 局完整训练轨迹。阶段末用在线 Agent 计算 VDN 单智能体替换动作的最大 Q 差，在有效存活智能体间取均值作为状态协作敏感度 `c`，再按该探测集的有效状态均值计算 `omega = c / mean(c)`。将轨迹及对齐的权重保存为 `chi_probes/phase*.th`，与训练 replay 分离。重评估时逐局从零隐状态开始，按时序重放观测、动作历史和 agent ID，复用固定权重。排除死亡智能体、无效动作、padding 和仅用于 bootstrap 的末状态。
 
-每个任务先计算 `mean_state(omega * mean_live_agent(abs(activation)))`，再除以本任务的层内均值。对本轮各任务的归一化分数逐神经元取最大值。选择沿用配置的全层 top-k 或严格阈值，分数并列时优先较小索引。下一阶段保护名单以本轮结果替换，选中神经元的实际 RMSprop 参数增量系数为 0.1，退出名单后沿用 100000 环境步的线性恢复。本轮无有效分数时使用空名单，探测或重评估异常另记 `chi_errors.jsonl`。每轮逐任务分数、最大值和名单写入 `chi_assessments.jsonl`。
+每个任务先计算 `mean_state(omega * mean_live_agent(abs(activation)))`，再除以本任务的层内均值。对本轮各任务的归一化分数逐神经元取最大值。选择沿用配置的全层 top-k 或严格阈值，分数并列时优先较小索引。默认将本轮入选单元并入历史保护名单，入选后持续保护，对应输入权重行、偏置和 GRU 输入列的实际 RMSprop 增量系数为 0.1。本轮无有效分数时保持既有并集。显式选择 `A_chi`、`A1_chi` 或 `A2_chi` 可运行名单替换版，退出单元沿用 100000 环境步线性恢复。探测或重评估异常另记 `chi_errors.jsonl`。每轮逐任务分数、最大值和名单写入 `chi_assessments.jsonl`。
 
 设计借鉴 SPG §3.2 中随网络变化重新评估历史任务重要性的思路。VDN 使用共享 Q 输出和各历史任务自己的固定探测集，以无梯度的响应统计评估。参见 [Parameter-Level Soft-Masking for Continual Learning](https://proceedings.mlr.press/v202/konishi23a.html)。
 

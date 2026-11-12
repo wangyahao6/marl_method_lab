@@ -49,11 +49,17 @@ def main():
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
     p.add_argument('--ts3-group',choices=['N','A1_linear','A1_union','A2_linear','A2_union','GEM_high','GEM_middle','GEM_low','GEM_gt3','A_union','TRHR','A_union_TRHR','A_equal_union','A_union_input','A_chi','A1_chi','A2_chi',
-                                             'A_chi_union','A_chi_input','A_chi_union_input'],default='N')
+                                             'A_chi_union','A_chi_input','A_chi_union_input','A2_chi_union'])
     p.add_argument('--ts4-group',choices=['N','A1_linear','A2_linear'],default='N')
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
     a=p.parse_args()
+    if a.ts3_group is None:
+        if a.method == 'softprotect_chi' and a.ts3_role in ('full', 'branch'):
+            a.ts3_group = 'A2_chi_union' if a.algorithm == 'vdn' else 'A_chi_union'
+        else:
+            a.ts3_group = 'N'
+
     metadata={}
     if a.experiment_metadata is not None:
         sys.path.insert(0,str(ROOT/'scheduler'))
@@ -98,7 +104,7 @@ def main():
             p.error('CHI requires shared-Agent VDN in TS3–TS8')
         if a.set or a.steps is not None:
             p.error('CHI settings belong in the named protocol')
-        groups = ('A1_chi', 'A2_chi') if a.algorithm == 'vdn' else ('A_chi', 'A_chi_union', 'A_chi_input', 'A_chi_union_input')
+        groups = ('A1_chi', 'A2_chi', 'A2_chi_union') if a.algorithm == 'vdn' else ('A_chi', 'A_chi_union', 'A_chi_input', 'A_chi_union_input')
         if a.ts3_role not in ('full', 'prefix', 'branch') or bool(a.parent) != (a.ts3_role == 'branch'):
             p.error('CHI requires full, prefix, or branch with --parent')
         if chi_control:
