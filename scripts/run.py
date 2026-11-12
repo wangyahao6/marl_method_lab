@@ -56,7 +56,7 @@ def main():
     a=p.parse_args()
     if a.ts3_group is None:
         if a.method == 'softprotect_chi' and a.ts3_role in ('full', 'branch'):
-            a.ts3_group = 'A2_chi_union' if a.algorithm == 'vdn' else 'A_chi_union'
+            a.ts3_group = 'A2_chi' if a.algorithm == 'vdn' else 'A_chi'
         else:
             a.ts3_group = 'N'
 

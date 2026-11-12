@@ -38,11 +38,12 @@
   ],
   "groups": [
     "N",
+    "A2_chi",
     "A2_chi_union"
   ],
   "screen_episodes": 32,
   "step_scale": 0.1,
-  "screening": "A2 CHI fixed-probe reassessment, strict score >3, historical selection union",
+  "screening": "A2 CHI fixed-probe reassessment, strict score >3",
   "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
   "shared_prefix": true,
   "evaluation": {

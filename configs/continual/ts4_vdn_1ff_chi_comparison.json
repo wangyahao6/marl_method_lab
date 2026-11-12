@@ -31,6 +31,7 @@
   ],
   "groups": [
     "N",
+    "A_chi",
     "A_union",
     "A_chi_union"
   ],
