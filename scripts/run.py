@@ -32,10 +32,11 @@ def trhr_settings(parser, overrides):
 
 
 def main():
+    preference_methods = ('action_set_preference', 'full_rank_preference', 'top1_preference')
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
-    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi','softprotect_chi_trhr','action_set_preference'],required=True)
+    p.add_argument('--method',choices=['baseline','reborn','redo','reset','softprotect','gem','trhr','softprotect_trhr','softprotect_chi','softprotect_chi_trhr',*preference_methods],required=True)
     p.add_argument('--seed',required=True,type=int)
     p.add_argument('--run-id',required=True)
     p.add_argument('--map')
@@ -75,8 +76,8 @@ def main():
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
-    if a.method == 'action_set_preference' and a.suite != 'vdn_action_set':
-        p.error('action_set_preference requires --suite vdn_action_set')
+    if a.method in preference_methods and a.suite != 'vdn_action_set':
+        p.error(f'{a.method} requires --suite vdn_action_set')
     if a.method=='gem' and a.suite!='ts3':p.error('gem currently supports TS3 only')
     trhr_overrides = [item for item in a.set if item.split('=', 1)[0].split('.')[0] == 'trhr']
     trhr = None

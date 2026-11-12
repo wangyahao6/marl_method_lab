@@ -68,3 +68,41 @@ cd /home/wyh/marl_method_lab
 - `drivers/continual/action_set_train.py` 驱动任务切换、独立评估、轨迹采集与持久化。 `action_set_protocol.py` 负责协议默认值和结构校验。
 - `scripts/run.py` 和 `scripts/evaluate.py` 注册训练与最终评价。 `configs/continual/vdn_action_set_example.json` 是三任务示例。
 - `.venv/bin/python tests/test_action_set_preference.py -v` 使用脚本环境和真实 VDN/GRU 验证 T1→T2→T3、联合损失、梯度、采样、掩码和关闭方法的对照。另在实际 SMACv2 的三个示例任务各完成一条冻结 Agent 贪心轨迹并检查掩码；正式持续学习训练及保留效果尚未评估。
+
+## 完整动作排序与 Top-1 偏好保持
+
+`full_rank_preference`（Exp-1）和 `top1_preference`（Exp-2）与 ASPR 共用 `vdn_action_set` 驱动。两者沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。首次抽到某个历史池时，从其 `reference_checkpoint` 加载并缓存该阶段的冻结 Agent。冻结和在线 Agent 分别初始化 GRU，从同一历史局的起点展开到最后一个决策步，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
+
+对每个智能体决策，令 `s = max(std(Q_old[合法动作]), q_scale_floor)`，标准差使用总体口径。旧模型的筛选间隔和当前模型的排序间隔均除以同一个冻结尺度 `s`。尺度下限保留了近似平局的识别能力。固定旧尺度使两个合法动作的情况也能通过当前 Q 间隔获得梯度。
+
+- **Exp-1** 对每个无序合法动作对只计算一次。旧模型的归一化绝对差距达到 `min_gap` 且严格大于零时，按旧差距的符号对当前差距定向，计算 `softplus(-sign(old_gap) * current_gap / temperature)`。明确的非首选动作对也参与约束。
+- **Exp-2** 用旧模型第一与第二名的归一化差距作为置信度 `c`。当 `c >= min_gap` 且 `c > 0`，用旧首选动作与其余每个合法动作计算 `softplus(-(Q_new[首选] - Q_new[其他]) / s / temperature)`。先对该决策的动作对求均值，再乘以 `c`。这使更高的置信度直接加强该决策的约束。
+
+两种方法先对每个决策的动作对取均值，再对历史任务内有约束的决策取均值，最后对本次采样中有约束的任务等权平均。历史项使用 `TD_loss + weight * preference_loss` 接入已有的一次反传。排序方法使用池中原始轨迹和冻结检查点，集合标记、δ 校准与固定集合 probe 仍由 ASPR 使用。每次独立运行的历史池来自该次运行自己的阶段末模型，因此同一采集协议下的实际轨迹可能随训练分化。
+
+配置写入协议 JSON 的同名顶层对象 `full_rank_preference`、`top1_preference`。可以按方法分别覆盖以下默认值。
+
+| 字段 | 默认值 | 含义 |
+| --- | ---: | --- |
+| `weight` | 1.0 | 偏好损失系数 λ，设为 0 时关闭该方法的记忆采集和偏好更新 |
+| `temperature` | 1.0 | Softplus 排序温度，取正值 |
+| `min_gap` | 0.5 | 旧模型归一化 Q 差阈值，取非负值 |
+| `q_scale_floor` | 0.1 | 旧模型合法 Q 标准差的下限，单位与原 Q 值一致，取正值 |
+
+采集和采样继续读取 `action_set.success_episodes`、`seed_offsets`、`attempts_per_seed`、`batch_episodes`。默认值用于实现验证，尚未按保留效果校准。
+
+```sh
+cd /home/wyh/marl_method_lab
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method full_rank_preference --seed 3535 --run-id vdn_full_rank_example_3535 \
+  --protocol configs/continual/vdn_action_set_example.json --dry-run
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method top1_preference --seed 3535 --run-id vdn_top1_example_3535 \
+  --protocol configs/continual/vdn_action_set_example.json --dry-run
+```
+
+`<method>_updates.jsonl` 逐更新记录 TD、偏好、总损失及采样信息。每个采样任务记录有效状态数、有效动作对数、约束覆盖率和 Top-1 翻转率。覆盖率的分母是至少两个合法动作的有效决策数。翻转率的分母是这些决策中旧模型有唯一贪心动作的数量，不受训练的 `min_gap` 限制。新模型按合法 Q 贪心选择，当前 Q 并列时沿用 `argmax` 的动作索引顺序。分母为零的比率记 null。
+
+`.venv/bin/python -m unittest discover -s tests -v` 验证两种损失和四种方法的三阶段 CPU 集成。测试使用真实 VDN/GRU 和脚本化 SMAC 风格环境，并检查参考模型冻结、采样一致性和联合损失。
+
+真实环境检查使用既有 TS3 双层 VDN seed 3535 的 B、C 阶段末检查点。在 SMACv2 5v5 收集一条 B 胜局（73 步）和一条 C 局（49 步），四种方法各执行一次 CPU learner 更新。两种排序方法的 TD loss 同为 0.154165。Exp-1 有 281 个有效决策和 2070 个动作对，Exp-2 有 108 个有效决策和 522 个动作对。四种方法均产生有限梯度并更新当前 GRU。未执行正式训练或保留效果评估。

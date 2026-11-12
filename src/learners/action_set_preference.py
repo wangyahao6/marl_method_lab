@@ -98,18 +98,22 @@ def pack_episode(batch, length, **metadata):
     })
 
 
-def batch_episodes(episodes, scheme, groups, device):
+def batch_episodes(episodes, scheme, groups, device, *, include_good=True):
     fields = ("obs", "actions_onehot", "avail_actions", "terminated", "filled")
     data = {key: pad_sequence([ep["data"][key] for ep in episodes], batch_first=True).to(device)
             for key in fields}
     steps = data["obs"].shape[1]
     batch = EpisodeBatch({key: scheme[key] for key in fields}, groups, len(episodes), steps,
                          data=SimpleNamespace(transition_data=data, episode_data={}), device=device)
-    good = pad_sequence([ep["good_mask"] for ep in episodes], batch_first=True).to(device)
+    good = None
+    if include_good:
+        good = pad_sequence([ep["good_mask"] for ep in episodes], batch_first=True).to(device)
     return batch, good
 
 
 class ActionSetPreference:
+    statistics = staticmethod(preference_statistics)
+
     def __init__(self, settings, rng, scheme, groups, log):
         self.settings = settings
         self.rng = rng
@@ -142,6 +146,10 @@ class ActionSetPreference:
             result.append((pool, episode_ids))
         return result
 
+    def task_loss(self, mac, pool, episodes):
+        batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device)
+        return preference_loss(mac, batch, good, self.settings["margin"])
+
     def __call__(self, mac):
         start = perf_counter()
         rows, summaries, losses, valid_counts = [], [], [], []
@@ -154,8 +162,7 @@ class ActionSetPreference:
             events[0].record()
         for pool, episode_ids in sampled:
             episodes = [pool["episodes"][i] for i in episode_ids]
-            batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device)
-            loss, count, summary = preference_loss(mac, batch, good, self.settings["margin"])
+            loss, count, summary = self.task_loss(mac, pool, episodes)
             rows.append(dict(task=pool["task"], source_phase=pool["phase"],
                              pool_size=len(pool["episodes"]), episode_ids=episode_ids,
                              sampled_episodes=len(episode_ids)))
@@ -178,9 +185,11 @@ class ActionSetPreference:
         values = th.cat((header, *summaries)).cpu().tolist()
         update_seconds = perf_counter() - self.update_started
         forward_cuda_seconds = events[0].elapsed_time(events[1]) / 1000 if events else None
-        for i, row in enumerate(rows):
-            offset = 3 + 10 * i
-            row.update(preference_statistics(values[offset:offset + 10]))
+        offset = len(header)
+        for row, summary in zip(rows, summaries):
+            end = offset + summary.numel()
+            row.update(self.statistics(values[offset:end]))
+            offset = end
         self.log(dict(phase=self.phase, task=self.task, t_env=t_env, td_loss=values[0],
                       total_loss=values[1], preference_loss=values[2], historical_tasks=rows,
                       historical_episode_count=sum(row["sampled_episodes"] for row in rows),

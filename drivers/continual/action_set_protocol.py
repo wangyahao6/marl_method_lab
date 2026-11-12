@@ -2,6 +2,8 @@
 from math import isfinite
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
+RANK_METHODS = ("full_rank_preference", "top1_preference")
+RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 DEFAULTS = dict(weight=1.0, margin=0.0, batch_episodes=8, success_episodes=100,
                 seed_offsets=[301001, 302001, 303001, 304001], attempts_per_seed=125,
                 delta_candidates_by_task={}, second_gap_quantile=None, probe_episodes_per_seed=0)
@@ -24,8 +26,8 @@ def settings_with_defaults(values, defaults, required=()):
 
 
 def validate(protocol, algorithm, method):
-    if algorithm not in ALGORITHMS or method not in ("baseline", "action_set_preference"):
-        raise ValueError("vdn_action_set requires shared recurrent VDN and baseline or action_set_preference")
+    if algorithm not in ALGORITHMS or method not in ("baseline", "action_set_preference", *RANK_METHODS):
+        raise ValueError("vdn_action_set requires shared recurrent VDN and a supported preference method or baseline")
     if not isinstance(protocol, dict):
         raise ValueError("protocol must be a JSON object")
     tasks = protocol.get("tasks")
@@ -93,7 +95,17 @@ def validate(protocol, algorithm, method):
             or any(not isinstance(values, list) or any(not nonnegative(v) for v in values)
                    for values in candidates.values())):
         raise ValueError("action_set.delta_candidates_by_task requires lists of nonnegative thresholds keyed by task")
-    return dict(protocol, algorithm=algorithm, method=method, evaluation=evaluation, action_set=settings)
+    ranking = {}
+    for name in RANK_METHODS:
+        if method == name or name in protocol:
+            options = settings_with_defaults(protocol.get(name, {}), RANK_DEFAULTS)
+            for key, value in options.items():
+                if not nonnegative(value) or (key in ("temperature", "q_scale_floor") and value == 0):
+                    bound = "positive" if key in ("temperature", "q_scale_floor") else "nonnegative"
+                    raise ValueError(f"{name}.{key} must be finite and {bound}")
+            ranking[name] = options
+    return dict(protocol, algorithm=algorithm, method=method, evaluation=evaluation,
+                action_set=settings, **ranking)
 
 
 def valid_seeds(seeds):

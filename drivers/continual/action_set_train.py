@@ -1,4 +1,4 @@
-"""Standalone SMACv2 VDN sequence with optional action-set preference replay."""
+"""Standalone SMACv2 VDN sequence with optional decision preference replay."""
 import argparse
 from contextlib import contextmanager
 import copy
@@ -17,7 +17,8 @@ from learners.action_set_preference import (
     ActionSetPreference, batch_episodes, decision_masks, pack_episode, preference_loss,
     preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
-from action_set_protocol import validate
+from learners.ranking_preference import RankingPreference
+from action_set_protocol import RANK_METHODS, validate
 import numpy as np
 import torch as th
 import yaml
@@ -39,6 +40,8 @@ def config(protocol, seed, out):
                t_max=sum(stage["steps"] for stage in protocol["stages"]),
                epsilon_on_switch=protocol.get("epsilon_on_switch", "per_task"),
                action_set=protocol["action_set"])
+    if protocol["method"] in RANK_METHODS:
+        cfg[protocol["method"]] = protocol[protocol["method"]]
     cfg["env_args"].update(seed=seed, game_version=protocol.get("sc2_game_version", "4.10"),
                            rosters=protocol["tasks"])
     return cfg
@@ -154,6 +157,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"]
+    label_action_sets = args.method == "action_set_preference"
     with isolated_rollouts():
         for block, offset in enumerate(offsets):
             seed = (args.seed + offset) % 2**31
@@ -175,23 +179,27 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     wins += 1
                     if len(successful) >= target:
                         continue
-                    successful.append(reference_record(runner, batch, episode))
+                    successful.append(reference_record(runner, batch, episode) if label_action_sets else episode)
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
-    delta, calibration = calibrate_delta(successful, settings, task)
-    candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
-    successful, statistics = label_records(successful, delta, candidates)
+    labels, diagnostics = {}, {}
+    if label_action_sets:
+        delta, calibration = calibrate_delta(successful, settings, task)
+        candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
+        successful, statistics = label_records(successful, delta, candidates)
+        labels = dict(delta=delta)
+        diagnostics = dict(calibration=calibration, candidates=statistics)
     path = out / "action_set_memory" / f"phase{phase:04d}"
     path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
-    pool = dict(task=task, phase=phase, delta=delta, layout=expected_layout,
-                reference_checkpoint=checkpoint_path, episodes=successful)
+    pool = dict(task=task, phase=phase, layout=expected_layout,
+                reference_checkpoint=checkpoint_path, episodes=successful, **labels)
     th.save(pool, path / "success.th")
     th.save(dict(task=task, phase=phase, episodes=failed), path / "failure.th")
     base.write(path / "summary.json", dict(
-        task=task, phase=phase, delta=delta, reference_checkpoint=checkpoint_path,
+        task=task, phase=phase, reference_checkpoint=checkpoint_path,
         requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
         failed=len(failed), blocks=blocks, collection_seconds=perf_counter() - start,
-        calibration=calibration, candidates=statistics))
+        **labels, **diagnostics))
     return pool
 
 
@@ -268,10 +276,15 @@ def train_sequence(protocol, seed, out):
         if args.use_cuda:
             learner.cuda()
         settings = protocol["action_set"]
+        method = protocol["method"]
         preference = None
-        if protocol["method"] == "action_set_preference" and settings["weight"]:
+        if method == "action_set_preference" and settings["weight"]:
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
                                              lambda row: base.append(out / "action_set_updates.jsonl", row))
+        elif method in RANK_METHODS and protocol[method]["weight"]:
+            ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
+            preference = RankingPreference(method, out, ranking, np.random.default_rng(seed), augmented, groups,
+                                            lambda row: base.append(out / f"{method}_updates.jsonl", row))
 
         stages = protocol["stages"]
         evaluation = protocol["evaluation"]
@@ -342,7 +355,8 @@ def train_sequence(protocol, seed, out):
             checkpoint.mkdir(parents=True, exist_ok=False)
             learner.save_models(str(checkpoint))
             reference = agent_snapshot()
-            probe_records = [] if preference is not None and settings["probe_episodes_per_seed"] else None
+            probe_records = ([] if method == "action_set_preference" and preference is not None
+                             and settings["probe_episodes_per_seed"] else None)
             row = {seen: evaluate(reference, seen, "stage_end", probe_records if seen == task else None)
                    for seen in dict.fromkeys(stage["task"] for stage in stages[:phase + 1])}
             latest[task] = row[task]
