@@ -13,3 +13,9 @@
 - `action_set_probes.jsonl` 记录固定独立轨迹在各阶段的偏好保持，`retention.json` 和 `evaluations.jsonl` 记录 ACC/BWT/FWT、阶段矩阵与当前任务曲线。联合检查旧任务实际保留和当前任务学习。
 
 已有 seed 3535 双层基线 `ts3_vdn_typeunion_N_seed3535_20261102_attempt001` 可用于描述性参照。该基线跨阶段保留 TD replay，本次阶段重建，因此二者的差值无法单独归因给 ASPR。首跑用于验证覆盖、集合宽度、偏好保持及其与实际胜率的关系。本次提交一条新训练路径。
+
+## 单层 64 补充路径
+
+运行 `ts3_vdn_1ff64_aspr_3535_20261112_attempt001` 使用 `vdn_1ff`（单层前馈 64、GRU 64），复用首跑的协议 JSON，TS3 阶段、种子 3535、累计 ε 退火、分阶段 TD replay、ASPR 超参数和评估保持一致。模型从相同训练种子独立初始化，各任务的 δ 由该路径自己的阶段末胜局确定。调度计划为 `results/ts3_vdn64_aspr_3535_20261112/plan_1ff64.json`。
+
+已有单层 64 基线 `ts3_vdn_1ff_N_seed3535_20261110_attempt001` 已完成。它使用逐任务重启 ε 和跨任务 replay，与本次 ASPR 路径的设置有差异，仅用于描述性参照。单双层 ASPR 比较在当前一个训练种子上解释。
