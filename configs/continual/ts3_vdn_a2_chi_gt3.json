@@ -1,5 +1,5 @@
 {
-  "id": "ts3_vdn_a2_chi_top3",
+  "id": "ts3_vdn_a2_chi_gt3",
   "tasks": {
     "A": [
       2,
@@ -42,7 +42,7 @@
   ],
   "screen_episodes": 32,
   "step_scale": 0.1,
-  "screening": "A2 CHI fixed-probe reassessment, overall top 3, historical selection union",
+  "screening": "A2 CHI fixed-probe reassessment, strict score >3, historical selection union",
   "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
   "shared_prefix": true,
   "evaluation": {
@@ -61,7 +61,7 @@
   ],
   "reward_normalization": "recompute_enemy_health_shield_every_reset",
   "algorithm": "vdn",
-  "selection": "top_k",
-  "top_k": 3,
-  "intervention": "vdn_chi"
+  "selection": "overall_threshold",
+  "intervention": "vdn_chi",
+  "threshold_beta": 3
 }

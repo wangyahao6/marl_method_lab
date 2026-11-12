@@ -67,7 +67,7 @@ The standalone TRHR intervention uses the existing two-layer VDN Agent on static
 
 ## VDN 历史探测集重评估（CHI）
 
-项目默认软保护采用 CHI 重评估与历史入选并集。两层 VDN 默认保护 A2，使用整体 top-3；参考协议为 `configs/continual/ts3_vdn_a2_chi_top3.json`。单层 VDN 的对应位置为 A，筛选规则以所选协议为准。
+项目默认软保护采用 CHI 重评估与历史入选并集。两层 VDN 默认保护 A2，单层 VDN 默认保护 A。默认筛选条件为层内归一化分数严格大于 3，实验协议可显式指定其他阈值或 top-k。两层 VDN 参考协议为 `configs/continual/ts3_vdn_a2_chi_gt3.json`。
 
 通过 `scripts/run.py --method softprotect_chi` 启用。使用 `--ts3-role full` 或 `branch` 时，两层和单层 VDN 分别默认选择 `A2_chi_union` 和 `A_chi_union`。使用 `--ts3-role prefix` 保存无保护 A 前缀及固定探测集，续训用 `--ts3-role branch --parent <prefix目录>`。仅持有模型权重的检查点无法提供原训练探测集。
 

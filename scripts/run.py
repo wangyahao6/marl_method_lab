@@ -129,7 +129,7 @@ def main():
         top_k = protocol.get('top_k')
         threshold = protocol.get('threshold_beta', protocol.get('single_ff_detection', {}).get('threshold'))
         if top_k is None and threshold is None:
-            p.error('CHI requires top_k or threshold_beta in the named protocol')
+            threshold = 3
         probe = protocol.get('chi_prefix_probe')
         if a.parent and not (ROOT/probe if probe else Path(a.parent)/'chi_probes'/'phase0.th').is_file():
             p.error('CHI branch requires a prefix with a saved fixed probe')
