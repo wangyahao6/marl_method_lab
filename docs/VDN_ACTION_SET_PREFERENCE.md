@@ -114,3 +114,11 @@ cd /home/wyh/marl_method_lab
 使用 `configs/continual/ts4_vdn64_ranking_return_3535.json`。训练入口是 `scripts/run.py --suite vdn_action_set --algorithm vdn`，配合对应 `--method` 和 `--preference-role prefix` 保存前三阶段。两条回访使用 `--preference-role keep` 或 `--preference-role release`，加 `--parent` 指向对应前缀的绝对运行目录。前缀在 C 末保存在线网络、目标网络、优化器、更新计数、累计探索状态、训练及历史采样随机状态、环境分布状态和各历史池。分支重新启动 SC2 进程，恢复可保存的环境分布状态。TD replay 沿用偏好驱动的逐阶段新建协议，A₂ 两组都使用空的当前任务 TD buffer。端点评估每任务 128 局，定期当前任务评估 32 局，每 25k 步一次。前缀的 C 末三任务结果作为回访更新前的共同参考；分支的 `retention.json` 保留该前缀结果。
 
 调度计划存于 `results/ts4_vdn64_ranking_return_3535_20261112/plan.json`，回访任务依赖对应方法前缀成功退出。`branch_restore.json` 保存恢复来源及模型指纹，正式结果按三任务阶段矩阵、A₂ 恢复及 B/C 保留比较。
+
+## SZC 两种子 T1PR 补充
+
+双层 64 宽 VDN，训练种子 3535、2222。使用任务历史实验的镜像 5v5 追猎者 → 狂热者 → 巨像路径，累计阈值 2M、4M、6M，整局切换。两条完整路径合计名义 12M 步。从狂热者阶段开始用 T1PR，超参数、阶段末胜局采集和任务均衡采样沿用 TS4 的 T1PR。当前任务每 25k 步评价 32 局，阶段末每个已见任务评价 128 局，使用 SZC 原实验的任务级种子块。按阶段矩阵报告 ACC、BWT、FWT。
+
+原 SZC 运行跨阶段保留 TD replay；本补充使用 T1PR 驱动的逐阶段重建规则。原同种子 SZC 结果可作参照，组间差值包含 TD replay 协议差异。原 SZC 节点分进程训练，本补充各种子在同一进程内完成整条路径。
+
+配置为 `configs/continual/szc_vdn64_t1pr.json`。调度计划为 `results/szc_vdn64_t1pr_20261113/plan.json`。
