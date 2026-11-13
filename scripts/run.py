@@ -376,6 +376,8 @@ def main():
         env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/train.py'),'--algorithm',a.algorithm,'--condition',a.method,'--scenario',a.scenario,'--seed',str(a.seed)]
         details={'protocol':protocol,'scenario':a.scenario,'steps':protocol['scenarios'][a.scenario][-1][0]}
+    if 'protocol' in details and a.suite != 'network_similarity':
+        protocol.setdefault('epsilon_on_switch', 'per_task')
     plan={'request':vars(a),'command':command,'output':str(out),'details':details}
     if metadata:
         plan['metadata']=metadata

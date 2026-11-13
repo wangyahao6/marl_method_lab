@@ -6,6 +6,8 @@
 
 `runs/<run-id>/task_epsilon.jsonl` 按任务记录 `start`、`end`、阶段编号、任务、全局步数、探索计数及训练 ε。结束值按实际阶段终点计算，短于衰减周期的阶段可能尚未到达 `epsilon_finish`。评估使用贪心动作，评估回合不计入探索步数。
 
+`scripts/run.py` 将缺省的 `per_task` 写入 `--dry-run` 预览和新运行的 `protocol.json`，并沿用协议显式指定的值。从旧协议派生新实验时，默认在新协议中使用 `per_task`。复现或续跑既有实验时沿用该实验的生效协议。
+
 已提交的 TS6 单层 VDN 和 TS3 GEM 阈值大于 3 批次继续使用提交时的全局调度。对应协议 `ts6.json` 和 `ts3_vdn_A2_local_gem_gt3_20261108.json` 显式固定 `cumulative_no_restart`。后续使用相同任务表做逐任务衰减时，新建协议并删除这一兼容字段或设为 `per_task`。
 
 以后可以直接说：“在我的marl_method_lab仓库中……”。Codex先读取本仓库README、AGENTS、方法清单和相关方案。
