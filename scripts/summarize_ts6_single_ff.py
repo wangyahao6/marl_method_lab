@@ -15,9 +15,7 @@ def read_rows(path):
             yield json.loads(line)
 
 
-def summarize_run(run, stage_labels):
-    rows = list(read_rows(run / 'neuron_detections.jsonl'))
-    failures = list(read_rows(run / 'neuron_detection_errors.jsonl'))
+def summarize_stages(rows, failures, stage_labels):
     stages = {}
     for phase, label in enumerate(stage_labels):
         checks = [row for row in rows if row['phase'] == phase]
@@ -35,9 +33,19 @@ def summarize_run(run, stage_labels):
             mean_adjacent_jaccard=mean(overlap) if overlap else None,
             stage_end=stage_end,
         )
+    return stages
+
+
+def summarize_run(run, stage_labels, layers):
+    rows = list(read_rows(run / 'neuron_detections.jsonl'))
+    failures = list(read_rows(run / 'neuron_detection_errors.jsonl'))
+    detection = summarize_stages(rows, failures, stage_labels) if not layers else {
+        layer: summarize_stages([row for row in rows if row['layer'] == layer], failures, stage_labels)
+        for layer in layers
+    }
     return dict(status=read_json(run / 'status.json'),
                 launcher=read_json(run / 'launcher_status.json'),
-                detection=stages, retention=read_json(run / 'retention.json'))
+                detection=detection, retention=read_json(run / 'retention.json'))
 
 
 def main():
@@ -51,7 +59,7 @@ def main():
         if task['type'] != 'training':
             continue
         run = Path(task['run_dir'])
-        record = summarize_run(run, stage_labels)
+        record = summarize_run(run, stage_labels, plan.get('detection_layers'))
         runs[task['id']] = dict(record, **task['metadata'])
     means = {}
     for algorithm in sorted({run['algorithm'] for run in runs.values()}):

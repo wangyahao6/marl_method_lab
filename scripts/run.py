@@ -240,15 +240,18 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/history_train.py'),'--seed',str(a.seed)]
         if a.parent:command+=['--parent',a.parent]
         details={'protocol':protocol,'parent':a.parent,'steps':2000000}
-    elif a.suite=='ts4' and a.algorithm=='vdn':
+    elif a.suite=='ts4' and a.algorithm=='vdn' and a.ts3_role != 'full':
         if a.algorithm!='vdn' or a.method!=('baseline' if a.ts4_group=='N' else 'softprotect'):p.error('ts4 requires VDN and matching group/method')
         protocol=json.loads((ROOT/a.protocol).read_text())
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts4_train.py'),'--seed',str(a.seed),'--group',a.ts4_group]
         details={'protocol':protocol,'group':a.ts4_group,'steps':protocol['thresholds'][-1]}
-    elif a.suite in ('ts5','ts6','ts7','ts8') or (a.suite in ('ts3', 'ts4') and a.algorithm == 'vdn_1ff'):
+    elif (a.suite in ('ts5', 'ts6', 'ts7', 'ts8')
+          or (a.suite == 'ts4' and a.algorithm in ('vdn', 'vdn_1ff'))
+          or (a.suite == 'ts3' and a.algorithm == 'vdn_1ff')):
         single_ff = a.algorithm in ('vdn_1ff', 'vdn_1ff_128') and a.suite != 'ts7'
-        roles = ('full',) if single_ff else ('resume',) if a.suite=='ts6' else ('prefix','branch')
+        full_baseline = single_ff or (a.suite == 'ts4' and a.algorithm == 'vdn')
+        roles = ('full',) if full_baseline else ('resume',) if a.suite=='ts6' else ('prefix','branch')
         if a.suite in ('ts5', 'ts8') and not single_ff:
             p.error(f'{a.suite} requires a single-feedforward VDN baseline')
         if (not single_ff and a.algorithm!='vdn') or a.ts3_role not in roles:
@@ -272,7 +275,7 @@ def main():
             if (protocol.get('suite') != 'ts4'
                     or protocol.get('intervention') != 'single_ff_trhr_factorial'
                     or a.seed not in protocol['seeds']):
-                p.error('use the named TS4 single-feedforward comparison protocol and its seed')
+                p.error('use the named TS4 comparison protocol and its seed')
             protocol.pop('intervention')
             protocol.pop('trhr_settings')
             protocol.pop('nominal_actual_training_steps', None)
@@ -290,9 +293,10 @@ def main():
                                                  'threshold': protocol['threshold_beta']})
         elif protocol.get('id')!=a.suite:
             p.error('suite must match named protocol')
-        if single_ff:
+        if full_baseline:
+            layers = 'Agent A' if single_ff else 'Agent A1 and A2'
             protocol.update(algorithm=a.algorithm, groups=['N'],
-                            screening='read-only VDN state-weighted activity at Agent A')
+                            screening=f'read-only VDN state-weighted activity at {layers}')
         env['MARL_PROTOCOL']=str(out/'protocol.json');env['SC2PATH']=str(ROOT/'runtime/SMACv2StarCraftII')
         command=[sys.executable,str(ROOT/'drivers/continual/ts3_train.py'),'--role',a.ts3_role,'--seed',str(a.seed),'--group',a.ts3_group]
         if a.parent:command+=['--parent',a.parent]

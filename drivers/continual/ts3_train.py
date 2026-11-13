@@ -9,8 +9,9 @@ from hetero_protection import select as qmix_select
 from ts3_vdn_detection import select as vdn_select
 from ts3_vdn_type_detection import select as vdn_type_select
 from ts3_protection import TS3Protection
+from ts4_diagnostics import score as vdn_score_layers
 import vdn_chi
-from protection import cpu_episode,rng_state,digest
+from protection import combine,cpu_episode,rng_state,digest
 import numpy as np
 import torch as th
 import yaml
@@ -363,17 +364,26 @@ def main():
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A','A1','A2']}
             write(dest/'result.json',result)
             return result
-        def detect_single_ff(task, nominal, boundary):
+        def detect_layers(task, nominal, boundary):
             record = dict(task=task, phase=phase, t_env=runner.t_env, nominal_t_env=nominal,
-                          stage_end=boundary, episodes=len(fifo), layer='A', layer_path='agent.net[2]',
-                          width=args.rnn_hidden_dim, threshold=detection['threshold'])
+                          stage_end=boundary, episodes=len(fifo), width=args.rnn_hidden_dim,
+                          threshold=detection['threshold'])
             try:
-                layer = vdn_select(learner, args, fifo, save_input=False)['A']
-                scores = layer['scores']
-                layer['sets']['above_threshold'] = (
-                    None if scores is None else [i for i, value in enumerate(scores)
-                                                  if value > detection['threshold']])
-                append(out/'neuron_detections.jsonl', dict(record, **layer))
+                if args.agent == 'single_ff_rnn':
+                    layers = vdn_select(learner, args, fifo, save_input=False)
+                else:
+                    layers = vdn_score_layers(learner, args, combine([entry[0] for entry in fifo]))
+                for name, layer in layers.items():
+                    scores = layer['scores']
+                    if name != 'A':
+                        activity = layer['activity']
+                        layer['sets']['overall'] = (None if activity is None else sorted(
+                            sorted(range(len(activity)), key=lambda i: (-activity[i], i))[:args.top_k]))
+                    layer['sets']['above_threshold'] = (
+                        None if scores is None else [i for i, value in enumerate(scores)
+                                                      if value > detection['threshold']])
+                    path = 'agent.net[4]' if name == 'A2' else 'agent.net[2]'
+                    append(out/'neuron_detections.jsonl', dict(record, layer=name, layer_path=path, **layer))
             except Exception:
                 append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
 
@@ -522,7 +532,7 @@ def main():
                 episode+=1
                 if episode%25==0:status()
                 if detection and runner.t_env >= min(next_detection, end):
-                    detect_single_ff(task, min(next_detection, end), runner.t_env >= end)
+                    detect_layers(task, min(next_detection, end), runner.t_env >= end)
                     next_detection += interval
                 if runner.t_env>=end:break
                 if runner.t_env>=next_test:
@@ -589,8 +599,7 @@ def main():
                     append(out/'historical_selection.jsonl', dict(task=task, t_env=runner.t_env,
                            selected=selection['A']['sets']['overall'], union=sorted(historical)))
                 if gem:
-                    from protection import combine
-                    append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
+                                        append(out/'gem_selection_history.jsonl',gem.update(task,selection,combine([x[0] for x in fifo]),runner.t_env))
                 if layer:append(out/'selection_history.jsonl',dict(source_task=task,next_task=P['order'][phase+1],**protector.update(selection,runner.t_env)))
         if o.role == 'prefix' or save_branch_prefix:
             if not CHI or CHI_COMPARISON:
