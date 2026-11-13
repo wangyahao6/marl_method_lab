@@ -386,7 +386,7 @@ def main():
     replay = a.replay_on_switch
     if replay is None and 'protocol' in details and a.suite != 'network_similarity':
         replay = protocol.get('replay_on_switch')
-    if configurable_replay and replay is None and a.method != 'baseline':
+    if configurable_replay and replay is None:
         replay = 'ft'
     if replay is not None:
         if replay not in ('retain', 'ft', 'er'):

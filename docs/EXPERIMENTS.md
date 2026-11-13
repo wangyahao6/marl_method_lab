@@ -16,11 +16,11 @@
 
 ## VDN 持续学习经验回放
 
-VDN 基线可在实验协议 JSON 中设置 `"replay_on_switch": "ft"` 或
-`"replay_on_switch": "er"`，也可用 `scripts/run.py --replay-on-switch ft|er`
-覆盖协议。TS3–TS8 和 history 的 VDN 基线默认使用共享 FIFO 经验池（`retain`）。
-TS3–TS8 的 VDN 神经元保护与约束方法（软保护、CHI、GEM、TRHR 及受支持的组合）
-默认使用 `ft`。复现旧的共享池协议时可显式指定 `--replay-on-switch retain`。
+TS3–TS8 和 history 的新 VDN 持续学习实验默认使用 `ft`，包括基线和受支持的
+神经元保护与约束方法。VDN 基线需要均衡回放时，在协议 JSON 中显式设置
+`"replay_on_switch": "er"`，或通过 `scripts/run.py --replay-on-switch er` 覆盖协议。
+共享前缀和续训分支应使用同一回放模式。复现旧的共享池协议时显式指定
+`--replay-on-switch retain`。
 `vdn_action_set` 的偏好约束仍在每个阶段重建 TD 经验池，历史参考数据由各约束方法管理。
 各入口沿用原有的模型、TD 更新、评估与任务预算。
 
