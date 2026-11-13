@@ -18,8 +18,11 @@
 
 VDN 基线可在实验协议 JSON 中设置 `"replay_on_switch": "ft"` 或
 `"replay_on_switch": "er"`，也可用 `scripts/run.py --replay-on-switch ft|er`
-覆盖协议。缺省沿用原来的共享 FIFO 经验池（`retain`）。此选项用于 TS3–TS8
-和 history 的 VDN 基线，沿用各入口原有的模型、TD 更新、评估与任务预算。
+覆盖协议。TS3–TS8 和 history 的 VDN 基线默认使用共享 FIFO 经验池（`retain`）。
+TS3–TS8 的 VDN 神经元保护与约束方法（软保护、CHI、GEM、TRHR 及受支持的组合）
+默认使用 `ft`。复现旧的共享池协议时可显式指定 `--replay-on-switch retain`。
+`vdn_action_set` 的偏好约束仍在每个阶段重建 TD 经验池，历史参考数据由各约束方法管理。
+各入口沿用原有的模型、TD 更新、评估与任务预算。
 
 - **VDN-FT** 在任务切换后从空池开始，积满一个批次的当前任务完整回合再更新。
 - **VDN-ER** 按任务标识保留完整回合，按已存经验的任务和当前任务分配

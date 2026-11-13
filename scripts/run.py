@@ -44,7 +44,7 @@ def main():
     p.add_argument('--scenario',choices=['task_drift','task_switch'])
     p.add_argument('--protocol',default='configs/continual/knife_fig6.json')
     p.add_argument('--replay-on-switch', choices=('retain', 'ft', 'er'),
-                   help='Replay mode for VDN continual baselines')
+                   help='Replay mode for VDN continual training (ER is baseline-only)')
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
     p.add_argument('--hetero-role',choices=['prefix','branch'])
     p.add_argument('--parent')
@@ -380,16 +380,21 @@ def main():
         details={'protocol':protocol,'scenario':a.scenario,'steps':protocol['scenarios'][a.scenario][-1][0]}
     if 'protocol' in details and a.suite != 'network_similarity':
         protocol.setdefault('epsilon_on_switch', 'per_task')
+    configurable_replay = (a.suite in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8', 'history')
+                           and a.algorithm in ('vdn', 'vdn_1ff', 'vdn_1ff_128')
+                           and a.ts3_role != 'eval_fwt')
     replay = a.replay_on_switch
     if replay is None and 'protocol' in details and a.suite != 'network_similarity':
         replay = protocol.get('replay_on_switch')
+    if configurable_replay and replay is None and a.method != 'baseline':
+        replay = 'ft'
     if replay is not None:
         if replay not in ('retain', 'ft', 'er'):
             p.error('replay_on_switch must be retain, ft or er')
-        if (a.suite not in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8', 'history')
-                or a.algorithm not in ('vdn', 'vdn_1ff', 'vdn_1ff_128')
-                or a.method != 'baseline' or a.ts3_role == 'eval_fwt'):
-            p.error('replay_on_switch is supported for VDN continual baselines')
+        if not configurable_replay:
+            p.error('replay_on_switch is supported for VDN continual training')
+        if replay == 'er' and a.method != 'baseline':
+            p.error('VDN-ER is supported for VDN continual baselines')
         if replay == 'er' and a.ts3_role == 'resume':
             p.error('VDN-ER requires historical replay; the TS6 weight-only resume has none')
         protocol['replay_on_switch'] = replay
