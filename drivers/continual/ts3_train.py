@@ -12,6 +12,8 @@ from ts3_protection import TS3Protection
 from ts4_diagnostics import score as vdn_score_layers
 import vdn_chi
 from protection import combine,cpu_episode,rng_state,digest
+from components.task_replay import (log_first_replay_batch, make_replay_buffer,
+                                    restore_replay_buffer, start_replay_task)
 import numpy as np
 import torch as th
 import yaml
@@ -155,6 +157,10 @@ def main():
         if TS4:
             cfg['env'] = 'ts4_protoss'
             cfg['env_args']['capability_config']['team_gen']['weights'] = [1., 0., 0.]
+        if P.get('replay_on_switch') == 'er' and o.role == 'resume':
+            raise ValueError('VDN-ER requires historical replay; the TS6 weight-only resume has none')
+        if 'replay_on_switch' in P:
+            cfg['replay_on_switch'] = P['replay_on_switch']
         args=SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
         def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
@@ -165,7 +171,8 @@ def main():
         if FACTORIAL or (TS4 and (CHI or CHI_COMPARISON)):
             scheme['source_phase'] = dict(vshape=(1,), dtype=th.long, episode_const=True)
         groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
-        buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
+        buffer = make_replay_buffer(args, P['order'], scheme, groups,
+                                    info['episode_limit'] + 1, preprocess)
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
         for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
             for module in network.modules():module._forward_hooks.clear()
@@ -175,7 +182,7 @@ def main():
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
-            learner.optimiser.load_state_dict(state['optimizer']);buffer=state['buffer'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
+            learner.optimiser.load_state_dict(state['optimizer']);buffer=restore_replay_buffer(buffer,state['buffer'],P['order'][:phase+1]);episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
             if 'trhr' not in P and not CHI:
                 selection_path = ROOT / P['prefix_selection_override'] if P.get('prefix_selection_override') else parent/'selection.json'
@@ -500,8 +507,9 @@ def main():
                 if learner.trhr is not None:
                     learner.trhr.protected.zero_()
                     learner.trhr.protected[trace.protected] = True
+            replay_state = start_replay_task(buffer, task)
             base.log_task_epsilon(runner, out, phase, task, 'start')
-            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None if not layer else protector.schedule.state(begin),gem_band=gem_band))
+            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None if not layer else protector.schedule.state(begin),gem_band=gem_band,**replay_state))
             audited=[False]
             def audit(x):
                 if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
@@ -529,6 +537,9 @@ def main():
                     sample=buffer.sample(args.batch_size);sample=sample[:,:sample.max_t_filled()];sample.to(args.device);protector.t_env=runner.t_env
                     if gem:gem.phase=phase
                     learner.train(sample,runner.t_env,episode);updates+=1;del sample
+                    if replay_state:
+                        log_first_replay_batch(buffer, append, out, phase, task, runner.t_env)
+                        replay_state = {}
                 episode+=1
                 if episode%25==0:status()
                 if detection and runner.t_env >= min(next_detection, end):

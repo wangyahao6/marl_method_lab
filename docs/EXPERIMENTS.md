@@ -14,6 +14,45 @@
 
 一次实验说明：目的、方法/比较对象、环境或任务序列、种子、每次预算；其余可明确“沿用某个方案”。只有方案设计就说“只设计，不运行”；需要执行就说“在远端运行”。缺少决定性设置时确认缺项，不猜测种子或预算。
 
+## VDN 持续学习经验回放
+
+VDN 基线可在实验协议 JSON 中设置 `"replay_on_switch": "ft"` 或
+`"replay_on_switch": "er"`，也可用 `scripts/run.py --replay-on-switch ft|er`
+覆盖协议。缺省沿用原来的共享 FIFO 经验池（`retain`）。此选项用于 TS3–TS8
+和 history 的 VDN 基线，沿用各入口原有的模型、TD 更新、评估与任务预算。
+
+- **VDN-FT** 在任务切换后从空池开始，积满一个批次的当前任务完整回合再更新。
+- **VDN-ER** 按任务标识保留完整回合，按已存经验的任务和当前任务分配
+  `buffer_size` 总容量。新任务加入时按新配额淘汰各池最旧的超额回合。
+  有历史经验时，每批一半取自当前任务，一半在其他任务之间均分。
+  除不尽的名额随机分配。历史任务回合过少时先取其不同回合，再从该任务重复抽样。
+  仍无历史经验时用一个完整批次的当前经验。切换后等当前任务积够所需回合再更新。
+  回访时，同一任务此前的经验也算当前经验。训练批次大小须为偶数，且每个任务的存储配额
+  须能容纳半个训练批次。
+- ER 的跨进程分支沿用带任务索引的回放快照，也支持能确定来源的单任务旧前缀。
+  TS6 双层 VDN 的权重续训入口没有历史回放，ER 应走能从头训练或恢复回放的入口。
+
+例如用 TS4 双层 VDN 基线协议生成两份启动预览。实际执行时去掉
+`--dry-run`，并使用各自的唯一运行编号。
+
+```sh
+.venv/bin/python scripts/run.py --suite ts4 --algorithm vdn --method baseline \
+  --protocol configs/continual/ts4_vdn_4242.json --seed 4242 \
+  --run-id ts4_vdn_ft_4242 --replay-on-switch ft --dry-run
+.venv/bin/python scripts/run.py --suite ts4 --algorithm vdn --method baseline \
+  --protocol configs/continual/ts4_vdn_4242.json --seed 4242 \
+  --run-id ts4_vdn_er_4242 --replay-on-switch er --dry-run
+```
+
+`transitions.jsonl` 的 `replay_task_episodes` 记录切换完成后的各任务库存。
+`replay_samples.jsonl` 记录每阶段首个更新批次的任务计数。检查 FT 切换后库存为零，
+首批全来自当前任务。检查 ER 在已有旧经验时两半各占一半，且历史各任务计数差至多一。
+回放单元测试可独立运行，无需启动 SC2。
+
+```sh
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -p test_task_replay.py
+```
+
 ## 静态SMAC示例（命令只是示例，未执行训练）
 
 ```sh

@@ -8,6 +8,8 @@ from ts4_diagnostics import score
 from protection import combine
 from environment import SequentialProtoss
 from protection import cpu_episode,rng_state,digest
+from components.task_replay import (log_first_replay_batch, make_replay_buffer,
+                                    restore_replay_buffer, start_replay_task)
 import numpy as np
 import torch as th
 base=h.base; ROOT=base.ROOT; write=base.write; append=base.append
@@ -39,6 +41,8 @@ def main():
         base.merge(cfg,__import__('yaml').safe_load((ROOT/'src/config/algs/vdn.yaml').read_text()))
         cfg.update(env='history_protoss',t_max=P['thresholds'][-1],protocol_id=P['id'],group=o.group,screening=P['screening'],phase_boundary=P['phase_boundary'],tasks=P['order'],thresholds=P['thresholds'])
         cfg['env_args']['capability_config']['team_gen']['weights']=[1.,0.,0.]
+        if 'replay_on_switch' in P:
+            cfg['replay_on_switch'] = P['replay_on_switch']
         args=SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
         def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
@@ -47,7 +51,8 @@ def main():
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
         scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
         groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
-        buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
+        buffer = make_replay_buffer(args, P['order'], scheme, groups,
+                                    info['episode_limit'] + 1, preprocess)
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
         for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
             for module in network.modules():module._forward_hooks.clear()
@@ -55,7 +60,7 @@ def main():
         if o.parent:
             state=th.load(Path(o.parent)/'continuation.th',map_location='cpu')
             for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
-            learner.optimiser.load_state_dict(state['optimizer']);buffer=state['buffer'];episode=state['episode'];updates=state['updates']
+            learner.optimiser.load_state_dict(state['optimizer']);buffer=restore_replay_buffer(buffer,state['buffer'],P['order'][:-1]);episode=state['episode'];updates=state['updates']
             learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
             write(out/'branch_restore.json',dict(parent=o.parent,t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process, distribution RNG restored'))
@@ -91,8 +96,9 @@ def main():
         phases=[len(P['order'])-1]
         for phase in phases:
             end=P['thresholds'][phase];task=P['order'][phase];begin=runner.t_env;runner.env.set_task(task);fifo=deque(maxlen=P['screen_episodes'])
+            replay_state = start_replay_task(buffer, task)
             base.log_task_epsilon(runner, out, phase, task, 'start')
-            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None))
+            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None,**replay_state))
             audited=[False]
             def audit(x):
                 if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
@@ -103,6 +109,9 @@ def main():
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
                     sample=buffer.sample(args.batch_size);sample=sample[:,:sample.max_t_filled()];sample.to(args.device);learner.train(sample,runner.t_env,episode);updates+=1;del sample
+                    if replay_state:
+                        log_first_replay_batch(buffer, append, out, phase, task, runner.t_env)
+                        replay_state = {}
                 episode+=1
                 if episode%25==0:status()
                 if runner.t_env>=end:break
