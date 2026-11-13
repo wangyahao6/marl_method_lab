@@ -1,0 +1,74 @@
+{
+  "id": "ts4_vdn64_a2_chi_3535",
+  "tasks": {
+    "stalker": [
+      5,
+      0,
+      0
+    ],
+    "zealot": [
+      0,
+      5,
+      0
+    ],
+    "colossus": [
+      0,
+      0,
+      5
+    ]
+  },
+  "order": [
+    "stalker",
+    "zealot",
+    "colossus",
+    "stalker"
+  ],
+  "thresholds": [
+    1000000,
+    1500000,
+    2000000,
+    3000000
+  ],
+  "groups": [
+    "A2_chi_union"
+  ],
+  "screen_episodes": 32,
+  "step_scale": 0.1,
+  "recovery_steps": 100000,
+  "screening": "A2 fixed-probe CHI scores strictly >3; historical union",
+  "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+  "shared_prefix": false,
+  "full_path_equivalent_steps": 3000000,
+  "evaluation": {
+    "interval": 25000,
+    "regular_episodes": 32,
+    "focus_episodes": 128,
+    "focus_blocks_per_task": 4
+  },
+  "phase_boundary": "whole_episode_after_absolute_threshold",
+  "retain": [
+    "online",
+    "target",
+    "optimizer",
+    "replay",
+    "per_task_epsilon_reset"
+  ],
+  "reward_normalization": "recompute_enemy_health_shield_every_reset",
+  "algorithm": "vdn",
+  "seeds": [
+    3535
+  ],
+  "selection": "overall_threshold_union",
+  "threshold_beta": 3,
+  "epsilon_on_switch": "per_task",
+  "suite": "ts4",
+  "stage_labels": [
+    "A\u2081",
+    "B",
+    "C",
+    "A\u2082"
+  ],
+  "evaluation_sc2_retries": 2,
+  "top_k": null,
+  "intervention": "vdn_chi"
+}

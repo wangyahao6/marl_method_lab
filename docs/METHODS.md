@@ -111,3 +111,5 @@ TS4 等数量筛选对照在 `results/ts4_chi_selection_matched_3535_20261111/pl
 TS4 和 TS8 的 64 单元配对实验使用 `ts4_vdn_1ff_chi_comparison.json` 和 `ts8_vdn_1ff_chi_comparison.json`。各序列共享一个无保护的 A₁ 前缀，普通软保护和 CHI 都使用阈值严格大于 3、历史入选并集及全参数范围保护。TS8 用精确镜像阵容运行 S、Z、C、2S3Z、2Z3C、3S2C、S，累计阈值为 1M、1.5M、2M、2.5M、3M、3.5M、4.5M。A₂ 按同一任务回访统计。
 
 TS8 单前馈基线通过 `--suite ts8 --method baseline --ts3-role full --protocol configs/continual/ts8_vdn_1ff_chi_comparison.json` 启动，`--algorithm` 支持 `vdn_1ff` 和 `vdn_1ff_128`。两种宽度均从 A₁ 随机初始化，沿用七阶段任务表及逐任务 ε 衰减，每 100k 步和阶段末记录唯一前馈层的状态加权活动、top-3 与严格大于 3 的名单。
+
+双层 64 单元 VDN 的 TS4 A2 CHI 对照使用 `ts4_vdn64_a2_chi_3535.json`。种子 3535，从 A₁ 开始，累计阶段阈值与现有双层无保护基线相同。每阶段固定最近 32 局，按层内归一化分数严格大于 3 更新历史保护并集。保护 A2 的输入权重行、偏置和通往 GRU 的输入权重列。
