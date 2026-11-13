@@ -31,3 +31,13 @@ The 2026-11-03 queue was handed over to the resumable scheduler with six paralle
 Adjust the live limit with `.venv/bin/python scripts/run_history.py --set-parallel N`. The scheduler reloads this setting each scheduling cycle. Lowering it lets existing training finish and prevents new starts until slots are available. Raising it admits eligible pending tasks in queue order.
 
 New History queues default to seven parallel slots.
+
+## SZC 可接受动作集合偏好回放（ASPR）
+
+2026-11-13 补充 seed 3535、2222，各一条完整 SZC 路径。按原路径使用镜像 5v5 Stalker → Zealot → Colossus、双层前馈 64→64 + GRU 64 的 `vdn`、累计 ε 退火、累计 2/4/6M 步阈值，整局结束后切换。名义新增 12M 步。沿用每次 32 局当前任务评估、阶段末每个已见任务 128 局及对应种子块。
+
+沿用 [ASPR 首跑](TS3_ASPR_PROTOCOL.md) 的方法和诊断。λ=1、margin=0、每更新采 8 条历史轨迹。各阶段目标 100 胜局，用最优与次优合法动作 Q 差的中位数固定 δ。评估中留出最多 16 局固定轨迹，记录后续阶段的贪心动作越集合比例及同期胜率。各路径从头训练，采用精确同构阵容适配器，训练环境在同一进程跨阶段延续，TD replay 随任务切换重建。
+
+原 `vdnh_SZC_seed3535_20261103_attempt001` 与 `vdnh_SZC_seed2222_20261103_attempt001` 已完成，可作同种子描述性参照。原路径跨节点保留 TD replay，阶段切换会新建 SC2 进程，并通过单一权重为 1 的阵容生成器抽取镜像队伍。这些差异影响因果归因。原路径最终 S/Z 均为 0/128 胜，C 分别为 88/128 和 90/128。
+
+协议为 `configs/continual/history_szc_aspr.json`，统一调度计划为 `results/vdnh_szc_aspr_20261113/plan.json`。运行目录名为 `vdnh_SZC_ASPR_seed<seed>_20261113_attempt001`。
