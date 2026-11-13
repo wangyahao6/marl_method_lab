@@ -143,3 +143,11 @@ Authorized three missing branches only:3535 overall top3,1234/4567 overall stric
 ## TS3 VDN A2 local GEM (2026-11-04)
 
 Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method branches,21A2units each, local actual RMSprop increment projection. Reuse original2M A prefixes, B-E8M each, nine branches72M new nominal steps. Latest-boundary groups, no neuronal history union or 0.1 scaling. Three baseline FWT jobs are evaluation-only. Resource-aware max5new workers; no interference with existing queues. See [protocol](TS3_VDN_A2_LOCAL_GEM_PROTOCOL.md). Queue `scripts/run_ts3_vdn_local_gem.py`, results `results/ts3_vdn_A2_local_gem_20261104/`. Launch/queuing is not completion.
+
+## SZC 双层 VDN64 四方法重跑
+
+沿用任务历史实验的镜像 5v5 SZC 路径，累计阈值 2M、4M、6M 后结束当前完整回合。每种方法从头训练 seed 3535、2222。四组均采用逐任务 ε 与 FT 的 TD 回放；偏好方法的历史胜局数据仍供其约束使用。原 SZC 基线使用累计 ε 和跨阶段共享 TD 池，只作为不同协议的历史参照。
+
+T1PR、FRPR、ASPR 使用 `configs/continual/szc_vdn64_ft_preferences.json` 和 `vdn_action_set`；方法参数沿用原 T1PR、TS4 FRPR 和 SZC ASPR 的设置。CHI 使用 `configs/continual/szc_vdn64_ft_a2_chi.json` 和 TS4 驱动的镜像环境，采用 `A2_chi`。在任务边界按固定探测集重评，严格大于 3 的最新名单替换旧名单，受保护更新系数 0.1，退出后 100k 步线性恢复。
+
+阶段末独立贪心评价每个已见任务 128 局，两个入口使用相同任务级种子块。定期当前任务评价为 32 局，TS4 驱动按全局步数对齐 25k 间隔，偏好驱动按阶段起点对齐。完整调度计划和终态汇总分别为 `results/szc_vdn64_ft_20261113/plan.json` 和同目录的 `summary.json`。
