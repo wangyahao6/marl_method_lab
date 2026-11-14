@@ -13,10 +13,12 @@ import torch as th
 from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
-from action_set_protocol import RANK_DEFAULTS, RANK_METHODS
+from action_set_protocol import RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
-from learners.ranking_preference import RankingPreference, full_rank_preference, top1_preference
+from learners.ranking_preference import (
+    RankingPreference, full_rank_preference, full_rank_preference_relu, top1_preference,
+)
 
 
 class RankingTest(unittest.TestCase):
@@ -44,6 +46,54 @@ class RankingTest(unittest.TestCase):
         expected = softplus(th.tensor([-3.0, -2.0]) / scale).mean() * (2 / scale)
         th.testing.assert_close(top1, expected)
         self.assertEqual(stats[2:].tolist(), [2, 1, 0, 1])
+
+    def test_full_rank_relu_gradients_and_zero_loss(self):
+        reference = th.tensor([[1.0, 3.0, 0.0, 5000.0]], requires_grad=True)
+        legal = th.tensor([[True, True, True, False]])
+        decisions = th.tensor([True])
+        scale = reference.detach()[0, :3].std(unbiased=False)
+        for values in ([1.0, 3.0, 0.0, 5000.0], [2.0, 5.0, -2.0, -5000.0],
+                       [2.0, 2.0, 2.0, -5000.0], [0.0, 3.0, 1.0, -5000.0]):
+            with self.subTest(current_q=values):
+                current = th.tensor([values], requires_grad=True)
+                loss, count, stats = full_rank_preference_relu(
+                    current, reference, legal, decisions, RANK_RELU_DEFAULTS)
+                self.assertEqual((count.item(), stats[2].item()), (1, 3))
+                loss.backward()
+                self.assertIsNone(reference.grad)
+                if values[0] < values[2]:
+                    expected = 1 / (3 * scale)
+                    th.testing.assert_close(loss, expected)
+                    th.testing.assert_close(current.grad, th.tensor([[-1., 0., 1., 0.]]) * expected)
+                else:
+                    self.assertEqual(loss.item(), 0)
+                    th.testing.assert_close(current.grad, th.zeros_like(current))
+
+    def test_full_rank_relu_masks_invalid_decisions_and_small_gaps(self):
+        # Each row has two agents. Step 0 is valid, step 1 is terminal,
+        # step 2 is bootstrap, and step 3 is padding.
+        batch = {
+            "filled": th.tensor([[[1], [1], [1], [0], [0]]]),
+            "terminated": th.tensor([[[0], [1], [0], [0], [0]]]),
+            "avail_actions": th.tensor([[[[0, 1, 1], [0, 1, 1]],
+                                         [[0, 1, 1], [1, 0, 0]],
+                                         [[0, 1, 1], [0, 1, 1]],
+                                         [[0, 1, 1], [0, 1, 1]],
+                                         [[0, 0, 0], [0, 0, 0]]]]),
+        }
+        legal, decisions = decision_masks(batch)
+        decisions = decisions & (legal.sum(dim=-1) >= 2)
+        current = th.tensor([[[[5000., 0., 2.], [5000., 0., 2.]]] * 4], requires_grad=True)
+        reference = th.tensor([[[[-5000., 2., 0.], [-5000., .01, 0.]]] * 4])
+        loss, count, stats = full_rank_preference_relu(
+            current, reference, legal, decisions, RANK_RELU_DEFAULTS)
+        self.assertEqual((count.item(), stats[2].item()), (2, 2))
+        th.testing.assert_close(loss, th.tensor(2.))
+        loss.backward()
+        expected = th.zeros_like(current)
+        expected[0, :2, 0, 1] = -.5
+        expected[0, :2, 0, 2] = .5
+        th.testing.assert_close(current.grad, expected)
 
     def test_top1_filters_ties_near_ties_and_masked_decisions(self):
         reference = th.tensor([[1.0, 0.99, -1.0], [1.0, 1.0, -1.0], [1.0, 0.99, 5000.0],
@@ -77,8 +127,15 @@ class RankingTest(unittest.TestCase):
         protocol["action_set"].pop("delta_by_task")
         for method in RANK_METHODS:
             effective = driver.validate(protocol, "vdn", method)
-            self.assertEqual(effective[method], RANK_DEFAULTS)
-            for key, value in (("temperature", 0), ("min_gap", -0.1), ("q_scale_floor", 0), ("weight", True)):
+            defaults = RANK_RELU_DEFAULTS if method == "full_rank_preference_relu" else RANK_DEFAULTS
+            self.assertEqual(effective[method], defaults)
+            for key in {"temperature", "margin"} - defaults.keys():
+                with self.assertRaisesRegex(ValueError, "unknown or malformed"):
+                    driver.validate(dict(protocol, **{method: {key: 1.0}}), "vdn", method)
+            invalid = {"temperature": 0, "min_gap": -0.1, "q_scale_floor": 0, "weight": True}
+            for key, value in invalid.items():
+                if key not in defaults:
+                    continue
                 with self.subTest(method=method, key=key):
                     with self.assertRaisesRegex(ValueError, f"{method}.{key}"):
                         driver.validate(dict(protocol, **{method: {key: value}}), "vdn", method)
@@ -234,7 +291,8 @@ class RankingTest(unittest.TestCase):
             self.assertTrue(decisions[0, 1, 0])
             self.assertFalse(legal[0, 0, 0, 0])
             for method in RANK_METHODS:
-                preference = RankingPreference(method, dict(RANK_DEFAULTS, min_gap=0), None,
+                defaults = RANK_RELU_DEFAULTS if method == "full_rank_preference_relu" else RANK_DEFAULTS
+                preference = RankingPreference(method, dict(defaults, min_gap=0), None,
                                                scheme, groups, None)
                 mac.agent.zero_grad()
                 with patch.object(th, "load", side_effect=AssertionError("preference loaded a checkpoint")):
@@ -245,7 +303,8 @@ class RankingTest(unittest.TestCase):
                     loss.backward()
                 gradient = mac.agent.rnn.weight_hh.grad
                 self.assertTrue(th.isfinite(gradient).all())
-                self.assertGreater(gradient.abs().sum().item(), 0)
+                if method != "full_rank_preference_relu":
+                    self.assertGreater(gradient.abs().sum().item(), 0)
 
     def test_keep_branch_matches_uninterrupted_sequence(self):
         raw = json.loads(PROTOCOL_PATH.read_text())

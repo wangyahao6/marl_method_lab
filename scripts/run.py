@@ -32,7 +32,9 @@ def trhr_settings(parser, overrides):
 
 
 def main():
-    preference_methods = ('action_set_preference', 'full_rank_preference', 'top1_preference')
+    sys.path.insert(0, str(ROOT / 'drivers/continual'))
+    from action_set_protocol import RANK_METHODS, validate, validate_fork
+    preference_methods = ('action_set_preference', *RANK_METHODS)
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
@@ -172,8 +174,6 @@ def main():
                 or a.ts3_role or a.hetero_role or a.scenario or a.ts3_group != 'N'
                 or a.ts4_group != 'N' or a.group != 'N'):
             p.error('vdn_action_set takes its complete sequence and settings from a named --protocol JSON')
-        sys.path.insert(0, str(ROOT / 'drivers/continual'))
-        from action_set_protocol import validate, validate_fork
         try:
             protocol = validate(json.loads((ROOT / a.protocol).read_text()), a.algorithm, a.method)
             validate_fork(protocol, a.preference_role, a.parent)

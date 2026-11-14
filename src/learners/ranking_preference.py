@@ -18,6 +18,15 @@ def reference_order(reference_q, legal, q_scale_floor):
 
 
 def full_rank_preference(current_q, reference_q, legal, decisions, settings):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           lambda inverted_gap: softplus(inverted_gap / settings["temperature"]))
+
+
+def full_rank_preference_relu(current_q, reference_q, legal, decisions, settings):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings, th.relu)
+
+
+def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty):
     old, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
     old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
     current_gap = (current_q.unsqueeze(-1) - current_q.unsqueeze(-2)) / scale.unsqueeze(-1)
@@ -25,7 +34,7 @@ def full_rank_preference(current_q, reference_q, legal, decisions, settings):
     unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
     pairs = (unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
              & (old_gap != 0) & (old_gap.abs() >= settings["min_gap"]))
-    penalties = softplus(-old_gap.sign() * current_gap / settings["temperature"])
+    penalties = penalty(-old_gap.sign() * current_gap)
     pair_counts = pairs.sum(dim=(-2, -1))
     state_loss = penalties.masked_fill(~pairs, 0).sum(dim=(-2, -1)) / pair_counts.clamp_min(1)
     return summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
@@ -66,7 +75,11 @@ class RankingPreference(ActionSetPreference):
 
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
-        self.loss = {"full_rank_preference": full_rank_preference, "top1_preference": top1_preference}[method]
+        self.loss = {
+            "full_rank_preference": full_rank_preference,
+            "full_rank_preference_relu": full_rank_preference_relu,
+            "top1_preference": top1_preference,
+        }[method]
 
     def task_loss(self, mac, pool, episodes):
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,

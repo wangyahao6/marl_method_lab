@@ -35,7 +35,7 @@
 
 [方法与协议](VDN_ACTION_SET_PREFERENCE.md)使用历史成功轨迹约束当前 Agent 的局部 Q 排序，支持任意长度的 5v5 Protoss 任务序列。训练入口为 `--suite vdn_action_set --method action_set_preference`，同入口的 `--method baseline` 提供对照。[TS3 首次实验](TS3_ASPR_PROTOCOL.md)记录 seed 3535 的配置与诊断。
 
-同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。使用 `--method full_rank_preference` 或 `--method top1_preference`，分别约束明确的合法动作对排序和明确的首选动作。两者使用阶段末冻结 Agent 和历史胜局回放。
+同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。全排序可选 `--method full_rank_preference`（Softplus）或 `--method full_rank_preference_relu`（无 margin 的 ReLU）。`--method top1_preference` 约束明确的首选动作。三个方法共用阶段末冻结 Agent 与历史胜局回放。
 
 ## 用户方法
 
