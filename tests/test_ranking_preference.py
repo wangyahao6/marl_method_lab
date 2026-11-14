@@ -13,11 +13,12 @@ import torch as th
 from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
-from action_set_protocol import RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS
+from action_set_protocol import RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.ranking_preference import (
-    RankingPreference, full_rank_preference, full_rank_preference_relu, top1_preference,
+    RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
+    top1_max_statistics, top1_preference,
 )
 
 
@@ -122,17 +123,72 @@ class RankingTest(unittest.TestCase):
             loss.backward()
             self.assertTrue(th.equal(current.grad, th.zeros_like(current.grad)))
 
+    def test_top1_max_loss_margin_and_only_strongest_gradient(self):
+        reference = th.tensor([[3., 1., 0., 200.]], requires_grad=True)
+        legal = th.tensor([[True, True, True, False]])
+        decisions = th.tensor([True])
+        scale = reference.detach()[0, :3].std(unbiased=False)
+        for values, margin, difference in (
+            ([4., 2., 1., 300.], 0., -2.),
+            ([1., 3., 2., 300.], 0., 2.),
+            ([2., 2., 1., 300.], .25, 0.),
+        ):
+            with self.subTest(values=values, margin=margin):
+                current = th.tensor([values], requires_grad=True)
+                loss, count, _ = top1_max_preference(
+                    current, reference, legal, decisions, dict(TOP1_MAX_DEFAULTS, margin=margin))
+                slack = (difference / scale + margin).clamp_min(0)
+                th.testing.assert_close(loss, slack.square())
+                self.assertEqual(count.item(), 1)
+                loss.backward()
+                th.testing.assert_close(current.grad, th.tensor([[-1., 1., 0., 0.]]) * (2 * slack / scale))
+                self.assertIsNone(reference.grad)
+
+    def test_top1_max_masks_and_metric_denominators(self):
+        # At t=1 the episode terminates. Later filled rows must still be ignored.
+        batch = dict(
+            filled=th.tensor([[[1], [1], [1], [1], [0], [0]]]),
+            terminated=th.tensor([[[0], [1], [0], [0], [0], [0]]]),
+            avail_actions=th.tensor([[[[0, 1, 1], [0, 1, 1], [0, 1, 1], [0, 1, 0]]] * 6]),
+        )
+        legal, decisions = decision_masks(batch)
+        reference = th.tensor([[[[100., 2., 0.], [100., .01, 0.],
+                                 [100., 1., 1.], [100., 2., 0.]]] * 5])
+        current = th.tensor([[[[1000., 0., 2.], [1000., 2., 0.],
+                               [1000., 0., 2.], [1000., 0., 2.]]] * 5], requires_grad=True)
+        loss, count, summary = top1_max_preference(current, reference, legal, decisions, TOP1_MAX_DEFAULTS)
+        self.assertEqual(count.item(), 2)
+        th.testing.assert_close(loss, th.tensor(4.))
+        stats = top1_max_statistics(summary.tolist())
+        self.assertEqual(stats['decision_states'], 6)
+        self.assertEqual(stats['top1_states'], 4)
+        self.assertEqual(stats['coverage'], 2 / 6)
+        self.assertEqual(stats['top1_flip_rate'], .5)
+        self.assertEqual(stats['constrained_top1_flip_rate'], 1.)
+        self.assertEqual(stats['margin_violation_rate'], 1.)
+        self.assertNotIn('valid_pairs', stats)
+        loss.backward()
+        expected = th.zeros_like(current)
+        expected[0, :2, 0, 1] = -2.
+        expected[0, :2, 0, 2] = 2.
+        th.testing.assert_close(current.grad, expected)
+        loss, count, summary = top1_max_preference(current, reference, legal, decisions & False,
+                                                   TOP1_MAX_DEFAULTS)
+        self.assertEqual((loss.item(), count.item()), (0, 0))
+        self.assertIsNone(top1_max_statistics(summary.tolist())['margin_violation_rate'])
+
     def test_temperature_and_config_validation(self):
         protocol = json.loads(PROTOCOL_PATH.read_text())
         protocol["action_set"].pop("delta_by_task")
         for method in RANK_METHODS:
             effective = driver.validate(protocol, "vdn", method)
-            defaults = RANK_RELU_DEFAULTS if method == "full_rank_preference_relu" else RANK_DEFAULTS
+            defaults = {"full_rank_preference_relu": RANK_RELU_DEFAULTS,
+                        "top1_max_preference": TOP1_MAX_DEFAULTS}.get(method, RANK_DEFAULTS)
             self.assertEqual(effective[method], defaults)
             for key in {"temperature", "margin"} - defaults.keys():
                 with self.assertRaisesRegex(ValueError, "unknown or malformed"):
                     driver.validate(dict(protocol, **{method: {key: 1.0}}), "vdn", method)
-            invalid = {"temperature": 0, "min_gap": -0.1, "q_scale_floor": 0, "weight": True}
+            invalid = {"temperature": 0, "min_gap": -0.1, "q_scale_floor": 0, "weight": True, "margin": -.1}
             for key, value in invalid.items():
                 if key not in defaults:
                     continue
@@ -172,6 +228,8 @@ class RankingTest(unittest.TestCase):
                 configured = copy.deepcopy(protocol)
                 if active in RANK_METHODS:
                     configured[active] = dict(weight=0 if method == "zero" else 0.5, min_gap=0)
+                    if active == "top1_max_preference":
+                        configured[active]["margin"] = 1.
                 driver.train_sequence(driver.validate(configured, "vdn", active), 8, run)
                 self.assertEqual(json.loads((run / "status.json").read_text())["status"], "completed")
 
@@ -208,13 +266,24 @@ class RankingTest(unittest.TestCase):
                         self.assertEqual([(item["task"], item["episode_ids"]) for item in history],
                                          [(item["task"], item["episode_ids"]) for item in aspr_row["historical_tasks"]])
                         for item in history:
-                            self.assertGreater(item["valid_pairs"], 0)
+                            if method == "top1_max_preference":
+                                self.assertNotIn("valid_pairs", item)
+                                self.assertTrue(0 <= item["constrained_top1_flip_rate"] <= 1)
+                                self.assertTrue(0 <= item["margin_violation_rate"] <= 1)
+                            else:
+                                self.assertGreater(item["valid_pairs"], 0)
                             self.assertEqual(item["valid_states"], (5 + 4) * item["sampled_episodes"])
                             self.assertEqual(item["coverage"], 1)
                             self.assertTrue(0 <= item["top1_flip_rate"] <= 1)
                         mean = sum(item["loss"] for item in history) / len(tasks) if tasks else 0
                         self.assertAlmostEqual(row["preference_loss"], mean, places=6)
                         self.assertAlmostEqual(row["total_loss"], row["td_loss"] + 0.5 * mean, places=6)
+                if method == "top1_max_preference":
+                    self.assertTrue(any(row["preference_loss"] > 0 for row in samples))
+                    normalized = jsonlines(run / "experiment_metrics.jsonl")
+                    self.assertTrue({"preference_loss", "valid_states", "coverage", "top1_flip_rate",
+                                     "constrained_top1_flip_rate", "margin_violation_rate"}
+                                    <= {row["metric"] for row in normalized})
                 rank_checkpoints = sorted((run / "models").glob("*/agent.th"))
                 initial, same = th.load(rank_checkpoints[0]), th.load(baseline[0])
                 self.assertTrue(all(th.equal(initial[k], same[k]) for k in initial))
@@ -291,7 +360,8 @@ class RankingTest(unittest.TestCase):
             self.assertTrue(decisions[0, 1, 0])
             self.assertFalse(legal[0, 0, 0, 0])
             for method in RANK_METHODS:
-                defaults = RANK_RELU_DEFAULTS if method == "full_rank_preference_relu" else RANK_DEFAULTS
+                defaults = {"full_rank_preference_relu": RANK_RELU_DEFAULTS,
+                        "top1_max_preference": TOP1_MAX_DEFAULTS}.get(method, RANK_DEFAULTS)
                 preference = RankingPreference(method, dict(defaults, min_gap=0), None,
                                                scheme, groups, None)
                 mac.agent.zero_grad()
@@ -303,7 +373,7 @@ class RankingTest(unittest.TestCase):
                     loss.backward()
                 gradient = mac.agent.rnn.weight_hh.grad
                 self.assertTrue(th.isfinite(gradient).all())
-                if method != "full_rank_preference_relu":
+                if method not in ("full_rank_preference_relu", "top1_max_preference"):
                     self.assertGreater(gradient.abs().sum().item(), 0)
 
     def test_keep_branch_matches_uninterrupted_sequence(self):

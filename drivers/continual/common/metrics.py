@@ -64,8 +64,13 @@ class Metrics:
 
     def preference(self, row, event):
         fields = ('loss', 'violation_ratio', 'greedy_outside_ratio', 'top1_flip_rate', 'coverage')
+        record_top1_max = self.identity['method'] == 'top1_max_preference'
+        if record_top1_max:
+            fields += ('valid_states', 'constrained_top1_flip_rate', 'margin_violation_rate')
 
         def measurements():
+            if record_top1_max:
+                yield 'preference_loss', row['preference_loss'], dict(event=event)
             for item in row.get('historical_tasks', [row]):
                 context = dict(event=event, source_task=item['task'], source_phase=item['source_phase'])
                 for name in fields:
