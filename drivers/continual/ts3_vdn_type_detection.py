@@ -3,8 +3,10 @@ import copy
 import numpy as np
 import torch as th
 from controllers import REGISTRY as controllers
-from protection import combine,rng_state
-from hetero_train import restore_rng
+from common.checkpoints import cpu_snapshot
+from memory import History
+from common.runtime import restore_rng, rng_state
+from memory.episodes import combine
 from ts4_diagnostics import vdn_sensitivity
 
 @th.no_grad()
@@ -12,7 +14,7 @@ def select(learner,args,fifo,out):
     saved=rng_state()
     try:
         cpu=combine([x[0] for x in fifo]);types=np.array([x[1] for x in fifo])
-        th.save(dict(batch=cpu,args=vars(args),agent={k:v.detach().cpu().clone() for k,v in learner.mac.agent.state_dict().items()},types=types.tolist()),out/'screen_input.th')
+        History.save(out/'screen_input.th', dict(batch=cpu,args=vars(args),agent=cpu_snapshot(learner.mac.agent),types=types.tolist()))
         batch=copy.deepcopy(cpu);batch.to(args.device)
         mac=controllers[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(learner.mac.agent.state_dict());mac.agent.to(args.device);mac.agent.eval()
         captured=[];handle=mac.agent.net[4].register_forward_hook(lambda m,i,o:captured.append(o.detach().clone()))

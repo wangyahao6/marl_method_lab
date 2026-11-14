@@ -6,6 +6,7 @@ MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本�
 
 - [方法清单](docs/METHODS.md)：算法、神经元干预、原始配置与实际支持范围。
 - [MEAL 设计参考](docs/MEAL_DESIGN_REFERENCE.md)：神经元效用、历史重要性与梯度约束的参考材料；未接入训练，对照实验待自己的方法确定并取得初步结果后再设计。
+- [持续学习驱动架构](docs/CONTINUAL_ARCHITECTURE.md)
 - [实验用法](docs/EXPERIMENTS.md)：以后如何描述实验、运行与评价入口。
 - [来源与修改](docs/PROVENANCE.md)：上游、导入的方法、许可证差异、运行时依赖。
 
@@ -15,6 +16,8 @@ MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本�
 | --- | --- |
 | `src/` | 公共训练底座、Agent/Mixer、各 learner、上游算法/环境配置 |
 | `drivers/continual/` | 现有 SMACv2 连续任务驱动、状态加权软保护及检测记录 |
+| `drivers/continual/common/` | 公共阶段操作、评估、检查点与实验指标 |
+| `drivers/continual/memory/` | 独立于 TD 经验池的方法历史轨迹、参考输出和固定探测集 |
 | `configs/continual/` | 可显式选用的连续任务参考方案；不是待执行队列 |
 | `scripts/run.py` | 统一单次训练入口，`--dry-run`只显示生效配置，不建运行目录 |
 | `scripts/evaluate.py` | 对已有运行独立评价，结果另存运行目录 |

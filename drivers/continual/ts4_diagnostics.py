@@ -3,8 +3,8 @@ import copy,random
 import numpy as np
 import torch as th
 from controllers import REGISTRY as controllers
-from protection import combine,rng_state
-from hetero_train import restore_rng
+from common.runtime import restore_rng, rng_state
+from memory.episodes import combine
 
 def vdn_sensitivity(q,actions,avail,valid_agents=None):
     chosen=q.gather(2,actions.unsqueeze(-1))

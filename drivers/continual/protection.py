@@ -2,10 +2,12 @@
 from collections import deque
 import copy
 import hashlib
-import random
-from types import SimpleNamespace
 import numpy as np
 import torch as th
+from common.runtime import rng_state
+from common.checkpoints import cpu_snapshot
+from memory import History
+from memory.episodes import combine, cpu_episode
 from detection_common import sensitivity, summary
 from release_schedule import ReleaseSchedule
 from neuron_records import detection_record, write_detection
@@ -30,40 +32,10 @@ def digest(value):
     return h.hexdigest()
 
 
-def rng_state():
-    return (random.getstate(), np.random.get_state(), th.get_rng_state(),
-            th.cuda.get_rng_state_all() if th.cuda.is_available() else [])
-
-
 def training_fingerprint(learner):
     return digest([n.state_dict() for n in (learner.mac.agent, learner.mixer,
                                            learner.target_mac.agent, learner.target_mixer)]
                   + [learner.optimiser.state_dict(), rng_state()])
-
-
-def cpu_episode(batch):
-    length = int(batch.max_t_filled().item())
-    data = SimpleNamespace(
-        transition_data={k: v[:, :length].detach().cpu().clone()
-                         for k, v in batch.data.transition_data.items()},
-        episode_data={k: v.detach().cpu().clone() for k, v in batch.data.episode_data.items()})
-    from components.episode_buffer import EpisodeBatch
-    return EpisodeBatch(batch.scheme, batch.groups, 1, length, data=data, device='cpu')
-
-
-def combine(episodes):
-    from components.episode_buffer import EpisodeBatch
-    length = max(x.max_seq_length for x in episodes)
-    first = episodes[0]
-    transition = {}
-    for k, v in first.data.transition_data.items():
-        out = th.zeros((len(episodes), length, *v.shape[2:]), dtype=v.dtype)
-        for i, ep in enumerate(episodes):
-            out[i, :ep.max_seq_length] = ep[k][0]
-        transition[k] = out
-    data = SimpleNamespace(transition_data=transition,
-        episode_data={k: th.cat([ep[k] for ep in episodes]) for k in first.data.episode_data})
-    return EpisodeBatch(first.scheme, first.groups, len(episodes), length, data=data, device='cpu')
 
 
 @th.no_grad()
@@ -130,9 +102,10 @@ def screen(mac, mixer, batch, config, enumerate_check=False):
 
 
 class SoftProtection:
-    def __init__(self, learner, config, output, append, write):
+    def __init__(self, learner, config, output, append, write, *, metrics=None):
         self.learner, self.config, self.output = learner, config, output
         self.append, self.write = append, write
+        self.metrics = metrics
         self.fifo = deque(maxlen=config['episodes'])
         self.keys = {}
         self.latest = {label: [] for label in config['layers']}
@@ -185,9 +158,12 @@ class SoftProtection:
             else: mask[:, ids] = True
             self.masks.append(mask)
         self.audit_next = True
+        state = self.state()
         self.append(self.output/'protection_transitions.jsonl', dict(t_env=t_env,
             previous=previous, released={l: sorted(set(previous[l])-set(self.protected[l]))
-                                        for l in self.config['layers']}, **self.state()))
+                                        for l in self.config['layers']}, **state))
+        if self.metrics is not None:
+            self.metrics.protection(phase, task, t_env, state['release_schedule'])
 
     def remember(self, batch, episode, task, start, end, info):
         self.fifo.append((cpu_episode(batch), dict(episode=episode, task=task,
@@ -235,9 +211,8 @@ class SoftProtection:
         dest = self.output/'detections'/str(t_env)
         dest.mkdir(parents=True, exist_ok=False)
         # Save CPU data before moving it for analysis; this is a reproducible small package.
-        th.save(dict(batch=batch, args=vars(args), config=self.config,
-                     agent={k: v.detach().cpu().clone() for k,v in self.learner.mac.agent.state_dict().items()},
-                     mixer={k: v.detach().cpu().clone() for k,v in self.learner.mixer.state_dict().items()}), dest/'input.th')
+        History.save(dest/'input.th', dict(batch=batch, args=vars(args), config=self.config,
+                     agent=cpu_snapshot(self.learner.mac.agent), mixer=cpu_snapshot(self.learner.mixer)))
         batch.to(args.device)
         result = screen(self.learner.mac, self.learner.mixer, batch, self.config, enumerate_check)
         expected_states = sum(m['end_step']-m['start_step'] for m in metadata)
@@ -267,6 +242,11 @@ class SoftProtection:
         self.write(dest/'result.json', result)
         write_detection(self.output, event, rows)
         self.write(dest/'task_sets.json', self.state())
+        if self.metrics is not None:
+            for layer, item in result['layers'].items():
+                self.metrics.neurons(self.phase, task, t_env, layer,
+                                     {'weighted_activity': item['activity'], 'normalized_score': item['score']},
+                                     event='boundary_detection')
 
 
 class NullProtection:

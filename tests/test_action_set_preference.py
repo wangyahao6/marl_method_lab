@@ -124,6 +124,21 @@ class ActionSetTest(unittest.TestCase):
                 self.assertFalse((path / "action_set_memory").exists())
                 self.assertFalse((path / "action_set_updates.jsonl").exists())
 
+            normalized = jsonlines(out / "experiment_metrics.jsonl")
+            evaluations = jsonlines(out / "evaluations.jsonl")
+            common_win = [row for row in normalized if row["metric"] == "win_rate"]
+            self.assertEqual([(r["phase"], r["task"], r["t_env"], r["context"]["event"], r["value"])
+                              for r in common_win],
+                             [(r["phase"], r["task"], r["t_env"], r["label"], r["win_rate"])
+                              for r in evaluations])
+            original = json.loads((out / "retention.json").read_text())["stages"]
+            for name in ("acc_percent", "bwt_pp", "fwt_pp"):
+                self.assertEqual([(r["phase"], r["value"]) for r in normalized if r["metric"] == name],
+                                 [(r["phase"], r[name]) for r in original if r[name] is not None])
+            self.assertTrue(any(r["category"] == "Mechanism" and
+                                r["metric"] == "greedy_outside_ratio" for r in normalized))
+            self.assertTrue(all(r["run_id"] == out.name for r in jsonlines(offline/"experiment_metrics.jsonl")))
+
             expected = [set(), {"stalker"}, {"stalker", "zealot"}]
             for phase, old in enumerate(expected):
                 phase_rows = [row for row in rows if row["phase"] == phase]

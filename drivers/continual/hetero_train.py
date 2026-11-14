@@ -1,9 +1,15 @@
 """Shared A prefix + resumed B/A branches for exact heterogeneous Protoss."""
-import argparse,copy,json,logging,os,random,sys,time,traceback
+import argparse,json,logging,os,random,time,traceback
 from pathlib import Path
 from collections import deque
 from types import SimpleNamespace
 import train as base
+from common.checkpoints import (continuation_state, restore_networks_and_optimizer,
+                                save_stage_models)
+from common.evaluation import evaluate_block, fixed_seed_plan
+from common.metrics import Metrics, record_evaluation
+from common.records import attach_legacy_metrics
+from common.runtime import begin_environment_audit, episode_spec, log_phase_end, restore_rng, td_sample
 import numpy as np
 import torch as th
 import yaml
@@ -22,24 +28,19 @@ def config(seed,out):
     cfg['env_args'].update(seed=seed,game_version='4.10');return cfg
 
 
-def restore_rng(s):
-    random.setstate(s[0]);np.random.set_state(s[1]);th.set_rng_state(s[2].cpu())
-    if s[3]:th.cuda.set_rng_state_all([x.cpu() for x in s[3]])
-
-
 def main():
     p=argparse.ArgumentParser();p.add_argument('--role',choices=['prefix','branch'],required=True);p.add_argument('--parent');p.add_argument('--task',choices=['R','M'],default='R');p.add_argument('--group',default='N');p.add_argument('--seed',type=int,default=3535);o=p.parse_args()
     out=Path(os.environ['MARL_RUN_DIR']);out.mkdir(exist_ok=True,parents=True);started=time.time();runner=None;t=0;updates=0;episode=0;phase=0
     try:
         th.set_num_threads(1);random.seed(o.seed);np.random.seed(o.seed);th.manual_seed(o.seed);th.cuda.manual_seed_all(o.seed)
         cfg=config(o.seed,out);cfg.update(role=o.role,parent=o.parent,branch_task=o.task,group=o.group,protocol_id=base.PROTOCOL['id']);args=SimpleNamespace(**cfg)
-        logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
-        def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
-        logger.log_stat=log
+        logging.basicConfig(level=logging.INFO)
+        logger = base.Logger(logging.getLogger(out.name))
+        attach_legacy_metrics(logger, out)
+        metrics = Metrics(out, 'qmix', ('baseline' if o.group == 'N' else 'softprotect'), o.seed, group=o.group, role=o.role)
         runner=base.EpisodeRunner(args,logger);info=runner.get_env_info();args.n_agents=info['n_agents'];args.n_actions=info['n_actions'];args.state_shape=info['state_shape']
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
-        scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
-        groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
+        scheme, groups, preprocess = spec = episode_spec(info)
         buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
         for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
@@ -47,8 +48,8 @@ def main():
         learner.cuda();fifo=deque(maxlen=32);selection={}
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
-            for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
-            learner.optimiser.load_state_dict(state['optimizer']);buffer=state['buffer'];t=state['t_env'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=t
+            restore_networks_and_optimizer(learner, state)
+            buffer=state['buffer'];t=state['t_env'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=t
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);restore_rng(state['rng'])
             selection=json.loads((parent/'selection.json').read_text())
             write(out/'branch_restore.json',dict(parent=str(parent),t_env=t,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,optimizer_entries=len(learner.optimiser.state),last_target_update_episode=learner.last_target_update_episode,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new process, common seed; distribution RNG restored'))
@@ -56,23 +57,22 @@ def main():
         protection=AgentProtection(learner,selection,o.group if o.role=='branch' else 'N',lambda r:append(out/'update_audit.jsonl',r))
         write(out/'protection.json',dict(ids=protection.ids,unique_parameters=protection.unique_parameters,group=o.group))
         def status(state='running',**extra):write(out/'status.json',dict(status=state,t_env=runner.t_env,phase=phase,updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
-        def models(label,full=False):
-            d=out/'models'/label;d.mkdir(parents=True,exist_ok=False);learner.save_models(str(d))
-            th.save(dict(target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),t_env=runner.t_env,episode=episode,updates=updates),d/'targets.th')
         def evaluate(task,focus,label):
-            saved=rng_state();wins=0;blocks=[91101,91102,91103,91104] if focus and task=='A' else [92101,92102,92103,92104] if focus else [91001,91002] if task=='A' else [92001,92002];per=32 if focus else 16
+            saved = rng_state()
+            wins = 0
+            idx = 0 if task == 'A' else 1
+            blocks, per = fixed_seed_plan(idx, focus, stride=1000)
+            context = dict(t_env=runner.t_env, phase=phase, task=task, label=label, focus=focus)
             try:
                 for envseed in blocks:
-                    ea=copy.deepcopy(args);ea.device='cpu';ea.use_cuda=False;ea.env_args=copy.deepcopy(args.env_args);ea.env_args['seed']=envseed
-                    emac=base.controllers[args.mac](buffer.scheme,groups,ea);emac.agent.load_state_dict(mac.agent.state_dict());emac.agent.eval()
-                    er=base.EpisodeRunner(ea,base.Logger(logging.getLogger('eval')));er.env.set_task(task);er.setup(scheme,groups,preprocess,emac)
-                    try:
-                        with th.no_grad():
-                            for j in range(per):
-                                er.run(test_mode=True);won=bool(er.env.last_info.get('battle_won',False));wins+=won
-                                append(out/'test_episodes.jsonl',dict(t_env=runner.t_env,phase=phase,task=task,label=label,focus=focus,env_seed=envseed,episode=j,won=won,length=er.t,return_value=float(er.batch['reward'].sum())))
-                    finally:er.close_env()
-                append(out/'evaluations.jsonl',dict(t_env=runner.t_env,phase=phase,task=task,label=label,focus=focus,wins=int(wins),episodes=per*len(blocks),win_rate=wins/(per*len(blocks))))
+                    rows = evaluate_block(
+                        args, spec, buffer.scheme, mac.agent.state_dict(), task, envseed, per,
+                        make_controller=base.controllers[args.mac], make_runner=base.EpisodeRunner,
+                        make_logger=base.Logger, include_return=True,
+                        record=lambda row: append(out/'test_episodes.jsonl', dict(context, **row)))
+                    wins += sum(row['won'] for row in rows)
+                record_evaluation(out, metrics, dict(
+                    context, wins=int(wins), episodes=per*len(blocks), win_rate=wins/(per*len(blocks))))
             finally:restore_rng(saved)
             status()
         if o.role=='prefix':phases=[(1000000,'A',0)]
@@ -81,10 +81,12 @@ def main():
             begin=runner.t_env;runner.env.set_task(task);protection.active=phase==1 and o.group!='N'
             base.log_task_epsilon(runner, out, phase, task, 'start')
             append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,active=protection.active,scale=.1 if protection.active else 1.,buffer_episodes=buffer.episodes_in_buffer,model_hash=base.parameter_hash(learner)))
-            audited=[False]
-            def audit(x):
-                if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
-            runner.env.audit=audit
+            begin_environment_audit(runner, out, phase)
+            for layer, ids in protection.ids.items():
+                width = mac.agent.net[0 if layer == 'A1' else 3].out_features
+                metrics.record('Mechanism', phase, task, begin,
+                               {'protected_neuron_fraction': (len(ids) if protection.active else 0) / width},
+                               event='phase_start', layer=layer)
             if phase!=2:evaluate(task,False,'phase_start')
             next_test=(runner.t_env//25000+1)*25000;next_old=(runner.t_env//100000+1)*100000
             while runner.t_env<end:
@@ -93,7 +95,7 @@ def main():
                     raw=runner.env.wrapped.env;types=['stalker' if raw.agents[i].unit_type==raw.stalker_id else 'zealot' for i in range(args.n_agents)];fifo.append((cpu_episode(batch),types))
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
-                    sample=buffer.sample(args.batch_size);sample=sample[:,:sample.max_t_filled()];sample.to(args.device);protection.t_env=runner.t_env;learner.train(sample,runner.t_env,episode);updates+=1;del sample
+                    sample=td_sample(buffer, args.batch_size, args.device);protection.t_env=runner.t_env;learner.train(sample,runner.t_env,episode);updates+=1;del sample
                 episode+=1;t=runner.t_env
                 if t>=end:break
                 if t>=next_test:
@@ -104,8 +106,9 @@ def main():
                     while next_old<=t:next_old+=100000
                 if episode%100==0:status()
             base.log_task_epsilon(runner, out, phase, task, 'end')
-            append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
-            models(f'phase{phase}_{runner.t_env}')
+            log_phase_end(out, phase, task, begin, end, runner.t_env)
+            save_stage_models(learner, out/'models'/f'phase{phase}_{runner.t_env}',
+                              runner.t_env, episode, updates)
             if phase==1:evaluate(task,True,'B_end');evaluate('A',True,'return_A_before_update')
             else:evaluate('A',True,'A1_end' if phase==0 else 'A2_end')
         if o.role=='prefix':
@@ -113,8 +116,13 @@ def main():
             try:selection=select(learner,args,fifo,out);write(out/'selection.json',selection)
             except Exception:
                 write(out/'selection_error.json',dict(error=traceback.format_exc()));selection={k:dict(T=[],G=[],R=[],k=0,defined=False) for k in ['A1','A2']};write(out/'selection.json',selection)
+            for layer, item in selection.items():
+                for group_name, scores in item.get('scores', {}).items():
+                    metrics.neurons(phase, task, runner.t_env, layer,
+                                    {'weighted_activity': scores['activity'], 'normalized_score': scores['score']},
+                                    event='boundary_detection', agent_group=group_name)
             write(out/'screen_audit.json',dict(training_state_unchanged=before_screen==digest([base.parameter_hash(learner),learner.optimiser.state_dict(),rng_state()])))
-            state=dict(agent=mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,t_env=runner.t_env,episode=episode,updates=updates,last_target_update_episode=learner.last_target_update_episode,log_stats_t=learner.log_stats_t,epsilon=mac.action_selector.epsilon,rng=rng_state(),environment_distributions=runner.env.distribution_state(),model_hash=base.parameter_hash(learner))
+            state = continuation_state(learner, runner, buffer, episode, updates)
             th.save(state,out/'prefix_state.th');write(out/'prefix_identity.json',dict(t_env=runner.t_env,episode=episode,updates=updates,buffer_index=buffer.buffer_index,buffer_episodes=buffer.episodes_in_buffer,model_hash=state['model_hash']))
         status('completed',finished=time.time())
     except BaseException:

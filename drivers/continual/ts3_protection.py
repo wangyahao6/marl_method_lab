@@ -1,4 +1,6 @@
 """Single Agent layer: latest-selection ramp versus permanent historical union."""
+import copy
+
 import torch as th
 from release_schedule import ReleaseSchedule
 
@@ -12,14 +14,35 @@ class TS3Protection:
         if layer: learner.optimiser.step=self.step
 
     def update(self, selection, t_env):
-        if not self.layer: return {'mode':'baseline','t_env':t_env}
-        item=selection[self.layer]; chosen=item.get('sets',{}).get('overall')
+        if not self.layer:
+            return {'mode': 'baseline', 't_env': t_env}
+        item = selection[self.layer]
+        chosen = item.get('sets', {}).get('overall')
+        if self.mode in ('chi', 'chi_union'):
+            return self._update_chi(item, chosen, t_env)
         if chosen is not None:
-            if self.mode in ('union', 'chi_union'): chosen=sorted(set(chosen)|self.schedule.protected[self.layer])
-            self.schedule.replace({self.layer:chosen},t_env)
-        return dict(self.schedule.state(t_env),mode=self.mode,layer=self.layer,
-                    detection_defined=item.get('defined', chosen is not None) if self.mode in ('chi', 'chi_union') else chosen is not None,
-                    latest_selected=item.get('sets',{}).get('overall'))
+            if self.mode == 'union':
+                chosen = sorted(set(chosen) | self.schedule.protected[self.layer])
+            self.schedule.replace({self.layer: chosen}, t_env)
+        return dict(self.schedule.state(t_env), mode=self.mode, layer=self.layer,
+                    detection_defined=chosen is not None, latest_selected=item.get('sets', {}).get('overall'))
+
+    def _update_chi(self, item, chosen, t_env):
+        protected_before = sorted(self.schedule.protected[self.layer])
+        defined = item.get('defined', chosen is not None)
+        updated = defined and chosen is not None
+        reason = None
+        if updated:
+            effective = sorted(set(chosen) | set(protected_before)) if self.mode == 'chi_union' else chosen
+            self.schedule.replace({self.layer: effective}, t_env)
+            state = self.schedule.state(t_env)
+        else:
+            reason = item.get('skip_reason', 'detection_undefined') if not defined else 'missing_selection'
+            # state() prunes completed recovery entries. Evaluate a copy for the audit.
+            state = copy.deepcopy(self.schedule).state(t_env)
+        return dict(state, mode=self.mode, layer=self.layer, detection_defined=defined,
+                    latest_selected=chosen, protection_updated=updated, skip_reason=reason,
+                    protected_before=protected_before, protected_after=state['protected'][self.layer])
 
     def scales(self, t_env):
         agent=self.learner.mac.agent; result={}

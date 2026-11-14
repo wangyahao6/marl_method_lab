@@ -1,5 +1,4 @@
 """Recurrent action-set replay for a shared SMAC VDN agent."""
-from collections import Counter
 from time import perf_counter
 from types import SimpleNamespace
 
@@ -92,10 +91,8 @@ def preference_statistics(summary):
 
 
 def pack_episode(batch, length, **metadata):
-    return dict(metadata, length=length, data={
-        key: value[0, :length + 1].detach().cpu().clone()
-        for key, value in batch.data.transition_data.items()
-    })
+    from drivers.continual.memory.episodes import pack_episode as pack
+    return pack(batch, length, **metadata)
 
 
 def batch_episodes(episodes, scheme, groups, device, *, include_good=True, include_old_q=False):
@@ -124,7 +121,9 @@ class ActionSetPreference:
         self.scheme = scheme
         self.groups = groups
         self.log = log
-        self.history = {}
+        from drivers.continual.memory import PreferenceHistory
+
+        self.history = PreferenceHistory()
         self.phase = None
         self.task = None
         self.report = None
@@ -134,21 +133,7 @@ class ActionSetPreference:
         self.update_started = perf_counter()
 
     def sample(self):
-        # Keep every stage snapshot. Use the latest available nonempty pool per old task.
-        pools = {pool["task"]: pool for pool in self.history.values()
-                 if pool["task"] != self.task and pool["episodes"]}
-        if not pools:
-            return []
-        task_ids = list(pools)
-        slots = self.rng.permutation(len(task_ids)).tolist()
-        allocation = Counter(slots[i % len(slots)] for i in range(self.settings["batch_episodes"]))
-        result = []
-        for index, count in allocation.items():
-            pool = pools[task_ids[index]]
-            size = len(pool["episodes"])
-            episode_ids = self.rng.choice(size, count, replace=count > size).tolist()
-            result.append((pool, episode_ids))
-        return result
+        return self.history.sample(self.task, self.settings["batch_episodes"], self.rng)
 
     def task_loss(self, mac, pool, episodes):
         batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device)

@@ -77,6 +77,8 @@ cd /home/wyh/marl_method_lab
 
 每次run-id唯一，目录已存在时不覆盖。启动保留config/protocol、launch.json、源码SHA-256与source.tar.gz、console.log；进程终态由launcher_status.json记录，exited只代表进程退出。连续任务另有原训练器status.json与逐次评价/检测记录。
 
+连续任务的统一标量指标另存 `experiment_metrics.jsonl`，包含 Performance 与 Mechanism 两类。原有日志继续用于已有分析脚本。字段、单位、历史数据载荷与驱动职责见[持续学习驱动架构](CONTINUAL_ARCHITECTURE.md)。
+
 独立评价：`.venv/bin/python scripts/evaluate.py --run /home/wyh/marl_method_lab/runs/<run-id> --episodes 32`。静态SMAC用`--step`选择最接近的已有模型步数（0选择最大），保留上游选择逻辑；连续任务评价最终模型。评价结果另存该运行evaluation目录。
 
 多方法/多种子由后续具体实验的方案定义，必要时编写简单队列；某run失败不连带取消剩余已授权任务。不默认新增验证训练、种子或中止条件。汇总图表和REPORT按具体研究问题生成，不预设所有实验都用同一CI或图。

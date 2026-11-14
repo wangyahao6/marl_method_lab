@@ -8,6 +8,8 @@ import traceback
 from pathlib import Path
 from types import SimpleNamespace
 import train as t
+from common.metrics import Metrics
+from common.runtime import episode_spec
 import numpy as np
 import torch as th
 
@@ -20,6 +22,9 @@ def evaluate(run, out, seed, episodes=32, combinations=COMBINATIONS):
     out.mkdir(parents=True, exist_ok=True)
     records = []
     cfg_original = json.loads((run/'config.json').read_text())
+    request = json.loads((run/'launch.json').read_text())['request'] if (run/'launch.json').is_file() else {}
+    metrics = Metrics(out, request.get('algorithm', cfg_original.get('algorithm', 'qmix')),
+                      request.get('method', cfg_original.get('condition', 'baseline')), seed, run_id=run.name)
     t.write(out/'status.json', dict(status='running', started=time.time()))
     for phase, step, task_ids in combinations:
         for task_id in task_ids:
@@ -41,12 +46,7 @@ def evaluate(run, out, seed, episodes=32, combinations=COMBINATIONS):
             try:
                 info = runner.get_env_info()
                 args.n_agents, args.n_actions, args.state_shape = info['n_agents'], info['n_actions'], info['state_shape']
-                scheme = dict(state=dict(vshape=info['state_shape']), obs=dict(vshape=info['obs_shape'], group='agents'),
-                    actions=dict(vshape=(1,), group='agents', dtype=th.long),
-                    avail_actions=dict(vshape=(info['n_actions'],), group='agents', dtype=th.int),
-                    reward=dict(vshape=(1,)), terminated=dict(vshape=(1,), dtype=th.uint8))
-                groups = dict(agents=args.n_agents)
-                preprocess = dict(actions=('actions_onehot', [t.OneHot(out_dim=args.n_actions)]))
+                scheme, groups, preprocess = episode_spec(info)
                 buffer = t.ReplayBuffer(scheme, groups, 1, info['episode_limit']+1, preprocess=preprocess, device='cpu')
                 mac = t.controllers[args.mac](buffer.scheme, groups, args)
                 mac.cuda()
@@ -68,6 +68,7 @@ def evaluate(run, out, seed, episodes=32, combinations=COMBINATIONS):
                     win_rate=sum(x['won'] for x in outcomes)/episodes, outcomes=outcomes,
                     checkpoint=str(checkpoint), max_reward=raw.max_reward)
                 t.write(target, record); records.append(record)
+                metrics.evaluation(dict(record, label='independent_checkpoint'))
             finally:
                 runner.close_env()
     t.write(out/'results.json', records)

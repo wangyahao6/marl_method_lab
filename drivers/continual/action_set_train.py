@@ -14,13 +14,17 @@ from types import SimpleNamespace
 import train as base
 from hetero_environment import ExactProtoss
 from learners.action_set_preference import (
-    ActionSetPreference, batch_episodes, decision_masks, pack_episode, preference_loss,
+    ActionSetPreference, batch_episodes, decision_masks, preference_loss,
     preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
 from learners.ranking_preference import RankingPreference
 from action_set_protocol import RANK_METHODS, validate, validate_fork
-from hetero_train import restore_rng
-from protection import rng_state
+from common.checkpoints import cpu_snapshot, save_models
+from common.metrics import Metrics, record_evaluation
+from common.records import attach_legacy_metrics
+from common.runtime import episode_spec, restore_rng, rng_state, td_sample
+from drivers.continual.memory import History, PreferenceHistory
+from drivers.continual.memory.episodes import pack_episode
 import numpy as np
 import torch as th
 import yaml
@@ -47,17 +51,6 @@ def config(protocol, seed, out):
     cfg["env_args"].update(seed=seed, game_version=protocol.get("sc2_game_version", "4.10"),
                            rosters=protocol["tasks"])
     return cfg
-
-
-def episode_spec(info):
-    scheme = dict(state=dict(vshape=info["state_shape"]),
-                  obs=dict(vshape=info["obs_shape"], group="agents"),
-                  actions=dict(vshape=(1,), group="agents", dtype=th.long),
-                  avail_actions=dict(vshape=(info["n_actions"],), group="agents", dtype=th.int),
-                  reward=dict(vshape=(1,)), terminated=dict(vshape=(1,), dtype=th.uint8))
-    groups = dict(agents=info["n_agents"])
-    preprocess = dict(actions=("actions_onehot", [base.OneHot(out_dim=info["n_actions"])]))
-    return scheme, groups, preprocess
 
 
 def augmented_scheme(spec):
@@ -209,13 +202,13 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
         successful, statistics = label_records(successful, delta, candidates)
         labels = dict(delta=delta)
         diagnostics = dict(calibration=calibration, candidates=statistics)
-    path = out / "action_set_memory" / f"phase{phase:04d}"
+    path = PreferenceHistory.phase_path(out, phase)
     path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
     pool = dict(task=task, phase=phase, layout=expected_layout,
                 reference_checkpoint=checkpoint_path, episodes=successful, **labels)
-    th.save(pool, path / "success.th")
-    th.save(dict(task=task, phase=phase, episodes=failed), path / "failure.th")
+    History.save(path / "success.th", pool)
+    History.save(path / "failure.th", dict(task=task, phase=phase, episodes=failed))
     base.write(path / "summary.json", dict(
         task=task, phase=phase, reference_checkpoint=checkpoint_path,
         requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
@@ -272,13 +265,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
         args.parent = str(parent) if parent else None
         args.preference_weight = 0.0 if role == "release" else protocol[protocol["method"]]["weight"]
     logger = base.Logger(logging.getLogger(out.name))
-    original_log = logger.log_stat
-
-    def log(key, value, t_env, **kwargs):
-        base.append(out / "metrics.jsonl", dict(key=key, value=float(value), t_env=int(t_env)))
-        original_log(key, value, t_env, **kwargs)
-
-    logger.log_stat = log
+    attach_legacy_metrics(logger, out)
+    metrics = Metrics(out, args.algorithm, args.method, seed, **({"role": role} if role else {}))
     runner = base.EpisodeRunner(args, logger)
     phase = episode = updates = 0
     try:
@@ -303,19 +291,26 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             learner.cuda()
         settings = protocol["action_set"]
         method = protocol["method"]
+
+        def record_preference(row):
+            base.append(out / f"{update_log}_updates.jsonl", row)
+            metrics.preference(row, event="preference_update")
+
         preference = None
         if method == "action_set_preference" and settings["weight"]:
+            update_log = "action_set"
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
-                                             lambda row: base.append(out / "action_set_updates.jsonl", row))
+                                             record_preference)
         elif method in RANK_METHODS and protocol[method]["weight"] and role != "release":
+            update_log = method
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             preference = RankingPreference(method, ranking, np.random.default_rng(seed), augmented, groups,
-                                            lambda row: base.append(out / f"{method}_updates.jsonl", row))
+                                            record_preference)
 
         stages = protocol["stages"]
         evaluation = protocol["evaluation"]
         initial, before, latest, results = {}, {}, {}, []
-        probes = {}
+        probes = History()
         nominal_end = 0
 
         def status(state, **extra):
@@ -323,7 +318,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                                                 episode=episode, updates=updates, **extra))
 
         def agent_snapshot():
-            return {name: value.detach().cpu().clone() for name, value in mac.agent.state_dict().items()}
+            return cpu_snapshot(mac.agent)
 
         def probe_error(task, error):
             base.append(out / "action_set_probe_errors.jsonl", dict(phase=phase, task=task, error=error))
@@ -334,7 +329,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                                 evaluation_settings(protocol, task, focus), probe_records=probe_records,
                                 probe_limit=settings["probe_episodes_per_seed"],
                                 log_probe_error=lambda error: probe_error(task, error))
-            base.append(out / "evaluations.jsonl", dict(phase=phase, label=label, t_env=runner.t_env, **row))
+            record_evaluation(out, metrics, dict(phase=phase, label=label, t_env=runner.t_env, **row))
             return row["win_rate"]
 
         first_phase = 0
@@ -363,15 +358,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             runner.env.restore_distribution(state["environment_distributions"])
             if preference is not None:
                 preference.rng.bit_generator.state = state["preference_rng"]
-                for old_phase in range(first_phase):
-                    path = parent / "action_set_memory" / f"phase{old_phase:04d}" / "success.th"
-                    pool = th.load(path, map_location="cpu")
-                    if method in RANK_METHODS and any(
-                        "old_q_values" not in ep["data"] for ep in pool["episodes"]
-                    ):
-                        raise ValueError(f"{path} predates stored old_q_values. Convert the historical pool offline before continuing.")
-                    pool["reference_checkpoint"] = str(parent / pool["reference_checkpoint"])
-                    preference.history[old_phase] = pool
+                preference.history.restore_success(parent, range(first_phase), require_old_q=method in RANK_METHODS)
             restore_rng(state["rng"])
             base.write(out / "branch_restore.json", dict(
                 parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
@@ -410,9 +397,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                     batch = runner.run()
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
-                    sample = buffer.sample(args.batch_size)
-                    sample = sample[:, :int(sample.max_t_filled())]
-                    sample.to(args.device)
+                    sample = td_sample(buffer, args.batch_size, args.device)
                     learner.train(sample, runner.t_env, episode, preference=preference)
                     updates += 1
                 episode += 1
@@ -424,8 +409,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             del buffer
             base.log_task_epsilon(runner, out, phase, task, "end")
             checkpoint = out / "models" / f"phase{phase:04d}_{runner.t_env}"
-            checkpoint.mkdir(parents=True, exist_ok=False)
-            learner.save_models(str(checkpoint))
+            save_models(learner, checkpoint)
             reference = agent_snapshot()
             probe_records = ([] if method == "action_set_preference" and preference is not None
                              and settings["probe_episodes_per_seed"] else None)
@@ -439,6 +423,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                                 acc_percent=100 * np.mean(list(row.values())),
                                 bwt_pp=100 * np.mean(bwt) if bwt else None,
                                 fwt_pp=100 * np.mean(fwt) if fwt else None))
+            metrics.retention(phase, task, runner.t_env, results[-1])
             if phase + 1 < len(stages):
                 next_task = stages[phase + 1]["task"]
                 if next_task not in row:
@@ -454,7 +439,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                     try:
                         labeled, _ = label_records(probe_records, pool["delta"])
                         probe = dict(task=task, source_phase=phase, delta=pool["delta"], episodes=labeled)
-                        th.save(probe, out / "action_set_memory" / f"phase{phase:04d}" / "probe.th")
+                        probes.save(PreferenceHistory.phase_path(out, phase) / "probe.th", probe)
                         probes[phase] = probe
                     except Exception:
                         probe_error(task, traceback.format_exc())
@@ -463,11 +448,13 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                         with th.no_grad():
                             probe_batch, good = batch_episodes(probe["episodes"], augmented, groups, args.device)
                             _, _, stats = preference_loss(mac, probe_batch, good, settings["margin"])
-                        metrics = preference_statistics(stats.cpu().tolist())
-                        base.append(out / "action_set_probes.jsonl", dict(
+                        row_metrics = dict(
                             phase=phase, t_env=runner.t_env, task=probe["task"],
                             source_phase=probe["source_phase"], delta=probe["delta"],
-                            episodes=len(probe["episodes"]), win_rate=row[probe["task"]], **metrics))
+                            episodes=len(probe["episodes"]), win_rate=row[probe["task"]],
+                            **preference_statistics(stats.cpu().tolist()))
+                        base.append(out / "action_set_probes.jsonl", row_metrics)
+                        metrics.preference(row_metrics, event="fixed_probe")
                     except Exception:
                         probe_error(probe["task"], traceback.format_exc())
         if role == "prefix":
@@ -502,6 +489,9 @@ def evaluate_final(run, output, episodes, protocol):
                           reference, task, evaluation_settings(protocol, task, focus=True), episodes)
             for task in final["win_rates"]]
     base.write(output / "results.json", dict(checkpoint=final["checkpoint"], t_env=final["t_env"], tasks=rows))
+    metrics = Metrics(output, protocol["algorithm"], protocol["method"], args.seed, run_id=run.name)
+    for row in rows:
+        metrics.evaluation(dict(row, phase=final["phase"], t_env=final["t_env"], label="independent_final"))
 
 
 def main():

@@ -5,6 +5,8 @@ import torch as th
 from controllers import REGISTRY as controllers
 from modules.mixers.qmix import QMixer
 from detection_common import sensitivity
+from common.checkpoints import cpu_snapshot
+from memory import History
 from protection import combine,rng_state,digest
 import random
 
@@ -13,7 +15,7 @@ def select(learner,args,fifo,out):
     state=rng_state()
     try:
         cpu=combine([x[0] for x in fifo])
-        th.save(dict(batch=cpu,args=vars(args),agent={k:v.detach().cpu().clone() for k,v in learner.mac.agent.state_dict().items()},mixer={k:v.detach().cpu().clone() for k,v in learner.mixer.state_dict().items()},types=[x[1] for x in fifo]),out/'screen_input.th')
+        History.save(out/'screen_input.th', dict(batch=cpu,args=vars(args),agent=cpu_snapshot(learner.mac.agent),mixer=cpu_snapshot(learner.mixer),types=[x[1] for x in fifo]))
         batch=copy.deepcopy(cpu);batch.to(args.device)
         mac=controllers[args.mac](batch.scheme,batch.groups,args);mix=QMixer(args)
         mac.agent.load_state_dict(learner.mac.agent.state_dict());mix.load_state_dict(learner.mixer.state_dict());mac.agent.to(args.device);mix.to(args.device)

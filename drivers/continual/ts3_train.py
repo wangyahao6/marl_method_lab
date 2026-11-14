@@ -4,6 +4,12 @@ from pathlib import Path
 from collections import deque
 from types import SimpleNamespace
 import hetero_train as h
+from common.checkpoints import (continuation_state, cpu_snapshot, restore_networks_and_optimizer,
+                                save_stage_models)
+from common.evaluation import evaluate_block, fixed_seed_plan
+from common.metrics import Metrics, method_for_group, record_evaluation
+from common.records import attach_legacy_metrics
+from common.runtime import begin_environment_audit, episode_spec, log_phase_end, restore_rng, td_sample, write_sequence_status
 from hetero_environment import TEAMS
 from hetero_protection import select as qmix_select
 from ts3_vdn_detection import select as vdn_select
@@ -11,7 +17,9 @@ from ts3_vdn_type_detection import select as vdn_type_select
 from ts3_protection import TS3Protection
 from ts4_diagnostics import score as vdn_score_layers
 import vdn_chi
-from protection import combine,cpu_episode,rng_state,digest
+from protection import rng_state,digest
+from memory import History
+from memory.episodes import combine, cpu_episode
 from components.task_replay import (log_first_replay_batch, make_replay_buffer,
                                     restore_replay_buffer, start_replay_task)
 import numpy as np
@@ -56,7 +64,7 @@ def select_scope(result):
         layer['defined'] = chosen is not None
     return result
 
-def sequence_metrics(order, sources):
+def sequence_metrics(order, sources, *, stage_end_steps=None):
     """Join immutable prefix and current evaluation rows, then calculate stage metrics."""
     stages, initial, before, curves = {}, {}, {}, {}
     stage_labels = P.get('stage_labels', order)
@@ -68,6 +76,8 @@ def sequence_metrics(order, sources):
                 continue
             if label == 'stage_end':
                 stages.setdefault(stage_labels[row['phase']], {})[task] = win_rate
+                if stage_end_steps is not None:
+                    stage_end_steps[row['phase']] = (row['t_env'], source.name)
             elif label == 'initial_reference':
                 initial[task] = win_rate
             elif label == 'next_unseen':
@@ -162,28 +172,37 @@ def main():
         if 'replay_on_switch' in P:
             cfg['replay_on_switch'] = P['replay_on_switch']
         args=SimpleNamespace(**cfg)
-        logging.basicConfig(level=logging.INFO);logger=base.Logger(logging.getLogger(out.name));original=logger.log_stat
-        def log(k,v,t,**kwargs):append(out/'metrics.jsonl',dict(key=k,value=float(v),t_env=int(t)));original(k,v,t,**kwargs)
-        logger.log_stat=log
+        logging.basicConfig(level=logging.INFO)
+        logger = base.Logger(logging.getLogger(out.name))
+        attach_legacy_metrics(logger, out)
+        method = method_for_group(o.group, chi=CHI, trhr='trhr' in cfg)
+        metrics = Metrics(out, algorithm, method, o.seed, group=o.group, role=o.role)
         runner=base.EpisodeRunner(args,logger);info=runner.get_env_info();args.n_agents=info['n_agents'];args.n_actions=info['n_actions'];args.state_shape=info['state_shape']
         write(out/'config.json',vars(args));write(out/'env_info.json',info)
-        scheme=dict(state=dict(vshape=info['state_shape']),obs=dict(vshape=info['obs_shape'],group='agents'),actions=dict(vshape=(1,),group='agents',dtype=th.long),avail_actions=dict(vshape=(info['n_actions'],),group='agents',dtype=th.int),reward=dict(vshape=(1,)),terminated=dict(vshape=(1,),dtype=th.uint8))
+        scheme, groups, preprocess = spec = episode_spec(info)
         if FACTORIAL or (TS4 and (CHI or CHI_COMPARISON)):
             scheme['source_phase'] = dict(vshape=(1,), dtype=th.long, episode_const=True)
-        groups=dict(agents=args.n_agents);preprocess=dict(actions=('actions_onehot',[base.OneHot(out_dim=args.n_actions)]))
         buffer = make_replay_buffer(args, P['order'], scheme, groups,
                                     info['episode_limit'] + 1, preprocess)
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
         for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
             for module in network.modules():module._forward_hooks.clear()
         learner.cuda();selection={}
+        if TRACE:
+            def record_trace(row):
+                trace_phase = row['phase']
+                trace_layer = 'A' if args.agent == 'single_ff_rnn' else 'A2'
+                metrics.neurons(trace_phase, P['order'][trace_phase], row['t_env'], trace_layer,
+                                {'activation_rate': row['activation_rate']},
+                                event='activation_window', start_t_env=row['start_t_env'])
+            learner.a2_trace.record = record_trace
         gem_mode=P.get('intervention')=='a2_local_gem'
-        initial_agent={k:v.detach().cpu().clone() for k,v in mac.agent.state_dict().items()} if gem_mode or (track_retention and o.role in ('prefix', 'resume', 'full')) else None
+        initial_agent=cpu_snapshot(mac.agent) if gem_mode or (track_retention and o.role in ('prefix', 'resume', 'full')) else None
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
-            for network,key in [(mac.agent,'agent'),(learner.mixer,'mixer'),(learner.target_mac.agent,'target_agent'),(learner.target_mixer,'target_mixer')]:network.load_state_dict(state[key])
-            learner.optimiser.load_state_dict(state['optimizer']);buffer=restore_replay_buffer(buffer,state['buffer'],P['order'][:phase+1]);episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
-            mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);h.restore_rng(state['rng'])
+            restore_networks_and_optimizer(learner, state)
+            buffer=restore_replay_buffer(buffer,state['buffer'],P['order'][:phase+1]);episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
+            mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);restore_rng(state['rng'])
             if 'trhr' not in P and not CHI:
                 selection_path = ROOT / P['prefix_selection_override'] if P.get('prefix_selection_override') else parent/'selection.json'
                 if TS4_FACTORIAL and o.group == 'A_equal_union':
@@ -242,17 +261,29 @@ def main():
         gem=None
         if gem_band:
             from a2_local_gem import A2LocalGEM
-            gem=A2LocalGEM(learner,gem_band,lambda x:append(out/'gem_audit.jsonl',x),
+            def record_gem(row):
+                append(out/'gem_audit.jsonl', row)
+                phase_index = row['phase']
+                keys = ('updates', 'projections', 'fallbacks', 'zero_or_invalid_reference_rows',
+                        'correction_norm_sum')
+                metrics.record('Mechanism', phase_index, P['order'][phase_index], row['t_env'],
+                               {key: row[key] for key in keys}, event='gem_window', band=row['band'])
+                for source_task, task_stats in row.get('tasks', {}).items():
+                    metrics.record('Mechanism', phase_index, P['order'][phase_index], row['t_env'],
+                                   {'max_actual_local_dot': task_stats['max_actual_local_dot']},
+                                   event='gem_window', band=row['band'], source_task=source_task)
+
+            gem=A2LocalGEM(learner,gem_band,record_gem,
                            lambda x:append(out/'gem_errors.jsonl',x),
                            score_threshold=P.get('gem_score_threshold'))
             source=next((Path(o.parent)/'detections').glob('A_*/screen_input.th'))
-            source_batch=th.load(source,map_location='cpu')['batch']
+            source_batch = History.load(source)['batch']
             append(out/'gem_selection_history.jsonl',gem.update('A',selection,source_batch,runner.t_env))
             del source_batch
-        chi_probes = {}
+        chi_probes = History()
         if CHI and o.role == 'branch':
             if release_trial:
-                chi_probes = {int(i): Path(path) for i, path in release_event['probes'].items()}
+                chi_probes.update((int(i), Path(path)) for i, path in release_event['probes'].items())
             else:
                 chi_probes[0] = (ROOT/P['chi_prefix_probe'] if P.get('chi_prefix_probe')
                                  else parent/'chi_probes'/'phase0.th')
@@ -261,19 +292,22 @@ def main():
             try:
                 if episodes is not None:
                     path = out/'chi_probes'/f'phase{phase}.th'
-                    chi_probes[phase] = path
                     vdn_chi.save_probe(mac, episodes, path)
+                    chi_probes[phase] = path
                 if not layer:
                     return None
                 result = vdn_chi.reassess(mac, chi_probes, layer, top_k=args.top_k,
                                           threshold=args.chi_threshold)
                 append(out/'chi_assessments.jsonl', dict(phase=phase, task=task,
                        t_env=runner.t_env, layers=result))
+                metrics.neurons(phase, task, runner.t_env, layer,
+                                {'normalized_score': result[layer]['scores']}, event='chi_reassessment')
                 return result
             except Exception:
                 append(out/'chi_errors.jsonl', dict(phase=phase, task=task, t_env=runner.t_env,
                        error=traceback.format_exc()))
-                return {layer: dict(sets={'overall': []}, defined=False)} if layer else None
+                return {layer: dict(sets={'overall': None}, defined=False,
+                                    skip_reason='detection_error')} if layer else None
 
         if CHI and o.role == 'branch':
             if release_trial:
@@ -290,35 +324,13 @@ def main():
         if o.role == 'branch' and layer:
             append(out/'selection_history.jsonl', dict(source_task=P['order'][phase],
                    next_task=P['order'][phase+1], **protector.update(selection, runner.t_env)))
-        def status(state='running',**extra):write(out/'status.json',dict(status=state,pid=os.getpid(),t_env=runner.t_env,phase=phase,task=P['order'][phase],updates=updates,episode=episode,elapsed_seconds=time.time()-started,**extra))
-        def evaluate_block(task, envseed, per, agent_state):
-            ea = copy.deepcopy(args)
-            ea.device = 'cpu'
-            ea.use_cuda = False
-            ea.env_args['seed'] = envseed
-            emac = base.controllers[args.mac](buffer.scheme, groups, ea)
-            emac.agent.load_state_dict(mac.agent.state_dict() if agent_state is None else agent_state)
-            emac.agent.eval()
-            er = base.EpisodeRunner(ea, base.Logger(logging.getLogger('eval')))
-            episodes = []
-            try:
-                er.env.set_task(task)
-                er.setup(scheme, groups, preprocess, emac)
-                with th.no_grad():
-                    for j in range(per):
-                        er.run(test_mode=True)
-                        episodes.append(dict(env_seed=envseed, episode=j,
-                            won=bool(er.env.last_info.get('battle_won', False)), length=er.t))
-            finally:
-                er.close_env()
-            return episodes
-
+        def status(state='running', **extra):
+            write_sequence_status(out, state, runner.t_env, phase, P['order'][phase],
+                                  updates, episode, started, **extra)
         def evaluate(task, focus, label, agent_state=None, reference_phase=None):
             saved = rng_state()
             idx = P['order'].index(task)
-            blocks = [91101 + idx*100 + j for j in range(4)] if focus else [
-                91001 + idx*100 + j for j in range(2)]
-            per = 32 if focus else 16
+            blocks, per = fixed_seed_plan(idx, focus)
             retries = P.get('evaluation_sc2_retries', 0)
             common = dict(t_env=runner.t_env, phase=phase, trained_task=P['order'][phase],
                           reference_phase=reference_phase, task=task, label=label, focus=focus)
@@ -328,7 +340,11 @@ def main():
                     block_rng = rng_state() if retries else None
                     for attempt in range(retries + 1):
                         try:
-                            episodes.extend(evaluate_block(task, envseed, per, agent_state))
+                            reference = mac.agent.state_dict() if agent_state is None else agent_state
+                            episodes.extend(evaluate_block(
+                                args, spec, buffer.scheme, reference, task, envseed, per,
+                                make_controller=base.controllers[args.mac], make_runner=base.EpisodeRunner,
+                                make_logger=base.Logger))
                             break
                         except (SC2ConnectionError, SC2ConnectError, SC2RequestError) as error:
                             if isinstance(error, SC2RequestError) and not (
@@ -341,7 +357,7 @@ def main():
                                     **common, env_seed=envseed, attempt=attempt+1,
                                     will_retry=will_retry, error=str(error)))
                             if will_retry:
-                                h.restore_rng(block_rng)
+                                restore_rng(block_rng)
                             elif retries and label in ('periodic', 'release_window', 'release_old'):
                                 status()
                                 return
@@ -350,10 +366,10 @@ def main():
                 for episode_result in episodes:
                     append(out/'test_episodes.jsonl', dict(**common, **episode_result))
                 wins = sum(result['won'] for result in episodes)
-                append(out/'evaluations.jsonl', dict(
+                record_evaluation(out, metrics, dict(
                     **common, wins=wins, episodes=len(episodes), win_rate=wins/len(episodes)))
             finally:
-                h.restore_rng(saved)
+                restore_rng(saved)
             status()
         def screen(task):
             dest=out/'detections'/f'{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False)
@@ -370,6 +386,19 @@ def main():
             except Exception:
                 write(dest/'error.json',dict(error=traceback.format_exc()));result={key:dict(sets={'overall':None}) for key in ['A','A1','A2']}
             write(dest/'result.json',result)
+            for name, item in result.items():
+                scores = item.get('scores')
+                score_groups = scores if isinstance(scores, dict) else item.get('group_statistics', {})
+                if score_groups:
+                    for group, values in score_groups.items():
+                        metrics.neurons(phase, task, runner.t_env, name,
+                                        {'weighted_activity': values.get('activity'),
+                                         'normalized_score': values.get('scores', values.get('score'))},
+                                        event='boundary_detection', agent_group=group)
+                else:
+                    metrics.neurons(phase, task, runner.t_env, name,
+                                    {'weighted_activity': item.get('activity'), 'normalized_score': scores},
+                                    event='boundary_detection')
             return result
         def detect_layers(task, nominal, boundary):
             record = dict(task=task, phase=phase, t_env=runner.t_env, nominal_t_env=nominal,
@@ -391,6 +420,9 @@ def main():
                                                       if value > detection['threshold']])
                     path = 'agent.net[4]' if name == 'A2' else 'agent.net[2]'
                     append(out/'neuron_detections.jsonl', dict(record, layer=name, layer_path=path, **layer))
+                    metrics.neurons(phase, task, runner.t_env, name,
+                                    {'weighted_activity': layer['activity'], 'normalized_score': scores},
+                                    event='stage_end' if boundary else 'periodic_detection')
             except Exception:
                 append(out/'neuron_detection_errors.jsonl', dict(record, error=traceback.format_exc()))
 
@@ -440,7 +472,7 @@ def main():
                         finally:
                             sample_runner.close_env()
                     finally:
-                        h.restore_rng(saved_rng)
+                        restore_rng(saved_rng)
                     selection = screen('E')
                     append(out/'selection_history.jsonl', dict(
                         source_task='E', next_task='F', sample_seed=sample_seed,
@@ -456,7 +488,8 @@ def main():
             if cache.exists():
                 cached=json.loads(cache.read_text())
                 write(out/'initial_reference_reuse.json',dict(source=str(cache),cached_model_hash=cached.get('model_hash'),current_model_hash=initial_hash,hashes_match=cached.get('model_hash')==initial_hash))
-                for item in json.loads(cache.read_text())['evaluations']:append(out/'evaluations.jsonl',item)
+                for item in json.loads(cache.read_text())['evaluations']:
+                    record_evaluation(out, metrics, item)
             else:
                 th.save(initial_agent,out/'initial_reference_agent.th')
                 for unseen in P['order'][1:]:evaluate(unseen,True,'initial_reference',initial_agent,reference_phase=-1)
@@ -485,15 +518,7 @@ def main():
         last_phase = len(P['order']) - 1
 
         def save_continuation():
-            state = dict(agent=mac.agent.state_dict(), mixer=learner.mixer.state_dict(),
-                         target_agent=learner.target_mac.agent.state_dict(),
-                         target_mixer=learner.target_mixer.state_dict(),
-                         optimizer=learner.optimiser.state_dict(), buffer=buffer,
-                         t_env=runner.t_env, episode=episode, updates=updates,
-                         last_target_update_episode=learner.last_target_update_episode,
-                         log_stats_t=learner.log_stats_t, epsilon=mac.action_selector.epsilon,
-                         rng=rng_state(), environment_distributions=runner.env.distribution_state(),
-                         model_hash=base.parameter_hash(learner))
+            state = continuation_state(learner, runner, buffer, episode, updates)
             th.save(state, out/'prefix_state.th')
 
         for phase in phases:
@@ -509,11 +534,11 @@ def main():
                     learner.trhr.protected[trace.protected] = True
             replay_state = start_replay_task(buffer, task)
             base.log_task_epsilon(runner, out, phase, task, 'start')
-            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=None if not layer else protector.schedule.state(begin),gem_band=gem_band,**replay_state))
-            audited=[False]
-            def audit(x):
-                if not audited[0]:append(out/'environment_audit.jsonl',dict(phase=phase,t_env=runner.t_env,**x));audited[0]=True
-            runner.env.audit = audit
+            schedule = protector.schedule.state(begin) if layer else None
+            append(out/'transitions.jsonl',dict(phase=phase,task=task,actual_start=begin,nominal_end=end,buffer_episodes=buffer.episodes_in_buffer,protection=schedule,gem_band=gem_band,**replay_state))
+            if schedule is not None:
+                metrics.protection(phase, task, begin, schedule)
+            begin_environment_audit(runner, out, phase)
             status()
             evaluate(task, release_trial, 'phase_start')
             next_test = begin + 25000 if release_trial else (begin//25000+1)*25000
@@ -534,7 +559,7 @@ def main():
                     fifo.append((cpu_episode(batch), types))
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
-                    sample=buffer.sample(args.batch_size);sample=sample[:,:sample.max_t_filled()];sample.to(args.device);protector.t_env=runner.t_env
+                    sample=td_sample(buffer, args.batch_size, args.device);protector.t_env=runner.t_env
                     if gem:gem.phase=phase
                     learner.train(sample,runner.t_env,episode);updates+=1;del sample
                     if replay_state:
@@ -560,9 +585,9 @@ def main():
             if TRACE:
                 trace.flush(runner.t_env)
             base.log_task_epsilon(runner, out, phase, task, 'end')
-            append(out/'phase_end.jsonl',dict(phase=phase,task=task,actual_start=begin,actual_end=runner.t_env,nominal_end=end,overshoot=runner.t_env-end))
-            dest=out/'models'/f'phase{phase}_{task}_{runner.t_env}';dest.mkdir(parents=True,exist_ok=False);learner.save_models(str(dest))
-            th.save(dict(target_agent=learner.target_mac.agent.state_dict(),target_mixer=learner.target_mixer.state_dict(),t_env=runner.t_env,episode=episode,updates=updates),dest/'targets.th')
+            log_phase_end(out, phase, task, begin, end, runner.t_env)
+            dest = out/'models'/f'phase{phase}_{task}_{runner.t_env}'
+            save_stage_models(learner, dest, runner.t_env, episode, updates)
             if layer:write(dest/'protection.json',protector.schedule.state(runner.t_env))
             if gem:gem.save(dest/'gem_state.th')
             seen_tasks = list(dict.fromkeys(P['order'][:phase+1]))
@@ -574,7 +599,7 @@ def main():
                 break
             if CHI:
                 selection = refresh_chi(phase, task, episodes=[entry[0] for entry in fifo])
-                if release_search and phase < last_phase:
+                if release_search and phase < last_phase and selection[layer]['defined']:
                     previous = protector.schedule.protected[layer]
                     item = selection[layer]
                     chosen = set(item['sets']['overall'])
@@ -639,7 +664,14 @@ def main():
                     earlier_parent = launch['request'].get('parent')
                     if earlier_parent:
                         sources.insert(0, (Path(earlier_parent), all_labels))
-            write(out/'retention.json', sequence_metrics(P['order'], sources + [(out, all_labels)]))
+            stage_end_steps = {}
+            report = sequence_metrics(P['order'], sources + [(out, all_labels)], stage_end_steps=stage_end_steps)
+            write(out/'retention.json', report)
+            for index, (stage, row) in enumerate(report['metrics'].items()):
+                if index in stage_end_steps:
+                    step, source_run_id = stage_end_steps[index]
+                    metrics.retention(index, P['order'][index], step, row,
+                                      stage_label=stage, source_run_id=source_run_id)
         status('completed',finished=time.time())
     except BaseException:
         write(out/'status.json',dict(status='failed',t_env=runner.t_env if runner else 0,phase=phase,updates=updates,error=traceback.format_exc()));raise

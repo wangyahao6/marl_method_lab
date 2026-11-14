@@ -3,7 +3,8 @@ import copy
 
 import torch as th
 
-from protection import combine
+from memory import History
+from memory.episodes import batch_on_device, combine
 from ts4_diagnostics import vdn_sensitivity
 
 
@@ -62,8 +63,7 @@ def save_probe(mac, episodes, path):
 
 @th.no_grad()
 def save_probe_batch(mac, cpu, path):
-    batch = copy.deepcopy(cpu)
-    batch.to(mac.args.device)
+    batch = batch_on_device(cpu, mac.args.device)
     states, agents = decision_masks(batch)
     weights = th.zeros(states.shape, device=states.device)
     if states.any():
@@ -73,10 +73,7 @@ def save_probe_batch(mac, cpu, path):
         mean = sensitivity.mean()
         if mean > 0:
             weights[states] = sensitivity / mean
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix('.tmp')
-    th.save(dict(batch=cpu, weights=weights.cpu()), temp)
-    temp.replace(path)
+    History.save(path, dict(batch=cpu, weights=weights.cpu()))
 
 
 @th.no_grad()
@@ -84,7 +81,7 @@ def reassess(mac, probes, layer, *, top_k, threshold):
     tasks = {}
     current = []
     for phase, path in probes.items():
-        probe = th.load(path, map_location='cpu')
+        probe = History.load(path)
         batch = probe['batch']
         batch.to(mac.args.device)
         weights = probe['weights'].to(mac.args.device)

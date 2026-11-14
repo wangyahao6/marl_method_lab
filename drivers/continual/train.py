@@ -1,6 +1,5 @@
 """KNIFE Figure 6 a/c environments; original QMIX versus configurable A/W/V soft protection."""
 import argparse
-import hashlib
 import json
 import logging
 import os
@@ -14,12 +13,17 @@ from types import SimpleNamespace, ModuleType
 
 ROOT = Path(__file__).resolve().parents[2]
 PROTOCOL = json.loads(Path(os.environ['MARL_PROTOCOL']).read_text())
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'src'))
 sys.path.insert(0, str(ROOT / 'vendor/smacv2'))
 os.environ['SC2PATH'] = str(ROOT / 'runtime/SMACv2StarCraftII')
 import numpy as np
 import torch as th
 import yaml
+from common.checkpoints import parameter_hash, save_models
+from common.metrics import Metrics, record_evaluation
+from common.records import append, attach_legacy_metrics, write
+from common.runtime import begin_environment_audit, episode_spec, log_task_epsilon, td_sample
 from environment import SequentialProtoss
 from protection import SoftProtection, NullProtection
 # ReBorn envs/__init__.py imports original SMAC unconditionally. Importing both
@@ -29,7 +33,7 @@ environment_module = ModuleType('envs')
 environment_module.REGISTRY = {'sequential_protoss': SequentialProtoss}
 sys.modules['envs'] = environment_module
 from components.episode_buffer import ReplayBuffer
-from components.transforms import OneHot
+from components.transforms import OneHot  # Legacy import used by offline scripts.
 from controllers import REGISTRY as controllers
 from learners import REGISTRY as learners
 from envs import REGISTRY as environments
@@ -38,43 +42,10 @@ from modules.layers.act_layer import ActivateLayer
 from utils.logging import Logger
 
 
-def write(path, value):
-    temp = path.with_suffix('.tmp')
-    temp.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False))
-    temp.replace(path)
-
-
-def append(path, value):
-    with path.open('a') as stream:
-        stream.write(json.dumps(value, allow_nan=False) + '\n')
-
-
-def log_task_epsilon(runner, out, phase, task, event):
-    selector = runner.mac.action_selector
-    mode = runner.args.epsilon_on_switch
-    if event == 'start' and mode == 'per_task':
-        selector.reset_exploration(runner.t_env)
-    append(out / 'task_epsilon.jsonl', dict(
-        event=event, phase=phase, task=task, t_env=runner.t_env,
-        exploration_steps=selector.exploration_steps(runner.t_env),
-        epsilon=selector.training_epsilon(runner.t_env), schedule=mode,
-    ))
-
-
 def merge(a, b):
     for k, v in b.items():
         a[k] = merge(a.get(k, {}), v) if isinstance(v, dict) else v
     return a
-
-
-def parameter_hash(learner):
-    digest = hashlib.sha256()
-    for network in (learner.mac.agent, learner.target_mac.agent,
-                    learner.mixer, learner.target_mixer):
-        for name, value in network.state_dict().items():
-            digest.update(name.encode())
-            digest.update(value.detach().cpu().numpy().tobytes())
-    return digest.hexdigest()
 
 
 def main():
@@ -131,23 +102,14 @@ def main():
         args = SimpleNamespace(**cfg)
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
         logger = Logger(logging.getLogger(out.name))
-        original_log = logger.log_stat
-        def log(key, value, t, **kwargs):
-            append(out / 'metrics.jsonl', dict(key=key, value=float(value), t_env=int(t)))
-            original_log(key, value, t, **kwargs)
-        logger.log_stat = log
+        attach_legacy_metrics(logger, out)
+        metrics = Metrics(out, o.algorithm, o.condition, o.seed)
         environments['sequential_protoss'] = SequentialProtoss
         runner = EpisodeRunner(args, logger)
         info = runner.get_env_info()
         write(out / 'env_info.json', info)
         args.n_agents, args.n_actions, args.state_shape = info['n_agents'], info['n_actions'], info['state_shape']
-        scheme = dict(state=dict(vshape=info['state_shape']),
-                      obs=dict(vshape=info['obs_shape'], group='agents'),
-                      actions=dict(vshape=(1,), group='agents', dtype=th.long),
-                      avail_actions=dict(vshape=(info['n_actions'],), group='agents', dtype=th.int),
-                      reward=dict(vshape=(1,)), terminated=dict(vshape=(1,), dtype=th.uint8))
-        groups = dict(agents=args.n_agents)
-        preprocess = dict(actions=('actions_onehot', [OneHot(out_dim=args.n_actions)]))
+        scheme, groups, preprocess = episode_spec(info)
         buffer = ReplayBuffer(scheme, groups, args.buffer_size, info['episode_limit']+1,
                               preprocess=preprocess, device='cpu')
         mac = controllers[args.mac](buffer.scheme, groups, args)
@@ -160,13 +122,12 @@ def main():
                 if isinstance(module, ActivateLayer):
                     module._forward_hooks.clear()
         learner.cuda()
-        protection = SoftProtection(learner, PROTOCOL['method'], out, append, write) if o.condition=='softprotect' else NullProtection()
+        protection = SoftProtection(learner, PROTOCOL['method'], out, append, write, metrics=metrics) if o.condition=='softprotect' else NullProtection()
         episode = 0
         initial_hash = parameter_hash(learner)
         def save_model(label):
             dest = out / 'models' / label
-            dest.mkdir(parents=True, exist_ok=False)
-            learner.save_models(str(dest))
+            save_models(learner, dest)
             write(dest / 'protection.json', protection.state())
             th.save(dict(target_agent=learner.target_mac.agent.state_dict(),
                          target_mixer=learner.target_mixer.state_dict(),
@@ -180,14 +141,7 @@ def main():
             runner.env.set_task(unit)
             runner.env.phase = phase
             log_task_epsilon(runner, out, phase, unit, 'start')
-            runner.env.audit = lambda x: append(out / 'environment_audit.jsonl', dict(phase=phase, t_env=runner.t_env, **x)) if o.smoke else None
-            # Record first actual reset of each phase, all resets in smoke.
-            audited = [False]
-            def audit(x):
-                if o.smoke or not audited[0]:
-                    append(out / 'environment_audit.jsonl', dict(phase=phase, t_env=runner.t_env, **x))
-                    audited[0] = True
-            runner.env.audit = audit
+            begin_environment_audit(runner, out, phase, all_resets=o.smoke)
             append(out / 'switches.jsonl', dict(phase=phase, unit=unit, t_env=runner.t_env,
                    end=end, model_hash=before, buffer_episodes=int(buffer.episodes_in_buffer),
                    updates=updates, last_target_update_episode=learner.last_target_update_episode,
@@ -204,7 +158,7 @@ def main():
                         wins += int(won)
                         append(out / 'test_episodes.jsonl', dict(t_env=runner.t_env, phase=phase,
                                unit=unit, evaluation=label, episode=j, won=won, length=runner.t))
-                append(out / 'evaluations.jsonl', dict(t_env=runner.t_env, phase=phase, unit=unit,
+                record_evaluation(out, metrics, dict(t_env=runner.t_env, phase=phase, unit=unit,
                        evaluation=label, wins=wins, episodes=args.test_nepisode,
                        win_rate=wins/args.test_nepisode, wall_seconds=time.time()-started))
                 write(out / 'status.json', dict(status='running', pid=os.getpid(), started=started,
@@ -219,9 +173,7 @@ def main():
                 protection.remember(batch, episode, unit, runner.t_env-runner.t, runner.t_env, runner.env.last_info)
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
-                    sample = buffer.sample(args.batch_size)
-                    sample = sample[:, :sample.max_t_filled()]
-                    sample.to(args.device)
+                    sample = td_sample(buffer, args.batch_size, args.device)
                     protection.t_env = runner.t_env
                     learner.train(sample, runner.t_env, episode)
                     updates += 1

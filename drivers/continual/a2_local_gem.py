@@ -6,7 +6,8 @@ copied. The unselected increment is unconstrained; this is LOCAL, not full GEM.
 import copy,itertools,time,traceback
 import numpy as np
 import torch as th
-from protection import combine
+from memory import History
+from memory.episodes import batch_on_device
 
 
 def partition(activity, width=64, count=21):
@@ -101,7 +102,7 @@ class A2LocalGEM:
         self.reference.agent.eval();self.target.agent.eval()
         self.params=[p for p in learner.mac.agent.parameters() if p.requires_grad]
         self.refparams=[p for p in self.reference.agent.parameters() if p.requires_grad]
-        self.memories={};self.device_memories={};self.ids=[]
+        self.memories=History();self.device_memories={};self.ids=[]
         self.indices,self.dim=indices_for(learner.mac.agent,[])
         self.t_env=0;self.phase=0;self.reference_rows=[];self.count=0;self.stats={}
         self.original_train=learner.train;self.original_step=learner.optimiser.step
@@ -109,7 +110,7 @@ class A2LocalGEM:
 
     def update(self,task,selection,cpu_batch,t_env):
         self.flush();self.memories[task]=copy.deepcopy(cpu_batch)
-        device=copy.deepcopy(cpu_batch);device.to(self.learner.args.device);self.device_memories[task]=device
+        self.device_memories[task] = batch_on_device(self.memories[task], self.learner.args.device)
         item = selection.get('A2', {})
         if self.score_threshold is None:
             activity = item.get('activity')
@@ -190,4 +191,6 @@ class A2LocalGEM:
         if self.stats:self.record(dict(t_env=self.t_env,phase=self.phase,band=self.band,ids=self.ids,parameters=int(self.indices.numel()),**self.stats));self.stats={}
 
     def save(self,path):
-        self.flush();th.save(dict(band=self.band,ids=self.ids,memories=self.memories,count=self.count,kind='local RMSprop increment projection; not complete trainer resume'),path)
+        self.flush()
+        self.memories.save(path, dict(band=self.band, ids=self.ids, memories=dict(self.memories),
+                                      count=self.count, kind='local RMSprop increment projection; not complete trainer resume'))

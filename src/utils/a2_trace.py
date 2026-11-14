@@ -14,6 +14,7 @@ class A2Trace:
         self.path = Path(directory) / ("a_windows.jsonl" if single_ff else "a2_windows.jsonl")
         self.stages = stages
         self.phase = 0
+        self.record = None
         self.history = []
         self.protected = []
         self.adjusted = set()
@@ -127,4 +128,6 @@ class A2Trace:
                           adjusted_total=len(self.adjusted), woken_total=len(self.recovered))
         with self.path.open("a") as stream:
             stream.write(json.dumps(record) + "\n")
+        if self.record is not None:
+            self.record(record)
         self.updates = 0
