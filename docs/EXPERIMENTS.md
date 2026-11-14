@@ -21,7 +21,7 @@ TS3–TS8 和 history 的新 VDN 持续学习实验默认使用 `ft`，包括基
 `"replay_on_switch": "er"`，或通过 `scripts/run.py --replay-on-switch er` 覆盖协议。
 共享前缀和续训分支应使用同一回放模式。复现旧的共享池协议时显式指定
 `--replay-on-switch retain`。
-`vdn_action_set` 的偏好约束仍在每个阶段重建 TD 经验池，历史参考数据由各约束方法管理。
+`vdn_action_set` 默认在每个阶段重建 TD 经验池，历史参考数据由各约束方法管理。同入口的无干预基线也支持 `--replay-on-switch er`，复用下述任务均衡采样。
 各入口沿用原有的模型、TD 更新、评估与任务预算。
 
 - **VDN-FT** 在任务切换后从空池开始，积满一个批次的当前任务完整回合再更新。
@@ -153,3 +153,5 @@ Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method br
 T1PR、FRPR、ASPR 使用 `configs/continual/szc_vdn64_ft_preferences.json` 和 `vdn_action_set`；方法参数沿用原 T1PR、TS4 FRPR 和 SZC ASPR 的设置。CHI 使用 `configs/continual/szc_vdn64_ft_a2_chi.json` 和 TS4 驱动的镜像环境，采用 `A2_chi`。在任务边界按固定探测集重评，严格大于 3 的最新名单替换旧名单，受保护更新系数 0.1，退出后 100k 步线性恢复。
 
 阶段末独立贪心评价每个已见任务 128 局，两个入口使用相同任务级种子块。定期当前任务评价为 32 局，TS4 驱动按全局步数对齐 25k 间隔，偏好驱动按阶段起点对齐。完整调度计划和终态汇总分别为 `results/szc_vdn64_ft_20261113/plan.json` 和同目录的 `summary.json`。
+
+2026-11-14 追加 `full_rank_preference_relu`、`top1_max_preference` 和无干预 VDN-ER，各跑 seed 3535、2222。六条路径沿用 `szc_vdn64_ft_preferences.json` 的逐任务 ε、镜像阵容、预算和评价。两种偏好变体使用各自默认参数和 FT，VDN-ER 在同一驱动中使用 `--method baseline --replay-on-switch er`。完整计划和汇总位于 `results/szc_vdn64_ft_20261113/with_variants_er/`。

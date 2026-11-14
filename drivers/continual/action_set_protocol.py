@@ -32,6 +32,9 @@ def validate(protocol, algorithm, method):
         raise ValueError("vdn_action_set requires shared recurrent VDN and a supported preference method or baseline")
     if not isinstance(protocol, dict):
         raise ValueError("protocol must be a JSON object")
+    replay = protocol.get("replay_on_switch", "ft")
+    if replay != "ft" and (replay != "er" or method != "baseline"):
+        raise ValueError("vdn_action_set uses FT replay, with ER supported for the baseline")
     tasks = protocol.get("tasks")
     stages = protocol.get("stages")
     if not isinstance(tasks, dict) or not tasks or not isinstance(stages, list) or not stages:

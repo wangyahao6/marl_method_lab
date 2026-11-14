@@ -17,6 +17,7 @@ from learners.action_set_preference import (
     ActionSetPreference, batch_episodes, decision_masks, preference_loss,
     preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
+from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference
 from action_set_protocol import RANK_METHODS, validate, validate_fork
 from common.checkpoints import cpu_snapshot, save_models
@@ -45,6 +46,7 @@ def config(protocol, seed, out):
                algorithm=protocol["algorithm"], method=protocol["method"],
                t_max=sum(stage["steps"] for stage in protocol["stages"]),
                epsilon_on_switch=protocol.get("epsilon_on_switch", "per_task"),
+               replay_on_switch=protocol.get("replay_on_switch", "ft"),
                action_set=protocol["action_set"])
     if protocol["method"] in RANK_METHODS:
         cfg[protocol["method"]] = protocol[protocol["method"]]
@@ -373,6 +375,11 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             for task in dict.fromkeys(stage["task"] for stage in stages if stage["task"] != stages[0]["task"]):
                 initial[task] = evaluate(reference, task, "initial_reference")
 
+        er_buffer = None
+        if args.replay_on_switch == "er":
+            er_buffer = make_replay_buffer(args, [stage["task"] for stage in stages],
+                                           scheme, groups, info["episode_limit"] + 1, preprocess)
+
         stop_phase = len(stages) - 1 if role == "prefix" else len(stages)
         for phase in range(first_phase, stop_phase):
             stage = stages[phase]
@@ -380,14 +387,16 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             begin = runner.t_env
             nominal_end += stage["steps"]
             end = nominal_end if protocol.get("phase_boundary") == "cumulative" else begin + stage["steps"]
-            # Only current-task training episodes enter the TD buffer.
-            buffer = base.ReplayBuffer(scheme, groups, args.buffer_size, info["episode_limit"] + 1,
-                                       preprocess=preprocess, device="cpu")
+            buffer = er_buffer
+            if buffer is None:
+                buffer = base.ReplayBuffer(scheme, groups, args.buffer_size, info["episode_limit"] + 1,
+                                           preprocess=preprocess, device="cpu")
+            replay_state = start_replay_task(buffer, task)
             runner.env.set_task(task)
             base.log_task_epsilon(runner, out, phase, task, "start")
             if preference is not None:
                 preference.phase, preference.task = phase, task
-            base.append(out / "transitions.jsonl", dict(phase=phase, task=task, start=begin, target=end))
+            base.append(out / "transitions.jsonl", dict(phase=phase, task=task, start=begin, target=end, **replay_state))
             status("running")
             evaluate(agent_snapshot(), task, "phase_start")
             interval = evaluation["interval"]
@@ -400,6 +409,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                     sample = td_sample(buffer, args.batch_size, args.device)
                     learner.train(sample, runner.t_env, episode, preference=preference)
                     updates += 1
+                    if replay_state:
+                        log_first_replay_batch(buffer, base.append, out, phase, task, runner.t_env)
+                        replay_state = {}
                 episode += 1
                 if episode % 25 == 0:
                     status("running")

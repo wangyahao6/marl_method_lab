@@ -388,7 +388,13 @@ def main():
         replay = protocol.get('replay_on_switch')
     if configurable_replay and replay is None:
         replay = 'ft'
-    if replay is not None:
+    if a.suite == 'vdn_action_set' and replay is not None:
+        try:
+            protocol = validate(dict(protocol, replay_on_switch=replay), a.algorithm, a.method)
+        except ValueError as exc:
+            p.error(str(exc))
+        details['protocol'] = protocol
+    elif replay is not None:
         if replay not in ('retain', 'ft', 'er'):
             p.error('replay_on_switch must be retain, ft or er')
         if not configurable_replay:
