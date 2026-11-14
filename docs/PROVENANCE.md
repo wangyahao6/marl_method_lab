@@ -10,13 +10,13 @@
 
 ## 运行时
 
-代码独立复制；本机依赖暂复用已有环境：.venv链接至/home/wyh/stagnant_figure2/.venv，SC2链接至/home/wyh/reborn_figure1/runtime/StarCraftII。不修改原环境。精确pip包版本记录在runtime_packages.txt。SMAC作为该环境内依赖，SMACv2源码在本仓库vendor内。以后公开时应整理安装说明；现有绝对路径链接不作为可移植安装方案，也不提交Git。
+代码独立复制；本机依赖暂复用已有环境：.venv链接至/home/wyh/stagnant_figure2/.venv，SC2链接至/home/wyh/reborn_figure1/runtime/StarCraftII。不修改原环境。精确pip包版本记录在runtime_packages.txt。SMAC作为该环境内依赖，SMACv2源码在本仓库vendor内。此处记录的是实验主机配置，可移植安装说明待整理。实验主机的绝对路径链接由本机维护。
 
 ## 许可证
 
-该固定版本的原README称Apache2.0，但LICENSE正文为GPLv3，存在不一致。本仓库保留双方原文，不自行指定新的整体许可证；公开前需确认来源许可口径并保留第三方版权和声明。独立仓库名称或新Git历史不改变代码来源。SMACv2自身LICENSE随vendor保留。
+该固定版本的原README称Apache2.0，但LICENSE正文为GPLv3，存在不一致。本仓库保留上游原文及第三方版权和声明。适用条款仍待上游确认。独立仓库名称或新Git历史不改变代码来源。SMACv2自身LICENSE随vendor保留。
 
-当前仅远端本地Git，无origin、无推送。旧实验工程未迁移、未改写。此次建立只做静态核对，不产生训练结果。
+公开副本于 2026-11-14 首次从 Ubuntu 主仓库推送，首推版本为 `d96055f`。后续方法代码同步规则见 [AGENTS.md](../AGENTS.md)。
 
 Continuous SMACv2 runs use runtime/SMACv2StarCraftII -> /home/wyh/stagnant_figure2/runtime/StarCraftII (existing SC2 4.10 task-switch runtime including SMACv2 maps). The static SMAC runtime/StarCraftII remains unchanged. Both are read-only reused dependencies.
 

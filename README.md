@@ -1,6 +1,6 @@
 # MARL Method Lab
 
-用户自己的 MARL 方法研究代码库。2026-10-30 建立，仅保存于 `rl-navigation-ubuntu:/home/wyh/marl_method_lab`，未上传、未配置 Git 网络远端。代码以 ReBorn 固定提交为基础；本仓库建立不启动任何训练、不恢复已终止队列。
+MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本位于 `rl-navigation-ubuntu:/home/wyh/marl_method_lab`。方法代码完成验证和提交后，可按 AGENTS.md 同步至公开的 [GitHub 仓库](https://github.com/wangyahao6/marl_method_lab)。
 
 ## 入口
 
