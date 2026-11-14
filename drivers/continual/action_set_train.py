@@ -86,7 +86,7 @@ def isolated_rollouts():
 
 
 @contextmanager
-def greedy_runner(args, spec, expected_layout, agent_state, task, seed):
+def greedy_runner(args, spec, expected_layout, agent_state, task, seed, *, q_steps=None):
     ea = copy.deepcopy(args)
     ea.device, ea.use_cuda, ea.seed = "cpu", False, seed
     ea.env_args["seed"] = seed
@@ -104,13 +104,29 @@ def greedy_runner(args, spec, expected_layout, agent_state, task, seed):
         mac.agent.eval().requires_grad_(False)
         runner.env.set_task(task)
         runner.setup(scheme, groups, preprocess, mac)
-        with th.no_grad():
-            yield runner
+        # The Agent returns raw Q before the action selector masks illegal actions.
+        def capture_q(_agent, _inputs, output):
+            q, _ = output
+            q_steps.append(q.detach().to(dtype=th.float32))
+
+        hook = mac.agent.register_forward_hook(capture_q) if q_steps is not None else None
+        try:
+            with th.no_grad():
+                yield runner
+        finally:
+            if hook is not None:
+                hook.remove()
     finally:
         runner.close_env()
 
 
-def reference_record(runner, batch, episode):
+def reference_record(runner, batch, episode, *, q_steps=None):
+    if q_steps is not None:
+        old_q = th.stack(q_steps)
+        if old_q.shape != episode["data"]["avail_actions"].shape:
+            raise ValueError("Collected Q values do not align with the stored episode")
+        episode["data"]["old_q_values"] = old_q
+        return episode
     batch = batch[:, :runner.t + 1]
     q = unroll(runner.mac, batch, runner.t)
     _, decision = decision_masks(batch)
@@ -160,17 +176,20 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"]
     label_action_sets = args.method == "action_set_preference"
+    q_steps = [] if args.method in RANK_METHODS else None
     with isolated_rollouts():
         for block, offset in enumerate(offsets):
             seed = (args.seed + offset) % 2**31
             quota = (target * (block + 1) + len(offsets) - 1) // len(offsets)
             wins = attempts = 0
             with greedy_runner(args, spec, expected_layout,
-                               reference, task, seed) as runner:
+                               reference, task, seed, q_steps=q_steps) as runner:
                 # Give each seed block at least one rollout, even for very small targets.
                 for index in range(settings["attempts_per_seed"]):
                     if index and len(successful) >= quota:
                         break
+                    if q_steps is not None:
+                        q_steps.clear()
                     batch = runner.run(test_mode=True)
                     won = bool(runner.last_episode_info.get("battle_won", False))
                     episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
@@ -181,7 +200,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     wins += 1
                     if len(successful) >= target:
                         continue
-                    successful.append(reference_record(runner, batch, episode) if label_action_sets else episode)
+                    successful.append(reference_record(runner, batch, episode, q_steps=q_steps))
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
     labels, diagnostics = {}, {}
     if label_action_sets:
@@ -290,7 +309,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                                              lambda row: base.append(out / "action_set_updates.jsonl", row))
         elif method in RANK_METHODS and protocol[method]["weight"] and role != "release":
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
-            preference = RankingPreference(method, out, ranking, np.random.default_rng(seed), augmented, groups,
+            preference = RankingPreference(method, ranking, np.random.default_rng(seed), augmented, groups,
                                             lambda row: base.append(out / f"{method}_updates.jsonl", row))
 
         stages = protocol["stages"]
@@ -347,6 +366,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                 for old_phase in range(first_phase):
                     path = parent / "action_set_memory" / f"phase{old_phase:04d}" / "success.th"
                     pool = th.load(path, map_location="cpu")
+                    if method in RANK_METHODS and any(
+                        "old_q_values" not in ep["data"] for ep in pool["episodes"]
+                    ):
+                        raise ValueError(f"{path} predates stored old_q_values. Convert the historical pool offline before continuing.")
                     pool["reference_checkpoint"] = str(parent / pool["reference_checkpoint"])
                     preference.history[old_phase] = pool
             restore_rng(state["rng"])

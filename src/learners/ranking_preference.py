@@ -1,6 +1,4 @@
 """Pairwise decision preference losses for recurrent VDN replay."""
-import copy
-
 import torch as th
 from torch.nn.functional import softplus
 
@@ -66,29 +64,14 @@ def ranking_statistics(summary):
 class RankingPreference(ActionSetPreference):
     statistics = staticmethod(ranking_statistics)
 
-    def __init__(self, method, run_dir, settings, rng, scheme, groups, log):
+    def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
         self.loss = {"full_rank_preference": full_rank_preference, "top1_preference": top1_preference}[method]
-        self.run_dir = run_dir
-        self.references = {}
-
-    def reference_mac(self, mac, pool):
-        checkpoint = self.run_dir / pool["reference_checkpoint"]
-        if checkpoint not in self.references:
-            reference = copy.copy(mac)
-            reference.agent = copy.deepcopy(mac.agent)
-            reference.hidden_states = None
-            reference.agent.load_state_dict(th.load(checkpoint, map_location="cpu"))
-            reference.agent.eval().requires_grad_(False)
-            self.references[checkpoint] = reference
-        return self.references[checkpoint]
 
     def task_loss(self, mac, pool, episodes):
-        batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device, include_good=False)
+        batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
+                                  include_good=False, include_old_q=True)
         legal, decisions = decision_masks(batch)
         decisions = decisions & (legal.sum(dim=-1) >= 2)
-        steps = batch.max_seq_length - 1
-        with th.no_grad():
-            reference_q = unroll(self.reference_mac(mac, pool), batch, steps)
-        current_q = unroll(mac, batch, steps)
-        return self.loss(current_q, reference_q, legal, decisions, self.settings)
+        current_q = unroll(mac, batch, batch.max_seq_length - 1)
+        return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions, self.settings)

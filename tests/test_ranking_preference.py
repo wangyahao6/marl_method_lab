@@ -1,7 +1,9 @@
 """Ranking loss checks and CPU sequence tests with real VDN/GRU."""
 import copy
 import json
+import logging
 from pathlib import Path
+from types import SimpleNamespace
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -13,6 +15,7 @@ from torch.nn.functional import softplus
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import RANK_DEFAULTS, RANK_METHODS
 from protection import digest
+from learners.action_set_preference import batch_episodes, decision_masks
 from learners.ranking_preference import RankingPreference, full_rank_preference, top1_preference
 
 
@@ -95,27 +98,14 @@ class RankingTest(unittest.TestCase):
         protocol["action_set"].update(batch_episodes=4, success_episodes=2,
                                       seed_offsets=[101, 102], attempts_per_seed=2)
         original_config = driver.config
-        original_reference = RankingPreference.reference_mac
-        frozen = {}
-
         def tiny_config(*args):
             return dict(original_config(*args), buffer_size=8, batch_size=2)
-
-        def track_reference(preference, mac, pool):
-            reference = original_reference(preference, mac, pool)
-            checkpoint = preference.run_dir / pool["reference_checkpoint"]
-            if checkpoint not in frozen:
-                frozen[checkpoint] = reference
-            self.assertIsNot(reference.agent, mac.agent)
-            self.assertIsNone(reference.hidden_states)
-            self.assertFalse(reference.agent.training)
-            return reference
 
         with tempfile.TemporaryDirectory() as tmp, patch.dict(
             driver.base.environments, {"action_set_protoss": ScriptedProtoss}
         ), patch.object(driver, "config", tiny_config), patch.object(
-            RankingPreference, "reference_mac", track_reference
-        ), patch.object(th.cuda, "is_available", return_value=False), np.testing.suppress_warnings() as quiet:
+            th.cuda, "is_available", return_value=False
+        ), np.testing.suppress_warnings() as quiet:
             quiet.filter(UserWarning)
             out = Path(tmp)
             for method in ("baseline", "action_set_preference", *RANK_METHODS, "zero"):
@@ -147,6 +137,8 @@ class RankingTest(unittest.TestCase):
                     self.assertEqual((old["seed"], old["index"]), (new["seed"], new["index"]))
                     self.assertTrue(all(th.equal(v, new["data"][k]) for k, v in old["data"].items()))
                     self.assertNotIn("good_mask", new)
+                    self.assertNotIn("old_q_values", old["data"])
+                    self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
                 samples = jsonlines(run / f"{method}_updates.jsonl")
                 for phase, tasks in enumerate((set(), {"stalker"}, {"stalker", "zealot"})):
                     phase_rows = [row for row in samples if row["phase"] == phase]
@@ -172,12 +164,88 @@ class RankingTest(unittest.TestCase):
                 trained, control = th.load(rank_checkpoints[1]), th.load(baseline[1])
                 self.assertFalse(th.equal(trained["rnn.weight_hh"], control["rnn.weight_hh"]))
 
-            self.assertEqual(len(frozen), 4)
-            for checkpoint, reference in frozen.items():
-                saved = th.load(checkpoint)
-                self.assertTrue(all(th.equal(saved[k], v) for k, v in reference.agent.state_dict().items()))
-                self.assertTrue(all(not p.requires_grad and p.grad is None for p in reference.agent.parameters()))
-                self.assertIsNone(reference.hidden_states)
+    def test_saved_q_matches_rollout_and_pads_for_backward(self):
+        class VariableWins(ScriptedProtoss):
+            def step(self, actions):
+                self.t += 1
+                done = self.t >= self.episodes + 1
+                return float(done), done, dict(battle_won=done, episode_limit=False)
+
+        class TracedRunner(driver.base.EpisodeRunner):
+            def setup(self, scheme, groups, preprocess, mac):
+                super().setup(scheme, groups, preprocess, mac)
+                forward = mac.forward
+
+                def trace(batch, t, test_mode=False):
+                    q = forward(batch, t, test_mode=test_mode)
+                    observed.append((t, q[0].detach().clone()))
+                    return q
+
+                mac.forward = trace
+
+        observed = []
+        protocol = driver.validate(json.loads(PROTOCOL_PATH.read_text()), "vdn", "top1_preference")
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(
+            driver.base.environments, {"action_set_protoss": VariableWins}
+        ), patch.object(driver.base, "EpisodeRunner", TracedRunner), patch.object(
+            th.cuda, "is_available", return_value=False
+        ), np.testing.suppress_warnings() as quiet:
+            quiet.filter(UserWarning)
+            out = Path(tmp)
+            args = SimpleNamespace(**driver.config(protocol, 8, out), n_agents=5, n_actions=11)
+            probe = TracedRunner(args, driver.base.Logger(logging.getLogger("test")))
+            spec = driver.episode_spec(probe.get_env_info())
+            expected_layout = driver.layout(probe)
+            probe.close_env()
+            scheme, groups = driver.augmented_scheme(spec), spec[1]
+            mac = driver.base.controllers[args.mac](scheme, groups, args)
+            settings = dict(protocol["action_set"], seed_offsets=[101], attempts_per_seed=2,
+                            success_episodes=2)
+            checkpoint = out / "source_checkpoint"
+            driver.collect_memory(args, spec, expected_layout, mac.agent.state_dict(),
+                                  checkpoint, "stalker", 0, settings, out)
+            pool = th.load(out / "action_set_memory/phase0000/success.th", map_location="cpu")
+            self.assertEqual(pool["reference_checkpoint"], "source_checkpoint/agent.th")
+            episodes = pool["episodes"]
+            self.assertEqual([ep["length"] for ep in episodes], [2, 3])
+            cursor = 0
+            for ep in episodes:
+                size = ep["length"] + 1
+                captured = observed[cursor:cursor + size]
+                self.assertEqual([t for t, _ in captured], list(range(size)))
+                stored = ep["data"]["old_q_values"]
+                self.assertEqual(stored.dtype, th.float32)
+                self.assertFalse(stored.requires_grad)
+                self.assertTrue(th.equal(stored, th.stack([q for _, q in captured])))
+                cursor += size
+            self.assertEqual(cursor, len(observed))
+
+            batch, _ = batch_episodes(episodes, scheme, groups, "cpu",
+                                      include_good=False, include_old_q=True)
+            self.assertEqual(batch["old_q_values"].shape, (2, 4, 5, 11))
+            for i, ep in enumerate(episodes):
+                length = ep["length"]
+                self.assertTrue(th.equal(batch["old_q_values"][i, :length + 1],
+                                         ep["data"]["old_q_values"]))
+                self.assertFalse(batch["old_q_values"][i, length + 1:].any())
+            legal, decisions = decision_masks(batch)
+            self.assertFalse(decisions[0, 2].any())
+            self.assertFalse(decisions[1, 1, 4])
+            self.assertTrue(decisions[0, 1, 0])
+            self.assertFalse(legal[0, 0, 0, 0])
+            for method in RANK_METHODS:
+                preference = RankingPreference(method, dict(RANK_DEFAULTS, min_gap=0), None,
+                                               scheme, groups, None)
+                mac.agent.zero_grad()
+                with patch.object(th, "load", side_effect=AssertionError("preference loaded a checkpoint")):
+                    loss, count, _ = preference.task_loss(mac, pool, episodes)
+                    self.assertTrue(th.isfinite(loss))
+                    self.assertGreater(count.item(), 0)
+                    self.assertIsNone(mac.hidden_states)
+                    loss.backward()
+                gradient = mac.agent.rnn.weight_hh.grad
+                self.assertTrue(th.isfinite(gradient).all())
+                self.assertGreater(gradient.abs().sum().item(), 0)
 
     def test_keep_branch_matches_uninterrupted_sequence(self):
         raw = json.loads(PROTOCOL_PATH.read_text())

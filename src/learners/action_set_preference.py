@@ -98,12 +98,16 @@ def pack_episode(batch, length, **metadata):
     })
 
 
-def batch_episodes(episodes, scheme, groups, device, *, include_good=True):
+def batch_episodes(episodes, scheme, groups, device, *, include_good=True, include_old_q=False):
     fields = ("obs", "actions_onehot", "avail_actions", "terminated", "filled")
+    batch_scheme = {key: scheme[key] for key in fields}
+    if include_old_q:
+        fields += ("old_q_values",)
+        batch_scheme["old_q_values"] = dict(scheme["avail_actions"], dtype=th.float32)
     data = {key: pad_sequence([ep["data"][key] for ep in episodes], batch_first=True).to(device)
             for key in fields}
     steps = data["obs"].shape[1]
-    batch = EpisodeBatch({key: scheme[key] for key in fields}, groups, len(episodes), steps,
+    batch = EpisodeBatch(batch_scheme, groups, len(episodes), steps,
                          data=SimpleNamespace(transition_data=data, episode_data={}), device=device)
     good = None
     if include_good:
