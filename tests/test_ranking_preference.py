@@ -13,13 +13,22 @@ import torch as th
 from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
-from action_set_protocol import RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS
+from action_set_protocol import (
+    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS,
+)
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.ranking_preference import (
     RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
-    top1_max_statistics, top1_preference,
+    top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
 )
+
+
+METHOD_DEFAULTS = {
+    "full_rank_preference_relu": RANK_RELU_DEFAULTS,
+    "top1_max_preference": TOP1_MAX_DEFAULTS,
+    "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
+}
 
 
 class RankingTest(unittest.TestCase):
@@ -177,15 +186,71 @@ class RankingTest(unittest.TestCase):
         self.assertEqual((loss.item(), count.item()), (0, 0))
         self.assertIsNone(top1_max_statistics(summary.tolist())['margin_violation_rate'])
 
+    def test_top1_unfiltered_keeps_low_confidence_and_exact_high_confidence_loss(self):
+        legal = th.tensor([[True, True, False]])
+        decisions = th.tensor([True])
+        current = th.tensor([[0., .1, 100.]], requires_grad=True)
+        for old_gap in (.01, .2, 0.):
+            with self.subTest(old_gap=old_gap):
+                reference = th.tensor([[old_gap, 0., 200.]], requires_grad=True)
+                old_loss, old_count, _ = top1_preference(
+                    current, reference, legal, decisions, RANK_DEFAULTS)
+                loss, count, summary = top1_unfiltered_preference(
+                    current, reference, legal, decisions, TOP1_UNFILTERED_DEFAULTS)
+                stats = top1_unfiltered_statistics(summary.tolist())
+                if old_gap == .01:
+                    self.assertEqual((old_count.item(), old_loss.item(), count.item()), (0, 0., 1))
+                    th.testing.assert_close(loss, softplus(th.tensor(1.)) * .1)
+                    self.assertAlmostEqual(stats["mean_constrained_confidence"], .1)
+                    gradient = th.autograd.grad(loss, current)[0]
+                    self.assertLess(gradient[0, 0].item(), 0)
+                    self.assertGreater(gradient[0, 1].item(), 0)
+                    self.assertEqual(gradient[0, 2].item(), 0)
+                    self.assertIsNone(reference.grad)
+                elif old_gap == .2:
+                    self.assertEqual((old_count.item(), count.item()), (1, 1))
+                    self.assertTrue(th.equal(loss, old_loss))
+                else:
+                    self.assertEqual((count.item(), loss.item()), (0, 0.))
+                    self.assertIsNone(stats["mean_constrained_confidence"])
+
+    def test_top1_unfiltered_excludes_invalid_decisions(self):
+        # Step 1 is the final real decision, step 2 is bootstrap, and steps 3–4 are padding.
+        batch = dict(
+            filled=th.tensor([[[1], [1], [1], [0], [0]]]),
+            terminated=th.tensor([[[0], [1], [0], [0], [0]]]),
+            avail_actions=th.tensor([[[[0, 1, 1], [0, 1, 0], [1, 0, 0]]] * 5]),
+        )
+        legal, decisions = decision_masks(batch)
+        reference = th.tensor([[[[100., .01, 0.]] * 3] * 4])
+        current = th.tensor([[[[1000., 0., .1]] * 3] * 4], requires_grad=True)
+        loss, count, summary = top1_unfiltered_preference(
+            current, reference, legal, decisions, TOP1_UNFILTERED_DEFAULTS)
+        self.assertEqual(count.item(), 2)
+        stats = top1_unfiltered_statistics(summary.tolist())
+        self.assertEqual((stats["decision_states"], stats["valid_pairs"], stats["coverage"]), (2, 2, 1.))
+        th.testing.assert_close(loss, softplus(th.tensor(1.)) * .1)
+        loss.backward()
+        self.assertTrue((current.grad[0, :2, 0, 1] < 0).all())
+        self.assertTrue((current.grad[0, :2, 0, 2] > 0).all())
+        self.assertFalse(current.grad[..., 0].any())
+        self.assertFalse(current.grad[0, 2:].any())
+        self.assertFalse(current.grad[0, :, 1:].any())
+        # Even a filled row following a terminal transition is excluded.
+        batch["filled"][0, 3] = 1
+        legal, decisions = decision_masks(batch)
+        _, count_after_terminal, _ = top1_unfiltered_preference(
+            current, reference, legal, decisions, TOP1_UNFILTERED_DEFAULTS)
+        self.assertEqual(count_after_terminal.item(), 2)
+
     def test_temperature_and_config_validation(self):
         protocol = json.loads(PROTOCOL_PATH.read_text())
         protocol["action_set"].pop("delta_by_task")
         for method in RANK_METHODS:
             effective = driver.validate(protocol, "vdn", method)
-            defaults = {"full_rank_preference_relu": RANK_RELU_DEFAULTS,
-                        "top1_max_preference": TOP1_MAX_DEFAULTS}.get(method, RANK_DEFAULTS)
+            defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
             self.assertEqual(effective[method], defaults)
-            for key in {"temperature", "margin"} - defaults.keys():
+            for key in {"temperature", "margin", "min_gap"} - defaults.keys():
                 with self.assertRaisesRegex(ValueError, "unknown or malformed"):
                     driver.validate(dict(protocol, **{method: {key: 1.0}}), "vdn", method)
             invalid = {"temperature": 0, "min_gap": -0.1, "q_scale_floor": 0, "weight": True, "margin": -.1}
@@ -227,7 +292,9 @@ class RankingTest(unittest.TestCase):
                 active = "top1_preference" if method == "zero" else method
                 configured = copy.deepcopy(protocol)
                 if active in RANK_METHODS:
-                    configured[active] = dict(weight=0 if method == "zero" else 0.5, min_gap=0)
+                    configured[active] = dict(weight=0 if method == "zero" else 0.5)
+                    if active != "top1_unfiltered_preference":
+                        configured[active]["min_gap"] = 0
                     if active == "top1_max_preference":
                         configured[active]["margin"] = 1.
                 driver.train_sequence(driver.validate(configured, "vdn", active), 8, run)
@@ -284,6 +351,12 @@ class RankingTest(unittest.TestCase):
                     self.assertTrue({"preference_loss", "valid_states", "coverage", "top1_flip_rate",
                                      "constrained_top1_flip_rate", "margin_violation_rate"}
                                     <= {row["metric"] for row in normalized})
+                if method == "top1_unfiltered_preference":
+                    self.assertTrue(any(row["preference_loss"] > 0 for row in samples))
+                    self.assertTrue(all(item["mean_constrained_confidence"] > 0
+                                        for row in samples for item in row["historical_tasks"]))
+                    normalized = jsonlines(run / "experiment_metrics.jsonl")
+                    self.assertTrue(any(row["metric"] == "mean_constrained_confidence" for row in normalized))
                 rank_checkpoints = sorted((run / "models").glob("*/agent.th"))
                 initial, same = th.load(rank_checkpoints[0]), th.load(baseline[0])
                 self.assertTrue(all(th.equal(initial[k], same[k]) for k in initial))
@@ -360,10 +433,11 @@ class RankingTest(unittest.TestCase):
             self.assertTrue(decisions[0, 1, 0])
             self.assertFalse(legal[0, 0, 0, 0])
             for method in RANK_METHODS:
-                defaults = {"full_rank_preference_relu": RANK_RELU_DEFAULTS,
-                        "top1_max_preference": TOP1_MAX_DEFAULTS}.get(method, RANK_DEFAULTS)
-                preference = RankingPreference(method, dict(defaults, min_gap=0), None,
-                                               scheme, groups, None)
+                defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
+                settings = dict(defaults)
+                if "min_gap" in settings:
+                    settings["min_gap"] = 0
+                preference = RankingPreference(method, settings, None, scheme, groups, None)
                 mac.agent.zero_grad()
                 with patch.object(th, "load", side_effect=AssertionError("preference loaded a checkpoint")):
                     loss, count, _ = preference.task_loss(mac, pool, episodes)

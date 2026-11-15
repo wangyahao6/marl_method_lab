@@ -43,9 +43,24 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty)
 def top1_preference(current_q, reference_q, legal, decisions, settings):
     _, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
     confident = decisions & (confidence > 0) & (confidence >= settings["min_gap"])
+    return _top1_softplus(current_q, legal, decisions, settings["temperature"],
+                          scale, best, confidence, confident)
+
+
+def top1_unfiltered_preference(current_q, reference_q, legal, decisions, settings):
+    _, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
+    decisions = decisions & (legal.sum(dim=-1) >= 2)
+    confident = decisions & (confidence > 0)
+    loss, count, summary = _top1_softplus(current_q, legal, decisions, settings["temperature"],
+                                          scale, best, confidence, confident)
+    mean_confidence = confidence.masked_fill(~confident, 0).sum() / count.clamp_min(1)
+    return loss, count, th.cat((summary, mean_confidence.reshape(1)))
+
+
+def _top1_softplus(current_q, legal, decisions, temperature, scale, best, confidence, confident):
     pairs = legal.scatter(-1, best, False) & confident.unsqueeze(-1)
     current_gap = (current_q.gather(-1, best) - current_q) / scale
-    penalties = softplus(-current_gap / settings["temperature"])
+    penalties = softplus(-current_gap / temperature)
     pair_counts = pairs.sum(dim=-1)
     mean_penalty = penalties.masked_fill(~pairs, 0).sum(dim=-1) / pair_counts.clamp_min(1)
     state_loss = mean_penalty * confidence.masked_fill(~confident, 0)
@@ -94,6 +109,12 @@ def ranking_statistics(summary):
 
 
 
+def top1_unfiltered_statistics(summary):
+    stats = ranking_statistics(summary[:-1])
+    stats["mean_constrained_confidence"] = summary[-1] if stats["valid_states"] else None
+    return stats
+
+
 def top1_max_statistics(summary):
     loss, valid, decisions, flips, top1_states, constrained_flips, violations = summary
     return dict(loss=loss if valid else None, valid_states=int(valid),
@@ -116,9 +137,12 @@ class RankingPreference(ActionSetPreference):
             "full_rank_preference_relu": full_rank_preference_relu,
             "top1_preference": top1_preference,
             "top1_max_preference": top1_max_preference,
+            "top1_unfiltered_preference": top1_unfiltered_preference,
         }[method]
         if method == "top1_max_preference":
             self.statistics = top1_max_statistics
+        elif method == "top1_unfiltered_preference":
+            self.statistics = top1_unfiltered_statistics
 
     def task_loss(self, mac, pool, episodes):
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,

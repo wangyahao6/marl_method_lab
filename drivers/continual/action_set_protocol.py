@@ -2,10 +2,12 @@
 from math import isfinite
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
-RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "top1_preference", "top1_max_preference")
+RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "top1_preference",
+                "top1_max_preference", "top1_unfiltered_preference")
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
 TOP1_MAX_DEFAULTS = dict(RANK_RELU_DEFAULTS, margin=0.0)
+TOP1_UNFILTERED_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "min_gap"}
 DEFAULTS = dict(weight=1.0, margin=0.0, batch_episodes=8, success_episodes=100,
                 seed_offsets=[301001, 302001, 303001, 304001], attempts_per_seed=125,
                 delta_candidates_by_task={}, second_gap_quantile=None, probe_episodes_per_seed=0)
@@ -106,6 +108,7 @@ def validate(protocol, algorithm, method):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
+                "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
             }.get(name, RANK_DEFAULTS)
             options = settings_with_defaults(protocol.get(name, {}), defaults)
             for key, value in options.items():
