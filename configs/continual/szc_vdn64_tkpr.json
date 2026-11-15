@@ -53,7 +53,7 @@
     }
   ],
   "phase_boundary": "cumulative",
-  "epsilon_on_switch": "cumulative_no_restart",
+  "epsilon_on_switch": "per_task",
   "evaluation": {
     "seeds": [
       91001,
