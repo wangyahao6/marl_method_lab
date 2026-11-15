@@ -18,15 +18,28 @@ def reference_order(reference_q, legal, q_scale_floor):
 
 
 def full_rank_preference(current_q, reference_q, legal, decisions, settings):
-    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
-                           lambda inverted_gap: softplus(inverted_gap / settings["temperature"]))
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings)
 
 
 def full_rank_preference_relu(current_q, reference_q, legal, decisions, settings):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings, th.relu)
 
 
-def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty):
+def topk_preference(current_q, reference_q, legal, decisions, settings):
+    decisions = decisions & (legal.sum(dim=-1) >= 2)
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings, k=settings["k"])
+
+
+@th.no_grad()
+def _topk_actions(reference_q, legal, effective_k):
+    # Stable descending sort breaks ties by ascending action index.
+    order = th.sort(reference_q.masked_fill(~legal, -th.inf), dim=-1, descending=True, stable=True).indices
+    sorted_legal = legal.gather(-1, order)
+    selected = sorted_legal & (sorted_legal.cumsum(dim=-1) <= effective_k.unsqueeze(-1))
+    return th.zeros_like(legal).scatter(-1, order, selected)
+
+
+def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *, k=None):
     old, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
     old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
     current_gap = (current_q.unsqueeze(-1) - current_q.unsqueeze(-2)) / scale.unsqueeze(-1)
@@ -34,10 +47,24 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty)
     unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
     pairs = (unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
              & (old_gap != 0) & (old_gap.abs() >= settings["min_gap"]))
-    penalties = penalty(-old_gap.sign() * current_gap)
+    if k is not None:
+        max_k = (legal.sum(dim=-1) - 1).clamp_min(0)
+        effective_k = max_k.clamp_max(k)
+        if k < action_count - 1:
+            top = _topk_actions(reference_q, legal, effective_k)
+            pairs = pairs & (top.unsqueeze(-1) | top.unsqueeze(-2))
+
+    inverted_gap = -old_gap.sign() * current_gap
+    penalties = softplus(inverted_gap / settings["temperature"]) if penalty is None else penalty(inverted_gap)
     pair_counts = pairs.sum(dim=(-2, -1))
     state_loss = penalties.masked_fill(~pairs, 0).sum(dim=(-2, -1)) / pair_counts.clamp_min(1)
-    return summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
+    loss, count, summary = summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
+    if k is not None:
+        violations = (pairs & (inverted_gap.detach() >= 0)).sum()
+        effective_k_sum = effective_k.masked_fill(~decisions, 0).sum()
+        clipped = (decisions & (effective_k < k)).sum()
+        summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped))))
+    return loss, count, summary
 
 
 def top1_preference(current_q, reference_q, legal, decisions, settings):
@@ -109,6 +136,16 @@ def ranking_statistics(summary):
 
 
 
+def topk_statistics(summary):
+    stats = ranking_statistics(summary[:-3])
+    violations, effective_k_sum, clipped = summary[-3:]
+    pairs, decisions = stats["valid_pairs"], stats["decision_states"]
+    stats.update(pair_violation_rate=violations / pairs if pairs else None,
+                 mean_effective_k=effective_k_sum / decisions if decisions else None,
+                 k_clip_rate=clipped / decisions if decisions else None)
+    return stats
+
+
 def top1_unfiltered_statistics(summary):
     stats = ranking_statistics(summary[:-1])
     stats["mean_constrained_confidence"] = summary[-1] if stats["valid_states"] else None
@@ -135,6 +172,7 @@ class RankingPreference(ActionSetPreference):
         self.loss = {
             "full_rank_preference": full_rank_preference,
             "full_rank_preference_relu": full_rank_preference_relu,
+            "topk_preference": topk_preference,
             "top1_preference": top1_preference,
             "top1_max_preference": top1_max_preference,
             "top1_unfiltered_preference": top1_unfiltered_preference,
@@ -143,6 +181,8 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_max_statistics
         elif method == "top1_unfiltered_preference":
             self.statistics = top1_unfiltered_statistics
+        elif method == "topk_preference":
+            self.statistics = topk_statistics
 
     def task_loss(self, mac, pool, episodes):
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,

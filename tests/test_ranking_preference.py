@@ -14,13 +14,14 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import (
-    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS,
+    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.ranking_preference import (
     RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
     top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
+    topk_preference, topk_statistics,
 )
 
 
@@ -28,6 +29,7 @@ METHOD_DEFAULTS = {
     "full_rank_preference_relu": RANK_RELU_DEFAULTS,
     "top1_max_preference": TOP1_MAX_DEFAULTS,
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
+    "topk_preference": TOPK_DEFAULTS,
 }
 
 
@@ -243,6 +245,85 @@ class RankingTest(unittest.TestCase):
             current, reference, legal, decisions, TOP1_UNFILTERED_DEFAULTS)
         self.assertEqual(count_after_terminal.item(), 2)
 
+    def test_topk_correct_pair_sets_expand_with_k_and_match_frpr(self):
+        reference = th.tensor([[4., 3., 2., 1., 500.]], requires_grad=True)
+        current = th.tensor([[2., 4., 1., 3., 900.]], requires_grad=True)
+        legal = th.tensor([[True, True, True, True, False]])
+        decisions = th.tensor([True])
+        scale = reference.detach()[0, :4].std(unbiased=False)
+        expected_pairs = (
+            ((0, 1), (0, 2), (0, 3)),
+            ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3)),
+            ((0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)),
+        )
+        for k, pairs in enumerate(expected_pairs, 1):
+            with self.subTest(k=k):
+                loss, count, summary = topk_preference(
+                    current, reference, legal, decisions, dict(TOPK_DEFAULTS, k=k))
+                expected = th.stack([softplus((current[0, j] - current[0, i]) / scale)
+                                     for i, j in pairs]).mean()
+                self.assertEqual(count.item(), 1)
+                self.assertEqual(topk_statistics(summary.tolist())["valid_pairs"], len(pairs))
+                th.testing.assert_close(loss, expected)
+                actual_grad, old_grad = th.autograd.grad(loss, (current, reference), allow_unused=True)
+                self.assertIsNone(old_grad)
+                self.assertEqual(actual_grad[0, 4].item(), 0.)
+                self.assertGreater(actual_grad.abs().sum().item(), 0.)
+                th.testing.assert_close(actual_grad, th.autograd.grad(expected, current)[0])
+
+        old_loss, old_count, old_summary = full_rank_preference(
+            current, reference, legal, decisions, RANK_DEFAULTS)
+        old_grad = th.autograd.grad(old_loss, current)[0]
+        for k in (3, 4):  # Full local and full environment K.
+            loss, count, summary = topk_preference(
+                current, reference, legal, decisions, dict(TOPK_DEFAULTS, k=k))
+            self.assertTrue(th.equal(loss, old_loss))
+            self.assertTrue(th.equal(count, old_count))
+            self.assertTrue(th.equal(summary[:6], old_summary))
+            self.assertTrue(th.equal(th.autograd.grad(loss, current)[0], old_grad))
+
+    def test_topk_ties_clipping_and_pair_threshold(self):
+        reference = th.tensor([[3., 3., 2., 2.9, 500.], [9., 1., 0., 8., 7.],
+                               [9., 2., 0., 8., 7.], [9., 2., 0., 8., 7.]])
+        legal = th.tensor([[True, True, True, True, False], [False, True, True, False, False],
+                           [False, True, False, False, False], [False, True, True, False, False]])
+        decisions = th.tensor([True, True, True, False])
+        current = th.tensor([[0., 7., 1., 9., 900.], [10., 1., 1., 8., 7.],
+                             [9., 2., 0., 8., 7.], [9., 2., 0., 8., 7.]], requires_grad=True)
+        for k, competitor_count, mean_k, clip_rate in ((1, 1, 1., 0.), (2, 2, 1.5, .5)):
+            with self.subTest(k=k):
+                loss, count, summary = topk_preference(
+                    current, reference, legal, decisions, dict(TOPK_DEFAULTS, k=k, q_scale_floor=1.))
+                stats = topk_statistics(summary.tolist())
+                self.assertEqual(count.item(), 2)
+                self.assertEqual(stats["valid_pairs"], competitor_count + 1)
+                self.assertEqual(stats["mean_effective_k"], mean_k)
+                self.assertEqual(stats["k_clip_rate"], clip_rate)
+                # Action 0 wins the old-Q tie for K=1. The close pair (0, 3)
+                # and the tied pair (0, 1) are excluded. A current tie violates strict order.
+                expected = softplus(current[0, 2] - current[0, :k]).mean()
+                th.testing.assert_close(loss, (expected + softplus(th.tensor(0.))) / 2)
+                self.assertEqual(stats["pair_violation_rate"], 2 / (competitor_count + 1))
+                self.assertEqual(stats["top1_flip_rate"], 0.)
+                grad = th.autograd.grad(loss, current)[0]
+                self.assertFalse(grad[2:].any())
+                self.assertFalse(grad[0, 3:].any())
+                self.assertEqual(grad[0, 1].item() == 0, k == 1)
+
+    def test_topk_configuration_rejects_invalid_k(self):
+        protocol = json.loads(PROTOCOL_PATH.read_text())
+        for k in (True, False, 1., 2.5, 0, -1, "2"):
+            with self.subTest(k=k), self.assertRaisesRegex(ValueError, "topk_preference.k"):
+                driver.validate(dict(protocol, topk_preference={"k": k}), "vdn", "topk_preference")
+        protocol = driver.validate(dict(protocol, topk_preference={"k": 11}), "vdn", "topk_preference")
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(
+            driver.base.environments, {"action_set_protoss": ScriptedProtoss}
+        ):
+            out = Path(tmp)
+            with self.assertRaisesRegex(ValueError, "n_actions - 1"):
+                driver.train_sequence(protocol, 8, out)
+            self.assertEqual(json.loads((out / "status.json").read_text())["status"], "failed")
+
     def test_temperature_and_config_validation(self):
         protocol = json.loads(PROTOCOL_PATH.read_text())
         protocol["action_set"].pop("delta_by_task")
@@ -357,6 +438,12 @@ class RankingTest(unittest.TestCase):
                                         for row in samples for item in row["historical_tasks"]))
                     normalized = jsonlines(run / "experiment_metrics.jsonl")
                     self.assertTrue(any(row["metric"] == "mean_constrained_confidence" for row in normalized))
+                if method == "topk_preference":
+                    self.assertTrue(any(row["preference_loss"] > 0 for row in samples))
+                    normalized = jsonlines(run / "experiment_metrics.jsonl")
+                    self.assertTrue({"valid_states", "valid_pairs", "coverage", "pair_violation_rate",
+                                     "top1_flip_rate", "mean_effective_k", "k_clip_rate"}
+                                    <= {row["metric"] for row in normalized})
                 rank_checkpoints = sorted((run / "models").glob("*/agent.th"))
                 initial, same = th.load(rank_checkpoints[0]), th.load(baseline[0])
                 self.assertTrue(all(th.equal(initial[k], same[k]) for k in initial))
@@ -451,16 +538,28 @@ class RankingTest(unittest.TestCase):
                     self.assertGreater(gradient.abs().sum().item(), 0)
 
     def test_keep_branch_matches_uninterrupted_sequence(self):
+        self.check_keep_branch_matches_uninterrupted_sequence("full_rank_preference")
+
+    def test_topk_keep_branch_restores_history_after_two_stages(self):
+        self.check_keep_branch_matches_uninterrupted_sequence("topk_preference")
+
+    def check_keep_branch_matches_uninterrupted_sequence(self, method):
         raw = json.loads(PROTOCOL_PATH.read_text())
-        raw["stages"].append(dict(task="stalker", steps=16))
+        revisit = dict(task="stalker", steps=16)
+        if method == "topk_preference":
+            raw["stages"][-1] = revisit
+        else:
+            raw["stages"].append(revisit)
+        last_phase = len(raw["stages"]) - 1
+        historical_tasks = {stage["task"] for stage in raw["stages"][:-1]} - {revisit["task"]}
         for stage in raw["stages"]:
             stage["steps"] = 16
         raw.update(phase_boundary="cumulative", epsilon_on_switch="cumulative_no_restart")
         raw["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0)
         raw["action_set"].update(batch_episodes=4, success_episodes=2,
                                  seed_offsets=[101, 102], attempts_per_seed=2)
-        raw["full_rank_preference"] = dict(min_gap=0)
-        protocol = driver.validate(raw, "vdn", "full_rank_preference")
+        raw[method] = dict(min_gap=0)
+        protocol = driver.validate(raw, "vdn", method)
 
         class ForkableScriptedProtoss(ScriptedProtoss):
             def distribution_state(self):
@@ -491,18 +590,18 @@ class RankingTest(unittest.TestCase):
                 self.assertEqual(restored["model_hash"], restored["parent_model_hash"])
                 transitions = jsonlines(branch / "transitions.jsonl")
                 self.assertEqual(len(transitions), 1)
-                self.assertEqual(transitions[0]["phase"], 3)
+                self.assertEqual(transitions[0]["phase"], last_phase)
                 self.assertEqual(transitions[0]["start"], restored["t_env"])
-                self.assertEqual(transitions[0]["target"], 64)
+                self.assertEqual(transitions[0]["target"], 16 * (last_phase + 1))
             for name in ("agent.th", "opt.th"):
-                continued = th.load(next((full / "models").glob(f"phase0003_*/{name}")))
-                branched = th.load(next((keep / "models").glob(f"phase0003_*/{name}")))
+                continued = th.load(next((full / "models").glob(f"phase{last_phase:04d}_*/{name}")))
+                branched = th.load(next((keep / "models").glob(f"phase{last_phase:04d}_*/{name}")))
                 self.assertEqual(digest(continued), digest(branched))
-            keep_rows = jsonlines(keep / "full_rank_preference_updates.jsonl")
+            keep_rows = jsonlines(keep / f"{method}_updates.jsonl")
             self.assertTrue(keep_rows)
             self.assertTrue(all({entry["task"] for entry in row["historical_tasks"]} ==
-                                {"zealot", "colossus"} for row in keep_rows))
-            self.assertFalse((release / "full_rank_preference_updates.jsonl").exists())
+                                historical_tasks for row in keep_rows))
+            self.assertFalse((release / f"{method}_updates.jsonl").exists())
             self.assertFalse((release / "action_set_memory").exists())
 
 

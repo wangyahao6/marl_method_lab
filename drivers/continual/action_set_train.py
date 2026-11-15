@@ -271,6 +271,11 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
     metrics = Metrics(out, args.algorithm, args.method, seed, **({"role": role} if role else {}))
     runner = base.EpisodeRunner(args, logger)
     phase = episode = updates = 0
+
+    def status(state, **extra):
+        base.write(out / "status.json", dict(status=state, phase=phase, t_env=runner.t_env,
+                                            episode=episode, updates=updates, **extra))
+
     try:
         info = runner.get_env_info()
         expected_layout = layout(runner)
@@ -278,6 +283,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                 expected_layout["attack_offset"], expected_layout["n_actions"]) != (5, 5, "protoss_gen", 6, 11):
             raise ValueError(f"unsupported SMACv2 Protoss action/agent layout: {expected_layout}")
         args.n_agents, args.n_actions, args.state_shape = info["n_agents"], info["n_actions"], info["state_shape"]
+        if args.method == "topk_preference" and protocol[args.method]["k"] >= args.n_actions:
+            raise ValueError(f"topk_preference.k must be at most n_actions - 1 ({args.n_actions - 1})")
         base.write(out / "config.json", vars(args))
         base.write(out / "env_info.json", dict(info, action_layout=expected_layout))
         scheme, groups, preprocess = spec = episode_spec(info)
@@ -314,10 +321,6 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
         initial, before, latest, results = {}, {}, {}, []
         probes = History()
         nominal_end = 0
-
-        def status(state, **extra):
-            base.write(out / "status.json", dict(status=state, phase=phase, t_env=runner.t_env,
-                                                episode=episode, updates=updates, **extra))
 
         def agent_snapshot():
             return cpu_snapshot(mac.agent)

@@ -69,6 +69,8 @@ class Metrics:
             fields += ('valid_states', 'constrained_top1_flip_rate', 'margin_violation_rate')
         elif self.identity['method'] == 'top1_unfiltered_preference':
             fields += ('mean_constrained_confidence',)
+        elif self.identity['method'] == 'topk_preference':
+            fields += ('valid_states', 'valid_pairs', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate')
 
         def measurements():
             if record_top1_max:

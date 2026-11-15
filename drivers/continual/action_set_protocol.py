@@ -3,8 +3,9 @@ from math import isfinite
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "top1_preference",
-                "top1_max_preference", "top1_unfiltered_preference")
+                "top1_max_preference", "top1_unfiltered_preference", "topk_preference")
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
+TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
 TOP1_MAX_DEFAULTS = dict(RANK_RELU_DEFAULTS, margin=0.0)
 TOP1_UNFILTERED_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "min_gap"}
@@ -108,10 +109,15 @@ def validate(protocol, algorithm, method):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
+                "topk_preference": TOPK_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
             }.get(name, RANK_DEFAULTS)
             options = settings_with_defaults(protocol.get(name, {}), defaults)
             for key, value in options.items():
+                if key == "k":
+                    if not positive_integer(value):
+                        raise ValueError(f"{name}.k must be a positive integer")
+                    continue
                 if not nonnegative(value) or (key in ("temperature", "q_scale_floor") and value == 0):
                     bound = "positive" if key in ("temperature", "q_scale_floor") else "nonnegative"
                     raise ValueError(f"{name}.{key} must be finite and {bound}")

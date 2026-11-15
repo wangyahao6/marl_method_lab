@@ -35,7 +35,7 @@
 
 [方法与协议](VDN_ACTION_SET_PREFERENCE.md)使用历史成功轨迹约束当前 Agent 的局部 Q 排序，支持任意长度的 5v5 Protoss 任务序列。训练入口为 `--suite vdn_action_set --method action_set_preference`，同入口的 `--method baseline` 提供对照。[TS3 首次实验](TS3_ASPR_PROTOCOL.md)记录 seed 3535 的配置与诊断。
 
-同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。全排序可选 `--method full_rank_preference`（Softplus）或 `--method full_rank_preference_relu`（无 margin 的 ReLU）。首选动作偏好可选 `--method top1_preference`（成对 Softplus）、`--method top1_max_preference`（最强竞争动作的平方 hinge）或 `--method top1_unfiltered_preference`（取消置信度硬筛选的加权 Softplus）。这些方法共用阶段末冻结 Agent 与历史胜局回放。
+同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。全排序可选 `--method full_rank_preference`（Softplus）或 `--method full_rank_preference_relu`（无 margin 的 ReLU）。首选动作偏好可选 `--method top1_preference`（成对 Softplus）、`--method top1_max_preference`（最强竞争动作的平方 hinge）或 `--method top1_unfiltered_preference`（取消置信度硬筛选的加权 Softplus）。[TKPR](VDN_ACTION_SET_PREFERENCE.md#top-k-偏好回放tkpr) 使用 `--method topk_preference` 选择，由 K 限定参与 FRPR Softplus 的动作对。这些方法共用阶段末冻结 Agent 与历史胜局回放。
 
 ## 用户方法
 

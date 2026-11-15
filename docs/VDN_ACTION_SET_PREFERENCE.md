@@ -168,3 +168,25 @@ cd /home/wyh/marl_method_lab
   --method top1_unfiltered_preference --seed 3535 --run-id szc_t1pr_unfiltered_3535 \
   --protocol configs/continual/szc_vdn64_t1pr_unfiltered.json --dry-run
 ```
+
+## Top-K 偏好回放（TKPR）
+
+`topk_preference` 按旧模型 Q 值对每个有效智能体决策的合法动作降序排列。同值时动作索引较小者在前。设合法动作数为 N，实际取 `K_eff = min(K, N - 1)`，少于两个合法动作的决策跳过。从 FRPR 的无序合法动作对中保留至少一个端点属于旧模型 Top-K 的对。K=2 时，旧模型排名第一与第二之间的关系以及这两个动作各自与低位动作的关系都受约束。
+
+对保留的动作对，用合法旧 Q 的总体标准差与 `q_scale_floor` 的较大值作为冻结尺度 `s`。筛掉归一化旧 Q 间隔为零或绝对值小于 `min_gap` 的对，然后计算 `softplus(-sign(old_gap) * (Q_new[i] - Q_new[j]) / s / temperature)`。对决策内有效动作对求均值，再对历史任务内有有效对的决策求均值，最后对有约束的历史任务等权平均，与 TD loss 一次联合反传。
+
+TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top-2 的间隔筛选整个决策，并给损失乘以置信度。在 K 覆盖全部合法动作中除最后一名外的排名时，每个有效动作对都被覆盖，TKPR 的损失和梯度等于 FRPR Softplus。
+
+`topk_preference` 配置接受 `weight`、`temperature`、`min_gap`、`q_scale_floor` 和 `k`，默认依次为 1.0、1.0、0.5、0.1 和 2。K 为正整数，运行时上限为环境的 `n_actions - 1`。SZC 协议沿用 `szc_vdn64_t1pr.json` 的任务、预算、探索和评估。
+
+`topk_preference_updates.jsonl` 和统一指标文件记录有效状态数、覆盖率、有效动作对数、Top-1 翻转率及以下诊断。
+
+- `pair_violation_rate` 以有效动作对为分母，统计当前 Q 反转或打平旧严格排序的比例。
+- `mean_effective_k` 和 `k_clip_rate` 以至少两个合法动作的有效决策为分母，包含后来被 `min_gap` 筛掉全部动作对的决策。
+- Top-1 翻转率沿用 FRPR 的口径，分母为旧模型有唯一首选动作的有效决策。上述比例在分母为零时在方法日志中记 null。
+
+```sh
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method topk_preference --seed 3535 --run-id szc_tkpr_3535 \
+  --protocol configs/continual/szc_vdn64_tkpr.json --dry-run
+```
