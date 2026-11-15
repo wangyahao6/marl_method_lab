@@ -38,6 +38,9 @@ def validate(protocol, algorithm, method):
     replay = protocol.get("replay_on_switch", "ft")
     if replay != "ft" and (replay != "er" or method != "baseline"):
         raise ValueError("vdn_action_set uses FT replay, with ER supported for the baseline")
+    interval = protocol.get("gradient_monitor_interval", 0)
+    if type(interval) is not int or interval < 0:
+        raise ValueError("gradient_monitor_interval must be a nonnegative integer")
     tasks = protocol.get("tasks")
     stages = protocol.get("stages")
     if not isinstance(tasks, dict) or not tasks or not isinstance(stages, list) or not stages:

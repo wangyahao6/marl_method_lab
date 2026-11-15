@@ -17,13 +17,19 @@ class Metrics:
     def record(self, category, phase, task, t_env, values, **context):
         self._write(category, phase, task, t_env, ((name, value, context) for name, value in values.items()))
 
-    def _write(self, category, phase, task, t_env, measurements):
+    def _write(self, category, phase, task, t_env, measurements, *, keep_null=False):
         lines = []
         for name, value, context in measurements:
-            if value is None or not math.isfinite(value):
+            if isinstance(value, dict):
+                metric_value = value
+            elif value is not None and math.isfinite(value):
+                metric_value = float(value)
+            elif keep_null:
+                metric_value = None
+            else:
                 continue
             row = dict(self.identity, category=category, phase=int(phase), task=task,
-                       t_env=int(t_env), metric=name, value=float(value), context=dict(self.run_context, **context))
+                       t_env=int(t_env), metric=name, value=metric_value, context=dict(self.run_context, **context))
             lines.append(json.dumps(row, allow_nan=False))
         if lines:
             try:
@@ -62,6 +68,11 @@ class Metrics:
                             {'protected_neuron_fraction': len(schedule['protected'][layer]) / len(scales)},
                             event='phase_start', layer=layer)
 
+    def gradients(self, phase, task, t_env, update, values):
+        context = dict(event='gradient_monitor', learner_update=update)
+        self._write('Mechanism', phase, task, t_env,
+                    ((name, value, context) for name, value in values.items()), keep_null=True)
+
     def preference(self, row, event):
         fields = ('loss', 'violation_ratio', 'greedy_outside_ratio', 'top1_flip_rate', 'coverage')
         record_top1_max = self.identity['method'] == 'top1_max_preference'
@@ -70,11 +81,14 @@ class Metrics:
         elif self.identity['method'] == 'top1_unfiltered_preference':
             fields += ('mean_constrained_confidence',)
         elif self.identity['method'] == 'topk_preference':
-            fields += ('valid_states', 'valid_pairs', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate')
+            fields += ('valid_states', 'valid_pairs', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
+                       'effective_k_histogram')
 
         def measurements():
             if record_top1_max:
                 yield 'preference_loss', row['preference_loss'], dict(event=event)
+            if 'effective_k_histogram' in row:
+                yield 'effective_k_histogram', row['effective_k_histogram'], dict(event=event, scope='update')
             for item in row.get('historical_tasks', [row]):
                 context = dict(event=event, source_task=item['task'], source_phase=item['source_phase'])
                 for name in fields:

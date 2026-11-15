@@ -63,7 +63,9 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         violations = (pairs & (inverted_gap.detach() >= 0)).sum()
         effective_k_sum = effective_k.masked_fill(~decisions, 0).sum()
         clipped = (decisions & (effective_k < k)).sum()
-        summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped))))
+        histogram = effective_k.new_zeros(min(k, action_count - 1) + 1)
+        histogram.scatter_add_(0, effective_k.reshape(-1), (pair_counts > 0).long().reshape(-1))
+        summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped)), histogram[1:]))
     return loss, count, summary
 
 
@@ -137,8 +139,9 @@ def ranking_statistics(summary):
 
 
 def topk_statistics(summary):
-    stats = ranking_statistics(summary[:-3])
-    violations, effective_k_sum, clipped = summary[-3:]
+    stats = ranking_statistics(summary[:6])
+    violations, effective_k_sum, clipped = summary[6:9]
+    stats["effective_k_histogram"] = {str(k): int(count) for k, count in enumerate(summary[9:], 1)}
     pairs, decisions = stats["valid_pairs"], stats["decision_states"]
     stats.update(pair_violation_rate=violations / pairs if pairs else None,
                  mean_effective_k=effective_k_sum / decisions if decisions else None,

@@ -1,5 +1,6 @@
 """Standalone SMACv2 VDN sequence with optional decision preference replay."""
 import argparse
+from collections import Counter
 from contextlib import contextmanager
 import copy
 import json
@@ -47,6 +48,7 @@ def config(protocol, seed, out):
                t_max=sum(stage["steps"] for stage in protocol["stages"]),
                epsilon_on_switch=protocol.get("epsilon_on_switch", "per_task"),
                replay_on_switch=protocol.get("replay_on_switch", "ft"),
+               gradient_monitor_interval=protocol.get("gradient_monitor_interval", 0),
                action_set=protocol["action_set"])
     if protocol["method"] in RANK_METHODS:
         cfg[protocol["method"]] = protocol[protocol["method"]]
@@ -302,8 +304,19 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
         method = protocol["method"]
 
         def record_preference(row):
+            if method == "topk_preference":
+                counts = Counter()
+                for historical in row["historical_tasks"]:
+                    counts.update(historical["effective_k_histogram"])
+                row["effective_k_histogram"] = dict(counts)
             base.append(out / f"{update_log}_updates.jsonl", row)
             metrics.preference(row, event="preference_update")
+
+        def record_gradients(values):
+            metrics.gradients(phase, task, runner.t_env, updates + 1, values)
+            for name, value in values.items():
+                if value is not None:
+                    logger.log_stat(name, value, runner.t_env)
 
         preference = None
         if method == "action_set_preference" and settings["weight"]:
@@ -384,6 +397,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                                            scheme, groups, info["episode_limit"] + 1, preprocess)
 
         stop_phase = len(stages) - 1 if role == "prefix" else len(stages)
+        monitor_interval = args.gradient_monitor_interval
         for phase in range(first_phase, stop_phase):
             stage = stages[phase]
             task = stage["task"]
@@ -410,7 +424,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                 buffer.insert_episode_batch(batch)
                 if buffer.can_sample(args.batch_size):
                     sample = td_sample(buffer, args.batch_size, args.device)
-                    learner.train(sample, runner.t_env, episode, preference=preference)
+                    diagnostics = {}
+                    if monitor_interval and (updates + 1) % monitor_interval == 0:
+                        diagnostics["gradient_monitor"] = record_gradients
+                    learner.train(sample, runner.t_env, episode, preference=preference, **diagnostics)
                     updates += 1
                     if replay_state:
                         log_first_replay_batch(buffer, base.append, out, phase, task, runner.t_env)

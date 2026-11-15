@@ -18,6 +18,7 @@ from action_set_protocol import (
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
+from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
     RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
     top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
@@ -299,6 +300,8 @@ class RankingTest(unittest.TestCase):
                 self.assertEqual(stats["valid_pairs"], competitor_count + 1)
                 self.assertEqual(stats["mean_effective_k"], mean_k)
                 self.assertEqual(stats["k_clip_rate"], clip_rate)
+                self.assertEqual(stats["effective_k_histogram"],
+                                 {"1": 2} if k == 1 else {"1": 1, "2": 1})
                 # Action 0 wins the old-Q tie for K=1. The close pair (0, 3)
                 # and the tied pair (0, 1) are excluded. A current tie violates strict order.
                 expected = softplus(current[0, 2] - current[0, :k]).mean()
@@ -309,6 +312,102 @@ class RankingTest(unittest.TestCase):
                 self.assertFalse(grad[2:].any())
                 self.assertFalse(grad[0, 3:].any())
                 self.assertEqual(grad[0, 1].item() == 0, k == 1)
+
+    def test_effective_k_histogram_excludes_decisions_without_a_valid_pair(self):
+        reference = th.tensor([[4., 0., 1., 2.], [1., 1., 1., 1.], [2., 0., 1., 2.]])
+        legal = th.tensor([[True, True, True, True], [True, True, True, True],
+                           [True, True, False, False]])
+        _, _, summary = topk_preference(reference, reference, legal, th.ones(3, dtype=th.bool),
+                                        dict(TOPK_DEFAULTS, k=5))
+        stats = topk_statistics(summary.tolist())
+        self.assertEqual(stats["decision_states"], 3)
+        self.assertEqual(stats["valid_states"], 2)
+        self.assertEqual(stats["effective_k_histogram"], {"1": 1, "2": 0, "3": 1})
+
+    def test_agent_gradient_metrics_use_weighted_gradients_without_accumulation(self):
+        agent = th.nn.Linear(2, 1, bias=True)
+        mixer = th.nn.Parameter(th.tensor(2.))
+        agent.weight.grad = th.ones_like(agent.weight)
+        td = (agent.weight * th.tensor([[3., 4.]])).sum() * mixer
+        pref = 2 * (agent.weight * th.tensor([[-3., -4.]])).sum()
+        expected = dict(td_grad_norm_agent=10., preference_grad_norm_agent=10.,
+                        preference_td_grad_ratio=1., td_preference_grad_cosine=-1.)
+        self.assertEqual(agent_gradient_metrics(agent, td, pref), expected)
+        self.assertTrue(th.equal(agent.weight.grad, th.ones_like(agent.weight)))
+        self.assertIsNone(agent.bias.grad)
+        self.assertIsNone(mixer.grad)
+        missing = agent_gradient_metrics(agent, td, None)
+        self.assertEqual(missing.pop("td_grad_norm_agent"), 10.)
+        self.assertTrue(all(value is None for value in missing.values()))
+        self.assertIsNone(agent_gradient_metrics(agent, td, mixer)["preference_grad_norm_agent"])
+        self.assertIsNone(agent_gradient_metrics(agent, td, pref * th.inf)["preference_grad_norm_agent"])
+        (td + pref).backward()
+        self.assertIsNotNone(mixer.grad)
+
+    def test_k_ablation_configs_start_identically_and_monitoring_preserves_updates(self):
+        configs = PROTOCOL_PATH.parent
+        original_config = driver.config
+
+        def tiny_config(*args):
+            return dict(original_config(*args), buffer_size=8, batch_size=2)
+
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(
+            driver.base.environments, {"action_set_protoss": ScriptedProtoss}
+        ), patch.object(driver, "config", tiny_config), patch.object(
+            th.cuda, "is_available", return_value=False
+        ), np.testing.suppress_warnings() as quiet:
+            quiet.filter(UserWarning)
+            first_stage = None
+            for k in (1, 2, 3, 5, None):
+                tag = f"tkpr_k{k}" if k is not None else "frpr"
+                method = "topk_preference" if k is not None else "full_rank_preference"
+                protocol = json.loads((configs / f"szc_vdn64_{tag}.json").read_text())
+                self.assertEqual(protocol[method].get("k"), k)
+                self.assertEqual(protocol["gradient_monitor_interval"], 100)
+                for stage in protocol["stages"]:
+                    stage["steps"] = 306
+                protocol["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0,
+                                              focus_seeds=None, focus_episodes_per_seed=None)
+                protocol["action_set"].update(success_episodes=2, seed_offsets=[101, 102],
+                                              attempts_per_seed=2, batch_episodes=4)
+                checkpoints = []
+                for interval in (0, 100):
+                    run = Path(tmp) / f"{tag}_{interval}"
+                    run.mkdir()
+                    configured = driver.validate(dict(protocol, gradient_monitor_interval=interval), "vdn", method)
+                    driver.train_sequence(configured, 1111, run)
+                    checkpoints.append(sorted((run / "models").glob("phase*")))
+                    updates = jsonlines(run / f"{method}_updates.jsonl")
+                    phase0 = [row for row in updates if row["phase"] == 0]
+                    self.assertTrue(phase0)
+                    self.assertTrue(all(row["td_loss"] == row["total_loss"] and not row["historical_tasks"]
+                                        for row in phase0))
+                    metrics = jsonlines(run / "experiment_metrics.jsonl")
+                    monitor = [row for row in metrics if row["context"].get("event") == "gradient_monitor"]
+                    self.assertEqual(len(monitor), len(updates) // 100 * 4 if interval else 0)
+                    if interval:
+                        auxiliary = [row for row in monitor if row["metric"] == "preference_grad_norm_agent"]
+                        self.assertEqual([row["context"]["learner_update"] for row in auxiliary],
+                                         list(range(100, len(updates) + 1, 100)))
+                        self.assertIsNone(auxiliary[0]["value"])
+                        self.assertTrue(any(row["value"] is not None for row in auxiliary[1:]))
+                    if k is not None:
+                        counts = [row["value"] for row in metrics
+                                  if row["metric"] == "effective_k_histogram"
+                                  and row["context"].get("scope") == "update"]
+                        self.assertEqual(len(counts), len(updates))
+                        self.assertEqual(counts[0], {})
+                        self.assertTrue(any(sum(hist.values()) for hist in counts))
+                self.assertEqual(len(checkpoints[0]), 3)
+                self.assertEqual(len(checkpoints[1]), 3)
+                for left, right in zip(*checkpoints):
+                    self.assertEqual(left.name, right.name)
+                    for name in ("agent.th", "opt.th"):
+                        th.testing.assert_close(th.load(left / name), th.load(right / name), rtol=0, atol=0)
+                agent = th.load(checkpoints[1][0] / "agent.th")
+                if first_stage is None:
+                    first_stage = agent
+                th.testing.assert_close(agent, first_stage, rtol=0, atol=0)
 
     def test_topk_configuration_rejects_invalid_k(self):
         protocol = json.loads(PROTOCOL_PATH.read_text())

@@ -1,5 +1,6 @@
 import copy
 from contextlib import nullcontext
+from math import isfinite
 
 import torch
 from components.episode_buffer import EpisodeBatch
@@ -13,6 +14,43 @@ from modules.layers.trhr import TRHRReLU, capture_activity
 from utils.a2_trace import A2Trace
 from torch.nn import Linear
 from torch.nn import GRU
+
+def _agent_gradient_vector(loss, parameters):
+    if loss is None or not loss.requires_grad or not parameters:
+        return None
+    try:
+        gradients = th.autograd.grad(loss, parameters, retain_graph=True, allow_unused=True)
+    except RuntimeError:
+        return None
+    if all(grad is None for grad in gradients):
+        return None
+    return th.cat([grad.detach().reshape(-1).to(th.float64) if grad is not None
+                   else param.new_zeros(param.numel(), dtype=th.float64)
+                   for param, grad in zip(parameters, gradients)])
+
+
+def agent_gradient_metrics(agent, td_loss, weighted_pref_loss):
+    parameters = tuple(param for param in agent.parameters() if param.requires_grad)
+    td = _agent_gradient_vector(td_loss, parameters)
+    pref = _agent_gradient_vector(weighted_pref_loss, parameters)
+
+    def norm(vector):
+        value = vector.norm().item() if vector is not None else None
+        return value if value is not None and isfinite(value) else None
+
+    td_norm, pref_norm = norm(td), norm(pref)
+    ratio = cosine = None
+    if td_norm and pref_norm is not None:
+        ratio = pref_norm / td_norm
+        if not isfinite(ratio):
+            ratio = None
+        if pref_norm:
+            value = th.dot(td / td_norm, pref / pref_norm).item()
+            if isfinite(value):
+                cosine = max(-1.0, min(1.0, value))
+    return dict(td_grad_norm_agent=td_norm, preference_grad_norm_agent=pref_norm,
+                preference_td_grad_ratio=ratio, td_preference_grad_cosine=cosine)
+
 
 class QLearner:
     def __init__(self, mac, scheme, logger, args):
@@ -76,7 +114,8 @@ class QLearner:
             self.a2_trace = A2Trace(mac.agent, self.trhr, args.local_results_path, window,
                                     single_ff=single_ff, stages=getattr(args, "trace_stages", 0))
 
-    def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False, preference=None):
+    def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False, preference=None,
+              *, gradient_monitor=None):
         if preference is not None and not check:
             preference.begin_update()
         # Get the relevant quantities
@@ -154,8 +193,12 @@ class QLearner:
 
         td_loss = loss
         pref_loss = preference(self.mac) if preference is not None else None
+        weighted_pref_loss = None
         if pref_loss is not None:
-            loss = td_loss + preference.settings["weight"] * pref_loss
+            weighted_pref_loss = preference.settings["weight"] * pref_loss
+            loss = td_loss + weighted_pref_loss
+        if gradient_monitor is not None:
+            gradient_metrics = agent_gradient_metrics(self.mac.agent, td_loss, weighted_pref_loss)
 
         # Optimise
         self.optimiser.zero_grad()
@@ -163,6 +206,8 @@ class QLearner:
         grad_norm = th.nn.utils.clip_grad_norm_(self.params, self.args.grad_norm_clip)
         snapshot = self.a2_trace.before_step() if self.a2_trace is not None else None
         self.optimiser.step()
+        if gradient_monitor is not None:
+            gradient_monitor(gradient_metrics)
         if preference is not None:
             preference.record(td_loss, loss, pref_loss, t_env)
         if self.trhr is not None:

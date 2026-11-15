@@ -183,6 +183,7 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 
 - `pair_violation_rate` 以有效动作对为分母，统计当前 Q 反转或打平旧严格排序的比例。
 - `mean_effective_k` 和 `k_clip_rate` 以至少两个合法动作的有效决策为分母，包含后来被 `min_gap` 筛掉全部动作对的决策。
+- `effective_k_histogram` 记录实际 K 到决策数的映射，仅计入筛选后至少剩一个有效排序对的决策。每次更新记录汇总分布和各历史任务的分布。
 - Top-1 翻转率沿用 FRPR 的口径，分母为旧模型有唯一首选动作的有效决策。上述比例在分母为零时在方法日志中记 null。
 
 ```sh
@@ -190,3 +191,9 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
   --method topk_preference --seed 3535 --run-id szc_tkpr_3535 \
   --protocol configs/continual/szc_vdn64_tkpr.json --dry-run
 ```
+
+### SZC-FT 的 K 值消融
+
+`configs/continual/szc_vdn64_tkpr_k{1,2,3,5}.json` 使用 `topk_preference`，`szc_vdn64_frpr.json` 使用 `full_rank_preference`。五组均采用 seed 1111、双层 VDN64、镜像 5v5 SZC、每阶段名义 2M、逐任务 ε 和 FT。公共排序参数为权重 1.0、温度 1.0、最小归一化间隔 0.5、Q 尺度下限 0.1。
+
+这些配置启用 `gradient_monitor_interval: 100`。每 100 次 learner 更新，从同一训练计算图分别获取 TD 与加权偏好损失对可训练 Agent 参数的梯度。梯度诊断写入 `experiment_metrics.jsonl`，通过 `context.learner_update` 定位更新，未定义值记为 null，有限诊断值同时写入 `metrics.jsonl`。范数和余弦使用裁剪前的梯度，训练继续使用原有联合反传和优化器步骤。
