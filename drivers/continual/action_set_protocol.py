@@ -3,9 +3,11 @@ from math import isfinite
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
-                "top1_preference",
+                "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference")
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
+FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
+FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
 TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
 TOP1_MAX_DEFAULTS = dict(RANK_RELU_DEFAULTS, margin=0.0)
@@ -114,6 +116,8 @@ def validate(protocol, algorithm, method):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
+                "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
+                "full_rank_preference_raw_loss": FRPR_RAW_LOSS_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,

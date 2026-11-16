@@ -199,17 +199,39 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 
 这些配置启用 `gradient_monitor_interval: 100`。每 100 次 learner 更新，从同一训练计算图分别获取 TD 与加权偏好损失对可训练 Agent 参数的梯度。梯度诊断写入 `experiment_metrics.jsonl`，通过 `context.learner_update` 定位更新，未定义值记为 null，有限诊断值同时写入 `metrics.jsonl`。范数和余弦使用裁剪前的梯度，训练继续使用原有联合反传和优化器步骤。
 
+## FRPR-Raw 与 FRPR-RawLoss
+
+令 `Δold = Q_old[i] - Q_old[j]`、`Δnew = Q_new[i] - Q_new[j]`，并令 `s` 为原版 FRPR 的旧 Q 尺度。两种变体都只考虑有效决策中的合法无序动作对。
+
+| 方法 | 旧动作对筛选 | 每对损失 |
+| --- | --- | --- |
+| FRPR-Raw（`full_rank_preference_raw`） | `Δold != 0` 且 `abs(Δold) >= min_gap_raw` | `softplus(-sign(Δold) * Δnew / temperature)` |
+| FRPR-RawLoss（`full_rank_preference_raw_loss`） | 完全沿用 FRPR，以按合法动作均值中心化并除以 `s` 后的旧 Q 计算差值。该差值须非零且绝对值达到 `min_gap` | `softplus(-sign(归一化旧差值) * Δnew / temperature)` |
+
+Raw 直接使用冻结旧 Q 和当前 Q，跳过旧均值和标准差计算。`min_gap_raw` 以原始 Q 为单位，默认取 0.1，尚未校准。RawLoss 保留原版的 `min_gap=0.5` 和 `q_scale_floor=0.1` 默认值。两者的 `weight`、`temperature` 默认均为 1.0。历史采集、采样、GRU 展开、损失聚合和 TD 联合更新沿用原版 FRPR。
+
+两份示例协议沿用 `szc_vdn64_frpr.json` 的 SZC 任务序列、预算、回放与评估设置。以下命令只预览生效配置。
+
+```sh
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method full_rank_preference_raw --seed 3535 --run-id szc_frpr_raw_example \
+  --protocol configs/continual/szc_vdn64_frpr_raw.json --dry-run
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method full_rank_preference_raw_loss --seed 3535 --run-id szc_frpr_raw_loss_example \
+  --protocol configs/continual/szc_vdn64_frpr_raw_loss.json --dry-run
+```
+
 ## FRPR 动作对筛选统计
 
-FRPR Softplus 和 FRPR-Unfiltered 每次更新都在各自的 `*_updates.jsonl` 中按 `historical_tasks` 记录分任务统计，并在 `pair_filter_stats` 记录本次更新的汇总。`experiment_metrics.jsonl` 同时输出标为 `historical_task` 和 `update` 的两种 `context.scope`。
+FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在各自的 `*_updates.jsonl` 中按 `historical_tasks` 记录分任务统计，并在 `pair_filter_stats` 记录本次更新的汇总。`experiment_metrics.jsonl` 同时输出标为 `historical_task` 和 `update` 的两种 `context.scope`。
 
 | 指标 | 口径 |
 | --- | --- |
 | `candidate_pairs` | 有效决策中的全部合法无序动作对 |
-| `tie_pairs` | 共享 FRPR 掩码中归一化旧 Q 差值恰为零的动作对 |
+| `tie_pairs` | 用于筛选的旧 Q 差值恰为零的动作对，Raw 使用原始差值，其余三种方法使用归一化差值 |
 | `eligible_pairs` | 候选对减去并列对 |
 | `valid_pairs` | 参与损失的动作对 |
-| `filtered_pairs` | 被 `min_gap` 排除的非并列动作对 |
+| `filtered_pairs` | 被方法的最小差距阈值排除的非并列动作对 |
 | `pair_filter_rate` | `filtered_pairs / eligible_pairs` |
 | `pair_keep_rate` | `valid_pairs / eligible_pairs` |
 

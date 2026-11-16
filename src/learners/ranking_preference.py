@@ -23,6 +23,16 @@ def full_rank_preference(current_q, reference_q, legal, decisions, settings, *, 
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings, pair_audit=pair_audit)
 
 
+def full_rank_preference_raw(current_q, reference_q, legal, decisions, settings):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           raw_reference=True, pair_audit=True)
+
+
+def full_rank_preference_raw_loss(current_q, reference_q, legal, decisions, settings):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           raw_loss=True, pair_audit=True)
+
+
 def full_rank_preference_unfiltered(current_q, reference_q, legal, decisions, settings):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
                            unfiltered=True, pair_audit=True)
@@ -47,15 +57,25 @@ def _topk_actions(reference_q, legal, effective_k):
 
 
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
-                    k=None, unfiltered=False, pair_audit=False):
-    old, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
+                    k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False):
+    current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
+    if raw_reference:
+        old = reference_q.detach()
+        best_two = old.masked_fill(~legal, -th.inf).topk(2, dim=-1).indices
+        first, second = old.gather(-1, best_two).unbind(dim=-1)
+        best = best_two[..., :1]
+        confidence = (first - second).masked_fill(legal.sum(dim=-1) < 2, 0)
+    else:
+        old, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
+        if not raw_loss:
+            current_gap = current_gap / scale.unsqueeze(-1)
     old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
-    current_gap = (current_q.unsqueeze(-1) - current_q.unsqueeze(-2)) / scale.unsqueeze(-1)
     action_count = legal.size(-1)
     unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
     candidates = unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
     eligible = candidates & (old_gap != 0)
-    pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings["min_gap"])
+    gap_key = "min_gap_raw" if raw_reference else "min_gap"
+    pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings[gap_key])
     if k is not None:
         max_k = (legal.sum(dim=-1) - 1).clamp_min(0)
         effective_k = max_k.clamp_max(k)
@@ -207,13 +227,16 @@ class RankingPreference(ActionSetPreference):
         self.loss = {
             "full_rank_preference": partial(full_rank_preference, pair_audit=True),
             "full_rank_preference_unfiltered": full_rank_preference_unfiltered,
+            "full_rank_preference_raw": full_rank_preference_raw,
+            "full_rank_preference_raw_loss": full_rank_preference_raw_loss,
             "full_rank_preference_relu": full_rank_preference_relu,
             "topk_preference": topk_preference,
             "top1_preference": top1_preference,
             "top1_max_preference": top1_max_preference,
             "top1_unfiltered_preference": top1_unfiltered_preference,
         }[method]
-        if method in ("full_rank_preference", "full_rank_preference_unfiltered"):
+        if method in ("full_rank_preference", "full_rank_preference_unfiltered",
+                      "full_rank_preference_raw", "full_rank_preference_raw_loss"):
             self.statistics = full_rank_statistics
         elif method == "top1_max_preference":
             self.statistics = top1_max_statistics

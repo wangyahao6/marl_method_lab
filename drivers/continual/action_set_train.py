@@ -309,7 +309,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                 for historical in row["historical_tasks"]:
                     counts.update(historical["effective_k_histogram"])
                 row["effective_k_histogram"] = dict(counts)
-            elif method in ("full_rank_preference", "full_rank_preference_unfiltered"):
+            elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
+                            "full_rank_preference_raw", "full_rank_preference_raw_loss"):
                 row["pair_filter_stats"] = aggregate_pair_filter_statistics(row["historical_tasks"])
             base.append(out / f"{update_log}_updates.jsonl", row)
             metrics.preference(row, event="preference_update")
