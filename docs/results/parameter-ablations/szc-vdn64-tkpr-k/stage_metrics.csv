@@ -1,0 +1,16 @@
+run_id,method,seed,role,phase,training_task,stalker_win_pct,zealot_win_pct,colossus_win_pct,acc_pct,bwt_pp,fwt_pp
+szc_vdn64_tkpr_k1_seed1111_attempt001,TKPR-K1,1111,independent,0,stalker,61.71875,,,61.71875,,
+szc_vdn64_tkpr_k1_seed1111_attempt001,TKPR-K1,1111,independent,1,zealot,60.15625,75.78125,,67.96875,-1.5625,36.71875
+szc_vdn64_tkpr_k1_seed1111_attempt001,TKPR-K1,1111,independent,2,colossus,61.71875,82.8125,57.8125,67.44791666666666,3.515625,38.671875
+szc_vdn64_tkpr_k2_seed1111_attempt001,TKPR-K2,1111,independent,0,stalker,61.71875,,,61.71875,,
+szc_vdn64_tkpr_k2_seed1111_attempt001,TKPR-K2,1111,independent,1,zealot,58.59375,78.125,,68.359375,-3.125,36.71875
+szc_vdn64_tkpr_k2_seed1111_attempt001,TKPR-K2,1111,independent,2,colossus,52.34375,81.25,58.59375,64.0625,-3.125,37.109375
+szc_vdn64_tkpr_k3_seed1111_attempt001,TKPR-K3,1111,independent,0,stalker,61.71875,,,61.71875,,
+szc_vdn64_tkpr_k3_seed1111_attempt001,TKPR-K3,1111,independent,1,zealot,57.8125,82.03125,,69.921875,-3.90625,36.71875
+szc_vdn64_tkpr_k3_seed1111_attempt001,TKPR-K3,1111,independent,2,colossus,66.40625,79.6875,55.46875,67.1875,1.171875,29.296875
+szc_vdn64_tkpr_k5_seed1111_attempt001,TKPR-K5,1111,independent,0,stalker,61.71875,,,61.71875,,
+szc_vdn64_tkpr_k5_seed1111_attempt001,TKPR-K5,1111,independent,1,zealot,57.8125,71.09375,,64.453125,-3.90625,36.71875
+szc_vdn64_tkpr_k5_seed1111_attempt001,TKPR-K5,1111,independent,2,colossus,55.46875,68.75,47.65625,57.291666666666664,-4.296875,32.03125
+szc_vdn64_frpr_seed1111_attempt001,FRPR,1111,independent,0,stalker,61.71875,,,61.71875,,
+szc_vdn64_frpr_seed1111_attempt001,FRPR,1111,independent,1,zealot,57.03125,78.125,,67.578125,-4.6875,36.71875
+szc_vdn64_frpr_seed1111_attempt001,FRPR,1111,independent,2,colossus,58.59375,78.90625,60.15625,65.88541666666666,-1.171875,29.296875

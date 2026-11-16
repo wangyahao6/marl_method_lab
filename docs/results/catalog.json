@@ -103,6 +103,42 @@
         "独立 VDN-FT 的 C 末状态和源码提交与偏好分支不同，它提供从头训练的参考。",
         "A₂ 再访 stalker 沿用同一任务 ID。分支只存新增阶段，重算时沿 parent_run_id 找前三阶段；A₂ 的 32 局定期评估与 128 局阶段末评估都进入报告的 AUC。"
       ]
+    },
+    {
+      "id": "szc-vdn64-tkpr-k",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-tkpr-k/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-tkpr-k/runs.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-tkpr-k/stage_metrics.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-tkpr-k/evaluations.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-tkpr-k/preference_diagnostics.csv",
+        "mechanism_summary": "parameter-ablations/szc-vdn64-tkpr-k/mechanism_summary.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        1111
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "independent_runs_matched_by_seed",
+        "match_on": [
+          "seed"
+        ],
+        "primary_control": {
+          "method": "FRPR",
+          "role": "independent"
+        }
+      },
+      "interpretation_limits": [
+        "只覆盖 seed 1111 和 SZC 任务顺序。五条独立运行在 S 末的 Agent 参数指纹一致。",
+        "有效 K 分布按参与排序约束的回放决策汇总，包含重复采样。",
+        "梯度每 100 次更新抽样一次，汇总无法单独确定性能差异的成因。"
+      ]
     }
   ]
 }
