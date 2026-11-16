@@ -1,4 +1,4 @@
-"""Collect stage evaluation matrices and final metrics for the four SZC methods."""
+"""Collect stage evaluation matrices and final metrics for SZC runs."""
 import argparse
 import json
 from pathlib import Path
@@ -17,7 +17,7 @@ def summarize_run(task):
     status = read_json(run / "status.json")
     launcher = read_json(run / "launcher_status.json")
     retention = read_json(run / "retention.json")
-    if task["metadata"]["method"] == "CHI":
+    if "stage_win_rates" in retention:
         labels = ("S", "Z", "C")
         matrix = retention.get("stage_win_rates", {})
         metrics = retention.get("metrics", {})
