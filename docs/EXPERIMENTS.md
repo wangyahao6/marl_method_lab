@@ -75,7 +75,7 @@ cd /home/wyh/marl_method_lab
 
 ## 记录与结果
 
-已公开的报告与分析数据按问题归档在[实验结果索引](results/README.md)。
+已公开的报告与分析数据按问题归档在[实验结果索引](results/README.md)。自动分析从[机器可读索引](results/catalog.json)定位数据与对照，归档规范见[数据说明](results/DATA.md)。
 
 每次run-id唯一，目录已存在时不覆盖。启动保留config/protocol、launch.json、源码SHA-256与source.tar.gz、console.log；进程终态由launcher_status.json记录，exited只代表进程退出。连续任务另有原训练器status.json与逐次评价/检测记录。
 

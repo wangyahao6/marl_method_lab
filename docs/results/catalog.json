@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "documentation": "DATA.md",
+  "path_base": "catalog_directory",
+  "join_key": "run_id",
+  "csv_empty_value": null,
+  "phase_index_base": 0,
+  "categories": {
+    "comparisons": "方法与基线对照",
+    "return-ablations": "回访与阶段干预消融",
+    "parameter-ablations": "超参数与组件消融",
+    "diagnostics": "机制诊断"
+  },
+  "datasets": {
+    "runs": {
+      "key": ["run_id"],
+      "config_path_base": "runs_csv_directory",
+      "parent_reference": "parent_run_id",
+      "commit_field": "commit",
+      "step_unit": "environment_steps"
+    },
+    "evaluations": {
+      "key": ["run_id", "phase", "task", "label", "t_env"],
+      "win_rate_numerator": "wins",
+      "win_rate_denominator": "episodes",
+      "step_field": "t_env",
+      "labels": {
+        "initial_reference": "初始模型评估",
+        "next_unseen": "首次训练目标任务前评估",
+        "phase_start": "本阶段开始时评估当前任务",
+        "periodic": "本阶段定期评估当前任务",
+        "stage_end": "阶段末评估已见任务"
+      }
+    },
+    "stage_metrics": {
+      "key": ["run_id", "phase"],
+      "derived_from": "evaluations",
+      "units": {
+        "*_win_pct": "percent",
+        "acc_pct": "percent",
+        "bwt_pp": "percentage_points",
+        "fwt_pp": "percentage_points",
+        "return_auc_pct": "percent"
+      }
+    },
+    "preference_diagnostics": {
+      "key": ["run_id", "phase", "source_phase", "historical_task"],
+      "coverage_numerator": "valid_states",
+      "coverage_denominator": "decision_states",
+      "sampling_unit": "replayed agent decisions with repeated samples"
+    }
+  },
+  "experiments": [
+    {
+      "id": "szc-vdn64",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64/README.md",
+      "files": {
+        "runs": "comparisons/szc-vdn64/runs.csv",
+        "stage_metrics": "comparisons/szc-vdn64/stage_metrics.csv",
+        "evaluations": "comparisons/szc-vdn64/evaluations.csv",
+        "preference_diagnostics": "comparisons/szc-vdn64/preference_diagnostics.csv",
+        "chi_selection": "comparisons/szc-vdn64/chi_selection.json"
+      },
+      "task_order": ["stalker", "zealot", "colossus"],
+      "training_seeds": [3535, 2222],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "independent_runs_matched_by_seed",
+        "match_on": ["seed"],
+        "primary_control": {"method": "VDN-FT", "role": "independent"},
+        "additional_control": {"method": "VDN-ER", "role": "independent"}
+      },
+      "interpretation_limits": [
+        "只覆盖一个任务顺序、双层 VDN64 和两个训练种子。评估局数用于估计单次运行的表现。",
+        "VDN-ER 使用按任务平衡的 TD 经验回放，VDN-FT 与干预组采用逐阶段清空或重建 TD 回放。所有组按任务重启 ε。",
+        "CHI 与 VDN-FT 使用不同驱动。定期评估相对阶段起点的对齐规则不同，曲线对齐应使用实际 t_env。",
+        "FRPR-ReLU、T1PR-Max 与 T1PR-Unfiltered 和原版的比较同时包含历史轨迹旧 Q 记录的版本变化。"
+      ]
+    },
+    {
+      "id": "ts4-vdn64-ranking",
+      "category": "return-ablations",
+      "report": "return-ablations/ts4-vdn64-ranking/README.md",
+      "files": {
+        "runs": "return-ablations/ts4-vdn64-ranking/runs.csv",
+        "stage_metrics": "return-ablations/ts4-vdn64-ranking/stage_metrics.csv",
+        "evaluations": "return-ablations/ts4-vdn64-ranking/evaluations.csv",
+        "preference_diagnostics": "return-ablations/ts4-vdn64-ranking/preference_diagnostics.csv"
+      },
+      "task_order": ["stalker", "zealot", "colossus", "stalker"],
+      "training_seeds": [3535],
+      "final_phase": 3,
+      "comparison": {
+        "kind": "paired_branches",
+        "match_on": ["method", "seed", "parent_run_id"],
+        "treatment": {"role": "keep"},
+        "primary_control": {"role": "release"},
+        "independent_reference": {"method": "VDN-FT", "role": "independent"}
+      },
+      "interpretation_limits": [
+        "只有 seed 3535。FRPR 和 T1PR 各自以其 C 末父运行作为共同起点，跨方法 C 末状态不同。",
+        "独立 VDN-FT 的 C 末状态和源码提交与偏好分支不同，它提供从头训练的参考。",
+        "A₂ 再访 stalker 沿用同一任务 ID。分支只存新增阶段，重算时沿 parent_run_id 找前三阶段；A₂ 的 32 局定期评估与 128 局阶段末评估都进入报告的 AUC。"
+      ]
+    }
+  ]
+}
