@@ -71,11 +71,12 @@ cd /home/wyh/marl_method_lab
 
 ## 完整动作排序与 Top-1 偏好保持
 
-全排序偏好回放（FRPR）提供 Softplus（`full_rank_preference`）和 ReLU（`full_rank_preference_relu`）两个版本。它们与首选偏好回放（T1PR，`top1_preference`、`top1_max_preference` 和 `top1_unfiltered_preference`）及 ASPR 共用 `vdn_action_set` 驱动。排序方法沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。采集时由阶段末冻结 Agent 从零 GRU 状态逐步前向，胜局在 `success.th` 的每条轨迹 `data.old_q_values` 中保存完整 FP32 动作 Q，包含末尾 bootstrap 观测对应的 Q。该字段与 `avail_actions` 同形状，采样时一起补齐时间轴。回放时直接读取旧 Q，当前 Agent 从零 GRU 状态展开历史观测，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
+全排序偏好回放（FRPR）提供带间隔筛选的 Softplus（`full_rank_preference`）、无间隔筛选的 Softplus（`full_rank_preference_unfiltered`）和 ReLU（`full_rank_preference_relu`）。它们与首选偏好回放（T1PR，`top1_preference`、`top1_max_preference` 和 `top1_unfiltered_preference`）及 ASPR 共用 `vdn_action_set` 驱动。排序方法沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。采集时由阶段末冻结 Agent 从零 GRU 状态逐步前向，胜局在 `success.th` 的每条轨迹 `data.old_q_values` 中保存完整 FP32 动作 Q，包含末尾 bootstrap 观测对应的 Q。该字段与 `avail_actions` 同形状，采样时一起补齐时间轴。回放时直接读取旧 Q，当前 Agent 从零 GRU 状态展开历史观测，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
 
 对每个智能体决策，令 `s = max(std(Q_old[合法动作]), q_scale_floor)`，标准差使用总体口径。旧模型的筛选间隔和当前模型的排序间隔均除以同一个冻结尺度 `s`。尺度下限保留了近似平局的识别能力。固定旧尺度使两个合法动作的情况也能通过当前 Q 间隔获得梯度。
 
 - **FRPR Softplus（Exp-1）** 对每个无序合法动作对只计算一次。旧模型的归一化绝对差距达到 `min_gap` 且严格大于零时，按旧差距的符号对当前差距定向，计算 `softplus(-sign(old_gap) * current_gap / temperature)`。明确的非首选动作对也参与约束。
+- **FRPR-Unfiltered（`full_rank_preference_unfiltered`）** 使用同一 Softplus 损失、旧 Q 归一化、合法动作及决策掩码。所有归一化旧 Q 差值非零的合法无序动作对都参与约束。配置接受 `weight`、`temperature`、`q_scale_floor`，默认分别为 1.0、1.0、0.1。其损失与梯度等同于 `min_gap=0` 的 FRPR Softplus。
 - **FRPR ReLU** 复用同一归一化、动作对和 `min_gap` 筛选，计算 `relu(-sign(old_gap) * current_gap)`。只惩罚排序反转，方向一致或当前 Q 打平时该动作对损失为零。
 - **T1PR 第一版（Exp-2，`top1_preference`）** 用旧模型第一与第二名的归一化差距作为置信度 `c`。当 `c >= min_gap` 且 `c > 0`，用旧首选动作与其余每个合法动作计算 `softplus(-(Q_new[首选] - Q_new[其他]) / s / temperature)`。先对该决策的动作对求均值，再乘以 `c`。这使更高的置信度直接加强该决策的约束。
 
@@ -85,14 +86,14 @@ cd /home/wyh/marl_method_lab
 
 成对损失先对每个决策的动作对取均值。各方法再对历史任务内有约束的决策取均值，最后对本次采样中有约束的任务等权平均。历史项使用 `TD_loss + weight * preference_loss` 接入已有的一次反传。历史池的 `reference_checkpoint` 记录 Q 的来源。早期胜局池须离线补齐 `old_q_values` 才能用于新代码的继续约束分支。ASPR 继续使用集合标记、δ 校准与固定集合 probe。每次独立运行的历史池来自该次运行自己的阶段末模型，因此同一采集协议下的实际轨迹可能随训练分化。
 
-配置写入协议 JSON 的同名顶层对象 `full_rank_preference`、`full_rank_preference_relu`、`top1_preference`、`top1_max_preference` 或 `top1_unfiltered_preference`，由 `--method` 独立选择。可以按方法分别覆盖以下默认值。
+配置写入协议 JSON 的同名顶层对象 `full_rank_preference`、`full_rank_preference_unfiltered`、`full_rank_preference_relu`、`top1_preference`、`top1_max_preference` 或 `top1_unfiltered_preference`，由 `--method` 独立选择。可以按方法分别覆盖以下默认值。
 
 | 字段 | 默认值 | 含义 |
 | --- | ---: | --- |
 | `weight` | 1.0 | 偏好损失系数 λ，设为 0 时关闭该方法的记忆采集和偏好更新 |
-| `temperature` | 1.0 | Softplus 排序温度，取正值，用于 `full_rank_preference`、`top1_preference` 和 `top1_unfiltered_preference` |
+| `temperature` | 1.0 | Softplus 排序温度，取正值，用于 `full_rank_preference`、`full_rank_preference_unfiltered`、`top1_preference` 和 `top1_unfiltered_preference` |
 | `margin` | 0.0 | 归一化 Q 间隔，取非负值，仅用于 `top1_max_preference` |
-| `min_gap` | 0.5 | 旧模型归一化 Q 差阈值，取非负值，`top1_unfiltered_preference` 配置省略此字段 |
+| `min_gap` | 0.5 | 旧模型归一化 Q 差阈值，取非负值，两个 Unfiltered 方法的配置均省略此字段 |
 | `q_scale_floor` | 0.1 | 旧模型合法 Q 标准差的下限，单位与原 Q 值一致，取正值 |
 
 例如，可在协议 JSON 中添加以下顶层对象。ReLU 配置仅接受 `weight`、`min_gap` 和 `q_scale_floor`。
@@ -197,3 +198,26 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 `configs/continual/szc_vdn64_tkpr_k{1,2,3,5}.json` 使用 `topk_preference`，`szc_vdn64_frpr.json` 使用 `full_rank_preference`。五组均采用 seed 1111、双层 VDN64、镜像 5v5 SZC、每阶段名义 2M、逐任务 ε 和 FT。公共排序参数为权重 1.0、温度 1.0、最小归一化间隔 0.5、Q 尺度下限 0.1。
 
 这些配置启用 `gradient_monitor_interval: 100`。每 100 次 learner 更新，从同一训练计算图分别获取 TD 与加权偏好损失对可训练 Agent 参数的梯度。梯度诊断写入 `experiment_metrics.jsonl`，通过 `context.learner_update` 定位更新，未定义值记为 null，有限诊断值同时写入 `metrics.jsonl`。范数和余弦使用裁剪前的梯度，训练继续使用原有联合反传和优化器步骤。
+
+## FRPR 动作对筛选统计
+
+FRPR Softplus 和 FRPR-Unfiltered 每次更新都在各自的 `*_updates.jsonl` 中按 `historical_tasks` 记录分任务统计，并在 `pair_filter_stats` 记录本次更新的汇总。`experiment_metrics.jsonl` 同时输出标为 `historical_task` 和 `update` 的两种 `context.scope`。
+
+| 指标 | 口径 |
+| --- | --- |
+| `candidate_pairs` | 有效决策中的全部合法无序动作对 |
+| `tie_pairs` | 共享 FRPR 掩码中归一化旧 Q 差值恰为零的动作对 |
+| `eligible_pairs` | 候选对减去并列对 |
+| `valid_pairs` | 参与损失的动作对 |
+| `filtered_pairs` | 被 `min_gap` 排除的非并列动作对 |
+| `pair_filter_rate` | `filtered_pairs / eligible_pairs` |
+| `pair_keep_rate` | `valid_pairs / eligible_pairs` |
+
+跨任务比率由合计数量计算。没有合格动作对时，`pair_filter_rate` 记 0，`pair_keep_rate` 记 null。FRPR-Unfiltered 的 `filtered_pairs` 和 `pair_filter_rate` 始终为 0。
+
+```sh
+.venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
+  --method full_rank_preference_unfiltered --seed 3535 \
+  --run-id szc_frpr_unfiltered_3535 \
+  --protocol configs/continual/szc_vdn64_frpr_unfiltered.json --dry-run
+```

@@ -14,13 +14,15 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import (
-    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
+    FRPR_UNFILTERED_DEFAULTS, RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
+    TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
-    RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
+    RankingPreference, aggregate_pair_filter_statistics, full_rank_preference, full_rank_preference_relu,
+    full_rank_preference_unfiltered, full_rank_statistics, pair_filter_statistics, top1_max_preference,
     top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
     topk_preference, topk_statistics,
 )
@@ -28,6 +30,7 @@ from learners.ranking_preference import (
 
 METHOD_DEFAULTS = {
     "full_rank_preference_relu": RANK_RELU_DEFAULTS,
+    "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
     "top1_max_preference": TOP1_MAX_DEFAULTS,
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
     "topk_preference": TOPK_DEFAULTS,
@@ -107,6 +110,43 @@ class RankingTest(unittest.TestCase):
         expected[0, :2, 0, 1] = -.5
         expected[0, :2, 0, 2] = .5
         th.testing.assert_close(current.grad, expected)
+
+    def test_frpr_unfiltered_keeps_small_gaps_and_ignores_ties(self):
+        reference = th.tensor([[2., 2., 1.95, 0., 500.], [1., 1., 1., 500., 500.],
+                               [3., 2., 1., 0., 500.]], requires_grad=True)
+        current = th.tensor([[0., 1., 2., 3., 500.], [1., 2., 3., 500., 500.],
+                             [0., 1., 2., 3., 500.]], requires_grad=True)
+        legal = th.tensor([[True, True, True, True, False], [True, True, True, False, False],
+                           [True, True, True, True, False]])
+        decisions = th.tensor([True, True, False])
+        original = full_rank_preference(current, reference, legal, decisions, RANK_DEFAULTS, pair_audit=True)
+        new = full_rank_preference_unfiltered(current, reference, legal, decisions, FRPR_UNFILTERED_DEFAULTS)
+        zero_gap = full_rank_preference(
+            current, reference, legal, decisions, dict(RANK_DEFAULTS, min_gap=0), pair_audit=True)
+        self.assertEqual(new[1].item(), 1)
+        for result, valid_pairs in ((original, 3), (new, 5)):
+            stats = full_rank_statistics(result[2].tolist())
+            self.assertEqual(stats["candidate_pairs"], 9)
+            self.assertEqual(stats["tie_pairs"], 4)
+            self.assertEqual(stats["eligible_pairs"], 5)
+            self.assertEqual(stats["valid_pairs"], valid_pairs)
+            self.assertEqual(stats["filtered_pairs"], 5 - valid_pairs)
+            self.assertEqual(stats["pair_filter_rate"], (5 - valid_pairs) / 5)
+            self.assertEqual(stats["pair_keep_rate"], valid_pairs / 5)
+        self.assertTrue(all(th.equal(a, b) for a, b in zip(new, zero_gap)))
+        gradient, reference_gradient = th.autograd.grad(new[0], (current, reference), allow_unused=True)
+        self.assertTrue(th.equal(gradient, th.autograd.grad(zero_gap[0], current)[0]))
+        self.assertIsNone(reference_gradient)
+        self.assertFalse(gradient[1:].any())
+        self.assertFalse(gradient[:, 4].any())
+
+    def test_frpr_pair_rates_use_total_counts(self):
+        tasks = [pair_filter_statistics(3, 2, 1), pair_filter_statistics(10, 8, 2)]
+        self.assertEqual(aggregate_pair_filter_statistics(tasks), dict(
+            candidate_pairs=13, tie_pairs=3, eligible_pairs=10, valid_pairs=3,
+            filtered_pairs=7, pair_filter_rate=.7, pair_keep_rate=.3))
+        self.assertEqual(aggregate_pair_filter_statistics([])["pair_filter_rate"], 0.)
+        self.assertIsNone(aggregate_pair_filter_statistics([])["pair_keep_rate"])
 
     def test_top1_filters_ties_near_ties_and_masked_decisions(self):
         reference = th.tensor([[1.0, 0.99, -1.0], [1.0, 1.0, -1.0], [1.0, 0.99, 5000.0],
@@ -473,7 +513,7 @@ class RankingTest(unittest.TestCase):
                 configured = copy.deepcopy(protocol)
                 if active in RANK_METHODS:
                     configured[active] = dict(weight=0 if method == "zero" else 0.5)
-                    if active != "top1_unfiltered_preference":
+                    if "min_gap" in METHOD_DEFAULTS.get(active, RANK_DEFAULTS):
                         configured[active]["min_gap"] = 0
                     if active == "top1_max_preference":
                         configured[active]["margin"] = 1.
@@ -543,6 +583,29 @@ class RankingTest(unittest.TestCase):
                     self.assertTrue({"valid_states", "valid_pairs", "coverage", "pair_violation_rate",
                                      "top1_flip_rate", "mean_effective_k", "k_clip_rate"}
                                     <= {row["metric"] for row in normalized})
+                if method in ("full_rank_preference", "full_rank_preference_unfiltered"):
+                    normalized = jsonlines(run / "experiment_metrics.jsonl")
+                    for row in samples:
+                        historical = row["historical_tasks"]
+                        totals = row["pair_filter_stats"]
+                        for name, value in totals.items():
+                            update_values = [metric["value"] for metric in normalized
+                                             if metric["metric"] == name
+                                             and metric["context"].get("scope") == "update"
+                                             and metric["t_env"] == row["t_env"]]
+                            self.assertEqual(update_values, [value])
+                        for item in historical:
+                            self.assertGreater(item["candidate_pairs"], 0)
+                            self.assertEqual(item["tie_pairs"] + item["eligible_pairs"], item["candidate_pairs"])
+                            self.assertEqual(item["filtered_pairs"] + item["valid_pairs"], item["eligible_pairs"])
+                            if method == "full_rank_preference_unfiltered":
+                                self.assertEqual(item["filtered_pairs"], 0)
+                                self.assertEqual(item["pair_filter_rate"], 0.)
+                            values = {metric["metric"]: metric["value"] for metric in normalized
+                                      if metric["context"].get("scope") == "historical_task"
+                                      and metric["context"]["source_task"] == item["task"]
+                                      and metric["t_env"] == row["t_env"]}
+                            self.assertEqual(values, {name: item[name] for name in totals})
                 rank_checkpoints = sorted((run / "models").glob("*/agent.th"))
                 initial, same = th.load(rank_checkpoints[0]), th.load(baseline[0])
                 self.assertTrue(all(th.equal(initial[k], same[k]) for k in initial))
