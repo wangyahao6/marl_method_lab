@@ -1,0 +1,15 @@
+run_id,method,seed,role,phase,training_task,stalker_win_pct,zealot_win_pct,colossus_win_pct,acc_pct,bwt_pp,fwt_pp,return_auc_pct
+ts4_vdn64_frpr_prefix_seed3535_20261112_attempt001,FRPR,3535,prefix,0,stalker,25.0,,,25.0,,,
+ts4_vdn64_frpr_prefix_seed3535_20261112_attempt001,FRPR,3535,prefix,1,zealot,24.21875,65.625,,44.921875,-0.78125,18.75,
+ts4_vdn64_frpr_prefix_seed3535_20261112_attempt001,FRPR,3535,prefix,2,colossus,25.78125,59.375,42.1875,42.447916666666664,-2.734375,24.21875,
+ts4_vdn64_frpr_keep_seed3535_20261112_attempt001,FRPR,3535,keep,3,stalker,21.875,58.59375,37.5,39.322916666666664,-5.859375,24.21875,33.08520381785345
+ts4_vdn64_frpr_release_seed3535_20261112_attempt001,FRPR,3535,release,3,stalker,54.6875,41.40625,27.34375,41.145833333333336,-19.53125,24.21875,45.448440626634415
+ts4_vdn64_t1pr_prefix_seed3535_20261112_attempt001,T1PR,3535,prefix,0,stalker,25.0,,,25.0,,,
+ts4_vdn64_t1pr_prefix_seed3535_20261112_attempt001,T1PR,3535,prefix,1,zealot,17.96875,65.625,,41.796875,-7.03125,18.75,
+ts4_vdn64_t1pr_prefix_seed3535_20261112_attempt001,T1PR,3535,prefix,2,colossus,17.1875,71.09375,43.75,44.010416666666664,-1.171875,28.515625,
+ts4_vdn64_t1pr_keep_seed3535_20261112_attempt001,T1PR,3535,keep,3,stalker,35.15625,71.09375,51.5625,52.604166666666664,6.640625,28.515625,38.83781103117656
+ts4_vdn64_t1pr_release_seed3535_20261112_attempt001,T1PR,3535,release,3,stalker,43.75,50.78125,24.21875,39.583333333333336,-17.1875,28.515625,38.63083117074683
+ts4_vdn64_preference_baseline_seed3535_20261113_attempt001,VDN-FT,3535,independent,0,stalker,25.0,,,25.0,,,
+ts4_vdn64_preference_baseline_seed3535_20261113_attempt001,VDN-FT,3535,independent,1,zealot,17.1875,66.40625,,41.796875,-7.8125,18.75,
+ts4_vdn64_preference_baseline_seed3535_20261113_attempt001,VDN-FT,3535,independent,2,colossus,0.0,0.0,52.34375,17.447916666666668,-45.703125,26.171875,
+ts4_vdn64_preference_baseline_seed3535_20261113_attempt001,VDN-FT,3535,independent,3,stalker,46.09375,28.125,38.28125,37.5,-26.171875,26.171875,46.66744927744581

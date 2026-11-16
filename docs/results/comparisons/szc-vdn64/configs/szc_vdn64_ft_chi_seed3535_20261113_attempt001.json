@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "run_id": "szc_vdn64_ft_chi_seed3535_20261113_attempt001",
+  "launch_git_commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da",
+  "clean_source_tree": true,
+  "config": {
+    "runner": "episode",
+    "mac": "basic_mac",
+    "env": "ts4_protoss",
+    "env_args": {
+      "continuing_episode": false,
+      "difficulty": "7",
+      "game_version": "4.10",
+      "map_name": "10gen_protoss",
+      "move_amount": 2,
+      "obs_all_health": true,
+      "obs_instead_of_state": false,
+      "obs_last_action": false,
+      "obs_own_health": true,
+      "obs_pathing_grid": false,
+      "obs_terrain_height": false,
+      "obs_timestep_number": false,
+      "reward_death_value": 10,
+      "reward_defeat": 0,
+      "reward_negative_scale": 0.5,
+      "reward_only_positive": true,
+      "reward_scale": true,
+      "reward_scale_rate": 20,
+      "reward_sparse": false,
+      "reward_win": 200,
+      "replay_dir": "",
+      "replay_prefix": "",
+      "conic_fov": false,
+      "use_unit_ranges": true,
+      "min_attack_range": 2,
+      "obs_own_pos": true,
+      "num_fov_actions": 12,
+      "capability_config": {
+        "n_units": 5,
+        "n_enemies": 5,
+        "team_gen": {
+          "dist_type": "weighted_teams",
+          "unit_types": [
+            "stalker",
+            "zealot",
+            "colossus"
+          ],
+          "weights": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "observe": true,
+          "env_key": "team_gen",
+          "n_units": 5,
+          "n_enemies": 5
+        },
+        "start_positions": {
+          "dist_type": "surrounded_and_reflect",
+          "p": 0.5,
+          "map_x": 32,
+          "map_y": 32,
+          "env_key": "start_positions",
+          "n_units": 5,
+          "n_enemies": 5
+        }
+      },
+      "state_last_action": true,
+      "state_timestep_number": false,
+      "step_mul": 8,
+      "heuristic_ai": false,
+      "debug": false,
+      "prob_obs_enemy": 1.0,
+      "action_mask": true,
+      "seed": 3535
+    },
+    "batch_size_run": 1,
+    "test_nepisode": 32,
+    "test_interval": 25000,
+    "test_greedy": true,
+    "log_interval": 2000,
+    "runner_log_interval": 2000,
+    "learner_log_interval": 2000,
+    "t_max": 6000000,
+    "use_cuda": true,
+    "buffer_cpu_only": true,
+    "use_tensorboard": false,
+    "save_model": false,
+    "save_model_interval": 2000000,
+    "checkpoint_path": "",
+    "evaluate": false,
+    "load_step": 0,
+    "save_replay": false,
+    "local_results_path": "runs/szc_vdn64_ft_chi_seed3535_20261113_attempt001",
+    "gamma": 0.99,
+    "batch_size": 32,
+    "buffer_size": 5000,
+    "lr": 0.0005,
+    "critic_lr": 0.0005,
+    "optim_alpha": 0.99,
+    "optim_eps": 1e-05,
+    "grad_norm_clip": 10,
+    "agent": "rnn",
+    "rnn_hidden_dim": 64,
+    "obs_agent_id": true,
+    "obs_last_action": true,
+    "repeat_id": 1,
+    "label": "default_label",
+    "action_selector": "epsilon_greedy",
+    "epsilon_start": 1.0,
+    "epsilon_finish": 0.05,
+    "epsilon_anneal_time": 50000,
+    "target_update_interval": 200,
+    "agent_output_type": "q",
+    "learner": "q_learner",
+    "double_q": true,
+    "mixer": "vdn",
+    "mixing_embed_dim": 64,
+    "hypernet_layers": 2,
+    "hypernet_embed": 64,
+    "name": "vdn",
+    "seed": 3535,
+    "device": "cuda:0",
+    "unique_token": "szc_vdn64_ft_chi_seed3535_20261113_attempt001",
+    "epsilon_on_switch": "per_task",
+    "algorithm": "vdn",
+    "top_k": null,
+    "protocol_id": "szc_vdn64_ft_a2_chi",
+    "role": "full",
+    "parent": null,
+    "group": "A2_chi",
+    "screening": "CHI fixed-probe reassessment with overall VDN activity",
+    "phase_boundary": "whole_episode_after_absolute_threshold",
+    "tasks": {
+      "stalker": [
+        5,
+        0,
+        0
+      ],
+      "zealot": [
+        0,
+        5,
+        0
+      ],
+      "colossus": [
+        0,
+        0,
+        5
+      ]
+    },
+    "thresholds": [
+      2000000,
+      4000000,
+      6000000
+    ],
+    "intervention": "vdn_chi",
+    "chi_probe_episodes": 32,
+    "chi_threshold": 3,
+    "chi_protect_output": true,
+    "replay_on_switch": "ft",
+    "n_agents": 5,
+    "n_actions": 11,
+    "state_shape": 130
+  },
+  "protocol": {
+    "id": "szc_vdn64_ft_a2_chi",
+    "tasks": {
+      "stalker": [
+        5,
+        0,
+        0
+      ],
+      "zealot": [
+        0,
+        5,
+        0
+      ],
+      "colossus": [
+        0,
+        0,
+        5
+      ]
+    },
+    "order": [
+      "stalker",
+      "zealot",
+      "colossus"
+    ],
+    "thresholds": [
+      2000000,
+      4000000,
+      6000000
+    ],
+    "groups": [
+      "N",
+      "A1_chi",
+      "A2_chi",
+      "A2_chi_union"
+    ],
+    "screen_episodes": 32,
+    "step_scale": 0.1,
+    "recovery_steps": 100000,
+    "screening": "CHI fixed-probe reassessment with overall VDN activity",
+    "weight_formula": "c/mean(c); c=mean_agent max_legal_alternative abs(Q_i(alt)-Q_i(chosen))",
+    "shared_prefix": false,
+    "full_path_equivalent_steps": 6000000,
+    "evaluation": {
+      "interval": 25000,
+      "regular_episodes": 32,
+      "focus_episodes": 128,
+      "focus_blocks_per_task": 4
+    },
+    "phase_boundary": "whole_episode_after_absolute_threshold",
+    "retain": [
+      "online",
+      "target",
+      "optimizer"
+    ],
+    "reward_normalization": "recompute_enemy_health_shield_every_reset",
+    "algorithm": "vdn",
+    "seeds": [
+      3535,
+      2222
+    ],
+    "selection": "overall_threshold",
+    "threshold_beta": 3,
+    "epsilon_on_switch": "per_task",
+    "suite": "ts4",
+    "stage_labels": [
+      "S",
+      "Z",
+      "C"
+    ],
+    "evaluation_sc2_retries": 2,
+    "top_k": null,
+    "intervention": "vdn_chi",
+    "replay_on_switch": "ft",
+    "sc2_game_version": "4.10",
+    "chi_comparison": false
+  },
+  "environment": {
+    "state_shape": 130,
+    "obs_shape": 92,
+    "cap_shape": 3,
+    "n_actions": 11,
+    "n_agents": 5,
+    "episode_limit": 200,
+    "agent_features": [
+      "health",
+      "energy/cooldown",
+      "rel_x",
+      "rel_y",
+      "shield",
+      "type_0",
+      "type_1",
+      "type_2"
+    ],
+    "enemy_features": [
+      "health",
+      "rel_x",
+      "rel_y",
+      "shield",
+      "type_0",
+      "type_1",
+      "type_2"
+    ]
+  },
+  "branch_restore": null
+}

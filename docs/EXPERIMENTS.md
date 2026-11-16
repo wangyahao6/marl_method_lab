@@ -75,6 +75,8 @@ cd /home/wyh/marl_method_lab
 
 ## 记录与结果
 
+已公开的报告与分析数据按问题归档在[实验结果索引](results/README.md)。
+
 每次run-id唯一，目录已存在时不覆盖。启动保留config/protocol、launch.json、源码SHA-256与source.tar.gz、console.log；进程终态由launcher_status.json记录，exited只代表进程退出。连续任务另有原训练器status.json与逐次评价/检测记录。
 
 连续任务的统一标量指标另存 `experiment_metrics.jsonl`，包含 Performance 与 Mechanism 两类。原有日志继续用于已有分析脚本。字段、单位、历史数据载荷与驱动职责见[持续学习驱动架构](CONTINUAL_ARCHITECTURE.md)。

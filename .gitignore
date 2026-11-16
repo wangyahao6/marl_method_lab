@@ -2,6 +2,7 @@
 runtime/
 runs/
 results/
+!/docs/results/
 evaluation/
 __pycache__/
 *.pyc
