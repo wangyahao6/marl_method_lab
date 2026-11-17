@@ -33,7 +33,7 @@ def trhr_settings(parser, overrides):
 
 def main():
     sys.path.insert(0, str(ROOT / 'drivers/continual'))
-    from action_set_protocol import RANK_METHODS, validate, validate_fork
+    from action_set_protocol import FORK_ROLES, RANK_METHODS, validate, validate_fork
     preference_methods = ('action_set_preference', *RANK_METHODS)
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
@@ -50,7 +50,8 @@ def main():
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
     p.add_argument('--hetero-role',choices=['prefix','branch'])
     p.add_argument('--parent')
-    p.add_argument('--preference-role', choices=['prefix', 'keep', 'release'])
+    p.add_argument('--preference-role', choices=FORK_ROLES)
+    p.add_argument('--capture-timing', action='store_true')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
     p.add_argument('--group',choices=['N','T1','G1','R1','T2','G2','R2','T12','G12','R12'],default='N')
     p.add_argument('--ts3-role',choices=['prefix','branch','eval_fwt','resume','full'])
@@ -81,6 +82,9 @@ def main():
     env=os.environ.copy();env['MARL_RUN_DIR']=str(out)
     env.setdefault('SC2PATH',str(ROOT/'runtime/StarCraftII'))
     env.setdefault('OMP_NUM_THREADS','1');env.setdefault('MKL_NUM_THREADS','1')
+    if a.capture_timing and (a.suite, a.method, a.preference_role) != (
+            'vdn_action_set', 'topk_preference', 'shared-branch'):
+        p.error('--capture-timing requires a shared TKPR-K1 branch')
     if a.preference_role and a.suite != 'vdn_action_set':
         p.error('--preference-role requires --suite vdn_action_set')
     if a.method in preference_methods and a.suite != 'vdn_action_set':
@@ -185,7 +189,12 @@ def main():
         stages = protocol['stages']
         if a.preference_role:
             command += ['--preference-role', a.preference_role]
-            stages = stages[-1:] if a.parent else stages[:-1]
+            stages = {'prefix': stages[:-1], 'keep': stages[-1:], 'release': stages[-1:],
+                      'shared-prefix': stages[:1], 'shared-branch': stages[1:]}[a.preference_role]
+        if a.capture_timing:
+            if protocol[a.method]['k'] != 1:
+                p.error('--capture-timing requires TKPR-K1')
+            command += ['--capture-timing']
         if a.parent:
             command += ['--parent', str(Path(a.parent).resolve())]
         details = dict(protocol=protocol, steps=sum(stage['steps'] for stage in stages))

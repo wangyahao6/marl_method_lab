@@ -17,6 +17,7 @@ from action_set_protocol import (
     FRPR_RAW_DEFAULTS, FRPR_RAW_LOSS_DEFAULTS, FRPR_UNFILTERED_DEFAULTS,
     RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
     TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
+    TOPK_HIGH_REGRET_DEFAULTS, TOPK_WEIGHTED_DEFAULTS,
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
@@ -38,6 +39,8 @@ METHOD_DEFAULTS = {
     "top1_max_preference": TOP1_MAX_DEFAULTS,
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
     "topk_preference": TOPK_DEFAULTS,
+    "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
+    "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
 }
 
 

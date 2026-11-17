@@ -1,14 +1,20 @@
 """Configuration for the standalone VDN action-set sequence."""
 from math import isfinite
 
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret")
+FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch")
+
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
-                "top1_max_preference", "top1_unfiltered_preference", "topk_preference")
+                "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
 TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
+TOPK_WEIGHTED_DEFAULTS = dict(RANK_DEFAULTS, k=1)
+TOPK_HIGH_REGRET_DEFAULTS = dict(TOPK_WEIGHTED_DEFAULTS, hr_threshold=0.5,
+                               hr_weight=1.0, hr_temperature=1.0)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
 TOP1_MAX_DEFAULTS = dict(RANK_RELU_DEFAULTS, margin=0.0)
 FRPR_UNFILTERED_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "min_gap"}
@@ -120,6 +126,8 @@ def validate(protocol, algorithm, method):
                 "full_rank_preference_raw_loss": FRPR_RAW_LOSS_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
+                "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
+                "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
             }.get(name, RANK_DEFAULTS)
             options = settings_with_defaults(protocol.get(name, {}), defaults)
@@ -127,9 +135,12 @@ def validate(protocol, algorithm, method):
                 if key == "k":
                     if not positive_integer(value):
                         raise ValueError(f"{name}.k must be a positive integer")
+                    if name in TOPK_VARIANTS and value != 1:
+                        raise ValueError(f"{name}.k must be 1")
                     continue
-                if not nonnegative(value) or (key in ("temperature", "q_scale_floor") and value == 0):
-                    bound = "positive" if key in ("temperature", "q_scale_floor") else "nonnegative"
+                positive = key in ("temperature", "q_scale_floor", "hr_temperature")
+                if not nonnegative(value) or (positive and value == 0):
+                    bound = "positive" if positive else "nonnegative"
                     raise ValueError(f"{name}.{key} must be finite and {bound}")
             ranking[name] = options
     return dict(protocol, algorithm=algorithm, method=method, evaluation=evaluation,
@@ -137,15 +148,28 @@ def validate(protocol, algorithm, method):
 
 
 def validate_fork(protocol, role, parent):
-    if bool(parent) != (role in ("keep", "release")):
-        raise ValueError("keep and release require --parent; prefix and full runs take no parent")
+    if bool(parent) != (role in ("keep", "release", "shared-branch")):
+        raise ValueError("keep, release and shared-branch require --parent; other roles take no parent")
+    method = protocol["method"]
+    if role in ("shared-prefix", "shared-branch"):
+        if protocol.get("replay_on_switch", "ft") != "ft" or len(protocol["stages"]) < 2:
+            raise ValueError("a shared S prefix requires FT and at least two stages")
+        if role == "shared-prefix" and (method not in RANK_METHODS or not protocol[method]["weight"]):
+            raise ValueError("a shared prefix needs an enabled ranking method to collect old Q")
+        if role == "shared-branch" and method not in ("baseline", *RANK_METHODS):
+            raise ValueError("a shared branch supports the baseline and ranking methods")
+        return
     if role:
-        method = protocol["method"]
         if method not in RANK_METHODS or not protocol[method]["weight"]:
             raise ValueError("preference forks require an enabled ranking method")
         stages = protocol["stages"]
         if stages[-1]["task"] not in {stage["task"] for stage in stages[:-1]}:
             raise ValueError("the final stage of a preference fork must revisit a trained task")
+
+
+def shared_fork_protocol(protocol):
+    # All method configurations and common settings match across the shared prefix and branches.
+    return {key: value for key, value in protocol.items() if key != "method"}
 
 
 def valid_seeds(seeds):

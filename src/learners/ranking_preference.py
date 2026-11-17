@@ -47,6 +47,18 @@ def topk_preference(current_q, reference_q, legal, decisions, settings):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings, k=settings["k"])
 
 
+def topk_preference_weighted(current_q, reference_q, legal, decisions, settings):
+    decisions = decisions & (legal.sum(dim=-1) >= 2)
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           k=1, confidence_weighted=True)
+
+
+def topk_preference_high_regret(current_q, reference_q, legal, decisions, settings):
+    decisions = decisions & (legal.sum(dim=-1) >= 2)
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           k=1, high_regret=True)
+
+
 @th.no_grad()
 def _topk_actions(reference_q, legal, effective_k):
     # Stable descending sort breaks ties by ascending action index.
@@ -57,7 +69,8 @@ def _topk_actions(reference_q, legal, effective_k):
 
 
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
-                    k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False):
+                    k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
+                    confidence_weighted=False, high_regret=False):
     current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
     if raw_reference:
         old = reference_q.detach()
@@ -87,6 +100,15 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
     penalties = softplus(inverted_gap / settings["temperature"]) if penalty is None else penalty(inverted_gap)
     pair_counts = pairs.sum(dim=(-2, -1))
     state_loss = penalties.masked_fill(~pairs, 0).sum(dim=(-2, -1)) / pair_counts.clamp_min(1)
+    if confidence_weighted:
+        valid = pair_counts > 0
+        weights = confidence.masked_fill(~valid, 0)
+        confidence_sum = weights.sum()
+        mean_confidence = confidence_sum / valid.sum().clamp_min(1)
+        denominator = th.where(confidence_sum > 0, mean_confidence, th.ones_like(mean_confidence))
+        weights = th.where(confidence_sum > 0, weights / denominator, valid.to(weights.dtype))
+        state_loss = state_loss * weights
+
     loss, count, summary = summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
     if pair_audit:
         summary = th.cat((summary, th.stack((candidates.sum(), eligible.sum()))))
@@ -97,7 +119,31 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         histogram = effective_k.new_zeros(min(k, action_count - 1) + 1)
         histogram.scatter_add_(0, effective_k.reshape(-1), (pair_counts > 0).long().reshape(-1))
         summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped)), histogram[1:]))
+    if confidence_weighted:
+        summary = th.cat((summary, th.stack((mean_confidence, (valid & (confidence == 0)).sum()))))
+    if high_regret:
+        hr_loss, active, regret = high_regret_penalty(current_q, reference_q, legal, decisions, scale, settings)
+        count = ((pair_counts > 0) | active).sum()
+        loss = loss + settings["hr_weight"] * hr_loss
+        summary = th.cat((loss.detach().reshape(1), summary[1:],
+                          th.stack((active.sum(), hr_loss.detach(), regret))))
     return loss, count, summary
+
+
+def high_regret_penalty(current_q, reference_q, legal, decisions, scale, settings):
+    with th.no_grad():
+        old_best = reference_q.masked_fill(~legal, -th.inf).argmax(dim=-1, keepdim=True)
+        new_best = current_q.detach().masked_fill(~legal, -th.inf).argmax(dim=-1, keepdim=True)
+        old_gap = reference_q.gather(-1, old_best) - reference_q.gather(-1, new_best)
+        regret = (old_gap / scale).squeeze(-1)
+        active = (decisions & (legal.sum(dim=-1) >= 2) & (old_best != new_best).squeeze(-1)
+                  & (regret >= settings["hr_threshold"]))
+    gap = current_q.gather(-1, new_best) - current_q.gather(-1, old_best)
+    logits = (gap / scale / settings["hr_temperature"]).squeeze(-1)
+    count = active.sum().clamp_min(1)
+    loss = softplus(logits).masked_fill(~active, 0).sum() / count
+    mean_regret = regret.masked_fill(~active, 0).sum() / count
+    return loss, active, mean_regret
 
 
 def top1_preference(current_q, reference_q, legal, decisions, settings):
@@ -201,6 +247,24 @@ def topk_statistics(summary):
     return stats
 
 
+def topk_weighted_statistics(summary):
+    stats = topk_statistics(summary[:-2])
+    confidence, zero = summary[-2:]
+    stats.update(mean_state_confidence=confidence if stats["valid_states"] else None,
+                 zero_confidence_states=int(zero))
+    return stats
+
+
+def topk_high_regret_statistics(summary):
+    stats = topk_statistics(summary[:-3])
+    count, loss, regret = summary[-3:]
+    stats.update(high_regret_states=int(count), high_regret_loss=loss if count else None,
+                 mean_high_regret=regret if count else None)
+    if count:
+        stats["loss"] = summary[0]
+    return stats
+
+
 def top1_unfiltered_statistics(summary):
     stats = ranking_statistics(summary[:-1])
     stats["mean_constrained_confidence"] = summary[-1] if stats["valid_states"] else None
@@ -231,6 +295,8 @@ class RankingPreference(ActionSetPreference):
             "full_rank_preference_raw_loss": full_rank_preference_raw_loss,
             "full_rank_preference_relu": full_rank_preference_relu,
             "topk_preference": topk_preference,
+            "topk_preference_weighted": topk_preference_weighted,
+            "topk_preference_high_regret": topk_preference_high_regret,
             "top1_preference": top1_preference,
             "top1_max_preference": top1_max_preference,
             "top1_unfiltered_preference": top1_unfiltered_preference,
@@ -244,6 +310,10 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_unfiltered_statistics
         elif method == "topk_preference":
             self.statistics = topk_statistics
+        elif method == "topk_preference_weighted":
+            self.statistics = topk_weighted_statistics
+        elif method == "topk_preference_high_regret":
+            self.statistics = topk_high_regret_statistics
 
     def task_loss(self, mac, pool, episodes):
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,

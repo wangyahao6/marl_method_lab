@@ -20,7 +20,8 @@ from learners.action_set_preference import (
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
-from action_set_protocol import RANK_METHODS, validate, validate_fork
+from action_set_protocol import FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, shared_fork_protocol, validate, validate_fork
+from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, save_models
 from common.metrics import Metrics, record_evaluation
 from common.records import attach_legacy_metrics
@@ -258,8 +259,11 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
     return dict(task=task, wins=wins, episodes=len(results), win_rate=wins / len(results), outcomes=results)
 
 
-def train_sequence(protocol, seed, out, role=None, parent=None):
+def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=False):
     validate_fork(protocol, role, parent)
+    if capture_timing and (role != "shared-branch" or protocol["method"] != "topk_preference"
+                           or protocol["topk_preference"]["k"] != 1):
+        raise ValueError("timing capture requires a shared TKPR-K1 branch")
     random.seed(seed)
     np.random.seed(seed)
     th.manual_seed(seed)
@@ -267,7 +271,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
     if role:
         args.preference_role = role
         args.parent = str(parent) if parent else None
-        args.preference_weight = 0.0 if role == "release" else protocol[protocol["method"]]["weight"]
+        args.preference_weight = (protocol[protocol["method"]]["weight"]
+                                  if role != "release" and protocol["method"] in RANK_METHODS else 0.0)
+    if capture_timing:
+        args.capture_timing = True
     logger = base.Logger(logging.getLogger(out.name))
     attach_legacy_metrics(logger, out)
     metrics = Metrics(out, args.algorithm, args.method, seed, **({"role": role} if role else {}))
@@ -304,7 +311,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
         method = protocol["method"]
 
         def record_preference(row):
-            if method == "topk_preference":
+            if method in ("topk_preference", *TOPK_VARIANTS):
                 counts = Counter()
                 for historical in row["historical_tasks"]:
                     counts.update(historical["effective_k_histogram"])
@@ -356,9 +363,14 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
         first_phase = 0
         if parent:
             state = th.load(parent / "return_state.th", map_location="cpu")
-            if state["protocol"] != protocol or state["seed"] != seed:
-                raise ValueError("preference branch must match its prefix protocol and seed")
+            prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
+            same_protocol = (shared_fork_protocol(state["protocol"]) == shared_fork_protocol(protocol)
+                             if role == "shared-branch" else state["protocol"] == protocol)
+            if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
+                raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())
+            if role == "shared-branch" and len(report["stages"]) != 1:
+                raise ValueError("a shared prefix must contain exactly its first stage")
             initial, before = report["initial_reference"], report["before_first_training"]
             for entry in report["stages"]:
                 latest[entry["task"]] = entry["win_rates"][entry["task"]]
@@ -399,7 +411,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             er_buffer = make_replay_buffer(args, [stage["task"] for stage in stages],
                                            scheme, groups, info["episode_limit"] + 1, preprocess)
 
-        stop_phase = len(stages) - 1 if role == "prefix" else len(stages)
+        stop_phase = {"prefix": len(stages) - 1, "shared-prefix": 1}.get(role, len(stages))
+        training_preference = None if role == "shared-prefix" else preference
         monitor_interval = args.gradient_monitor_interval
         for phase in range(first_phase, stop_phase):
             stage = stages[phase]
@@ -421,6 +434,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
             evaluate(agent_snapshot(), task, "phase_start")
             interval = evaluation["interval"]
             next_eval = begin + interval
+            timing_points = ([(part, begin + (end - begin) * part // 4) for part in (1, 2, 3)]
+                             if capture_timing else [])
             while runner.t_env < end:
                 with th.no_grad():
                     batch = runner.run()
@@ -430,7 +445,14 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                     diagnostics = {}
                     if monitor_interval and (updates + 1) % monitor_interval == 0:
                         diagnostics["gradient_monitor"] = record_gradients
-                    learner.train(sample, runner.t_env, episode, preference=preference, **diagnostics)
+                    while timing_points and runner.t_env >= timing_points[0][1]:
+                        part, _ = timing_points.pop(0)
+                        try:
+                            capture_update(out, learner, sample, preference, phase, task,
+                                           part, runner.t_env, episode, updates + 1)
+                        except Exception:
+                            logging.getLogger(out.name).exception("Could not capture a timing sample")
+                    learner.train(sample, runner.t_env, episode, preference=training_preference, **diagnostics)
                     updates += 1
                     if replay_state:
                         log_first_replay_batch(buffer, base.append, out, phase, task, runner.t_env)
@@ -492,9 +514,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                         metrics.preference(row_metrics, event="fixed_probe")
                     except Exception:
                         probe_error(probe["task"], traceback.format_exc())
-        if role == "prefix":
+        if role in ("prefix", "shared-prefix"):
             th.save(dict(
-                protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
+                fork_role=role, protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
                 target_agent=learner.target_mac.agent.state_dict(),
                 last_target_update_episode=learner.last_target_update_episode,
                 learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
@@ -535,7 +557,8 @@ def main():
     mode.add_argument("--seed", type=int)
     mode.add_argument("--evaluate-run", type=Path)
     parser.add_argument("--episodes", type=int)
-    parser.add_argument("--preference-role", choices=("prefix", "keep", "release"))
+    parser.add_argument("--preference-role", choices=FORK_ROLES)
+    parser.add_argument("--capture-timing", action="store_true")
     parser.add_argument("--parent", type=lambda path: Path(path).resolve())
     args = parser.parse_args()
     out = Path(os.environ["MARL_RUN_DIR"])
@@ -546,7 +569,8 @@ def main():
     if args.evaluate_run:
         evaluate_final(args.evaluate_run, out, args.episodes, protocol)
     else:
-        train_sequence(protocol, args.seed, out, role=args.preference_role, parent=args.parent)
+        train_sequence(protocol, args.seed, out, role=args.preference_role, parent=args.parent,
+                       capture_timing=args.capture_timing)
 
 
 if __name__ == "__main__":

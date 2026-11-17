@@ -243,3 +243,11 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
   --run-id szc_frpr_unfiltered_3535 \
   --protocol configs/continual/szc_vdn64_frpr_unfiltered.json --dry-run
 ```
+
+### SZC 的 TKPR-K1 共享 S 前缀
+
+`configs/continual/szc_vdn64_tkpr_k1_shared.json` 沿用现有 SZC VDN64 的镜像 5v5、每阶段 2M、逐任务 ε、FT 和评价协议。T1PR 使用原版的损失和超参数，环境、探索与 TD 回放采用共同协议。每个种子运行一次 `--method topk_preference --preference-role shared-prefix`，仅训练 S，保存其在线及目标网络、优化器、计数、随机状态和带旧 Q 的胜局池。其余阶段用 `--preference-role shared-branch --parent <S运行目录>` 分支。所有分支使用相同完整协议；只有命令指定的活动方法不同。分支从空的 Z 阶段 TD 回放池开始，偏好方法读取共同 S 胜局。C 继续使用该 S 来源及各自 Z 末的参考记忆。
+
+- **TKPR-K1-W** 通过 `topk_preference_weighted` 使用。旧 Top-1 与 Top-2 的差值除以原 TKPR 的冻结旧 Q 尺度得到置信度。对每个历史任务本次回放中至少有一个合格动作对的决策，除以这些决策的平均置信度，使权重均值为 1，再乘状态内动作对平均损失。若这批合格决策的置信度全为零，则采用均匀权重。
+- **TKPR-K1-HR** 通过 `topk_preference_high_regret` 使用。仅考虑合法动作上的有效决策。当新、旧贪婪动作不同，且旧模型对旧最优动作与新最优动作的 Q 差除以旧 Q 尺度达到 0.5，计算额外 `softplus((Q_new[new_best] - Q_new[old_best]) / old_scale / hr_temperature)`。每个历史任务对触发状态取平均，再以权重 1 加到原 TKPR-K1 的任务损失，温度为 1。贪婪动作并列时取动作索引最小者。无触发状态时额外项为零。
+- **配对计时** 在 K1 分支启用 `--capture-timing`，在 Z、C 进度约 25%、50%、75% 时保存更新前的真实 TD batch、在线／目标网络、优化器状态及偏好采样 RNG。单独运行 `scripts/benchmark_szc_tkpr_k1.py`。每个快照对两个条件分别预热 5 次并配对测量 20 次，交替顺序，GPU 前后同步。每次在计时区间外恢复同一状态。计时包括 learner 更新中的偏好采样、前向、反传和优化，文件写入、TD 抽样、环境交互及梯度诊断在区间外。
