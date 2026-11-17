@@ -1,0 +1,675 @@
+{
+  "source_run": "szc_vdn64_greedy_action_agreement_20261117_attempt002",
+  "analysis_script_sha256": "9160d695f7f930636c5e72eef5aac705b64b674ecf9cb336b1169b8737531944",
+  "base_commit": "a9d149fc223ab1430a0ea10c23da316b0466687c",
+  "agr_inputs": {
+    "manifest.json": "f6918fc63108ce30205c9f3d45f2fa0c8401efcb9974eef6a806e45195554830",
+    "public/manifest.json": "f6918fc63108ce30205c9f3d45f2fa0c8401efcb9974eef6a806e45195554830",
+    "public/rollout_audit.json": "cd73d886aa264292da05b6a2692b795cf3e143b38351ff3f04a7414bc5dc6d7e",
+    "public/summary.csv": "0484dd23975b91b21db12c2b2fded70e6e994019cf60f7003c91d5198ab7e427",
+    "public/per_episode.csv": "3c20da93a355ae6336ddeff8d43c1ce5f9552ea780de2e7ac11bb045ee6dd1a5",
+    "public/per_agent.csv": "48a17e40ff91e7d1cf0731206b193c41133270b3db9395b9b5328a1cdb4e3876",
+    "public/confidence.csv": "b82c52bfcb71f5e44cbc8135c2c127aebc1da942588b7f4726e3f21d51d0d7f5"
+  },
+  "checkpoints": [
+    {
+      "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+      "phase": 0,
+      "t_env": 2000051,
+      "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+      "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+      "phase": 1,
+      "t_env": 4000043,
+      "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0001_4000043/agent.th",
+      "sha256": "7b893ede5048a98c61980738838f29663f5bb301a5fba98a2b2a0fc3142f91e3",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+      "phase": 2,
+      "t_env": 6000011,
+      "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0002_6000011/agent.th",
+      "sha256": "4790f06df0fb82112e3ae824134eaba40a0260ecfc67805b88a60256fc0ea8eb",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+      "phase": 0,
+      "t_env": 2000051,
+      "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0000_2000051/agent.th",
+      "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+      "phase": 1,
+      "t_env": 4000002,
+      "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0001_4000002/agent.th",
+      "sha256": "992410da6a2977f567fb971f90df7dd1c417956b51ead2c80d6b1b0eb1f976eb",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+      "phase": 2,
+      "t_env": 6000060,
+      "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0002_6000060/agent.th",
+      "sha256": "e6df96e1e5c786e0b5eeae4a5b7bfc20c270f2a102df64f30636b6256121a705",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+      "phase": 0,
+      "t_env": 2000051,
+      "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0000_2000051/agent.th",
+      "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+      "phase": 1,
+      "t_env": 4000014,
+      "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0001_4000014/agent.th",
+      "sha256": "7a2294fef56c68e7dd02262fa9a665454dcbdf30b60aa5f888715e0895d6f47b",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+      "phase": 2,
+      "t_env": 6000008,
+      "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0002_6000008/agent.th",
+      "sha256": "f669e6dd00735de90134cd5930dd3b51b83d4c6c06d9ed58af119e01a0f7046f",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+      "phase": 0,
+      "t_env": 2000051,
+      "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0000_2000051/agent.th",
+      "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+      "phase": 1,
+      "t_env": 4000031,
+      "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0001_4000031/agent.th",
+      "sha256": "7680c083fbeeb14e80415ec88e417aaee6c934637393c4cca66551953a47c84c",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+      "phase": 2,
+      "t_env": 6000086,
+      "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0002_6000086/agent.th",
+      "sha256": "0eb1d27a6ce4dcfc1aca0a8fcdb9bada99e9dbe73728ca7cb07e243b5ddec3a8",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+      "phase": 0,
+      "t_env": 2000051,
+      "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0000_2000051/agent.th",
+      "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+      "phase": 1,
+      "t_env": 4000014,
+      "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0001_4000014/agent.th",
+      "sha256": "b66e5e35e024f3b5f38e8eecfdc813cd932c2a2a92cb8304d12c705ec8d8c216",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+      "phase": 2,
+      "t_env": 6000020,
+      "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0002_6000020/agent.th",
+      "sha256": "878f93078d89892c571ce056b6c68beb756b4e5e067b6f97eefe01e031c3bc01",
+      "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+    },
+    {
+      "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+      "phase": 0,
+      "t_env": 2000046,
+      "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+      "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+      "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+      "phase": 2,
+      "t_env": 6000064,
+      "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0002_6000064/agent.th",
+      "sha256": "913c4d7ce0e17375af49477736f5e32589983883c74e00fba4128a85318f3956",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+      "phase": 2,
+      "t_env": 6000040,
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0002_6000040/agent.th",
+      "sha256": "7d41d7e66a44ab460f33afcaee3ece11a096ae0712de5928399a771d1f57018e",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+      "phase": 0,
+      "t_env": 2000007,
+      "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+      "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+      "phase": 1,
+      "t_env": 4000037,
+      "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+      "sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+      "phase": 0,
+      "t_env": 2000032,
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+      "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+      "phase": 1,
+      "t_env": 4000053,
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+      "sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+      "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+    }
+  ],
+  "archives": [
+    {
+      "reference_id": "stalker-158e651caa6b659f-f075736e",
+      "env_seed": 91101,
+      "episodes": 32,
+      "wins": 21,
+      "transitions": 2012,
+      "archive": "trajectories-91101.th",
+      "sha256": "a29f783848c8461a5a14c800275bb7eccf3b8de5ca6b0280ee9a488e6bfc094d"
+    },
+    {
+      "reference_id": "stalker-158e651caa6b659f-f075736e",
+      "env_seed": 91102,
+      "episodes": 32,
+      "wins": 16,
+      "transitions": 2041,
+      "archive": "trajectories-91102.th",
+      "sha256": "55c50923e5a98c8b4b47943653e666b615f3c84b1878e893cdd5cb88d1f53ad6"
+    },
+    {
+      "reference_id": "stalker-158e651caa6b659f-f075736e",
+      "env_seed": 91103,
+      "episodes": 32,
+      "wins": 24,
+      "transitions": 2037,
+      "archive": "trajectories-91103.th",
+      "sha256": "2ba752dfe78c38b68f1379df0c7624611ac5feb17cf0a0e23f9d5caf644b5453"
+    },
+    {
+      "reference_id": "stalker-158e651caa6b659f-f075736e",
+      "env_seed": 91104,
+      "episodes": 32,
+      "wins": 18,
+      "transitions": 2063,
+      "archive": "trajectories-91104.th",
+      "sha256": "7bf51b2ecf0bac09c5741f7f9b4171539243c89fc10e841f010bee79cf135f45"
+    },
+    {
+      "reference_id": "zealot-7b893ede5048a98c-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 27,
+      "transitions": 1814,
+      "archive": "trajectories-91201.th",
+      "sha256": "43e8b1584a10e300a5bec8b2b26c243c882063b08fe05e34025bc62911f9beec"
+    },
+    {
+      "reference_id": "zealot-7b893ede5048a98c-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1784,
+      "archive": "trajectories-91202.th",
+      "sha256": "2d2d99cff3b97776467ffc8379b47f4534a4f1a0dacb749f8d3c16d32cc87380"
+    },
+    {
+      "reference_id": "zealot-7b893ede5048a98c-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 26,
+      "transitions": 1780,
+      "archive": "trajectories-91203.th",
+      "sha256": "1bc9274d8c1dbd21f48d20689b58937f213ea583545cd52674aefaea7981792e"
+    },
+    {
+      "reference_id": "zealot-7b893ede5048a98c-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1762,
+      "archive": "trajectories-91204.th",
+      "sha256": "6d03afac9dedd3af92ed5f16a96546732625ee37d1e7e36710096ed723aba502"
+    },
+    {
+      "reference_id": "zealot-a96c38b8940b9093-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 24,
+      "transitions": 1720,
+      "archive": "trajectories-91201.th",
+      "sha256": "9f0bc0e808104aacba8e1c31ca1d5f28197ec5fc3299f781ad25706136e697e3"
+    },
+    {
+      "reference_id": "zealot-a96c38b8940b9093-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 26,
+      "transitions": 1789,
+      "archive": "trajectories-91202.th",
+      "sha256": "050241eb2d49cdcb81b66652d31229981b792b4cbfad82cfef33546094f129bf"
+    },
+    {
+      "reference_id": "zealot-a96c38b8940b9093-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 28,
+      "transitions": 1807,
+      "archive": "trajectories-91203.th",
+      "sha256": "1f9922655768726ea194c21d1316e4c35ee34d2463218ab81081dd355a2ec334"
+    },
+    {
+      "reference_id": "zealot-a96c38b8940b9093-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 27,
+      "transitions": 1681,
+      "archive": "trajectories-91204.th",
+      "sha256": "4c899b748c1990deac1786ff9b8860329cf49de08c6c2ff6dd3f62641b42d9b2"
+    },
+    {
+      "reference_id": "stalker-91b23e4bd06d32e6-f075736e",
+      "env_seed": 91101,
+      "episodes": 32,
+      "wins": 20,
+      "transitions": 2025,
+      "archive": "trajectories-91101.th",
+      "sha256": "755b71e8c44a43323e4e91d3db29caf5de12d252884c6a8072f3d3246bf30e6e"
+    },
+    {
+      "reference_id": "stalker-91b23e4bd06d32e6-f075736e",
+      "env_seed": 91102,
+      "episodes": 32,
+      "wins": 17,
+      "transitions": 1998,
+      "archive": "trajectories-91102.th",
+      "sha256": "b5aa57129d4f94ef6b30c4b86cc9501f91d5541861f26f435ce5e79f34ba3c95"
+    },
+    {
+      "reference_id": "stalker-91b23e4bd06d32e6-f075736e",
+      "env_seed": 91103,
+      "episodes": 32,
+      "wins": 21,
+      "transitions": 1976,
+      "archive": "trajectories-91103.th",
+      "sha256": "3551ed64a4591d03fb7dfb0f35947db21f38df4630fe6e200db31a3fbc8dd208"
+    },
+    {
+      "reference_id": "stalker-91b23e4bd06d32e6-f075736e",
+      "env_seed": 91104,
+      "episodes": 32,
+      "wins": 13,
+      "transitions": 1931,
+      "archive": "trajectories-91104.th",
+      "sha256": "82a467e0e797c992da3369de600bee28578795a7ddafb61a19cca18f14afaa84"
+    },
+    {
+      "reference_id": "zealot-49ffcd505b228ed2-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 28,
+      "transitions": 1841,
+      "archive": "trajectories-91201.th",
+      "sha256": "b3c513958bbb3fa8545348d72ff8f84dec417afffb388b805c6a59cc0e16a201"
+    },
+    {
+      "reference_id": "zealot-49ffcd505b228ed2-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1747,
+      "archive": "trajectories-91202.th",
+      "sha256": "3b30201d1d24814a597f1efd1e6c7984d66f49cf3cbea865d1293ec638626039"
+    },
+    {
+      "reference_id": "zealot-49ffcd505b228ed2-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 29,
+      "transitions": 1851,
+      "archive": "trajectories-91203.th",
+      "sha256": "764f857281da59f94df5ee28eb8155f28f75b5b498d304f5bc285d72beee5443"
+    },
+    {
+      "reference_id": "zealot-49ffcd505b228ed2-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1864,
+      "archive": "trajectories-91204.th",
+      "sha256": "25fd53a7d4c3c72fb4fcc9891a3f0996572bc2349ba4f486dfe9e3527c0acab4"
+    },
+    {
+      "reference_id": "stalker-cec458a1884efa98-f075736e",
+      "env_seed": 91101,
+      "episodes": 32,
+      "wins": 18,
+      "transitions": 2087,
+      "archive": "trajectories-91101.th",
+      "sha256": "734a60fd53a0181a4d610d6923de5b6261c2f21e4774e9cf33f483cd3e2777a7"
+    },
+    {
+      "reference_id": "stalker-cec458a1884efa98-f075736e",
+      "env_seed": 91102,
+      "episodes": 32,
+      "wins": 16,
+      "transitions": 1957,
+      "archive": "trajectories-91102.th",
+      "sha256": "6bd156a46757494613d5817e05cf5d3cb9ddd4a0925ddbe75efcb8644bddd73d"
+    },
+    {
+      "reference_id": "stalker-cec458a1884efa98-f075736e",
+      "env_seed": 91103,
+      "episodes": 32,
+      "wins": 19,
+      "transitions": 2011,
+      "archive": "trajectories-91103.th",
+      "sha256": "52fe0075bd5e623fb67bfcc2c0aba8a89801e874c80bf0e262c558e05050c5b5"
+    },
+    {
+      "reference_id": "stalker-cec458a1884efa98-f075736e",
+      "env_seed": 91104,
+      "episodes": 32,
+      "wins": 18,
+      "transitions": 1975,
+      "archive": "trajectories-91104.th",
+      "sha256": "721e7434b096690ca85bfef68e2ade1bcc2d87e9d8540a4ae5950a64210e7fe3"
+    },
+    {
+      "reference_id": "zealot-c2b0edbf44f80577-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 26,
+      "transitions": 1680,
+      "archive": "trajectories-91201.th",
+      "sha256": "ec9b3d161ea146a99b4faa63812b667df5be8e2282bf6edb984a0fd7ac16d41e"
+    },
+    {
+      "reference_id": "zealot-c2b0edbf44f80577-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 20,
+      "transitions": 1731,
+      "archive": "trajectories-91202.th",
+      "sha256": "5be8b65ac9ae40792b83095738e6e8d1aad730440e3c8de2d00a01cbd2476def"
+    },
+    {
+      "reference_id": "zealot-c2b0edbf44f80577-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1718,
+      "archive": "trajectories-91203.th",
+      "sha256": "6660b5b881953197312d34bdaf8353f63c08d5c3d81d6d02fb80da0d6b466568"
+    },
+    {
+      "reference_id": "zealot-c2b0edbf44f80577-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1846,
+      "archive": "trajectories-91204.th",
+      "sha256": "5323ceaef1c2daad2c8f1509378b377641a56554333de7f0bff9f866a33a08ca"
+    },
+    {
+      "reference_id": "zealot-992410da6a2977f5-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 27,
+      "transitions": 1847,
+      "archive": "trajectories-91201.th",
+      "sha256": "12df18680528ce5c1f0de97e1ce0e0f7e04234514d3d67c8a03345486a4cd630"
+    },
+    {
+      "reference_id": "zealot-992410da6a2977f5-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1893,
+      "archive": "trajectories-91202.th",
+      "sha256": "e909d1d874dce31ebfb584b08192212cf79f257e6303b523dc5d3747d4a930b3"
+    },
+    {
+      "reference_id": "zealot-992410da6a2977f5-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 23,
+      "transitions": 1898,
+      "archive": "trajectories-91203.th",
+      "sha256": "98398813f662b98464a62f6f95bbbc86aa44c89282a4b7446c0c4bf288556dfb"
+    },
+    {
+      "reference_id": "zealot-992410da6a2977f5-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1810,
+      "archive": "trajectories-91204.th",
+      "sha256": "2f237c69d5a367a440b8238f028516eb24c2dd5b3bde2b45474422e8269dc3d1"
+    },
+    {
+      "reference_id": "zealot-7a2294fef56c68e7-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1766,
+      "archive": "trajectories-91201.th",
+      "sha256": "999ee2c32c4c438009a11f0e0927969da8703da2e93581242214064b4f93354a"
+    },
+    {
+      "reference_id": "zealot-7a2294fef56c68e7-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 23,
+      "transitions": 1770,
+      "archive": "trajectories-91202.th",
+      "sha256": "ff1228edae92fc102dd2fab02f52bfcacfc74379aaa366836f6a8333b6316eb5"
+    },
+    {
+      "reference_id": "zealot-7a2294fef56c68e7-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 22,
+      "transitions": 1839,
+      "archive": "trajectories-91203.th",
+      "sha256": "a8b30355b113a442e17053e041afdb667661c15034e504c1faa0e5dce953606d"
+    },
+    {
+      "reference_id": "zealot-7a2294fef56c68e7-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 30,
+      "transitions": 1717,
+      "archive": "trajectories-91204.th",
+      "sha256": "6060fd27ce720c3328e779f49d5971f6f903a71edbd64aa16b43e1f218fb454f"
+    },
+    {
+      "reference_id": "zealot-7680c083fbeeb14e-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1966,
+      "archive": "trajectories-91201.th",
+      "sha256": "15189b84d9099976eac43ec2cdfcca9d1d32e7d088ec8ab220203f54948e3f94"
+    },
+    {
+      "reference_id": "zealot-7680c083fbeeb14e-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 26,
+      "transitions": 1999,
+      "archive": "trajectories-91202.th",
+      "sha256": "715fbadf50d8be1cce3361a27ebf7ac7a4dc874acb5c11bc15726841665fe1eb"
+    },
+    {
+      "reference_id": "zealot-7680c083fbeeb14e-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 26,
+      "transitions": 2058,
+      "archive": "trajectories-91203.th",
+      "sha256": "ba5ddaf4ad373d51d5001ea1c45f598d93d424ee6eacf981d83883d7b31a6a4a"
+    },
+    {
+      "reference_id": "zealot-7680c083fbeeb14e-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 28,
+      "transitions": 1876,
+      "archive": "trajectories-91204.th",
+      "sha256": "997df4675ddf31707140762b1532a3e734679658c6bc7f7e4b3a4dc2d9c9c312"
+    },
+    {
+      "reference_id": "zealot-b66e5e35e024f3b5-f075736e",
+      "env_seed": 91201,
+      "episodes": 32,
+      "wins": 23,
+      "transitions": 1926,
+      "archive": "trajectories-91201.th",
+      "sha256": "0ef68d2a48dd43a0d1794daf34de1d41d7375f481a18e6861303df3b5711b080"
+    },
+    {
+      "reference_id": "zealot-b66e5e35e024f3b5-f075736e",
+      "env_seed": 91202,
+      "episodes": 32,
+      "wins": 19,
+      "transitions": 2030,
+      "archive": "trajectories-91202.th",
+      "sha256": "b1a93bf55f40adfc9af8a0f2d957ab260f5bdf32b9cfc9777925fce98fc600c7"
+    },
+    {
+      "reference_id": "zealot-b66e5e35e024f3b5-f075736e",
+      "env_seed": 91203,
+      "episodes": 32,
+      "wins": 24,
+      "transitions": 1932,
+      "archive": "trajectories-91203.th",
+      "sha256": "b52297d592543496864383bd023edde98d2069d90c0f454189b0683ef837645a"
+    },
+    {
+      "reference_id": "zealot-b66e5e35e024f3b5-f075736e",
+      "env_seed": 91204,
+      "episodes": 32,
+      "wins": 25,
+      "transitions": 1849,
+      "archive": "trajectories-91204.th",
+      "sha256": "a2264b6ec06d1357f471e87785ecca04f778389ac72bb73d492ed84898f978ca"
+    }
+  ],
+  "references": [
+    {
+      "reference_id": "stalker-158e651caa6b659f-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 40765,
+      "old_action_mismatches": 0,
+      "comparisons": 10
+    },
+    {
+      "reference_id": "zealot-7b893ede5048a98c-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 35700,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "zealot-a96c38b8940b9093-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 34985,
+      "old_action_mismatches": 0,
+      "comparisons": 7
+    },
+    {
+      "reference_id": "stalker-91b23e4bd06d32e6-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 39650,
+      "old_action_mismatches": 0,
+      "comparisons": 2
+    },
+    {
+      "reference_id": "zealot-49ffcd505b228ed2-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 36515,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "stalker-cec458a1884efa98-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 40150,
+      "old_action_mismatches": 0,
+      "comparisons": 2
+    },
+    {
+      "reference_id": "zealot-c2b0edbf44f80577-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 34875,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "zealot-992410da6a2977f5-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 37240,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "zealot-7a2294fef56c68e7-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 35460,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "zealot-7680c083fbeeb14e-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 39495,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    },
+    {
+      "reference_id": "zealot-b66e5e35e024f3b5-f075736e",
+      "episodes": 128,
+      "old_actions_verified": 38685,
+      "old_action_mismatches": 0,
+      "comparisons": 1
+    }
+  ],
+  "comparisons_verified": 28,
+  "episode_rows_verified": 3584,
+  "agent_rows_verified": 140,
+  "confidence_rows_verified": 140,
+  "new_trajectory_rollouts": 0,
+  "new_training_steps": 0
+}

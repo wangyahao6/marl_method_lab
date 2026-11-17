@@ -182,6 +182,47 @@
         "每行 AGR 来自旧策略访问的状态。Z 自身阶段参考因方法而异，统一参考使用独立 Z 模型。",
         "相关性以运行端点为单位，分任务、阶段与参考策略计算，属于小样本描述统计。"
       ]
+    },
+    {
+      "id": "szc-vdn64-action-regret",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-action-regret/README.md",
+      "files": {
+        "summary": "behavioral-analysis/szc-vdn64-action-regret/summary.csv",
+        "per_episode": "behavioral-analysis/szc-vdn64-action-regret/per_episode.csv",
+        "confidence": "behavioral-analysis/szc-vdn64-action-regret/confidence.csv",
+        "per_agent": "behavioral-analysis/szc-vdn64-action-regret/per_agent.csv",
+        "audit": "behavioral-analysis/szc-vdn64-action-regret/audit.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        1111,
+        2222,
+        3535
+      ],
+      "comparison": {
+        "kind": "frozen_policy_replay",
+        "source_experiment": "szc-vdn64-greedy-action-agreement",
+        "key": [
+          "comparison_id"
+        ],
+        "match_on": [
+          "task",
+          "reference",
+          "stage"
+        ],
+        "primary_cohort": "k_ablation",
+        "additional_cohort": "earlier_frpr"
+      },
+      "interpretation_limits": [
+        "R 是旧策略估计的动作价值损失，由旧 Agent 的合法动作 Q 值计算。",
+        "同批方法比较只有 seed 1111。其他两个 FRPR 端点使用较早训练实现。",
+        "Z 自身参考的轨迹随方法变化，统一 Z 参考复用同一批独立策略轨迹。"
+      ]
     }
   ]
 }
