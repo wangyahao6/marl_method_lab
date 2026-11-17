@@ -1,0 +1,13 @@
+run_id,method,seed,role,phase,training_task,t_env,mode,sampled_task,sampled_episodes
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,0,stalker,1539,er,stalker,32
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,1,zealot,2000961,er,zealot,16
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,1,zealot,2000961,er,stalker,16
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,2,colossus,4001221,er,colossus,16
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,2,colossus,4001221,er,stalker,8
+szc_vdn64_er_a2_chi_seed1111_attempt001,VDN-ER+CHI,1111,independent,2,colossus,4001221,er,zealot,8
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,0,stalker,1573,er,stalker,32
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,1,zealot,2000924,er,zealot,16
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,1,zealot,2000924,er,stalker,16
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,2,colossus,4001205,er,colossus,16
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,2,colossus,4001205,er,stalker,8
+szc_vdn64_er_a2_chi_seed3535_attempt001,VDN-ER+CHI,3535,independent,2,colossus,4001205,er,zealot,8

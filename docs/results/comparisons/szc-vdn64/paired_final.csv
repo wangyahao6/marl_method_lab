@@ -1,0 +1,33 @@
+seed,method,control_method,run_id,control_run_id,acc_delta_pp,bwt_delta_pp,fwt_delta_pp,stalker_delta_pp,zealot_delta_pp,colossus_delta_pp
+1111,FRPR-Raw,FRPR,szc_vdn64_frpr_raw_seed1111_20261116_attempt001,szc_vdn64_frpr_seed1111_attempt001,-11.979166666666671,-12.109375,-0.390625,-13.28125,-7.8125,-14.84375
+3535,FRPR-Raw,FRPR,szc_vdn64_frpr_raw_seed3535_20261116_attempt001,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,-4.947916666666671,-3.90625,-12.5,-10.9375,-2.34375,-1.5625
+1111,FRPR-RawLoss,FRPR,szc_vdn64_frpr_raw_loss_seed1111_20261116_attempt001,szc_vdn64_frpr_seed1111_attempt001,-7.552083333333336,4.296875,-1.5625,1.5625,-1.5625,-22.65625
+3535,FRPR-RawLoss,FRPR,szc_vdn64_frpr_raw_loss_seed3535_20261116_attempt001,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,-11.458333333333336,-8.203125,-5.078125,-14.84375,-12.5,-7.03125
+1111,FRPR-Raw,FRPR-RawLoss,szc_vdn64_frpr_raw_seed1111_20261116_attempt001,szc_vdn64_frpr_raw_loss_seed1111_20261116_attempt001,-4.427083333333336,-16.40625,1.171875,-14.84375,-6.25,7.8125
+3535,FRPR-Raw,FRPR-RawLoss,szc_vdn64_frpr_raw_seed3535_20261116_attempt001,szc_vdn64_frpr_raw_loss_seed3535_20261116_attempt001,6.510416666666664,4.296875,-7.421875,3.90625,10.15625,5.46875
+2222,FRPR-Unfiltered,FRPR,szc_vdn64_frpr_unfiltered_seed2222_20261116_attempt001,szc_vdn64_ft_frpr_seed2222_20261113_attempt001,-5.729166666666671,4.6875,1.953125,-3.90625,-4.6875,-8.59375
+3535,FRPR-Unfiltered,FRPR,szc_vdn64_frpr_unfiltered_seed3535_20261116_attempt001,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,-8.593750000000007,-2.34375,-4.296875,0.0,-12.5,-13.28125
+2222,FRPR-ReLU,FRPR,szc_vdn64_frpr_relu_seed2222_20261114_attempt001,szc_vdn64_ft_frpr_seed2222_20261113_attempt001,-17.44791666666667,-17.96875,0.390625,-32.03125,-14.0625,-6.25
+3535,FRPR-ReLU,FRPR,szc_vdn64_frpr_relu_seed3535_20261114_attempt001,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,-10.677083333333336,-16.015625,-0.78125,-12.5,-15.625,-3.90625
+1111,TKPR-K1,FRPR,szc_vdn64_tkpr_k1_seed1111_attempt001,szc_vdn64_frpr_seed1111_attempt001,1.5625,4.6875,9.375,3.125,3.90625,-2.34375
+1111,TKPR-K2,FRPR,szc_vdn64_tkpr_k2_seed1111_attempt001,szc_vdn64_frpr_seed1111_attempt001,-1.8229166666666714,-1.953125,7.8125,-6.25,2.34375,-1.5625
+1111,TKPR-K3,FRPR,szc_vdn64_tkpr_k3_seed1111_attempt001,szc_vdn64_frpr_seed1111_attempt001,1.3020833333333286,2.34375,0.0,7.8125,0.78125,-4.6875
+1111,TKPR-K5,FRPR,szc_vdn64_tkpr_k5_seed1111_attempt001,szc_vdn64_frpr_seed1111_attempt001,-8.593750000000007,-3.125,2.734375,-3.125,-10.15625,-12.5
+1111,TKPR-K10,FRPR,szc_vdn64_tkpr_k10_seed1111_attempt001,szc_vdn64_frpr_seed1111_attempt001,-2.343750000000007,4.6875,5.859375,0.0,-1.5625,-5.46875
+3535,TKPR-K10,FRPR,szc_vdn64_tkpr_k10_seed3535_attempt001,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,-13.281250000000007,-16.015625,-4.6875,-29.6875,-9.375,-0.78125
+2222,T1PR-Max,T1PR,szc_vdn64_t1pr_max_seed2222_20261114_attempt001,szc_vdn64_ft_t1pr_seed2222_20261113_attempt001,-5.989583333333336,-14.453125,-5.078125,-10.15625,-22.65625,14.84375
+3535,T1PR-Max,T1PR,szc_vdn64_t1pr_max_seed3535_20261114_attempt001,szc_vdn64_ft_t1pr_seed3535_20261113_attempt001,-10.9375,-11.328125,8.203125,-20.3125,-21.09375,8.59375
+2222,T1PR-Unfiltered,T1PR,szc_vdn64_t1pr_unfiltered_seed2222_20261115_attempt001,szc_vdn64_ft_t1pr_seed2222_20261113_attempt001,2.0833333333333357,7.421875,4.6875,12.5,2.34375,-8.59375
+3535,T1PR-Unfiltered,T1PR,szc_vdn64_t1pr_unfiltered_seed3535_20261115_attempt001,szc_vdn64_ft_t1pr_seed3535_20261113_attempt001,-2.0833333333333357,2.734375,10.546875,-7.8125,-3.90625,5.46875
+3535,VDN-ER+CHI,VDN-ER,szc_vdn64_er_a2_chi_seed3535_attempt001,szc_vdn64_vdn_er_seed3535_20261114_attempt001,-4.427083333333332,-2.34375,-3.125,-1.5625,-10.9375,-0.78125
+3535,VDN-ER+CHI,CHI (A2),szc_vdn64_er_a2_chi_seed3535_attempt001,szc_vdn64_ft_chi_seed3535_20261113_attempt001,8.59375,21.09375,5.859375,3.90625,29.6875,-7.8125
+2222,CHI (A2),VDN-FT,szc_vdn64_ft_chi_seed2222_20261113_attempt001,szc_vdn64_ft_baseline_seed2222_20261113_attempt001,-3.90625,-2.734375,6.640625,0.0,0.0,-11.71875
+3535,CHI (A2),VDN-FT,szc_vdn64_ft_chi_seed3535_20261113_attempt001,szc_vdn64_ft_baseline_seed3535_20261113_attempt001,-0.2604166666666643,-1.5625,-7.421875,0.0,0.0,-0.78125
+2222,VDN-ER,VDN-FT,szc_vdn64_vdn_er_seed2222_20261114_attempt001,szc_vdn64_ft_baseline_seed2222_20261113_attempt001,11.458333333333336,33.59375,3.515625,2.34375,41.40625,-9.375
+3535,VDN-ER,VDN-FT,szc_vdn64_vdn_er_seed3535_20261114_attempt001,szc_vdn64_ft_baseline_seed3535_20261113_attempt001,12.760416666666668,21.875,1.5625,5.46875,40.625,-7.8125
+2222,ASPR,VDN-FT,szc_vdn64_ft_aspr_seed2222_20261113_attempt001,szc_vdn64_ft_baseline_seed2222_20261113_attempt001,26.041666666666664,41.796875,-0.390625,14.84375,61.71875,1.5625
+3535,ASPR,VDN-FT,szc_vdn64_ft_aspr_seed3535_20261113_attempt001,szc_vdn64_ft_baseline_seed3535_20261113_attempt001,29.166666666666668,45.3125,3.90625,37.5,55.46875,-5.46875
+2222,T1PR,VDN-FT,szc_vdn64_ft_t1pr_seed2222_20261113_attempt001,szc_vdn64_ft_baseline_seed2222_20261113_attempt001,39.0625,63.28125,0.0,43.75,78.90625,-5.46875
+3535,T1PR,VDN-FT,szc_vdn64_ft_t1pr_seed3535_20261113_attempt001,szc_vdn64_ft_baseline_seed3535_20261113_attempt001,38.54166666666667,58.59375,-2.34375,43.75,80.46875,-8.59375
+2222,FRPR,VDN-FT,szc_vdn64_ft_frpr_seed2222_20261113_attempt001,szc_vdn64_ft_baseline_seed2222_20261113_attempt001,42.44791666666667,68.75,2.34375,60.15625,73.4375,-6.25
+3535,FRPR,VDN-FT,szc_vdn64_ft_frpr_seed3535_20261113_attempt001,szc_vdn64_ft_baseline_seed3535_20261113_attempt001,45.05208333333334,71.09375,7.8125,62.5,77.34375,-4.6875

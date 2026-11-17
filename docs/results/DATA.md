@@ -14,7 +14,13 @@
 | `evaluations.csv` | 从 `evaluations.jsonl` 提取的一行一次独立贪心评估。用 `wins / episodes` 重算胜率。阶段编号 `phase` 从 0 开始，`t_env` 是累计训练环境步数。 |
 | `stage_metrics.csv` | 由评估计数重算的阶段末逐任务胜率、ACC、BWT、FWT，以及有回访曲线时的回训 AUC。空字段表示该阶段无对应指标。 |
 | `preference_diagnostics.csv` | 从偏好回放逐更新记录按运行、当前阶段及历史来源任务汇总。覆盖率为 `valid_states / decision_states`，计数包含重复采样；`valid_pairs` 等字段按实现实际记录。 |
+| `paired_final.csv` | SZC 同种子终点差值，`run_id` 是方法运行，`control_run_id` 是其对照运行。差值均为方法减对照，单位为百分点。 |
+| `gradient_diagnostics.csv` | 按运行、阶段和指标汇总 Agent 梯度抽样点的均值和中位数。`logged_points` 含未定义点，均值与中位数使用 `defined_points`。抽样间隔见生效配置。 |
+| `effective_k_histogram.csv` | TKPR 按历史来源任务的有效 K 计数。每个计数是含至少一个约束对的采样决策，含重复采样。 |
+| `replay_samples.csv` | ER + CHI 每个阶段首个 TD 批次的任务分配，粒度为运行、阶段、采样来源任务。 |
 | `configs/<run-id>.json` | 运行快照中的配置、任务协议、环境维度与分支恢复记录。实验主机的仓库绝对路径转写为仓库相对路径。`launch_git_commit` 可用于查阅实际训练版本。 |
+
+SZC 的 `runs.csv` 中 `cohort` 标识原始提交批次。`preference_diagnostics.csv` 的筛选率和 Top-1 翻转率由累计计数相除。`mean_task_loss` 是有定义的历史任务损失在各更新间的平均，分母为 `task_loss_updates`。旧日志缺少的细项留空。Raw 与归一化变体的损失尺度不同，比较时同时查看覆盖率、动作对与梯度。
 
 评估标签中，`initial_reference` 是初始模型在将来任务上的表现，`next_unseen` 是首次训练该任务前的评估，`phase_start` 和 `periodic` 描述本阶段当前任务的学习过程，`stage_end` 用于比较该阶段末各已见任务。曲线的圆点为阶段末评估。定期与阶段末评估的局数与种子块可不同，见各实验的协议。
 
