@@ -1,0 +1,2527 @@
+{
+  "base_commit": "3e688b750a31b4c807d42c44b8af19f2da9a8e9d",
+  "analysis_sha256": {
+    "run_analysis.py": "2b4e775d19d57fefb0e2968f93b87c2428649e19740defed8a578b8fba97d1c4",
+    "summarize.py": "f5d4b4f24548b7bcf00df076a51dca485e1d3405301772cf77db5c9ce386b351"
+  },
+  "episodes_per_seed": 32,
+  "runs": [
+    {
+      "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+      "method": "FRPR",
+      "seed": 1111,
+      "cohort": "k_ablation",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "phase": 0,
+          "t_env": 2000051,
+          "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+          "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "phase": 1,
+          "t_env": 4000043,
+          "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0001_4000043/agent.th",
+          "sha256": "7b893ede5048a98c61980738838f29663f5bb301a5fba98a2b2a0fc3142f91e3",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "phase": 2,
+          "t_env": 6000011,
+          "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0002_6000011/agent.th",
+          "sha256": "4790f06df0fb82112e3ae824134eaba40a0260ecfc67805b88a60256fc0ea8eb",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+      "method": "FRPR",
+      "seed": 2222,
+      "cohort": "earlier_frpr",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "phase": 0,
+          "t_env": 2000007,
+          "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+          "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        },
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "phase": 1,
+          "t_env": 4000037,
+          "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+          "sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        },
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "phase": 2,
+          "t_env": 6000064,
+          "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0002_6000064/agent.th",
+          "sha256": "913c4d7ce0e17375af49477736f5e32589983883c74e00fba4128a85318f3956",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+      "method": "FRPR",
+      "seed": 3535,
+      "cohort": "earlier_frpr",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "phase": 0,
+          "t_env": 2000032,
+          "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+          "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        },
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "phase": 1,
+          "t_env": 4000053,
+          "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+          "sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        },
+        {
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "phase": 2,
+          "t_env": 6000040,
+          "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0002_6000040/agent.th",
+          "sha256": "7d41d7e66a44ab460f33afcaee3ece11a096ae0712de5928399a771d1f57018e",
+          "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+      "method": "K1",
+      "seed": 1111,
+      "cohort": "k_ablation",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1,
+        "k": 1
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "phase": 0,
+          "t_env": 2000051,
+          "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0000_2000051/agent.th",
+          "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "phase": 1,
+          "t_env": 4000002,
+          "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0001_4000002/agent.th",
+          "sha256": "992410da6a2977f567fb971f90df7dd1c417956b51ead2c80d6b1b0eb1f976eb",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "phase": 2,
+          "t_env": 6000060,
+          "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0002_6000060/agent.th",
+          "sha256": "e6df96e1e5c786e0b5eeae4a5b7bfc20c270f2a102df64f30636b6256121a705",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+      "method": "K2",
+      "seed": 1111,
+      "cohort": "k_ablation",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1,
+        "k": 2
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "phase": 0,
+          "t_env": 2000051,
+          "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0000_2000051/agent.th",
+          "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "phase": 1,
+          "t_env": 4000014,
+          "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0001_4000014/agent.th",
+          "sha256": "7a2294fef56c68e7dd02262fa9a665454dcbdf30b60aa5f888715e0895d6f47b",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "phase": 2,
+          "t_env": 6000008,
+          "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0002_6000008/agent.th",
+          "sha256": "f669e6dd00735de90134cd5930dd3b51b83d4c6c06d9ed58af119e01a0f7046f",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+      "method": "K3",
+      "seed": 1111,
+      "cohort": "k_ablation",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1,
+        "k": 3
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "phase": 0,
+          "t_env": 2000051,
+          "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0000_2000051/agent.th",
+          "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "phase": 1,
+          "t_env": 4000031,
+          "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0001_4000031/agent.th",
+          "sha256": "7680c083fbeeb14e80415ec88e417aaee6c934637393c4cca66551953a47c84c",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "phase": 2,
+          "t_env": 6000086,
+          "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0002_6000086/agent.th",
+          "sha256": "0eb1d27a6ce4dcfc1aca0a8fcdb9bada99e9dbe73728ca7cb07e243b5ddec3a8",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        }
+      ]
+    },
+    {
+      "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+      "method": "K5",
+      "seed": 1111,
+      "cohort": "k_ablation",
+      "training_settings": {
+        "weight": 1.0,
+        "temperature": 1.0,
+        "min_gap": 0.5,
+        "q_scale_floor": 0.1,
+        "k": 5
+      },
+      "checkpoints": [
+        {
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "phase": 0,
+          "t_env": 2000051,
+          "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0000_2000051/agent.th",
+          "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "phase": 1,
+          "t_env": 4000014,
+          "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0001_4000014/agent.th",
+          "sha256": "b66e5e35e024f3b5f38e8eecfdc813cd932c2a2a92cb8304d12c705ec8d8c216",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        },
+        {
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "phase": 2,
+          "t_env": 6000020,
+          "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0002_6000020/agent.th",
+          "sha256": "878f93078d89892c571ce056b6c68beb756b4e5e067b6f97eefe01e031c3bc01",
+          "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "id": "stalker-158e651caa6b659f-f075736e",
+      "task": "stalker",
+      "policy": {
+        "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+        "phase": 0,
+        "t_env": 2000051,
+        "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+        "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 79,
+        "episodes": 128,
+        "win_rate": 0.6171875
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_frpr_seed1111_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "method": "FRPR",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000043,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0001_4000043/agent.th",
+            "sha256": "7b893ede5048a98c61980738838f29663f5bb301a5fba98a2b2a0fc3142f91e3",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 73,
+            "episodes": 128,
+            "win_rate": 0.5703125
+          }
+        },
+        {
+          "id": "szc_vdn64_frpr_seed1111_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "method": "FRPR",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000011,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0002_6000011/agent.th",
+            "sha256": "4790f06df0fb82112e3ae824134eaba40a0260ecfc67805b88a60256fc0ea8eb",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 75,
+            "episodes": 128,
+            "win_rate": 0.5859375
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k1_seed1111_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "method": "K1",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000002,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0001_4000002/agent.th",
+            "sha256": "992410da6a2977f567fb971f90df7dd1c417956b51ead2c80d6b1b0eb1f976eb",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 77,
+            "episodes": 128,
+            "win_rate": 0.6015625
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k1_seed1111_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "method": "K1",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000060,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0002_6000060/agent.th",
+            "sha256": "e6df96e1e5c786e0b5eeae4a5b7bfc20c270f2a102df64f30636b6256121a705",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 79,
+            "episodes": 128,
+            "win_rate": 0.6171875
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k2_seed1111_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "method": "K2",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000014,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0001_4000014/agent.th",
+            "sha256": "7a2294fef56c68e7dd02262fa9a665454dcbdf30b60aa5f888715e0895d6f47b",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 75,
+            "episodes": 128,
+            "win_rate": 0.5859375
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k2_seed1111_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "method": "K2",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000008,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0002_6000008/agent.th",
+            "sha256": "f669e6dd00735de90134cd5930dd3b51b83d4c6c06d9ed58af119e01a0f7046f",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 67,
+            "episodes": 128,
+            "win_rate": 0.5234375
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k3_seed1111_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "method": "K3",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000031,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0001_4000031/agent.th",
+            "sha256": "7680c083fbeeb14e80415ec88e417aaee6c934637393c4cca66551953a47c84c",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 74,
+            "episodes": 128,
+            "win_rate": 0.578125
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k3_seed1111_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "method": "K3",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000086,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0002_6000086/agent.th",
+            "sha256": "0eb1d27a6ce4dcfc1aca0a8fcdb9bada99e9dbe73728ca7cb07e243b5ddec3a8",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 85,
+            "episodes": 128,
+            "win_rate": 0.6640625
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k5_seed1111_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "method": "K5",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000014,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0001_4000014/agent.th",
+            "sha256": "b66e5e35e024f3b5f38e8eecfdc813cd932c2a2a92cb8304d12c705ec8d8c216",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 74,
+            "episodes": 128,
+            "win_rate": 0.578125
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k5_seed1111_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "method": "K5",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 0,
+            "t_env": 2000051,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0000_2000051/agent.th",
+            "sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000020,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0002_6000020/agent.th",
+            "sha256": "878f93078d89892c571ce056b6c68beb756b4e5e067b6f97eefe01e031c3bc01",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 71,
+            "episodes": 128,
+            "win_rate": 0.5546875
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-7b893ede5048a98c-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+        "phase": 1,
+        "t_env": 4000043,
+        "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0001_4000043/agent.th",
+        "sha256": "7b893ede5048a98c61980738838f29663f5bb301a5fba98a2b2a0fc3142f91e3",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 100,
+        "episodes": 128,
+        "win_rate": 0.78125
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_frpr_seed1111_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "method": "FRPR",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000043,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0001_4000043/agent.th",
+            "sha256": "7b893ede5048a98c61980738838f29663f5bb301a5fba98a2b2a0fc3142f91e3",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000011,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0002_6000011/agent.th",
+            "sha256": "4790f06df0fb82112e3ae824134eaba40a0260ecfc67805b88a60256fc0ea8eb",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 101,
+            "episodes": 128,
+            "win_rate": 0.7890625
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-a96c38b8940b9093-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+        "phase": 0,
+        "t_env": 2000046,
+        "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+        "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+        "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": null,
+      "comparisons": [
+        {
+          "id": "szc_vdn64_frpr_seed1111_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+          "method": "FRPR",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_frpr_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000011,
+            "path": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0002_6000011/agent.th",
+            "sha256": "4790f06df0fb82112e3ae824134eaba40a0260ecfc67805b88a60256fc0ea8eb",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 101,
+            "episodes": 128,
+            "win_rate": 0.7890625
+          }
+        },
+        {
+          "id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 2222,
+          "cohort": "earlier_frpr",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000064,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0002_6000064/agent.th",
+            "sha256": "913c4d7ce0e17375af49477736f5e32589983883c74e00fba4128a85318f3956",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 94,
+            "episodes": 128,
+            "win_rate": 0.734375
+          }
+        },
+        {
+          "id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 3535,
+          "cohort": "earlier_frpr",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000040,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0002_6000040/agent.th",
+            "sha256": "7d41d7e66a44ab460f33afcaee3ece11a096ae0712de5928399a771d1f57018e",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 99,
+            "episodes": 128,
+            "win_rate": 0.7734375
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k1_seed1111_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "method": "K1",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000060,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0002_6000060/agent.th",
+            "sha256": "e6df96e1e5c786e0b5eeae4a5b7bfc20c270f2a102df64f30636b6256121a705",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 106,
+            "episodes": 128,
+            "win_rate": 0.828125
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k2_seed1111_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "method": "K2",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000008,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0002_6000008/agent.th",
+            "sha256": "f669e6dd00735de90134cd5930dd3b51b83d4c6c06d9ed58af119e01a0f7046f",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 104,
+            "episodes": 128,
+            "win_rate": 0.8125
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k3_seed1111_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "method": "K3",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000086,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0002_6000086/agent.th",
+            "sha256": "0eb1d27a6ce4dcfc1aca0a8fcdb9bada99e9dbe73728ca7cb07e243b5ddec3a8",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 102,
+            "episodes": 128,
+            "win_rate": 0.796875
+          }
+        },
+        {
+          "id": "szc_vdn64_tkpr_k5_seed1111_attempt001:zealot:2:independent_z",
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "method": "K5",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "independent_z",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+            "phase": 0,
+            "t_env": 2000046,
+            "path": "runs/vdnh_Z_seed1111_20261103_attempt001/models/phase0_zealot_2000046/agent.th",
+            "sha256": "a96c38b8940b9093b839f16933df8fb9859b84e8a851f388f501370a4bb52b9c",
+            "commit": "94f2a661b116458ad04ac4fad8a1551262bfa5c7"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000020,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0002_6000020/agent.th",
+            "sha256": "878f93078d89892c571ce056b6c68beb756b4e5e067b6f97eefe01e031c3bc01",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 88,
+            "episodes": 128,
+            "win_rate": 0.6875
+          }
+        }
+      ]
+    },
+    {
+      "id": "stalker-91b23e4bd06d32e6-f075736e",
+      "task": "stalker",
+      "policy": {
+        "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+        "phase": 0,
+        "t_env": 2000007,
+        "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+        "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+        "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 71,
+        "episodes": 128,
+        "win_rate": 0.5546875
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 2222,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 0,
+            "t_env": 2000007,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+            "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 1,
+            "t_env": 4000037,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+            "sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 69,
+            "episodes": 128,
+            "win_rate": 0.5390625
+          }
+        },
+        {
+          "id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 2222,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 0,
+            "t_env": 2000007,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+            "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000064,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0002_6000064/agent.th",
+            "sha256": "913c4d7ce0e17375af49477736f5e32589983883c74e00fba4128a85318f3956",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 77,
+            "episodes": 128,
+            "win_rate": 0.6015625
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-49ffcd505b228ed2-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+        "phase": 1,
+        "t_env": 4000037,
+        "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+        "sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+        "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 101,
+        "episodes": 128,
+        "win_rate": 0.7890625
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 2222,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 1,
+            "t_env": 4000037,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+            "sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed2222_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000064,
+            "path": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0002_6000064/agent.th",
+            "sha256": "913c4d7ce0e17375af49477736f5e32589983883c74e00fba4128a85318f3956",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 94,
+            "episodes": 128,
+            "win_rate": 0.734375
+          }
+        }
+      ]
+    },
+    {
+      "id": "stalker-cec458a1884efa98-f075736e",
+      "task": "stalker",
+      "policy": {
+        "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+        "phase": 0,
+        "t_env": 2000032,
+        "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+        "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+        "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 71,
+        "episodes": 128,
+        "win_rate": 0.5546875
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001:stalker:1:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 3535,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "Z",
+          "phase": 1,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 0,
+            "t_env": 2000032,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+            "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 1,
+            "t_env": 4000053,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+            "sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 73,
+            "episodes": 128,
+            "win_rate": 0.5703125
+          }
+        },
+        {
+          "id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001:stalker:2:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 3535,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "stalker",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 0,
+            "t_env": 2000032,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+            "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000040,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0002_6000040/agent.th",
+            "sha256": "7d41d7e66a44ab460f33afcaee3ece11a096ae0712de5928399a771d1f57018e",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 80,
+            "episodes": 128,
+            "win_rate": 0.625
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-c2b0edbf44f80577-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+        "phase": 1,
+        "t_env": 4000053,
+        "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+        "sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+        "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 93,
+        "episodes": 128,
+        "win_rate": 0.7265625
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+          "method": "FRPR",
+          "seed": 3535,
+          "cohort": "earlier_frpr",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 1,
+            "t_env": 4000053,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+            "sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_ft_frpr_seed3535_20261113_attempt001",
+            "phase": 2,
+            "t_env": 6000040,
+            "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0002_6000040/agent.th",
+            "sha256": "7d41d7e66a44ab460f33afcaee3ece11a096ae0712de5928399a771d1f57018e",
+            "commit": "d96055fe0a2cac24823336e920d2e5ed9d1179da"
+          },
+          "evaluation": {
+            "wins": 99,
+            "episodes": 128,
+            "win_rate": 0.7734375
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-992410da6a2977f5-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+        "phase": 1,
+        "t_env": 4000002,
+        "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0001_4000002/agent.th",
+        "sha256": "992410da6a2977f567fb971f90df7dd1c417956b51ead2c80d6b1b0eb1f976eb",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 97,
+        "episodes": 128,
+        "win_rate": 0.7578125
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_tkpr_k1_seed1111_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+          "method": "K1",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000002,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0001_4000002/agent.th",
+            "sha256": "992410da6a2977f567fb971f90df7dd1c417956b51ead2c80d6b1b0eb1f976eb",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k1_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000060,
+            "path": "runs/szc_vdn64_tkpr_k1_seed1111_attempt001/models/phase0002_6000060/agent.th",
+            "sha256": "e6df96e1e5c786e0b5eeae4a5b7bfc20c270f2a102df64f30636b6256121a705",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 106,
+            "episodes": 128,
+            "win_rate": 0.828125
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-7a2294fef56c68e7-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+        "phase": 1,
+        "t_env": 4000014,
+        "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0001_4000014/agent.th",
+        "sha256": "7a2294fef56c68e7dd02262fa9a665454dcbdf30b60aa5f888715e0895d6f47b",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 100,
+        "episodes": 128,
+        "win_rate": 0.78125
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_tkpr_k2_seed1111_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+          "method": "K2",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000014,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0001_4000014/agent.th",
+            "sha256": "7a2294fef56c68e7dd02262fa9a665454dcbdf30b60aa5f888715e0895d6f47b",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k2_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000008,
+            "path": "runs/szc_vdn64_tkpr_k2_seed1111_attempt001/models/phase0002_6000008/agent.th",
+            "sha256": "f669e6dd00735de90134cd5930dd3b51b83d4c6c06d9ed58af119e01a0f7046f",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 104,
+            "episodes": 128,
+            "win_rate": 0.8125
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-7680c083fbeeb14e-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+        "phase": 1,
+        "t_env": 4000031,
+        "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0001_4000031/agent.th",
+        "sha256": "7680c083fbeeb14e80415ec88e417aaee6c934637393c4cca66551953a47c84c",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 105,
+        "episodes": 128,
+        "win_rate": 0.8203125
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_tkpr_k3_seed1111_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+          "method": "K3",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000031,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0001_4000031/agent.th",
+            "sha256": "7680c083fbeeb14e80415ec88e417aaee6c934637393c4cca66551953a47c84c",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k3_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000086,
+            "path": "runs/szc_vdn64_tkpr_k3_seed1111_attempt001/models/phase0002_6000086/agent.th",
+            "sha256": "0eb1d27a6ce4dcfc1aca0a8fcdb9bada99e9dbe73728ca7cb07e243b5ddec3a8",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 102,
+            "episodes": 128,
+            "win_rate": 0.796875
+          }
+        }
+      ]
+    },
+    {
+      "id": "zealot-b66e5e35e024f3b5-f075736e",
+      "task": "zealot",
+      "policy": {
+        "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+        "phase": 1,
+        "t_env": 4000014,
+        "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0001_4000014/agent.th",
+        "sha256": "b66e5e35e024f3b5f38e8eecfdc813cd932c2a2a92cb8304d12c705ec8d8c216",
+        "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+      },
+      "env_args": {
+        "continuing_episode": false,
+        "difficulty": "7",
+        "game_version": "4.10",
+        "map_name": "10gen_protoss",
+        "move_amount": 2,
+        "obs_all_health": true,
+        "obs_instead_of_state": false,
+        "obs_last_action": false,
+        "obs_own_health": true,
+        "obs_pathing_grid": false,
+        "obs_terrain_height": false,
+        "obs_timestep_number": false,
+        "reward_death_value": 10,
+        "reward_defeat": 0,
+        "reward_negative_scale": 0.5,
+        "reward_only_positive": true,
+        "reward_scale": true,
+        "reward_scale_rate": 20,
+        "reward_sparse": false,
+        "reward_win": 200,
+        "replay_dir": "",
+        "replay_prefix": "",
+        "conic_fov": false,
+        "use_unit_ranges": true,
+        "min_attack_range": 2,
+        "obs_own_pos": true,
+        "num_fov_actions": 12,
+        "capability_config": {
+          "n_units": 5,
+          "n_enemies": 5,
+          "team_gen": {
+            "dist_type": "weighted_teams",
+            "unit_types": [
+              "stalker",
+              "zealot",
+              "colossus"
+            ],
+            "weights": [
+              0.45,
+              0.45,
+              0.1
+            ],
+            "observe": true,
+            "env_key": "team_gen",
+            "n_units": 5,
+            "n_enemies": 5
+          },
+          "start_positions": {
+            "dist_type": "surrounded_and_reflect",
+            "p": 0.5,
+            "map_x": 32,
+            "map_y": 32,
+            "env_key": "start_positions",
+            "n_units": 5,
+            "n_enemies": 5
+          }
+        },
+        "state_last_action": true,
+        "state_timestep_number": false,
+        "step_mul": 8,
+        "heuristic_ai": false,
+        "debug": false,
+        "prob_obs_enemy": 1.0,
+        "action_mask": true,
+        "rosters": {
+          "stalker": {
+            "ally": [
+              5,
+              0,
+              0
+            ],
+            "enemy": [
+              5,
+              0,
+              0
+            ]
+          },
+          "zealot": {
+            "ally": [
+              0,
+              5,
+              0
+            ],
+            "enemy": [
+              0,
+              5,
+              0
+            ]
+          },
+          "colossus": {
+            "ally": [
+              0,
+              0,
+              5
+            ],
+            "enemy": [
+              0,
+              0,
+              5
+            ]
+          }
+        }
+      },
+      "policy_evaluation": {
+        "wins": 91,
+        "episodes": 128,
+        "win_rate": 0.7109375
+      },
+      "comparisons": [
+        {
+          "id": "szc_vdn64_tkpr_k5_seed1111_attempt001:zealot:2:own_stage",
+          "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+          "method": "K5",
+          "seed": 1111,
+          "cohort": "k_ablation",
+          "reference": "own_stage",
+          "task": "zealot",
+          "stage": "C",
+          "phase": 2,
+          "old_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 1,
+            "t_env": 4000014,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0001_4000014/agent.th",
+            "sha256": "b66e5e35e024f3b5f38e8eecfdc813cd932c2a2a92cb8304d12c705ec8d8c216",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "new_checkpoint": {
+            "run_id": "szc_vdn64_tkpr_k5_seed1111_attempt001",
+            "phase": 2,
+            "t_env": 6000020,
+            "path": "runs/szc_vdn64_tkpr_k5_seed1111_attempt001/models/phase0002_6000020/agent.th",
+            "sha256": "878f93078d89892c571ce056b6c68beb756b4e5e067b6f97eefe01e031c3bc01",
+            "commit": "f332d9e1e7a4c0c9633aced0bc6ccad8b4ab5510"
+          },
+          "evaluation": {
+            "wins": 88,
+            "episodes": 128,
+            "win_rate": 0.6875
+          }
+        }
+      ]
+    }
+  ]
+}
