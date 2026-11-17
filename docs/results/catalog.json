@@ -223,6 +223,48 @@
         "同批方法比较只有 seed 1111。其他两个 FRPR 端点使用较早训练实现。",
         "Z 自身参考的轨迹随方法变化，统一 Z 参考复用同一批独立策略轨迹。"
       ]
+    },
+    {
+      "id": "szc-vdn64-action-intervention",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-action-intervention/README.md",
+      "files": {
+        "summary": "behavioral-analysis/szc-vdn64-action-intervention/summary.csv",
+        "per_episode": "behavioral-analysis/szc-vdn64-action-intervention/per_episode.csv",
+        "contrasts": "behavioral-analysis/szc-vdn64-action-intervention/contrasts.csv",
+        "per_agent": "behavioral-analysis/szc-vdn64-action-intervention/per_agent.csv",
+        "audit": "behavioral-analysis/szc-vdn64-action-intervention/audit.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        1111,
+        2222,
+        3535
+      ],
+      "comparison": {
+        "kind": "live_policy_intervention",
+        "source_experiment": "szc-vdn64-action-regret",
+        "key": [
+          "comparison_id"
+        ],
+        "match_on": [
+          "task",
+          "stage",
+          "method",
+          "seed"
+        ],
+        "primary_cohort": "k_ablation",
+        "additional_cohort": "earlier_frpr"
+      },
+      "interpretation_limits": [
+        "在旧任务中比较冻结策略的在线干预。结论针对旧任务评价。",
+        "同批方法比较只有 seed 1111。其他两个 FRPR 端点使用较早训练实现。",
+        "C 与 D 执行相同旧策略。同一旧权重的 C/D 分别共享各自的环境运行。"
+      ]
     }
   ]
 }
