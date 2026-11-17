@@ -1,0 +1,9 @@
+task,stage,reference,subset,n,pearson_r,spearman_rho
+stalker,Z,own_stage,k_ablation,5,-0.9806609994336324,-0.9746794344808964
+stalker,Z,own_stage,all_available,7,0.20989036531570565,-0.21821789023599242
+stalker,C,own_stage,k_ablation,5,0.15880819809519597,0.19999999999999998
+stalker,C,own_stage,all_available,7,0.20449067384864145,0.25
+zealot,C,own_stage,k_ablation,5,0.16360600204515063,0.0
+zealot,C,own_stage,all_available,7,0.016172222161243865,-0.14285714285714288
+zealot,C,independent_z,k_ablation,5,0.1351487343161168,0.7
+zealot,C,independent_z,all_available,7,0.3355807424394139,0.642857142857143

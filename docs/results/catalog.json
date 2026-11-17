@@ -9,7 +9,8 @@
     "comparisons": "方法与基线对照",
     "return-ablations": "回访与阶段干预消融",
     "parameter-ablations": "超参数与组件消融",
-    "diagnostics": "机制诊断"
+    "diagnostics": "机制诊断",
+    "behavioral-analysis": "策略行为分析"
   },
   "datasets": {
     "runs": {
@@ -138,6 +139,48 @@
         "只覆盖 seed 1111 和 SZC 任务顺序。五条独立运行在 S 末的 Agent 参数指纹一致。",
         "有效 K 分布按参与排序约束的回放决策汇总，包含重复采样。",
         "梯度每 100 次更新抽样一次，汇总无法单独确定性能差异的成因。"
+      ]
+    },
+    {
+      "id": "szc-vdn64-greedy-action-agreement",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-greedy-action-agreement/README.md",
+      "files": {
+        "summary": "behavioral-analysis/szc-vdn64-greedy-action-agreement/summary.csv",
+        "per_episode": "behavioral-analysis/szc-vdn64-greedy-action-agreement/per_episode.csv",
+        "confidence": "behavioral-analysis/szc-vdn64-greedy-action-agreement/confidence.csv",
+        "per_agent": "behavioral-analysis/szc-vdn64-greedy-action-agreement/per_agent.csv",
+        "correlation": "behavioral-analysis/szc-vdn64-greedy-action-agreement/correlation.csv",
+        "manifest": "behavioral-analysis/szc-vdn64-greedy-action-agreement/manifest.json",
+        "rollout_audit": "behavioral-analysis/szc-vdn64-greedy-action-agreement/rollout_audit.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        1111,
+        2222,
+        3535
+      ],
+      "comparison": {
+        "kind": "frozen_policy_replay",
+        "key": [
+          "comparison_id"
+        ],
+        "match_on": [
+          "task",
+          "reference",
+          "stage"
+        ],
+        "primary_cohort": "k_ablation",
+        "additional_cohort": "earlier_frpr"
+      },
+      "interpretation_limits": [
+        "同批 K1/K2/K3/K5/FRPR 只覆盖 seed 1111。其他两条 FRPR 使用较早版本。",
+        "每行 AGR 来自旧策略访问的状态。Z 自身阶段参考因方法而异，统一参考使用独立 Z 模型。",
+        "相关性以运行端点为单位，分任务、阶段与参考策略计算，属于小样本描述统计。"
       ]
     }
   ]
