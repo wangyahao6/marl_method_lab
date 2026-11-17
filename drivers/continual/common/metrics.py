@@ -95,6 +95,20 @@ class Metrics:
                     yield name, item.get(name), context
 
         self._write('Mechanism', row['phase'], row['task'], row['t_env'], measurements())
+        if 'pair_filter_stats' in row:
+            totals = row['pair_filter_stats']
+
+            def pair_measurements():
+                for name, value in totals.items():
+                    yield name, value, dict(event=event, scope='update')
+                for item in row['historical_tasks']:
+                    context = dict(event=event, scope='historical_task', source_task=item['task'],
+                                   source_phase=item['source_phase'])
+                    for name in totals:
+                        yield name, item[name], context
+
+            self._write('Mechanism', row['phase'], row['task'], row['t_env'],
+                        pair_measurements(), keep_null=True)
 
 
 def record_evaluation(out, metrics, row):

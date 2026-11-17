@@ -14,13 +14,17 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import (
-    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS, TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
+    FRPR_RAW_DEFAULTS, FRPR_RAW_LOSS_DEFAULTS, FRPR_UNFILTERED_DEFAULTS,
+    RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
+    TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
-    RankingPreference, full_rank_preference, full_rank_preference_relu, top1_max_preference,
+    RankingPreference, aggregate_pair_filter_statistics, full_rank_preference, full_rank_preference_raw,
+    full_rank_preference_raw_loss, full_rank_preference_relu,
+    full_rank_preference_unfiltered, full_rank_statistics, pair_filter_statistics, top1_max_preference,
     top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
     topk_preference, topk_statistics,
 )
@@ -28,6 +32,9 @@ from learners.ranking_preference import (
 
 METHOD_DEFAULTS = {
     "full_rank_preference_relu": RANK_RELU_DEFAULTS,
+    "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
+    "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
+    "full_rank_preference_raw_loss": FRPR_RAW_LOSS_DEFAULTS,
     "top1_max_preference": TOP1_MAX_DEFAULTS,
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
     "topk_preference": TOPK_DEFAULTS,
@@ -107,6 +114,104 @@ class RankingTest(unittest.TestCase):
         expected[0, :2, 0, 1] = -.5
         expected[0, :2, 0, 2] = .5
         th.testing.assert_close(current.grad, expected)
+
+    def test_frpr_unfiltered_keeps_small_gaps_and_ignores_ties(self):
+        reference = th.tensor([[2., 2., 1.95, 0., 500.], [1., 1., 1., 500., 500.],
+                               [3., 2., 1., 0., 500.]], requires_grad=True)
+        current = th.tensor([[0., 1., 2., 3., 500.], [1., 2., 3., 500., 500.],
+                             [0., 1., 2., 3., 500.]], requires_grad=True)
+        legal = th.tensor([[True, True, True, True, False], [True, True, True, False, False],
+                           [True, True, True, True, False]])
+        decisions = th.tensor([True, True, False])
+        original = full_rank_preference(current, reference, legal, decisions, RANK_DEFAULTS, pair_audit=True)
+        new = full_rank_preference_unfiltered(current, reference, legal, decisions, FRPR_UNFILTERED_DEFAULTS)
+        zero_gap = full_rank_preference(
+            current, reference, legal, decisions, dict(RANK_DEFAULTS, min_gap=0), pair_audit=True)
+        self.assertEqual(new[1].item(), 1)
+        for result, valid_pairs in ((original, 3), (new, 5)):
+            stats = full_rank_statistics(result[2].tolist())
+            self.assertEqual(stats["candidate_pairs"], 9)
+            self.assertEqual(stats["tie_pairs"], 4)
+            self.assertEqual(stats["eligible_pairs"], 5)
+            self.assertEqual(stats["valid_pairs"], valid_pairs)
+            self.assertEqual(stats["filtered_pairs"], 5 - valid_pairs)
+            self.assertEqual(stats["pair_filter_rate"], (5 - valid_pairs) / 5)
+            self.assertEqual(stats["pair_keep_rate"], valid_pairs / 5)
+        self.assertTrue(all(th.equal(a, b) for a, b in zip(new, zero_gap)))
+        gradient, reference_gradient = th.autograd.grad(new[0], (current, reference), allow_unused=True)
+        self.assertTrue(th.equal(gradient, th.autograd.grad(zero_gap[0], current)[0]))
+        self.assertIsNone(reference_gradient)
+        self.assertFalse(gradient[1:].any())
+        self.assertFalse(gradient[:, 4].any())
+
+    def test_frpr_raw_uses_raw_threshold_and_softplus_without_reference_normalization(self):
+        reference = th.tensor([[4., 3., 1., 1., 500.], [0., 3., 500., 500., 500.],
+                               [1., 1., 1., 1., 500.], [4., 3., 1., 1., 500.]], requires_grad=True)
+        current = th.tensor([[0., 1., 2., 3., 500.]] * 4, requires_grad=True)
+        legal = th.tensor([[True, True, True, True, False], [True, True, False, False, False],
+                           [True, True, True, True, False], [True, True, True, True, False]])
+        decisions = th.tensor([True, True, True, False])
+        settings = dict(FRPR_RAW_DEFAULTS, min_gap_raw=2., temperature=0.5)
+        first_state = (current[0, 2:4] - current[0, :2].unsqueeze(-1)).reshape(-1)
+        second_state = current[1, 0] - current[1, 1]
+        expected = (softplus(first_state / 0.5).mean() + softplus(second_state / 0.5)) / 2
+
+        with patch("learners.ranking_preference.reference_order",
+                   side_effect=AssertionError("Raw must not normalize old Q")):
+            loss, count, summary = full_rank_preference_raw(current, reference, legal, decisions, settings)
+            _, _, zero_summary = full_rank_preference_raw(
+                current, reference, legal, decisions, dict(settings, min_gap_raw=0))
+        th.testing.assert_close(loss, expected)
+        self.assertEqual(count.item(), 2)
+        stats = full_rank_statistics(summary.tolist())
+        self.assertEqual((stats["candidate_pairs"], stats["tie_pairs"], stats["valid_pairs"]), (13, 7, 5))
+        self.assertEqual(full_rank_statistics(zero_summary.tolist())["valid_pairs"], 6)
+        gradient, reference_gradient = th.autograd.grad(loss, (current, reference), allow_unused=True)
+        th.testing.assert_close(gradient, th.autograd.grad(expected, current)[0])
+        self.assertGreater(gradient.abs().sum().item(), 0)
+        self.assertIsNone(reference_gradient)
+
+    def test_frpr_raw_loss_keeps_normalized_pair_mask_but_uses_raw_softplus(self):
+        reference = th.tensor([[4., 3.5, 0., 0., 500.]], requires_grad=True)
+        current = th.tensor([[0., 1., 2., -3., 500.]], requires_grad=True)
+        legal = th.tensor([[True, True, True, True, False]])
+        decisions = th.tensor([True])
+        settings = dict(FRPR_RAW_LOSS_DEFAULTS, temperature=0.5)
+        logits = (current[0, 2:4] - current[0, :2].unsqueeze(-1)).reshape(-1) / 0.5
+        scale = reference.detach()[0, :4].std(unbiased=False)
+
+        original, original_count, original_summary = full_rank_preference(
+            current, reference, legal, decisions, settings, pair_audit=True)
+        loss, count, summary = full_rank_preference_raw_loss(current, reference, legal, decisions, settings)
+        self.assertTrue(th.equal(count, original_count))
+        self.assertTrue(th.equal(summary[1:], original_summary[1:]))
+        stats = full_rank_statistics(summary.tolist())
+        self.assertEqual((stats["tie_pairs"], stats["filtered_pairs"], stats["valid_pairs"]), (1, 1, 4))
+
+        # A distinct power of two for each pair identifies the exact retained set.
+        pair_codes = (2. ** th.arange(25)).reshape(1, 5, 5)
+        with patch("learners.ranking_preference.softplus", return_value=pair_codes):
+            original_mask, _, _ = full_rank_preference(current, reference, legal, decisions, settings)
+            raw_loss_mask, _, _ = full_rank_preference_raw_loss(current, reference, legal, decisions, settings)
+        th.testing.assert_close(original_mask, pair_codes[0, :2, 2:4].mean())
+        self.assertTrue(th.equal(raw_loss_mask, original_mask))
+
+        expected = softplus(logits).mean()
+        th.testing.assert_close(original, softplus(logits / scale).mean())
+        th.testing.assert_close(loss, expected)
+        self.assertFalse(th.isclose(loss, original))
+        gradient, reference_gradient = th.autograd.grad(loss, (current, reference), allow_unused=True)
+        th.testing.assert_close(gradient, th.autograd.grad(expected, current)[0])
+        self.assertGreater(gradient.abs().sum().item(), 0)
+        self.assertIsNone(reference_gradient)
+
+    def test_frpr_pair_rates_use_total_counts(self):
+        tasks = [pair_filter_statistics(3, 2, 1), pair_filter_statistics(10, 8, 2)]
+        self.assertEqual(aggregate_pair_filter_statistics(tasks), dict(
+            candidate_pairs=13, tie_pairs=3, eligible_pairs=10, valid_pairs=3,
+            filtered_pairs=7, pair_filter_rate=.7, pair_keep_rate=.3))
+        self.assertEqual(aggregate_pair_filter_statistics([])["pair_filter_rate"], 0.)
+        self.assertIsNone(aggregate_pair_filter_statistics([])["pair_keep_rate"])
 
     def test_top1_filters_ties_near_ties_and_masked_decisions(self):
         reference = th.tensor([[1.0, 0.99, -1.0], [1.0, 1.0, -1.0], [1.0, 0.99, 5000.0],
@@ -430,10 +535,11 @@ class RankingTest(unittest.TestCase):
             effective = driver.validate(protocol, "vdn", method)
             defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
             self.assertEqual(effective[method], defaults)
-            for key in {"temperature", "margin", "min_gap"} - defaults.keys():
+            for key in {"temperature", "margin", "min_gap", "min_gap_raw", "q_scale_floor"} - defaults.keys():
                 with self.assertRaisesRegex(ValueError, "unknown or malformed"):
                     driver.validate(dict(protocol, **{method: {key: 1.0}}), "vdn", method)
-            invalid = {"temperature": 0, "min_gap": -0.1, "q_scale_floor": 0, "weight": True, "margin": -.1}
+            invalid = {"temperature": 0, "min_gap": -0.1, "min_gap_raw": -0.1,
+                       "q_scale_floor": 0, "weight": True, "margin": -.1}
             for key, value in invalid.items():
                 if key not in defaults:
                     continue
@@ -473,8 +579,9 @@ class RankingTest(unittest.TestCase):
                 configured = copy.deepcopy(protocol)
                 if active in RANK_METHODS:
                     configured[active] = dict(weight=0 if method == "zero" else 0.5)
-                    if active != "top1_unfiltered_preference":
-                        configured[active]["min_gap"] = 0
+                    defaults = METHOD_DEFAULTS.get(active, RANK_DEFAULTS)
+                    for gap_key in {"min_gap", "min_gap_raw"} & defaults.keys():
+                        configured[active][gap_key] = 0
                     if active == "top1_max_preference":
                         configured[active]["margin"] = 1.
                 driver.train_sequence(driver.validate(configured, "vdn", active), 8, run)
@@ -543,6 +650,30 @@ class RankingTest(unittest.TestCase):
                     self.assertTrue({"valid_states", "valid_pairs", "coverage", "pair_violation_rate",
                                      "top1_flip_rate", "mean_effective_k", "k_clip_rate"}
                                     <= {row["metric"] for row in normalized})
+                if method in ("full_rank_preference", "full_rank_preference_unfiltered",
+                              "full_rank_preference_raw", "full_rank_preference_raw_loss"):
+                    normalized = jsonlines(run / "experiment_metrics.jsonl")
+                    for row in samples:
+                        historical = row["historical_tasks"]
+                        totals = row["pair_filter_stats"]
+                        for name, value in totals.items():
+                            update_values = [metric["value"] for metric in normalized
+                                             if metric["metric"] == name
+                                             and metric["context"].get("scope") == "update"
+                                             and metric["t_env"] == row["t_env"]]
+                            self.assertEqual(update_values, [value])
+                        for item in historical:
+                            self.assertGreater(item["candidate_pairs"], 0)
+                            self.assertEqual(item["tie_pairs"] + item["eligible_pairs"], item["candidate_pairs"])
+                            self.assertEqual(item["filtered_pairs"] + item["valid_pairs"], item["eligible_pairs"])
+                            if method == "full_rank_preference_unfiltered":
+                                self.assertEqual(item["filtered_pairs"], 0)
+                                self.assertEqual(item["pair_filter_rate"], 0.)
+                            values = {metric["metric"]: metric["value"] for metric in normalized
+                                      if metric["context"].get("scope") == "historical_task"
+                                      and metric["context"]["source_task"] == item["task"]
+                                      and metric["t_env"] == row["t_env"]}
+                            self.assertEqual(values, {name: item[name] for name in totals})
                 rank_checkpoints = sorted((run / "models").glob("*/agent.th"))
                 initial, same = th.load(rank_checkpoints[0]), th.load(baseline[0])
                 self.assertTrue(all(th.equal(initial[k], same[k]) for k in initial))
@@ -621,8 +752,8 @@ class RankingTest(unittest.TestCase):
             for method in RANK_METHODS:
                 defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
                 settings = dict(defaults)
-                if "min_gap" in settings:
-                    settings["min_gap"] = 0
+                for gap_key in {"min_gap", "min_gap_raw"} & settings.keys():
+                    settings[gap_key] = 0
                 preference = RankingPreference(method, settings, None, scheme, groups, None)
                 mac.agent.zero_grad()
                 with patch.object(th, "load", side_effect=AssertionError("preference loaded a checkpoint")):

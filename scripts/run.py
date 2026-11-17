@@ -46,7 +46,7 @@ def main():
     p.add_argument('--scenario',choices=['task_drift','task_switch'])
     p.add_argument('--protocol',default='configs/continual/knife_fig6.json')
     p.add_argument('--replay-on-switch', choices=('retain', 'ft', 'er'),
-                   help='Replay mode for VDN continual training (ER is baseline-only)')
+                   help='Replay mode for VDN continual training (ER supports baseline and CHI)')
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
     p.add_argument('--hetero-role',choices=['prefix','branch'])
     p.add_argument('--parent')
@@ -399,8 +399,8 @@ def main():
             p.error('replay_on_switch must be retain, ft or er')
         if not configurable_replay:
             p.error('replay_on_switch is supported for VDN continual training')
-        if replay == 'er' and a.method != 'baseline':
-            p.error('VDN-ER is supported for VDN continual baselines')
+        if replay == 'er' and a.method not in ('baseline', 'softprotect_chi'):
+            p.error('VDN-ER is supported for VDN continual baselines and CHI')
         if replay == 'er' and a.ts3_role == 'resume':
             p.error('VDN-ER requires historical replay; the TS6 weight-only resume has none')
         protocol['replay_on_switch'] = replay

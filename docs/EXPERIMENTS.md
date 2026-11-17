@@ -17,7 +17,7 @@
 ## VDN 持续学习经验回放
 
 TS3–TS8 和 history 的新 VDN 持续学习实验默认使用 `ft`，包括基线和受支持的
-神经元保护与约束方法。VDN 基线需要均衡回放时，在协议 JSON 中显式设置
+神经元保护与约束方法。VDN 基线和 CHI 需要均衡回放时，在协议 JSON 中显式设置
 `"replay_on_switch": "er"`，或通过 `scripts/run.py --replay-on-switch er` 覆盖协议。
 共享前缀和续训分支应使用同一回放模式。复现旧的共享池协议时显式指定
 `--replay-on-switch retain`。
@@ -157,3 +157,5 @@ T1PR、FRPR、ASPR 使用 `configs/continual/szc_vdn64_ft_preferences.json` 和 
 阶段末独立贪心评价每个已见任务 128 局，两个入口使用相同任务级种子块。定期当前任务评价为 32 局，TS4 驱动按全局步数对齐 25k 间隔，偏好驱动按阶段起点对齐。完整调度计划和终态汇总分别为 `results/szc_vdn64_ft_20261113/plan.json` 和同目录的 `summary.json`。
 
 2026-11-14 追加 `full_rank_preference_relu`、`top1_max_preference` 和无干预 VDN-ER，各跑 seed 3535、2222。六条路径沿用 `szc_vdn64_ft_preferences.json` 的逐任务 ε、镜像阵容、预算和评价。两种偏好变体使用各自默认参数和 FT，VDN-ER 在同一驱动中使用 `--method baseline --replay-on-switch er`。完整计划和汇总位于 `results/szc_vdn64_ft_20261113/with_variants_er/`。
+
+SZC 的 VDN-ER + CHI 使用 `configs/continual/szc_vdn64_er_a2_chi.json`，保持双层 `A2_chi` 的最新名单、阈值与恢复调度，TD 池改用同入口的任务均衡回放。seed 1111 与 3535 均从头训练，沿用 SZC 的 2M/2M/2M 预算、逐任务 ε 与评估设置。调度计划和终态汇总位于 `results/szc_vdn64_er_a2_chi/`。

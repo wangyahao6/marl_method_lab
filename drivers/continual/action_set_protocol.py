@@ -2,12 +2,16 @@
 from math import isfinite
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
-RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "top1_preference",
+RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
+                "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference")
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
+FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
+FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
 TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
 TOP1_MAX_DEFAULTS = dict(RANK_RELU_DEFAULTS, margin=0.0)
+FRPR_UNFILTERED_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "min_gap"}
 TOP1_UNFILTERED_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "min_gap"}
 DEFAULTS = dict(weight=1.0, margin=0.0, batch_episodes=8, success_episodes=100,
                 seed_offsets=[301001, 302001, 303001, 304001], attempts_per_seed=125,
@@ -111,6 +115,9 @@ def validate(protocol, algorithm, method):
         if method == name or name in protocol:
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
+                "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
+                "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
+                "full_rank_preference_raw_loss": FRPR_RAW_LOSS_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,

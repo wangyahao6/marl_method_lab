@@ -19,7 +19,7 @@ from learners.action_set_preference import (
     preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
-from learners.ranking_preference import RankingPreference
+from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
 from action_set_protocol import RANK_METHODS, validate, validate_fork
 from common.checkpoints import cpu_snapshot, save_models
 from common.metrics import Metrics, record_evaluation
@@ -309,6 +309,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None):
                 for historical in row["historical_tasks"]:
                     counts.update(historical["effective_k_histogram"])
                 row["effective_k_histogram"] = dict(counts)
+            elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
+                            "full_rank_preference_raw", "full_rank_preference_raw_loss"):
+                row["pair_filter_stats"] = aggregate_pair_filter_statistics(row["historical_tasks"])
             base.append(out / f"{update_log}_updates.jsonl", row)
             metrics.preference(row, event="preference_update")
 
