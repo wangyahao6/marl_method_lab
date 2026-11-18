@@ -4,7 +4,7 @@ from pathlib import Path
 from collections import deque
 from types import SimpleNamespace
 import train as base
-from common.checkpoints import (continuation_state, restore_networks_and_optimizer,
+from common.checkpoints import (continuation_state, parent_hash_fields, restore_networks_and_optimizer,
                                 save_stage_models)
 from common.evaluation import evaluate_block, fixed_seed_plan
 from common.metrics import Metrics, record_evaluation
@@ -53,7 +53,7 @@ def main():
             buffer=state['buffer'];t=state['t_env'];episode=state['episode'];updates=state['updates'];learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=t
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);restore_rng(state['rng'])
             selection=json.loads((parent/'selection.json').read_text())
-            write(out/'branch_restore.json',dict(parent=str(parent),t_env=t,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,optimizer_entries=len(learner.optimiser.state),last_target_update_episode=learner.last_target_update_episode,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new process, common seed; distribution RNG restored'))
+            write(out/'branch_restore.json',dict(parent=str(parent),t_env=t,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,optimizer_entries=len(learner.optimiser.state),last_target_update_episode=learner.last_target_update_episode,model_hash=base.parameter_hash(learner),**parent_hash_fields(state),rng_match=digest(rng_state())==digest(state['rng']),engine='new process, common seed; distribution RNG restored'))
             del state
         protection=AgentProtection(learner,selection,o.group if o.role=='branch' else 'N',lambda r:append(out/'update_audit.jsonl',r))
         write(out/'protection.json',dict(ids=protection.ids,unique_parameters=protection.unique_parameters,group=o.group))

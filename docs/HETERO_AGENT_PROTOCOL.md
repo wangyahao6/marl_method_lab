@@ -103,7 +103,7 @@
 
 | 选中位置 | 输入权重行与偏置 | 输出连接列 | 不包含 |
 | --- | --- | --- | --- |
-| A1 | `agent.net[0].weight[j,:]`、bias[j] | `agent.net[3].weight[:,j]` | 未使用的fc1、固定全1ActivateLayer |
+| A1 | `agent.net[0].weight[j,:]`、bias[j] | `agent.net[3].weight[:,j]` | 历史检查点中已移除的 fc1、固定全 1 ActivateLayer |
 | A2 | `agent.net[3].weight[j,:]`、bias[j] | `agent.rnn.weight_ih[:,j]`，包括GRU全部三个门的输入列 | GRU循环weight_hh、GRU偏置、动作输出fc2 |
 
 **联合组按参数元素取布尔并集：中间Linear的被选输入列与被选输出行交叉处仅乘0.1一次，不乘成0.01。** 不缩放Mixer，不将A2输出连接错误映射到fc2。
@@ -162,7 +162,7 @@ B期间每约100k训练步额外评估A的保持胜率32局。A₁末、B末（A
 
 建议方案ID `hetero_agent_softprotect_ABA_v1_20261101`，共享前缀ID `hetero_Aprefix_seed<seed>_<launch-date>_attemptNNN`，分支ID `hetero_<R|M>_<N|T1|G1|R1|T2|G2|R2|T12|G12|R12>_seed<seed>_<launch-date>_attemptNNN`。实际编号启动时生成，不能把此命名示例当作已经存在的运行。
 
-远端计划代码位置：`configs/continual/hetero_agent_softprotect_ABA.json`及连续任务驱动扩展；这些文件**目前尚未实现**，本页不提供可误执行的训练命令。启动时保存实际生效配置、Git版本、源码快照/指纹、前缀父ID、任务定义、分支状态与检查点；旧实验不改写。
+远端计划代码位置：`configs/continual/neuron_protection/softprotect/hetero_agent_softprotect_ABA.json`及连续任务驱动扩展；这些文件**目前尚未实现**，本页不提供可误执行的训练命令。启动时保存实际生效配置、Git版本、源码快照/指纹、前缀父ID、任务定义、分支状态与检查点；旧实验不改写。
 
 每个运行保留：训练和评价曲线、完整阶段步数、A₁检测名单/分数与兵种/层标签、k与唯一受保护参数数、B实际更新缩放的必要抽样记录、A₂完全释放记录、异常及结束状态。无需全程全量激活、视频或训练轨迹；仅保留A₁末32回合检测包和分支恢复所需完整快照。阶段边界及最终模型保留远端。
 

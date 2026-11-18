@@ -1,6 +1,6 @@
 # ASPR-Max 首跑 · TS3 · VDN 双层 64 · seed 3535
 
-2026-11-12 授权一条 ASPR-Max 训练路径。配置为 `configs/continual/ts3_vdn64_aspr_3535.json`，运行编号为 `ts3_vdn64_aspr_3535_20261112_attempt001`。
+2026-11-12 授权一条 ASPR-Max 训练路径。配置为 `configs/continual/action_preference/historical/ts3_vdn64_aspr_3535.json`，运行编号为 `ts3_vdn64_aspr_3535_20261112_attempt001`。
 
 沿用 TS3 标准 5v5 任务。己方固定 2 Stalker + 3 Zealot，敌方 A–E 分别为 2S3Z、4S1Z、1S4Z、3S2Z、5S0Z。每段名义 2M 环境步，使用累计 2/4/6/8/10M 阈值，在整局结束后切换。用原版两层前馈 64→64 与 GRU 64 的 `vdn`，从头训练，累计 ε 退火。TD replay 每阶段重建；在线和目标网络、RMSprop 及全局计数连续。λ=1、margin=0，每次采 8 条历史轨迹。阶段末目标 100 胜局，最多 4 个种子块 × 125 次尝试。
 

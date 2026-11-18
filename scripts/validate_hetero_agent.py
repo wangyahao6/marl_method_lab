@@ -3,7 +3,7 @@ import copy,json,os,sys,tempfile
 from pathlib import Path
 from types import SimpleNamespace
 ROOT=Path(__file__).resolve().parents[1]
-os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/hetero_agent_softprotect_ABA.json');sys.path.insert(0,str(ROOT/'drivers/continual'))
+os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/neuron_protection/softprotect/hetero_agent_softprotect_ABA.json');sys.path.insert(0,str(ROOT/'drivers/continual'))
 import hetero_train as h
 from hetero_protection import AgentProtection
 from protection import digest,rng_state

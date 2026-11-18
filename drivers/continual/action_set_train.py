@@ -24,7 +24,7 @@ from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, shared_fork_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
-from common.checkpoints import cpu_snapshot, save_models
+from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models
 from common.metrics import Metrics, record_evaluation
 from common.records import attach_legacy_metrics
 from common.exploration import epsilon_on_switch
@@ -422,12 +422,17 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 preference.history.restore_success(parent, range(first_phase),
                                                    require_old_q=method in RANK_METHODS, require_good=aspr)
             restore_rng(state["rng"])
+            parent_hash = dict(parent_model_hash=state["model_hash"])
+            if getattr(mac.agent, "loaded_legacy_fc1", False):
+                # VDN mixers are parameter-free. Only the two Agent states enter the hash.
+                online = th.load(Path(results[-1]["checkpoint"]) / "agent.th", map_location="cpu")
+                parent_hash = parent_hash_fields(state, (online, state["target_agent"]))
             base.write(out / "branch_restore.json", dict(
                 parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
                 preference_weight=args.preference_weight,
                 t_env=runner.t_env, episode=episode, updates=updates,
                 last_target_update_episode=learner.last_target_update_episode,
-                model_hash=base.parameter_hash(learner), parent_model_hash=state["model_hash"],
+                model_hash=base.parameter_hash(learner), **parent_hash,
                 engine="new SC2 process, distribution RNG restored"))
         status("running")
         if not parent:

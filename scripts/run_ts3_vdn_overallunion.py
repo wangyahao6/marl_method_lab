@@ -11,7 +11,7 @@ PARENT = ROOT / 'runs/ts3_vdn_typeunion_Aprefix_seed3535_20261102_attempt001'
 COMMAND = [
     sys.executable, 'scripts/run.py', '--suite', 'ts3', '--algorithm', 'vdn',
     '--method', 'softprotect', '--seed', '3535', '--run-id', RUN,
-    '--protocol', 'configs/continual/ts3_vdn_A2_overallunion_3535.json',
+    '--protocol', 'configs/continual/neuron_protection/softprotect/ts3_vdn_A2_overallunion_3535.json',
     '--ts3-role', 'branch', '--ts3-group', 'A2_union', '--parent', str(PARENT),
 ]
 

@@ -77,7 +77,7 @@ def main():
     for method,runid in RUNS.items():
         if (ROOT/'runs'/runid).exists():
             failed.append(dict(method=method,reason='run directory exists; retained without retry'));continue
-        cmd=[sys.executable,'scripts/run.py','--suite','continual','--algorithm','qmix','--method',method,'--scenario','task_switch','--seed','1111','--run-id',runid,'--protocol','configs/continual/aba_WV_switch_1111.json']
+        cmd=[sys.executable,'scripts/run.py','--suite','continual','--algorithm','qmix','--method',method,'--scenario','task_switch','--seed','1111','--run-id',runid,'--protocol','configs/continual/neuron_protection/softprotect/aba_WV_switch_1111.json']
         with (OUT/(method+'_launcher.log')).open('w') as stream:active[method]=subprocess.Popen(cmd,stdout=stream,stderr=subprocess.STDOUT)
     write(state('training'))
     while active:

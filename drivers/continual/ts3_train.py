@@ -4,7 +4,8 @@ from pathlib import Path
 from collections import deque
 from types import SimpleNamespace
 import hetero_train as h
-from common.checkpoints import (continuation_state, cpu_snapshot, restore_networks_and_optimizer,
+from common.checkpoints import (continuation_state, cpu_snapshot, parent_hash_fields,
+                                restore_networks_and_optimizer,
                                 save_stage_models)
 from common.evaluation import evaluate_block, fixed_seed_plan
 from common.metrics import Metrics, method_for_group, record_evaluation
@@ -198,6 +199,11 @@ def main():
             learner.a2_trace.record = record_trace
         gem_mode=P.get('intervention')=='a2_local_gem'
         initial_agent=cpu_snapshot(mac.agent) if gem_mode or (track_retention and o.role in ('prefix', 'resume', 'full')) else None
+        initial_hashes = set()
+        if gem_mode or (track_retention and o.role == 'resume'):
+            initial_hashes.add(digest(initial_agent))
+            if hasattr(mac.agent, 'legacy_initial_state'):
+                initial_hashes.add(digest(mac.agent.legacy_initial_state(initial_agent)))
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')
             restore_networks_and_optimizer(learner, state)
@@ -211,7 +217,7 @@ def main():
                 if P.get('prefix_selection_override'):
                     import hashlib
                     write(out/'prefix_selection.json', dict(selection=selection, source=str(selection_path), source_sha256=hashlib.sha256(selection_path.read_bytes()).hexdigest(), parent_original=str(parent/'selection.json'), parent_original_sha256=hashlib.sha256((parent/'selection.json').read_bytes()).hexdigest()))
-            write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
+            write(out/'branch_restore.json',dict(parent=str(parent),t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,buffer_index=buffer.buffer_index,model_hash=base.parameter_hash(learner),**parent_hash_fields(state),rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process; recoverable distribution RNG restored'))
             if TRACE:
                 names = [name for name, _ in mac.agent.named_parameters()]
                 write(out/'branch_parameter_identity.json', dict(
@@ -439,7 +445,7 @@ def main():
                 history = P['history'][str(o.seed)]
                 historical_fwt = ROOT/history['baseline_fwt']
                 historical_identity = json.loads((historical_fwt/'initial_reference_identity.json').read_text())
-                matching_reference = digest(initial_agent) == historical_identity['reconstructed_model_hash']
+                matching_reference = historical_identity['reconstructed_model_hash'] in initial_hashes
                 # On a changed initializer, collect every initial reference using the same model.
                 for unseen in P['order'][5 if matching_reference else 1:]:
                     evaluate(unseen, True, 'initial_reference', initial_agent, reference_phase=-1)
@@ -487,7 +493,7 @@ def main():
             write(out/'initial_reference_identity.json',dict(seed=o.seed,reconstructed_model_hash=initial_hash,meaning='same-seed fresh untrained reference, not an archived initial checkpoint'))
             if cache.exists():
                 cached=json.loads(cache.read_text())
-                write(out/'initial_reference_reuse.json',dict(source=str(cache),cached_model_hash=cached.get('model_hash'),current_model_hash=initial_hash,hashes_match=cached.get('model_hash')==initial_hash))
+                write(out/'initial_reference_reuse.json',dict(source=str(cache),cached_model_hash=cached.get('model_hash'),current_model_hash=initial_hash,hashes_match=cached.get('model_hash') in initial_hashes))
                 for item in json.loads(cache.read_text())['evaluations']:
                     record_evaluation(out, metrics, item)
             else:

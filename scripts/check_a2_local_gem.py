@@ -3,7 +3,7 @@ import copy,json,os,sys
 from pathlib import Path
 from types import SimpleNamespace
 ROOT=Path(__file__).resolve().parents[1]
-os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/ts3_vdn_A2_local_gem_20261104.json')
+os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/gradient_constraint/gem/ts3_vdn_A2_local_gem_20261104.json')
 sys.path.insert(0,str(ROOT/'drivers/continual'))
 import ts3_train as t
 from a2_local_gem import partition,indices_for,project_increment,td_loss,A2LocalGEM

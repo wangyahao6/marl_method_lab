@@ -23,7 +23,7 @@ def main():
     plan = json.loads(args.plan.read_text())
     runs = [Path(task["run_dir"]) for task in plan["tasks"]
             if task.get("metadata", {}).get("capture_timing")]
-    protocol = root / "configs/continual/szc_vdn64_tkpr_k1_shared.json"
+    protocol = root / "configs/continual/action_preference/szc/szc_vdn64_tkpr_k1_shared.json"
     os.environ["MARL_PROTOCOL"] = str(protocol)
     sys.path.insert(0, str(root / "drivers/continual"))
     import action_set_train as driver

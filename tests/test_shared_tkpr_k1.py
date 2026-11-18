@@ -166,7 +166,7 @@ class SharedTKPRTest(unittest.TestCase):
         self.assertEqual(rows[0]["preference_participation_rate"], 0.)
 
     def test_all_branches_inherit_shared_s_and_timing_replays_matched_batch(self):
-        path = driver.ROOT / "configs/continual/szc_vdn64_tkpr_k1_shared.json"
+        path = driver.ROOT / "configs/continual/action_preference/szc/szc_vdn64_tkpr_k1_shared.json"
         raw = json.loads(path.read_text())
         for stage in raw["stages"]:
             stage["steps"] = 32

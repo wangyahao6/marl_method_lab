@@ -8,10 +8,10 @@ Action-Set Preference Replay（ASPR）用每个已完成任务的阶段末 Agent
 cd /home/wyh/marl_method_lab
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method aspr_preference --seed 3535 --run-id szc_vdn64_aspr_seed3535_attempt001 \
-  --protocol configs/continual/szc_vdn64_aspr.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_aspr.json --dry-run
 ```
 
-`--dry-run` 检查配置并打印启动计划。使用同一协议配合 `--method baseline` 可做同入口对照。支持 `vdn`、`vdn_1ff`、`vdn_1ff_128`。ASPR-Max 使用 `--method aspr_max_preference` 和 `configs/continual/szc_vdn64_aspr_max.json`。旧协议中的 `action_set_preference` 仍指向 ASPR-Max。
+`--dry-run` 检查配置并打印启动计划。使用同一协议配合 `--method baseline` 可做同入口对照。支持 `vdn`、`vdn_1ff`、`vdn_1ff_128`。ASPR-Max 使用 `--method aspr_max_preference` 和 `configs/continual/action_preference/szc/szc_vdn64_aspr_max.json`。旧协议中的 `action_set_preference` 仍指向 ASPR-Max。
 
 | 字段 | 用途 |
 | --- | --- |
@@ -69,7 +69,7 @@ ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`�
 
 - `src/learners/action_set_preference.py` 管理历史池采样、GRU 展开、合法/有效掩码、损失和逐更新日志。 `src/learners/q_learner.py` 接收可选偏好项并接入原有单次反传。
 - `drivers/continual/action_set_train.py` 驱动任务切换、独立评估、轨迹采集与持久化。 `action_set_protocol.py` 负责协议默认值和结构校验。
-- `scripts/run.py` 和 `scripts/evaluate.py` 注册训练与最终评价。 `configs/continual/vdn_action_set_example.json` 是三任务示例。
+- `scripts/run.py` 和 `scripts/evaluate.py` 注册训练与最终评价。 `configs/continual/action_preference/examples/vdn_action_set_example.json` 是三任务示例。
 - `.venv/bin/python tests/test_action_set_preference.py -v` 使用脚本环境和真实 VDN/GRU 验证 T1→T2→T3、联合损失、梯度、采样、掩码和关闭方法的对照。另在实际 SMACv2 的三个示例任务各完成一条冻结 Agent 贪心轨迹并检查掩码；正式持续学习训练及保留效果尚未评估。
 
 ## 完整动作排序与 Top-1 偏好保持
@@ -117,13 +117,13 @@ ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`�
 cd /home/wyh/marl_method_lab
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method full_rank_preference --seed 3535 --run-id vdn_full_rank_example_3535 \
-  --protocol configs/continual/vdn_action_set_example.json --dry-run
+  --protocol configs/continual/action_preference/examples/vdn_action_set_example.json --dry-run
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method full_rank_preference_relu --seed 3535 --run-id vdn_full_rank_relu_example_3535 \
-  --protocol configs/continual/vdn_action_set_example.json --dry-run
+  --protocol configs/continual/action_preference/examples/vdn_action_set_example.json --dry-run
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method top1_preference --seed 3535 --run-id vdn_top1_example_3535 \
-  --protocol configs/continual/vdn_action_set_example.json --dry-run
+  --protocol configs/continual/action_preference/examples/vdn_action_set_example.json --dry-run
 ```
 
 `<method>_updates.jsonl` 逐更新记录 TD、偏好、总损失及采样信息。每个采样任务记录有效状态数、约束覆盖率和 Top-1 翻转率。成对损失另记有效动作对数。覆盖率的分母是至少两个合法动作的有效决策数。翻转率的分母是这些决策中旧模型有唯一贪心动作的数量，不受训练的 `min_gap` 限制。新模型按合法 Q 贪心选择，当前 Q 并列时沿用 `argmax` 的动作索引顺序。分母为零的比率记 null。
@@ -138,7 +138,7 @@ cd /home/wyh/marl_method_lab
 
 种子 3535，双层 64 宽共享 VDN。双方 5v5 纯追猎者 → 纯狂热者 → 纯巨像 → 纯追猎者，按累计 1M、1.5M、2M、3M 阈值整局切换。两种方法各训练一次前三阶段；首阶段无历史约束，从 B 开始使用各自默认参数。C 末从同一状态分出两条 A₂ 路径。继续组仍回放 B/C 历史，取消组从回访起只使用 VDN-TD。首次 A 的胜局仍保留在前缀，但 A₂ 时同任务池不进入偏好采样。四条 A₂ 分支与两个前缀合计名义训练量 8M。
 
-使用 `configs/continual/ts4_vdn64_ranking_return_3535.json`。训练入口是 `scripts/run.py --suite vdn_action_set --algorithm vdn`，配合对应 `--method` 和 `--preference-role prefix` 保存前三阶段。两条回访使用 `--preference-role keep` 或 `--preference-role release`，加 `--parent` 指向对应前缀的绝对运行目录。前缀在 C 末保存在线网络、目标网络、优化器、更新计数、累计探索状态、训练及历史采样随机状态、环境分布状态和各历史池。分支重新启动 SC2 进程，恢复可保存的环境分布状态。TD replay 沿用偏好驱动的逐阶段新建协议，A₂ 两组都使用空的当前任务 TD buffer。端点评估每任务 128 局，定期当前任务评估 32 局，每 25k 步一次。前缀的 C 末三任务结果作为回访更新前的共同参考；分支的 `retention.json` 保留该前缀结果。
+使用 `configs/continual/action_preference/historical/ts4_vdn64_ranking_return_3535.json`。训练入口是 `scripts/run.py --suite vdn_action_set --algorithm vdn`，配合对应 `--method` 和 `--preference-role prefix` 保存前三阶段。两条回访使用 `--preference-role keep` 或 `--preference-role release`，加 `--parent` 指向对应前缀的绝对运行目录。前缀在 C 末保存在线网络、目标网络、优化器、更新计数、累计探索状态、训练及历史采样随机状态、环境分布状态和各历史池。分支重新启动 SC2 进程，恢复可保存的环境分布状态。TD replay 沿用偏好驱动的逐阶段新建协议，A₂ 两组都使用空的当前任务 TD buffer。端点评估每任务 128 局，定期当前任务评估 32 局，每 25k 步一次。前缀的 C 末三任务结果作为回访更新前的共同参考；分支的 `retention.json` 保留该前缀结果。
 
 调度计划存于 `results/ts4_vdn64_ranking_return_3535_20261112/plan.json`，回访任务依赖对应方法前缀成功退出。`branch_restore.json` 保存恢复来源及模型指纹，正式结果按三任务阶段矩阵、A₂ 恢复及 B/C 保留比较。
 
@@ -148,29 +148,29 @@ cd /home/wyh/marl_method_lab
 
 原 SZC 运行跨阶段保留 TD replay；本补充使用 T1PR 驱动的逐阶段重建规则。原同种子 SZC 结果可作参照，组间差值包含 TD replay 协议差异。原 SZC 节点分进程训练，本补充各种子在同一进程内完成整条路径。
 
-配置为 `configs/continual/szc_vdn64_t1pr.json`。调度计划为 `results/szc_vdn64_t1pr_20261113/plan.json`。
+配置为 `configs/continual/action_preference/historical/szc_vdn64_t1pr.json`。调度计划为 `results/szc_vdn64_t1pr_20261113/plan.json`。
 
 ## SZC T1PR 第二版协议
 
-`configs/continual/szc_vdn64_t1pr_max.json` 沿用第一版 SZC 协议的任务顺序、预算和评估设置，使用项目标准的逐任务 ε 退火。用同一协议及训练种子预览两种方法。
+`configs/continual/action_preference/szc/szc_vdn64_t1pr_max.json` 沿用第一版 SZC 协议的任务顺序、预算和评估设置，使用项目标准的逐任务 ε 退火。用同一协议及训练种子预览两种方法。
 
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method top1_max_preference --seed 3535 --run-id szc_t1pr_max_3535 \
-  --protocol configs/continual/szc_vdn64_t1pr_max.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_t1pr_max.json --dry-run
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method top1_preference --seed 3535 --run-id szc_t1pr_3535 \
-  --protocol configs/continual/szc_vdn64_t1pr_max.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_t1pr_max.json --dry-run
 ```
 
 ## SZC T1PR 无阈值协议
 
-`configs/continual/szc_vdn64_t1pr_unfiltered.json` 使用第一版 SZC 协议的任务顺序、步数和评估设置，使用逐任务 ε 退火。方法配置接受 `weight`、`temperature` 和 `q_scale_floor`，默认分别为 1.0、1.0 和 0.1。
+`configs/continual/action_preference/szc/szc_vdn64_t1pr_unfiltered.json` 使用第一版 SZC 协议的任务顺序、步数和评估设置，使用逐任务 ε 退火。方法配置接受 `weight`、`temperature` 和 `q_scale_floor`，默认分别为 1.0、1.0 和 0.1。
 
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method top1_unfiltered_preference --seed 3535 --run-id szc_t1pr_unfiltered_3535 \
-  --protocol configs/continual/szc_vdn64_t1pr_unfiltered.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_t1pr_unfiltered.json --dry-run
 ```
 
 ## Top-K 偏好回放（TKPR）
@@ -193,12 +193,12 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method topk_preference --seed 3535 --run-id szc_tkpr_3535 \
-  --protocol configs/continual/szc_vdn64_tkpr.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_tkpr.json --dry-run
 ```
 
 ### SZC-FT 的 K 值消融
 
-`configs/continual/szc_vdn64_tkpr_k{1,2,3,5}.json` 使用 `topk_preference`，`szc_vdn64_frpr.json` 使用 `full_rank_preference`。五组均采用 seed 1111、双层 VDN64、镜像 5v5 SZC、每阶段名义 2M、逐任务 ε 和 FT。公共排序参数为权重 1.0、温度 1.0、最小归一化间隔 0.5、Q 尺度下限 0.1。
+`configs/continual/action_preference/szc/szc_vdn64_tkpr_k{1,2,3,5}.json` 使用 `topk_preference`，`szc_vdn64_frpr.json` 使用 `full_rank_preference`。五组均采用 seed 1111、双层 VDN64、镜像 5v5 SZC、每阶段名义 2M、逐任务 ε 和 FT。公共排序参数为权重 1.0、温度 1.0、最小归一化间隔 0.5、Q 尺度下限 0.1。
 
 这些配置启用 `gradient_monitor_interval: 100`。每 100 次 learner 更新，从同一训练计算图分别获取 TD 与加权偏好损失对可训练 Agent 参数的梯度。梯度诊断写入 `experiment_metrics.jsonl`，通过 `context.learner_update` 定位更新，未定义值记为 null，有限诊断值同时写入 `metrics.jsonl`。范数和余弦使用裁剪前的梯度，训练继续使用原有联合反传和优化器步骤。
 
@@ -218,10 +218,10 @@ Raw 直接使用冻结旧 Q 和当前 Q，跳过旧均值和标准差计算。`m
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method full_rank_preference_raw --seed 3535 --run-id szc_frpr_raw_example \
-  --protocol configs/continual/szc_vdn64_frpr_raw.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_frpr_raw.json --dry-run
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method full_rank_preference_raw_loss --seed 3535 --run-id szc_frpr_raw_loss_example \
-  --protocol configs/continual/szc_vdn64_frpr_raw_loss.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_frpr_raw_loss.json --dry-run
 ```
 
 ## FRPR 动作对筛选统计
@@ -244,12 +244,12 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method full_rank_preference_unfiltered --seed 3535 \
   --run-id szc_frpr_unfiltered_3535 \
-  --protocol configs/continual/szc_vdn64_frpr_unfiltered.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_frpr_unfiltered.json --dry-run
 ```
 
 ### SZC 的 TKPR-K1 共享 S 前缀
 
-`configs/continual/szc_vdn64_tkpr_k1_shared.json` 沿用现有 SZC VDN64 的镜像 5v5、每阶段 2M、逐任务 ε、FT 和评价协议。T1PR 使用原版的损失和超参数，环境、探索与 TD 回放采用共同协议。每个种子运行一次 `--method topk_preference --preference-role shared-prefix`，仅训练 S，保存其在线及目标网络、优化器、计数、随机状态和带旧 Q 的胜局池。其余阶段用 `--preference-role shared-branch --parent <S运行目录>` 分支。所有分支使用相同完整协议；只有命令指定的活动方法不同。分支从空的 Z 阶段 TD 回放池开始，偏好方法读取共同 S 胜局。C 继续使用该 S 来源及各自 Z 末的参考记忆。
+`configs/continual/action_preference/szc/szc_vdn64_tkpr_k1_shared.json` 沿用现有 SZC VDN64 的镜像 5v5、每阶段 2M、逐任务 ε、FT 和评价协议。T1PR 使用原版的损失和超参数，环境、探索与 TD 回放采用共同协议。每个种子运行一次 `--method topk_preference --preference-role shared-prefix`，仅训练 S，保存其在线及目标网络、优化器、计数、随机状态和带旧 Q 的胜局池。其余阶段用 `--preference-role shared-branch --parent <S运行目录>` 分支。所有分支使用相同完整协议；只有命令指定的活动方法不同。分支从空的 Z 阶段 TD 回放池开始，偏好方法读取共同 S 胜局。C 继续使用该 S 来源及各自 Z 末的参考记忆。
 
 - **TKPR-K1-W** 通过 `topk_preference_weighted` 使用。旧 Top-1 与 Top-2 的差值除以原 TKPR 的冻结旧 Q 尺度得到置信度。对每个历史任务本次回放中至少有一个合格动作对的决策，除以这些决策的平均置信度，使权重均值为 1，再乘状态内动作对平均损失。若这批合格决策的置信度全为零，则采用均匀权重。
 - **TKPR-K1-HR** 通过 `topk_preference_high_regret` 使用。仅考虑合法动作上的有效决策。当新、旧贪婪动作不同，且旧模型对旧最优动作与新最优动作的 Q 差除以旧 Q 尺度达到 0.5，计算额外 `softplus((Q_new[new_best] - Q_new[old_best]) / old_scale / hr_temperature)`。每个历史任务对触发状态取平均，再以权重 1 加到原 TKPR-K1 的任务损失，温度为 1。贪婪动作并列时取动作索引最小者。无触发状态时额外项为零。

@@ -518,7 +518,7 @@ class RankingTest(unittest.TestCase):
         self.assertIsNotNone(mixer.grad)
 
     def test_k_ablation_configs_start_identically_and_monitoring_preserves_updates(self):
-        configs = PROTOCOL_PATH.parent
+        configs = driver.ROOT / "configs/continual/action_preference/szc"
         original_config = driver.config
 
         def tiny_config(*args):

@@ -22,7 +22,7 @@ Current task32 greedy evaluation episodes at phase start/every25k steps; stage e
 
 Resource snapshot at setup:24 logical CPUs,87GiB RAM available,480GiB disk free; six existing GPU jobs use7731/12053MiB, GPU utilization82%. Run at most TWO new training processes, one Torch/OMP/MKL thread each. Existing jobs unchanged. Queue `scripts/run_history.py` starts each node through `scripts/run.py --suite history`. A failed node marks its dependents unavailable; unrelated nodes continue, no silent retries.
 
-Protocol `configs/continual/history.json`; immutable per-node config in result folder and each run. Source/Git snapshots via standard launcher. Runs `runs/vdnh_<prefix>_seed<seed>_20261103_attempt001`; main output `results/vdn_task_history_20261103/`. Continuation checkpoints at single/pair nodes include replay and remain remote; terminal nodes save model/score inputs. Summary at queue termination via `scripts/summarize_history.py`; training completion and diagnostic completeness reported separately. Queue completion requires later review; no chat notification or recurring monitoring configured.
+Protocol `configs/continual/task_transfer/history.json`; immutable per-node config in result folder and each run. Source/Git snapshots via standard launcher. Runs `runs/vdnh_<prefix>_seed<seed>_20261103_attempt001`; main output `results/vdn_task_history_20261103/`. Continuation checkpoints at single/pair nodes include replay and remain remote; terminal nodes save model/score inputs. Summary at queue termination via `scripts/summarize_history.py`; training completion and diagnostic completeness reported separately. Queue completion requires later review; no chat notification or recurring monitoring configured.
 
 ## Queue concurrency override
 
@@ -40,4 +40,4 @@ New History queues default to seven parallel slots.
 
 原 `vdnh_SZC_seed3535_20261103_attempt001` 与 `vdnh_SZC_seed2222_20261103_attempt001` 已完成，可作同种子描述性参照。原路径跨节点保留 TD replay，阶段切换会新建 SC2 进程，并通过单一权重为 1 的阵容生成器抽取镜像队伍。这些差异影响因果归因。原路径最终 S/Z 均为 0/128 胜，C 分别为 88/128 和 90/128。
 
-协议为 `configs/continual/history_szc_aspr.json`，统一调度计划为 `results/vdnh_szc_aspr_20261113/plan.json`。运行目录名为 `vdnh_SZC_ASPR_seed<seed>_20261113_attempt001`。
+协议为 `configs/continual/action_preference/historical/history_szc_aspr.json`，统一调度计划为 `results/vdnh_szc_aspr_20261113/plan.json`。运行目录名为 `vdnh_SZC_ASPR_seed<seed>_20261113_attempt001`。

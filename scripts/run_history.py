@@ -9,7 +9,7 @@ CONTROL=OUT/'parallel_limit.json'
 
 def initialize():
     OUT.mkdir(parents=True,exist_ok=False)
-    master=json.loads((ROOT/'configs/continual/history.json').read_text());write(OUT/'protocol.json',master)
+    master=json.loads((ROOT/'configs/continual/task_transfer/history.json').read_text());write(OUT/'protocol.json',master)
     tasks={'S':'stalker','Z':'zealot','C':'colossus'};nodes={}
     for length in (1,2,3):
         for seed in master['seeds']:

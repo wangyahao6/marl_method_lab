@@ -29,7 +29,7 @@
 
 单层配置的 Agent 路径为 Linear → ReLU → A 诊断门 → GRUCell → 线性 Q 输出头。A 门为原仓库的冻结全一门，用于采集活动值。两套配置沿用 VDN 的共享控制器、求和 Mixer、QLearner 与其他训练参数。宽度同时作用于前馈层和 GRU，因此 64 与 128 的对比涉及两处容量变化。每种结构使用各自的 checkpoint。
 
-通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。TS6 单层基线通过 `scripts/run.py --suite ts6 --method baseline --ts3-role full --protocol configs/continual/ts6.json` 使用。从 A 起训到 J，每阶段 2M，保留连续回放与优化器状态。全程复用 VDN 训练及连续任务独立评估。TS5 单层基线使用 `--suite ts5 --protocol configs/continual/ts5.json`，按 TS7 的 A–E 双边精确阵容从头训练，每阶段 2M，使用逐任务 ε 衰减。按每 100k 步和阶段末取当前任务最近 32 局，用当前模型复算唯一前馈层 A（`agent.net[2]`）的状态加权活动。记录全宽归一化分数、top-3 和严格 >3 名单，不改变训练。
+通过 `scripts/run.py --suite smac --method baseline` 使用，`--algorithm` 指定 `vdn_1ff` 或 `vdn_1ff_128`，其余参数沿用同一入口的静态任务用法。TS6 单层基线通过 `scripts/run.py --suite ts6 --method baseline --ts3-role full --protocol configs/continual/task_transfer/ts6.json` 使用。从 A 起训到 J，每阶段 2M，保留连续回放与优化器状态。全程复用 VDN 训练及连续任务独立评估。TS5 单层基线使用 `--suite ts5 --protocol configs/continual/task_transfer/ts5.json`，按 TS7 的 A–E 双边精确阵容从头训练，每阶段 2M，使用逐任务 ε 衰减。按每 100k 步和阶段末取当前任务最近 32 局，用当前模型复算唯一前馈层 A（`agent.net[2]`）的状态加权活动。记录全宽归一化分数、top-3 和严格 >3 名单，不改变训练。
 
 ## 可接受动作集合偏好回放（ASPR）
 
@@ -41,7 +41,7 @@
 
 `drivers/continual/protection.py`、`release_schedule.py`、`detection_common.py`为状态加权Mixer W/V软保护；`neuron_records.py`为名单和频次记录。导入自已停止的latest_ramp工程，不导入其旧队列或结果。
 
-参考配置：`configs/continual/knife_fig6.json`。公式omega=c/mean(c)，A=sum(omega*abs(z))/N；阈值严格大于3，最近32训练回合，实际参数更新系数0.1，最新集合替换，退出后100000环境步线性恢复；未定义检测按原实现记录与处理。仅是已导入实现和参考设置，不固化为所有未来实验要求。
+参考配置：`configs/continual/task_transfer/knife_fig6.json`。公式omega=c/mean(c)，A=sum(omega*abs(z))/N；阈值严格大于3，最近32训练回合，实际参数更新系数0.1，最新集合替换，退出后100000环境步线性恢复；未定义检测按原实现记录与处理。仅是已导入实现和参考设置，不固化为所有未来实验要求。
 
 ## 环境覆盖
 
@@ -75,7 +75,7 @@ The standalone TRHR intervention uses the existing two-layer VDN Agent on static
 
 项目默认采用原版 CHI。用当前网络重评估历史探测集，按层内归一化分数严格大于 3 选出本轮名单，再用它替换保护名单。后续实验以单层 VDN 为主，使用 `--algorithm vdn_1ff`（64 单元）或按实验指定宽度，保护唯一前馈层 A。两层 VDN 对应 A2。
 
-通过 `scripts/run.py --method softprotect_chi` 启用。`--ts3-role full` 或 `branch` 省略分组时，单层 VDN 默认使用 `A_chi`，两层 VDN 使用 `A2_chi`。单层参考协议为 `configs/continual/ts4_vdn_1ff_chi_comparison.json`。使用 `--ts3-role prefix` 保存无保护 A 前缀和固定探测集，再以 `--ts3-role branch --parent <prefix目录>` 续训。
+通过 `scripts/run.py --method softprotect_chi` 启用。`--ts3-role full` 或 `branch` 省略分组时，单层 VDN 默认使用 `A_chi`，两层 VDN 使用 `A2_chi`。单层参考协议为 `configs/continual/neuron_protection/chi/ts4_vdn_1ff_chi_comparison.json`。使用 `--ts3-role prefix` 保存无保护 A 前缀和固定探测集，再以 `--ts3-role branch --parent <prefix目录>` 续训。
 
 每个阶段保留最近至多 32 局完整训练轨迹。阶段末用在线 Agent 计算 VDN 单智能体替换动作的最大 Q 差，在有效存活智能体间取均值作为状态协作敏感度 `c`，再按该探测集的有效状态均值计算 `omega = c / mean(c)`。将轨迹及对齐的权重保存为 `chi_probes/phase*.th`，与训练 replay 分离。重评估时逐局从零隐状态开始，按时序重放观测、动作历史和 agent ID，复用固定权重。排除死亡智能体、无效动作、padding 和仅用于 bootstrap 的末状态。
 
@@ -96,9 +96,9 @@ Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method br
 
 [MEAL 机制参考](MEAL_DESIGN_REFERENCE.md)及[固定版本源码](../references/meal/README.md)用于自己的神经元机制和持续学习设计。EWC/MAS/A-GEM/CBP 在这里是参考材料，不是新增的可运行方法或待执行对照。方法确定并取得初步结果后再考虑对照实验。
 
-`configs/continual/ts3_vdn_1ff_chi.json` 与 `ts5_vdn_1ff_chi.json` 为种子 3535 的 64 宽度配对实验。每套序列共享无干预 A 前缀，前缀保存固定探测集与原版阈值选择，B–E 分别运行 CHI 与原版历史并集软保护。两组严格使用层内分数 >3，各任务 2M 环境步，评价含初始未见任务、阶段末全部已见任务和下一未见任务。Windows 使用其已安装的 SC2 版本，两组在同一主机运行。
+`configs/continual/neuron_protection/chi/ts3_vdn_1ff_chi.json` 与 `ts5_vdn_1ff_chi.json` 为种子 3535 的 64 宽度配对实验。每套序列共享无干预 A 前缀，前缀保存固定探测集与原版阈值选择，B–E 分别运行 CHI 与原版历史并集软保护。两组严格使用层内分数 >3，各任务 2M 环境步，评价含初始未见任务、阶段末全部已见任务和下一未见任务。Windows 使用其已安装的 SC2 版本，两组在同一主机运行。
 
-TS3 的 64 宽单前馈基线使用 `--suite ts3 --algorithm vdn_1ff --method baseline --ts3-role full --protocol configs/continual/ts3_vdn_1ff_chi.json`。沿用该协议的任务表、预算、探索和评估，从 A 训练到 E。每 100k 步及阶段末记录 Agent A 的状态加权活动、top-3 和严格阈值名单。
+TS3 的 64 宽单前馈基线使用 `--suite ts3 --algorithm vdn_1ff --method baseline --ts3-role full --protocol configs/continual/neuron_protection/chi/ts3_vdn_1ff_chi.json`。沿用该协议的任务表、预算、探索和评估，从 A 训练到 E。每 100k 步及阶段末记录 Agent A 的状态加权活动、top-3 和严格阈值名单。
 
 Windows 启动器为每次运行设置独立的 `runs/<run-id>/tmp`，并将 TEMP/TMP 传给训练与评估子进程，隔离 SC2 的 `StarCraft II/TempLaunchMap.SC2Map`。TS3 共享驱动的评估重试覆盖协议断连、启动连接失败与创建地图的 InvalidMapData。重试仍使用同一环境种子，并恢复该种子块起始 RNG。周期评估重试耗尽时记录错误并跳过该次评估，正式阶段评估仍按原规则报告失败。
 
@@ -110,6 +110,6 @@ TS4 等数量筛选对照在 `results/ts4_chi_selection_matched_3535_20261111/pl
 
 TS4 和 TS8 的 64 单元配对实验使用 `ts4_vdn_1ff_chi_comparison.json` 和 `ts8_vdn_1ff_chi_comparison.json`。各序列共享一个无保护的 A₁ 前缀，普通软保护和 CHI 都使用阈值严格大于 3、历史入选并集及全参数范围保护。TS8 用精确镜像阵容运行 S、Z、C、2S3Z、2Z3C、3S2C、S，累计阈值为 1M、1.5M、2M、2.5M、3M、3.5M、4.5M。A₂ 按同一任务回访统计。
 
-TS8 单前馈基线通过 `--suite ts8 --method baseline --ts3-role full --protocol configs/continual/ts8_vdn_1ff_chi_comparison.json` 启动，`--algorithm` 支持 `vdn_1ff` 和 `vdn_1ff_128`。两种宽度均从 A₁ 随机初始化，沿用七阶段任务表及逐任务 ε 衰减，每 100k 步和阶段末记录唯一前馈层的状态加权活动、top-3 与严格大于 3 的名单。
+TS8 单前馈基线通过 `--suite ts8 --method baseline --ts3-role full --protocol configs/continual/neuron_protection/chi/ts8_vdn_1ff_chi_comparison.json` 启动，`--algorithm` 支持 `vdn_1ff` 和 `vdn_1ff_128`。两种宽度均从 A₁ 随机初始化，沿用七阶段任务表及逐任务 ε 衰减，每 100k 步和阶段末记录唯一前馈层的状态加权活动、top-3 与严格大于 3 的名单。
 
 双层 64 单元 VDN 的 TS4 A2 CHI 对照使用 `ts4_vdn64_a2_chi_3535.json`。种子 3535，从 A₁ 开始，累计阶段阈值与现有双层无保护基线相同。每阶段固定最近 32 局，按层内归一化分数严格大于 3 更新历史保护并集。保护 A2 的输入权重行、偏置和通往 GRU 的输入权重列。

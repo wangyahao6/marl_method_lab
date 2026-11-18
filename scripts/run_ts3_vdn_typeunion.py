@@ -7,7 +7,7 @@ def parent(seed):return f'ts3_vdn_typeunion_Aprefix_seed{seed}_20261102_attempt0
 def branch(seed,g):return f'ts3_vdn_typeunion_{g}_seed{seed}_20261102_attempt001'
 def cmd(seed,role,g='N'):
     run=parent(seed) if role=='prefix' else branch(seed,g)
-    result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts3','--algorithm','vdn','--method','baseline' if g=='N' else 'softprotect','--seed',str(seed),'--run-id',run,'--protocol','configs/continual/ts3_vdn_A2_typeunion_3535.json','--ts3-role',role,'--ts3-group',g]
+    result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts3','--algorithm','vdn','--method','baseline' if g=='N' else 'softprotect','--seed',str(seed),'--run-id',run,'--protocol','configs/continual/neuron_protection/softprotect/ts3_vdn_A2_typeunion_3535.json','--ts3-role',role,'--ts3-group',g]
     if role=='branch':result+=['--parent',str(ROOT/'runs'/parent(seed))]
     return run,result
 
