@@ -1,4 +1,6 @@
 """Paths and data shared by launch plan builders."""
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass
 from pathlib import Path

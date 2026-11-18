@@ -52,6 +52,8 @@ def validate(protocol, algorithm, method):
     replay = protocol.get("replay_on_switch", "ft")
     if replay != "ft" and (replay != "er" or method != "baseline"):
         raise ValueError("vdn_action_set uses FT replay, with ER supported for the baseline")
+    if protocol.get("optimizer", "rmsprop") not in ("rmsprop", "adam"):
+        raise ValueError("optimizer must be rmsprop or adam")
     interval = protocol.get("gradient_monitor_interval", 0)
     if type(interval) is not int or interval < 0:
         raise ValueError("gradient_monitor_interval must be a nonnegative integer")
@@ -172,9 +174,16 @@ def validate_fork(protocol, role, parent):
             raise ValueError("the final stage of a preference fork must revisit a trained task")
 
 
-def shared_fork_protocol(protocol):
-    # All method configurations and common settings match across the shared prefix and branches.
-    return {key: value for key, value in protocol.items() if key != "method"}
+def matching_shared_protocol(parent, branch):
+    def shared_settings(protocol):
+        return {"optimizer": "rmsprop", **{key: value for key, value in protocol.items() if key != "method"}}
+
+    previous, requested = shared_settings(parent), shared_settings(branch)
+    # A new branch method can supply its own settings when the prefix had no such method.
+    method = branch["method"]
+    if method not in previous and method in RANK_METHODS and method != parent["method"]:
+        previous[method] = requested[method]
+    return previous == requested
 
 
 def valid_seeds(seeds):

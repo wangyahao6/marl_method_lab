@@ -166,6 +166,15 @@ class SharedTKPRTest(unittest.TestCase):
         self.assertEqual(rows[0]["preference_participation_rate"], 0.)
 
     def test_all_branches_inherit_shared_s_and_timing_replays_matched_batch(self):
+        self.check_shared_branches("rmsprop", ("baseline", "topk_preference", "top1_preference",
+                                               "topk_preference_weighted", "topk_preference_high_regret",
+                                               "aspr_preference", "full_rank_preference"))
+
+    def test_adam_branches_inherit_adam_state(self):
+        self.check_shared_branches("adam", ("topk_preference", "topk_preference_weighted",
+                                            "full_rank_preference"))
+
+    def check_shared_branches(self, optimizer, methods):
         path = driver.ROOT / "configs/continual/action_preference/szc/szc_vdn64_tkpr_k1_shared.json"
         raw = json.loads(path.read_text())
         for stage in raw["stages"]:
@@ -174,10 +183,11 @@ class SharedTKPRTest(unittest.TestCase):
                                  focus_seeds=None, focus_episodes_per_seed=None)
         raw["action_set"].update(batch_episodes=4, success_episodes=2,
                                  seed_offsets=[101, 102], attempts_per_seed=2)
-        methods = ("baseline", "topk_preference", "top1_preference",
-                   "topk_preference_weighted", "topk_preference_high_regret")
-        for method in methods[1:]:
-            raw[method]["min_gap"] = 0
+        if optimizer == "adam":
+            raw["optimizer"] = optimizer
+        for method in methods:
+            if method in raw:
+                raw[method]["min_gap"] = 0
         original_config = driver.config
 
         def configure(*args):
@@ -204,7 +214,8 @@ class SharedTKPRTest(unittest.TestCase):
             for method in methods:
                 run = out / method
                 run.mkdir()
-                effective = driver.validate(raw, "vdn", method)
+                options = raw if method in raw or method == "baseline" else dict(raw, **{method: {"min_gap": 0}})
+                effective = driver.validate(options, "vdn", method)
                 starts, td_buffers = [], []
                 start_replay = driver.start_replay_task
 
@@ -215,6 +226,7 @@ class SharedTKPRTest(unittest.TestCase):
                 def verify(learner, batch, t_env, episode, *a, **kw):
                     if not starts:
                         starts.append(True)
+                        self.assertIs(type(learner.optimiser), th.optim.Adam if optimizer == "adam" else th.optim.RMSprop)
                         self.assertEqual(digest(learner.optimiser.state_dict()),
                                          digest(th.load(original_checkpoint / "opt.th", map_location="cpu")))
                         self.assertEqual(driver.base.parameter_hash(learner), driver_state["model_hash"])
@@ -225,7 +237,7 @@ class SharedTKPRTest(unittest.TestCase):
                     driver, "start_replay_task", verify_ft
                 ):
                     driver.train_sequence(effective, 8, run, role="shared-branch", parent=prefix,
-                                          capture_timing=method == "topk_preference")
+                                          capture_timing=optimizer == "rmsprop" and method == "topk_preference")
                 restored = json.loads((run / "branch_restore.json").read_text())
                 self.assertEqual(restored["model_hash"], restored["parent_model_hash"])
                 self.assertEqual(restored["model_hash"], driver_state["model_hash"])
@@ -237,6 +249,18 @@ class SharedTKPRTest(unittest.TestCase):
                     self.assertTrue(all(r["historical_tasks"] for r in updates))
                     self.assertEqual(updates[0]["historical_tasks"][0]["source_phase"], 0)
 
+                if method == "aspr_preference":
+                    pool = th.load(run / "action_set_memory/phase0000/success.th", map_location="cpu")
+                    original = th.load(history, map_location="cpu")
+                    for old, derived in zip(original["episodes"], pool["episodes"]):
+                        self.assertNotIn("good_mask", old)
+                        self.assertEqual(derived["good_mask"].shape, old["data"]["avail_actions"].shape)
+                        self.assertTrue(th.equal(derived["data"]["old_q_values"], old["data"]["old_q_values"]))
+
+            if optimizer == "adam":
+                incompatible = driver.validate(dict(raw, optimizer="rmsprop"), "vdn", "topk_preference")
+                self.assertFalse(driver.matching_shared_protocol(k1, incompatible))
+                return
             run = out / "topk_preference"
             snapshots = sorted((run / "timing_snapshots").glob("*.th"))
             self.assertEqual(len(snapshots), 6)

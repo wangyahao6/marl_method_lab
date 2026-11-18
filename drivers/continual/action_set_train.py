@@ -21,7 +21,7 @@ from learners.action_set_preference import (
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
 from action_set_protocol import (
-    ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, shared_fork_protocol, validate, validate_fork,
+    ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models
@@ -53,6 +53,7 @@ def config(protocol, seed, out):
                epsilon_on_switch=epsilon_on_switch(protocol),
                replay_on_switch=protocol.get("replay_on_switch", "ft"),
                gradient_monitor_interval=protocol.get("gradient_monitor_interval", 0),
+               optimizer=protocol.get("optimizer", "rmsprop"),
                action_set=protocol["action_set"])
     if protocol["method"] in RANK_METHODS:
         cfg[protocol["method"]] = protocol[protocol["method"]]
@@ -178,6 +179,36 @@ def calibrate_delta(records, settings, task):
                        quantiles=dict(zip(map(str, levels), quantiles)))
 
 
+def label_successful_memory(records, settings, task):
+    delta, calibration = calibrate_delta(records, settings, task)
+    candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
+    episodes, statistics = label_records(records, delta, candidates)
+    return episodes, dict(delta=delta), dict(calibration=calibration, candidates=statistics)
+
+
+def restore_aspr_shared_memory(history, parent, phases, settings, scheme, groups, out):
+    history.restore_success(parent, phases, require_old_q=True)
+    for phase in phases:
+        pool = history[phase]
+        records = []
+        for episode in pool["episodes"]:
+            batch, _ = batch_episodes([episode], scheme, groups, "cpu", include_good=False, include_old_q=True)
+            q = batch["old_q_values"]
+            if q.shape != batch["avail_actions"].shape:
+                raise ValueError("historical Q values do not align with avail_actions")
+            _, decision = decision_masks(batch)
+            records.append((episode, reference_gaps(batch, q[:, :-1])[0], decision[0]))
+        episodes, labels, diagnostics = label_successful_memory(records, settings, pool["task"])
+        history[phase] = dict(pool, episodes=episodes, **labels)
+        path = history.phase_path(out, phase)
+        path.mkdir(parents=True, exist_ok=False)
+        history.save(path / "success.th", history[phase])
+        base.write(path / "summary.json", dict(task=pool["task"], phase=phase,
+                   source_pool=str(history.phase_path(parent, phase) / "success.th"),
+                   reference_checkpoint=pool["reference_checkpoint"], stored_wins=len(episodes),
+                   **labels, **diagnostics))
+
+
 def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out):
     start = perf_counter()
     successful, failed, blocks = [], [], []
@@ -213,11 +244,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
     labels, diagnostics = {}, {}
     if label_action_sets:
-        delta, calibration = calibrate_delta(successful, settings, task)
-        candidates = list(dict.fromkeys([delta, *settings["delta_candidates_by_task"].get(task, [])]))
-        successful, statistics = label_records(successful, delta, candidates)
-        labels = dict(delta=delta)
-        diagnostics = dict(calibration=calibration, candidates=statistics)
+        successful, labels, diagnostics = label_successful_memory(successful, settings, task)
     path = PreferenceHistory.phase_path(out, phase)
     path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
@@ -392,7 +419,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
             # Older direct launches used per-task exploration when the field was absent.
             parent_protocol = {"epsilon_on_switch": "per_task", **state["protocol"]}
-            same_protocol = (shared_fork_protocol(parent_protocol) == shared_fork_protocol(protocol)
+            same_protocol = (matching_shared_protocol(parent_protocol, protocol)
                              if role == "shared-branch" else parent_protocol == protocol)
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
@@ -419,8 +446,12 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             runner.env.restore_distribution(state["environment_distributions"])
             if preference is not None:
                 preference.rng.bit_generator.state = state["preference_rng"]
-                preference.history.restore_success(parent, range(first_phase),
-                                                   require_old_q=method in RANK_METHODS, require_good=aspr)
+                if aspr and role == "shared-branch":
+                    restore_aspr_shared_memory(preference.history, parent, range(first_phase),
+                                               settings, augmented, groups, out)
+                else:
+                    preference.history.restore_success(parent, range(first_phase),
+                                                       require_old_q=method in RANK_METHODS, require_good=aspr)
             restore_rng(state["rng"])
             parent_hash = dict(parent_model_hash=state["model_hash"])
             if getattr(mac.agent, "loaded_legacy_fc1", False):

@@ -103,7 +103,10 @@ class QLearner:
         para = sum([numpy.prod(list(p.size())) for p in self.mixer.parameters()])
         print(para * 4 / 1000 / 1000)
 
-        self.optimiser = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
+        if getattr(args, "optimizer", "rmsprop") == "adam":
+            self.optimiser = Adam(self.params, lr=args.lr)
+        else:
+            self.optimiser = RMSprop(params=self.params, lr=args.lr, alpha=args.optim_alpha, eps=args.optim_eps)
 
         # a little wasteful to deepcopy (e.g. duplicates action selector), but should work for any MAC
         self.target_mac = copy.deepcopy(mac)
