@@ -54,6 +54,9 @@ class SharedTKPRTest(unittest.TestCase):
         self.assertAlmostEqual(stats["nonzero_weight_coverage"], 2 / 3)
         self.assertAlmostEqual(stats["nonzero_weight_fraction_of_valid"], 2 / 3)
         self.assertEqual(stats["valid_pairs"], 5)
+        self.assertEqual(stats["nonzero_loss_states"], 2)
+        self.assertEqual(stats["weight_histogram"],
+                         {"zero": 1, "(0,0.5)": 0, "[0.5,1)": 1, "[1,2)": 0, "[2,+inf)": 1})
         expected_grad = th.autograd.grad(expected, new)[0]
         loss.backward()
         th.testing.assert_close(new.grad, expected_grad)
@@ -72,6 +75,7 @@ class SharedTKPRTest(unittest.TestCase):
         self.assertEqual(stats["zero_confidence_states"], 1)
         self.assertEqual(stats["nonzero_weight_states"], 1)
         self.assertEqual(stats["nonzero_weight_coverage"], 1.)
+        self.assertEqual(stats["weight_histogram"]["[1,2)"], 1)
         _, _, summary = topk_preference_weighted(new, old, legal, ~decisions, TOPK_WEIGHTED_DEFAULTS)
         self.assertIsNone(topk_weighted_statistics(summary.tolist())["nonzero_weight_coverage"])
 
@@ -94,14 +98,72 @@ class SharedTKPRTest(unittest.TestCase):
         self.assertEqual(stats["high_regret_fraction"], 1 / 4)
         self.assertAlmostEqual(stats["base_preference_loss"], base.item())
         self.assertAlmostEqual(stats["weighted_high_regret_loss"], extra.item())
+        self.assertAlmostEqual(stats["high_regret_loss_share"], extra.item() / loss.item())
         disabled_loss, _, disabled_summary = topk_preference_high_regret(
             new, old, legal, decisions, dict(settings, hr_weight=0.))
         th.testing.assert_close(disabled_loss, base)
         disabled = topk_high_regret_statistics(disabled_summary.tolist())
         self.assertEqual(disabled["high_regret_states"], 1)
         self.assertEqual(disabled["weighted_high_regret_loss"], 0.)
+        extra_only, count, summary = topk_preference_high_regret(
+            new, old, legal, decisions, dict(settings, min_gap=2.))
+        extra_only_stats = topk_high_regret_statistics(summary.tolist())
+        self.assertEqual(extra_only_stats["valid_pairs"], 0)
+        self.assertEqual(extra_only_stats["nonzero_loss_states"], 1)
+        self.assertEqual(count.item(), 1)
+        self.assertEqual(extra_only_stats["high_regret_loss_share"], 1.)
+        th.testing.assert_close(extra_only, extra)
         th.testing.assert_close(th.autograd.grad(loss - base, new)[0], th.autograd.grad(extra, new)[0])
         self.assertIsNone(old.grad)
+
+    def test_empty_pairs_ties_and_single_legal_action(self):
+        old = th.tensor([[1., 1., 1.], [3., 2., 1.]])
+        new = th.tensor([[0., 1., 2.], [1., 0., 2.]], requires_grad=True)
+        legal = th.tensor([[True, True, True], [False, True, False]])
+        decisions = th.ones(2, dtype=th.bool)
+        cases = (
+            (topk_preference_weighted, topk_weighted_statistics, TOPK_WEIGHTED_DEFAULTS),
+            (topk_preference_high_regret, topk_high_regret_statistics, TOPK_HIGH_REGRET_DEFAULTS),
+        )
+        for method, statistics, options in cases:
+            with self.subTest(method=method.__name__):
+                loss, count, summary = method(new, old, legal, decisions, options)
+                result = statistics(summary.tolist())
+                self.assertEqual((loss.item(), count.item()), (0., 0))
+                self.assertEqual(result["decision_states"], 1)
+                for name in ("valid_states", "valid_pairs", "nonzero_loss_states"):
+                    self.assertEqual(result[name], 0)
+                self.assertTrue(th.equal(th.autograd.grad(loss, new)[0], th.zeros_like(new)))
+                if "high_regret_states" in result:
+                    self.assertEqual(result["high_regret_fraction"], 0.)
+                    self.assertEqual(result["weighted_high_regret_loss"], 0.)
+                    self.assertIsNone(result["high_regret_loss_share"])
+                else:
+                    self.assertEqual(sum(result["weight_histogram"].values()), 0)
+        loss, _, summary = topk_preference_high_regret(old, old, th.ones_like(legal), decisions,
+                                                       TOPK_HIGH_REGRET_DEFAULTS)
+        result = topk_high_regret_statistics(summary.tolist())
+        self.assertGreater(loss.item(), 0.)
+        self.assertEqual(result["high_regret_states"], 0)
+        self.assertEqual(result["high_regret_loss_share"], 0.)
+
+    def test_empty_history_records_update_with_no_preference_participation(self):
+        rows = []
+        pref = RankingPreference("topk_preference_weighted",
+                                 dict(TOPK_WEIGHTED_DEFAULTS, batch_episodes=4),
+                                 np.random.default_rng(5), {}, {}, rows.append)
+        pref.task = "stalker"
+        pref.begin_update()
+        self.assertIsNone(pref(None))
+        td = th.tensor(1.)
+        pref.record(td, td, None, 4)
+        self.assertEqual(rows[0]["historical_tasks"], [])
+        for name in ("historical_episode_count", "decision_states", "constrained_states",
+                     "valid_pairs", "nonzero_loss_states", "preference_participating_updates"):
+            self.assertEqual(rows[0][name], 0)
+        self.assertEqual(rows[0]["preference_recorded_updates"], 1)
+        self.assertFalse(rows[0]["preference_participated_update"])
+        self.assertEqual(rows[0]["preference_participation_rate"], 0.)
 
     def test_all_branches_inherit_shared_s_and_timing_replays_matched_batch(self):
         path = driver.ROOT / "configs/continual/szc_vdn64_tkpr_k1_shared.json"

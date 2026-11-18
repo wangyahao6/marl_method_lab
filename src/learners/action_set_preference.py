@@ -76,18 +76,19 @@ def preference_loss(mac, batch, good, margin):
     denominator = count.clamp_min(1)
     greedy = q.detach().masked_fill(~legal, -th.inf).argmax(dim=-1, keepdim=True)
     outside = valid & ~good.gather(-1, greedy).squeeze(-1)
+    violations = (valid & (slack > 0)).sum()
     stats = th.stack((loss_sum.detach(), q_good.detach().sum(), q_bad.detach().sum(),
-                      (valid & (slack > 0)).sum(), outside.sum())) / denominator
+                      violations, outside.sum())) / denominator
     return loss_sum / denominator, count, th.cat((stats, count.reshape(1),
-                                                   set_counts(legal, decision, good)))
+                                                   set_counts(legal, decision, good), violations.reshape(1)))
 
 
 def preference_statistics(summary):
-    loss, q_good, q_bad, violation, outside, count, *set_stats = summary
+    loss, q_good, q_bad, violation, outside, count, *set_stats, nonzero = summary
     return dict(loss=loss if count else None, q_good_max=q_good if count else None,
                 q_bad_max=q_bad if count else None, violation_ratio=violation if count else None,
                 greedy_outside_ratio=outside if count else None,
-                valid_states=int(count), **set_statistics(*set_stats))
+                valid_states=int(count), nonzero_loss_states=int(nonzero), **set_statistics(*set_stats))
 
 
 def pack_episode(batch, length, **metadata):
@@ -128,6 +129,8 @@ class ActionSetPreference:
         self.task = None
         self.report = None
         self.forward_events = None
+        self.recorded_updates = 0
+        self.participating_updates = 0
 
     def begin_update(self):
         self.update_started = perf_counter()
@@ -159,30 +162,46 @@ class ActionSetPreference:
             losses.append(loss)
             valid_counts.append(count)
         result = None
+        counts = None
         if losses:
-            included = th.stack(valid_counts) > 0
+            counts = th.stack(valid_counts)
+            included = counts > 0
             result = (th.stack(losses) * included).sum() / included.sum().clamp_min(1)
         if events is not None:
             events[1].record()
-        self.report = (rows, summaries, perf_counter() - start, events)
+        self.report = (rows, summaries, counts, perf_counter() - start, events)
         return result
 
     def record(self, td_loss, total_loss, pref_loss, t_env):
-        rows, summaries, elapsed, events = self.report
+        rows, summaries, counts, elapsed, events = self.report
         header = th.stack((td_loss.detach(), total_loss.detach(),
                            td_loss.new_zeros(()) if pref_loss is None else pref_loss.detach()))
-        values = th.cat((header, *summaries)).cpu().tolist()
+        counts = counts if counts is not None else header.new_empty(0)
+        values = th.cat((header, counts, *summaries)).cpu().tolist()
         update_seconds = perf_counter() - self.update_started
         forward_cuda_seconds = events[0].elapsed_time(events[1]) / 1000 if events else None
-        offset = len(header)
+        offset = len(header) + len(rows)
         for row, summary in zip(rows, summaries):
             end = offset + summary.numel()
             row.update(self.statistics(values[offset:end]))
             offset = end
+        constrained = int(sum(values[len(header):len(header) + len(rows)]))
+        participated = constrained > 0 and self.settings["weight"] != 0
+        self.recorded_updates += 1
+        self.participating_updates += int(participated)
         self.log(dict(phase=self.phase, task=self.task, t_env=t_env, td_loss=values[0],
                       total_loss=values[1], preference_loss=values[2],
                       preference_loss_nonzero=values[2] != 0, historical_tasks=rows,
                       historical_episode_count=sum(row["sampled_episodes"] for row in rows),
+                      decision_states=sum(row["decision_states"] for row in rows),
+                      constrained_states=constrained,
+                      valid_pairs=sum(row.get("valid_pairs", 0) for row in rows)
+                      if all("valid_pairs" in row for row in rows) else None,
+                      nonzero_loss_states=sum(row["nonzero_loss_states"] for row in rows),
+                      preference_participated_update=participated,
+                      preference_recorded_updates=self.recorded_updates,
+                      preference_participating_updates=self.participating_updates,
+                      preference_participation_rate=self.participating_updates / self.recorded_updates,
                       preference_prepare_seconds=elapsed, preference_forward_cuda_seconds=forward_cuda_seconds,
                       learner_update_seconds=update_seconds))
         self.report = None

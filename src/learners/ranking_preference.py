@@ -7,6 +7,9 @@ from torch.nn.functional import softplus
 from learners.action_set_preference import ActionSetPreference, batch_episodes, decision_masks, unroll
 
 
+WEIGHT_BINS = ("zero", "(0,0.5)", "[0.5,1)", "[1,2)", "[2,+inf)")
+
+
 @th.no_grad()
 def reference_order(reference_q, legal, q_scale_floor):
     count = legal.sum(dim=-1, keepdim=True).clamp_min(1)
@@ -120,15 +123,21 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         histogram.scatter_add_(0, effective_k.reshape(-1), (pair_counts > 0).long().reshape(-1))
         summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped)), histogram[1:]))
     if confidence_weighted:
-        summary = th.cat((summary, th.stack((mean_confidence, (valid & (confidence == 0)).sum(),
-                                              (valid & (weights != 0)).sum()))))
+        weight_bins = th.bucketize(weights, weights.new_tensor([0.5, 1., 2.]), right=True) + 1
+        weight_bins.masked_fill_(weights == 0, 0)
+        weight_histogram = pair_counts.new_zeros(len(WEIGHT_BINS))
+        weight_histogram.scatter_add_(0, weight_bins.reshape(-1), valid.long().reshape(-1))
+        summary = th.cat((summary, th.stack((mean_confidence, (valid & (confidence == 0)).sum())),
+                          weight_histogram))
     if high_regret:
         hr_loss, active, regret = high_regret_penalty(current_q, reference_q, legal, decisions, scale, settings)
         count = ((pair_counts > 0) | active).sum()
         base_loss = loss
         extra_loss = settings["hr_weight"] * hr_loss
         loss = base_loss + extra_loss
-        summary = th.cat((loss.detach().reshape(1), summary[1:],
+        nonzero = (state_loss.detach() != 0) | (active & (extra_loss.detach() != 0))
+        summary = th.cat((loss.detach().reshape(1), summary[1:6],
+                          th.stack((nonzero.sum(),)), summary[7:],
                           th.stack((active.sum(), hr_loss.detach(), regret,
                                     base_loss.detach(), extra_loss.detach()))))
     return loss, count, summary
@@ -207,13 +216,14 @@ def summarize(state_loss, pair_counts, current_q, legal, decisions, best, confid
     greedy = current_q.detach().masked_fill(~legal, -th.inf).argmax(dim=-1)
     flips = (unique_top1 & (greedy != best.squeeze(-1))).sum()
     return loss, valid_count, th.stack((loss.detach(), valid_count, pair_counts.sum(),
-                                       decisions.sum(), flips, unique_top1.sum()))
+                                       decisions.sum(), flips, unique_top1.sum(), (state_loss.detach() != 0).sum()))
 
 
 def ranking_statistics(summary):
-    loss, valid, pairs, decisions, flips, top1_states = summary
+    loss, valid, pairs, decisions, flips, top1_states, nonzero = summary
     return dict(loss=loss if valid else None, valid_states=int(valid), valid_pairs=int(pairs),
                 decision_states=int(decisions), coverage=valid / decisions if decisions else None,
+                nonzero_loss_states=int(nonzero),
                 top1_flips=int(flips), top1_states=int(top1_states),
                 top1_flip_rate=flips / top1_states if top1_states else None)
 
@@ -234,16 +244,16 @@ def aggregate_pair_filter_statistics(historical_tasks):
 
 
 def full_rank_statistics(summary):
-    stats = ranking_statistics(summary[:6])
-    candidates, eligible = map(int, summary[6:])
+    stats = ranking_statistics(summary[:7])
+    candidates, eligible = map(int, summary[7:])
     stats.update(pair_filter_statistics(candidates, eligible, stats["valid_pairs"]))
     return stats
 
 
 def topk_statistics(summary):
-    stats = ranking_statistics(summary[:6])
-    violations, effective_k_sum, clipped = summary[6:9]
-    stats["effective_k_histogram"] = {str(k): int(count) for k, count in enumerate(summary[9:], 1)}
+    stats = ranking_statistics(summary[:7])
+    violations, effective_k_sum, clipped = summary[7:10]
+    stats["effective_k_histogram"] = {str(k): int(count) for k, count in enumerate(summary[10:], 1)}
     pairs, decisions = stats["valid_pairs"], stats["decision_states"]
     stats.update(pair_violation_rate=violations / pairs if pairs else None,
                  mean_effective_k=effective_k_sum / decisions if decisions else None,
@@ -252,11 +262,15 @@ def topk_statistics(summary):
 
 
 def topk_weighted_statistics(summary):
-    stats = topk_statistics(summary[:-3])
-    confidence, zero, nonzero = summary[-3:]
+    extra_fields = len(WEIGHT_BINS) + 2
+    stats = topk_statistics(summary[:-extra_fields])
+    confidence, zero, *counts = summary[-extra_fields:]
+    histogram = dict(zip(WEIGHT_BINS, map(int, counts)))
+    nonzero = sum(map(int, counts[1:]))
     valid, decisions = stats["valid_states"], stats["decision_states"]
     stats.update(mean_state_confidence=confidence if valid else None,
                  zero_confidence_states=int(zero),
+                 weight_histogram=histogram,
                  nonzero_weight_states=int(nonzero),
                  nonzero_weight_coverage=nonzero / decisions if decisions else None,
                  nonzero_weight_fraction_of_valid=nonzero / valid if valid else None)
@@ -272,6 +286,7 @@ def topk_high_regret_statistics(summary):
                  high_regret_loss=loss if count else None,
                  base_preference_loss=base_loss,
                  weighted_high_regret_loss=extra_loss,
+                 high_regret_loss_share=extra_loss / summary[0] if summary[0] else None,
                  mean_high_regret=regret if count else None)
     if count:
         stats["loss"] = summary[0]
@@ -288,6 +303,7 @@ def top1_max_statistics(summary):
     loss, valid, decisions, flips, top1_states, constrained_flips, violations = summary
     return dict(loss=loss if valid else None, valid_states=int(valid),
                 decision_states=int(decisions), coverage=valid / decisions if decisions else None,
+                valid_pairs=int(valid), nonzero_loss_states=int(violations),
                 top1_flips=int(flips), top1_states=int(top1_states),
                 top1_flip_rate=flips / top1_states if top1_states else None,
                 constrained_top1_flips=int(constrained_flips),

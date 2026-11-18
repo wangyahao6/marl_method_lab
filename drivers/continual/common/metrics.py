@@ -74,21 +74,22 @@ class Metrics:
                     ((name, value, context) for name, value in values.items()), keep_null=True)
 
     def preference(self, row, event):
-        fields = ('loss', 'violation_ratio', 'greedy_outside_ratio', 'top1_flip_rate', 'coverage')
+        fields = ('loss', 'violation_ratio', 'greedy_outside_ratio', 'top1_flip_rate', 'coverage',
+                  'valid_states', 'sampled_episodes', 'decision_states', 'nonzero_loss_states')
         if 'pair_filter_stats' not in row:
             fields += ('valid_pairs',)
         record_top1_max = self.identity['method'] == 'top1_max_preference'
         if record_top1_max:
-            fields += ('valid_states', 'constrained_top1_flip_rate', 'margin_violation_rate')
+            fields += ('constrained_top1_flip_rate', 'margin_violation_rate')
         elif self.identity['method'] == 'top1_unfiltered_preference':
             fields += ('mean_constrained_confidence',)
         elif self.identity['method'] in ('topk_preference', 'topk_preference_weighted',
                                            'topk_preference_high_regret'):
-            fields += ('valid_states', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
+            fields += ('pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
                        'effective_k_histogram', 'mean_state_confidence', 'zero_confidence_states',
                        'nonzero_weight_states', 'nonzero_weight_coverage', 'nonzero_weight_fraction_of_valid',
                        'high_regret_states', 'high_regret_fraction', 'high_regret_loss', 'mean_high_regret',
-                       'base_preference_loss', 'weighted_high_regret_loss')
+                       'base_preference_loss', 'weighted_high_regret_loss', 'high_regret_loss_share', 'weight_histogram')
 
         context = dict(event=event)
         if 'learner_update' in row:
@@ -97,8 +98,13 @@ class Metrics:
         def measurements():
             if record_top1_max:
                 yield 'preference_loss', row['preference_loss'], context
-            if 'preference_loss_nonzero' in row:
-                yield 'preference_loss_nonzero', row['preference_loss_nonzero'], dict(context, scope='update')
+            for name in ('preference_loss_nonzero', 'historical_episode_count', 'decision_states',
+                         'constrained_states', 'nonzero_loss_states', 'preference_participated_update',
+                         'preference_recorded_updates', 'preference_participating_updates',
+                         'preference_participation_rate'):
+                yield name, row.get(name), dict(context, scope='update')
+            if 'pair_filter_stats' not in row:
+                yield 'valid_pairs', row.get('valid_pairs'), dict(context, scope='update')
             if 'effective_k_histogram' in row:
                 yield 'effective_k_histogram', row['effective_k_histogram'], dict(context, scope='update')
             for item in row.get('historical_tasks', [row]):

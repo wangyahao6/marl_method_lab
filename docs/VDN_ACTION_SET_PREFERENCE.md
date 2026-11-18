@@ -258,3 +258,11 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
 - TKPR-K1-Weighted 的 `nonzero_weight_states` 按实际乘入损失的权重计数。全零置信度触发原有均匀权重回退时，这些有效状态也计入。`nonzero_weight_coverage` 以全部决策为分母，`nonzero_weight_fraction_of_valid` 以筛选后有有效动作对的状态为分母。
 - TKPR-K1-High-Regret 的 `high_regret_states` 和 `high_regret_fraction` 记录达到阈值的状态数及其占全部决策的比例。`base_preference_loss` 是原 K1 项，`high_regret_loss` 是激活状态上的额外项均值，`weighted_high_regret_loss` 是乘 `hr_weight` 后加入基础项的值。
 - `preference_grad_nonzero_agent` 根据加权偏好项对 Agent 参数实测的梯度范数计算，记录优化器、裁剪及 TD 合并前的梯度贡献。未定义的梯度记 null。采样频率沿用 `gradient_monitor_interval`，并用 `learner_update` 对齐偏好日志和梯度指标。
+
+#### 状态与更新统计
+
+- `historical_episode_count` 按历史回放的实际抽样次数计数，包含重复抽中的轨迹。`decision_states` 统计该方法进入筛选的智能体决策，排序偏好要求至少两个合法动作。`constrained_states` 按各历史任务实际用于损失聚合的状态数求和，High-Regret 的基础项和额外项在同一状态激活时只计一次。
+- `valid_pairs` 统计通过筛选的比较对。T1PR-Max 每个有效状态只比较旧首选和当前最强对手。ASPR 用动作集合的最大 Q 差计算损失，有历史样本时动作对计数为空。
+- `nonzero_loss_states` 统计单状态偏好项非零的决策，应用 Weighted 的最终状态权重。High-Regret 对非零基础项和启用的额外项取并集。计数在全局偏好系数乘入前完成。
+- `weight_histogram` 以通过动作对筛选的状态为样本，对最终归一化权重按 0、(0, 0.5)、[0.5, 1)、[1, 2)、[2, +∞) 分箱。落入均匀回退的有效权重计入 [1, 2)。`high_regret_loss_share` 为 `weighted_high_regret_loss / loss`，分母为该历史任务基础项与加权额外项的和，为零时记空。
+- `preference_participated_update` 表示本次有进入损失聚合的约束状态且全局偏好权重非零。`preference_participation_rate` 为本次进程的参与更新数除以送入偏好模块的更新数，包含历史记忆为空的更新。分支进程从自己的计数起算。梯度贡献仍以间隔采样的 `preference_grad_nonzero_agent` 为准。新增计数和分箱使用已有前向张量及汇总读回，梯度采样沿用原有计算。

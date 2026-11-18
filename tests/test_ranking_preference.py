@@ -62,7 +62,7 @@ class RankingTest(unittest.TestCase):
         expected = softplus(th.tensor([-3.0, 1.0, -2.0]) / scale).mean()
         th.testing.assert_close(loss, expected)
         self.assertEqual(count.item(), 1)
-        self.assertEqual(stats[2:].tolist(), [3, 1, 0, 1])
+        self.assertEqual(stats[2:].tolist(), [3, 1, 0, 1, 1])
         loss.backward()
         self.assertIsNone(reference.grad)
         self.assertEqual(current.grad[0, 3].item(), 0)
@@ -70,7 +70,7 @@ class RankingTest(unittest.TestCase):
         top1, count, stats = top1_preference(current, reference, legal, decisions, RANK_DEFAULTS)
         expected = softplus(th.tensor([-3.0, -2.0]) / scale).mean() * (2 / scale)
         th.testing.assert_close(top1, expected)
-        self.assertEqual(stats[2:].tolist(), [2, 1, 0, 1])
+        self.assertEqual(stats[2:].tolist(), [2, 1, 0, 1, 1])
 
     def test_full_rank_relu_gradients_and_zero_loss(self):
         reference = th.tensor([[1.0, 3.0, 0.0, 5000.0]], requires_grad=True)
@@ -231,7 +231,7 @@ class RankingTest(unittest.TestCase):
         expected = softplus(th.tensor([1.0, 0.0]) / scale).mean() / scale
         th.testing.assert_close(loss, expected)
         self.assertEqual(count.item(), 1)
-        self.assertEqual(stats[2:].tolist(), [2, 4, 3, 3])
+        self.assertEqual(stats[2:].tolist(), [2, 4, 3, 3, 1])
         loss.backward()
         self.assertTrue(th.equal(current.grad[:3], th.zeros_like(current.grad[:3])))
         self.assertTrue(th.equal(current.grad[4], th.zeros_like(current.grad[4])))
@@ -288,7 +288,7 @@ class RankingTest(unittest.TestCase):
         self.assertEqual(stats['top1_flip_rate'], .5)
         self.assertEqual(stats['constrained_top1_flip_rate'], 1.)
         self.assertEqual(stats['margin_violation_rate'], 1.)
-        self.assertNotIn('valid_pairs', stats)
+        self.assertEqual(stats["valid_pairs"], stats["valid_states"])
         loss.backward()
         expected = th.zeros_like(current)
         expected[0, :2, 0, 1] = -2.
@@ -390,7 +390,7 @@ class RankingTest(unittest.TestCase):
                 current, reference, legal, decisions, dict(TOPK_DEFAULTS, k=k))
             self.assertTrue(th.equal(loss, old_loss))
             self.assertTrue(th.equal(count, old_count))
-            self.assertTrue(th.equal(summary[:6], old_summary))
+            self.assertTrue(th.equal(summary[:old_summary.numel()], old_summary))
             self.assertTrue(th.equal(th.autograd.grad(loss, current)[0], old_grad))
 
     def test_topk_ties_clipping_and_pair_threshold(self):
@@ -667,7 +667,7 @@ class RankingTest(unittest.TestCase):
                                          [(item["task"], item["episode_ids"]) for item in aspr_row["historical_tasks"]])
                         for item in history:
                             if method == "top1_max_preference":
-                                self.assertNotIn("valid_pairs", item)
+                                self.assertEqual(item["valid_pairs"], item["valid_states"])
                                 self.assertTrue(0 <= item["constrained_top1_flip_rate"] <= 1)
                                 self.assertTrue(0 <= item["margin_violation_rate"] <= 1)
                             else:
@@ -677,6 +677,16 @@ class RankingTest(unittest.TestCase):
                             self.assertTrue(0 <= item["top1_flip_rate"] <= 1)
                         mean = sum(item["loss"] for item in history) / len(tasks) if tasks else 0
                         self.assertAlmostEqual(row["preference_loss"], mean, places=6)
+                        self.assertEqual(row["preference_participated_update"], bool(tasks))
+                        self.assertEqual(row["historical_episode_count"],
+                                         sum(item["sampled_episodes"] for item in history))
+                        self.assertEqual(row["decision_states"], sum(item["decision_states"] for item in history))
+                        self.assertEqual(row["nonzero_loss_states"],
+                                         sum(item["nonzero_loss_states"] for item in history))
+                        self.assertEqual(row["valid_pairs"], sum(item["valid_pairs"] for item in history))
+                        self.assertAlmostEqual(row["preference_participation_rate"],
+                                               row["preference_participating_updates"] /
+                                               row["preference_recorded_updates"])
                         self.assertAlmostEqual(row["total_loss"], row["td_loss"] + 0.5 * mean, places=6)
                 if method == "top1_max_preference":
                     self.assertTrue(any(row["preference_loss"] > 0 for row in samples))

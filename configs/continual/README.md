@@ -13,3 +13,13 @@
 复现或续训时，以原运行的 `protocol.json`、`config.json` 和 `launch.json` 为准。早期快照缺少该字段时，按启动版本确认原行为。从历史配置派生新实验时，使用独立协议 ID 并使用 `per_task`。共享前缀与分支使用同一协议版本和 ε 调度。
 
 配置文件供选用。实际提交的实验以调度计划与运行记录为准。 [实验用法](../../docs/EXPERIMENTS.md)
+
+## 其他任务协议
+
+| 用途 | 主要入口 |
+| --- | --- |
+| 当前方法和任务入口 | TS3、TS4、TS5、TS6、TS7、TS8 由方法文档和实验计划指定协议。复用已登记协议时沿用其参数，从历史协议派生新实验时使用 `per_task`。 [方法与协议](../../docs/METHODS.md) |
+| 历史实验及其现存启动脚本 | `aba_WV*.json`、`hetero_agent_softprotect_ABA.json`、`location_*_switch_1111.json`、`knife_fig6.json`、`history.json`、`network_similarity.json` 供历史对照、工具或脚本复跑。 [实验用法](../../docs/EXPERIMENTS.md) |
+| 指定历史平台或方法 | `ts4_vdn_1ff_128_softprotect_windows.json` 已用于 Windows TS4 两条运行。各 TS 的 GEM、TRHR、CHI、ASPR 研究配置可用来定位原设定。 |
+
+已退出常用入口且查无现行引用或运行的旧参考见[归档索引](../archive/continual/README.md)。归档依据是协议的使用记录与引用。显式 `per_task` 的在用协议继续保留原路径。
