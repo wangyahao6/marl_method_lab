@@ -6,7 +6,7 @@ import numpy as np
 import torch as th
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'drivers/continual'))
-os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/location_AWV_switch_1111.json')
+os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/neuron_protection/softprotect/location_AWV_switch_1111.json')
 import train as t
 import protection as p
 from modules.mixers.qmix import QMixer

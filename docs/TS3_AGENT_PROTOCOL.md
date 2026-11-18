@@ -10,6 +10,6 @@ Budget: shared 1M + five 4M branches = nominal actual 21M training steps, equiva
 
 Resources before launch: 24 logical CPUs, 121GiB available RAM, about 11.6GiB free GPU RAM, no active training. Max five concurrent branches after shared prefix; torch/OMP/MKL threads=1 per process. Each branch failure recorded without cancelling independent branches. Shared-prefix failure leaves dependent branches unstartable and recorded.
 
-Entry: scripts/run.py --suite ts3. Queue scripts/run_ts3_agent.py. Frozen JSON configs/continual/ts3_agent_3535.json. Results results/ts3_agent_3535_20261102. Raw models, prefix replay/RNG snapshot, boundary detection packages and evaluations stay remote. Automatic summary writes five matrices, current-task curves, CSV and report, subject to completion review; no notification automation configured.
+Entry: scripts/run.py --suite ts3. Queue scripts/run_ts3_agent.py. Frozen JSON configs/continual/neuron_protection/softprotect/ts3_agent_3535.json. Results results/ts3_agent_3535_20261102. Raw models, prefix replay/RNG snapshot, boundary detection packages and evaluations stay remote. Automatic summary writes five matrices, current-task curves, CSV and report, subject to completion review; no notification automation configured.
 
 Report absolute first-learned wins, final old-task average, BWT relative to first-learned wins and final all-task average. Coverage/duration differ as part of schedule policy. Single seed/one order: no cross-seed significance, causal screening superiority, or layer-synergy claim.

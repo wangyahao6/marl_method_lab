@@ -38,7 +38,7 @@
 
     .venv/bin/python scripts/run.py --suite ts3 --algorithm vdn --method trhr \
       --ts3-role branch --ts3-group N \
-      --protocol configs/continual/ts3_vdn_A2_top3_1234_4567.json \
+      --protocol configs/continual/neuron_protection/softprotect/ts3_vdn_A2_top3_1234_4567.json \
       --parent PREFIX_DIR --seed SEED --run-id RUN_ID --dry-run
 
 可用重复的 --set trhr.FIELD=VALUE 覆盖上表字段。TRHR 分支只复用父分支的训练状态，独立调节低活跃单元。方法当前独立运行，和软保护的组合留待验证后接入。

@@ -4,7 +4,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/ts3_agent_3535_20261102';PARENT='ts3_Aprefix_seed3535_20261102_attempt001'
 GROUPS=['N','A1_linear','A1_union','A2_linear','A2_union']
 def cmd(run,role,group='N'):
-    result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts3','--algorithm','qmix','--method','baseline' if group=='N' else 'softprotect','--seed','3535','--run-id',run,'--protocol','configs/continual/ts3_agent_3535.json','--ts3-role',role,'--ts3-group',group]
+    result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts3','--algorithm','qmix','--method','baseline' if group=='N' else 'softprotect','--seed','3535','--run-id',run,'--protocol','configs/continual/neuron_protection/softprotect/ts3_agent_3535.json','--ts3-role',role,'--ts3-group',group]
     if role=='branch':result+=['--parent',str(ROOT/'runs'/PARENT)]
     return result
 

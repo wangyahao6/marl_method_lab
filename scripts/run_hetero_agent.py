@@ -3,7 +3,7 @@ import argparse,json,os,subprocess,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'results/hetero_agent_softprotect_3535_20261101';PARENT='hetero_Aprefix_seed3535_20261101_attempt001'
 def cmd(run,role,task='R',group='N'):
- result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','hetero','--algorithm','qmix','--method','baseline' if group=='N' else 'softprotect','--seed','3535','--run-id',run,'--protocol','configs/continual/hetero_agent_softprotect_ABA.json','--hetero-role',role,'--branch-task',task,'--group',group]
+ result=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','hetero','--algorithm','qmix','--method','baseline' if group=='N' else 'softprotect','--seed','3535','--run-id',run,'--protocol','configs/continual/neuron_protection/softprotect/hetero_agent_softprotect_ABA.json','--hetero-role',role,'--branch-task',task,'--group',group]
  if role=='branch':result+=['--parent',str(ROOT/'runs'/PARENT)]
  return result
 

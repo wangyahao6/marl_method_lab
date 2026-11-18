@@ -4,7 +4,7 @@ from pathlib import Path
 import run_aba as summary
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'results/aba_WV_A2_1M_seeds3535_2222_20261031'
-PROTOCOL='configs/continual/aba_WV_A2_1M_3535_2222.json'
+PROTOCOL='configs/continual/neuron_protection/softprotect/aba_WV_A2_1M_3535_2222.json'
 SEEDS=[3535,2222]
 JOBS=[dict(seed=seed,method=m,run_id=f'qmix_ABA_A2_1M_{m}_seed{seed}_20261031') for seed in SEEDS for m in ['baseline','softprotect']]
 

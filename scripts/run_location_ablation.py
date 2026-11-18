@@ -25,7 +25,7 @@ def main():
             location=pending.pop(0);run=ROOT/'runs'/RUNS[location]
             if run.exists():
                 failed.append(dict(location=location,reason='run directory already exists; preserved without automatic retry'));continue
-            command=[sys.executable,'scripts/run.py','--suite','continual','--algorithm','qmix','--method','softprotect','--scenario','task_switch','--seed','1111','--run-id',RUNS[location],'--protocol','configs/continual/location_'+location+'_switch_1111.json']
+            command=[sys.executable,'scripts/run.py','--suite','continual','--algorithm','qmix','--method','softprotect','--scenario','task_switch','--seed','1111','--run-id',RUNS[location],'--protocol','configs/continual/neuron_protection/softprotect/location_'+location+'_switch_1111.json']
             with (OUT/(location+'_launcher.log')).open('w') as log:
                 active[location]=subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT)
         write(state('training'));time.sleep(15)

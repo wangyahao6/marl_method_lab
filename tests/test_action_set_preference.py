@@ -13,7 +13,7 @@ import numpy as np
 import torch as th
 
 ROOT = Path(__file__).resolve().parents[1]
-PROTOCOL_PATH = ROOT / "configs/continual/vdn_action_set_example.json"
+PROTOCOL_PATH = ROOT / "configs/continual/action_preference/examples/vdn_action_set_example.json"
 sys.path.insert(0, str(ROOT / "drivers/continual"))
 with patch.dict(os.environ, {"MARL_PROTOCOL": str(PROTOCOL_PATH)}):
     import action_set_train as driver
@@ -183,11 +183,14 @@ class ActionSetTest(unittest.TestCase):
                 scheme = driver.augmented_scheme(spec)
                 mac = driver.base.controllers[args.mac](scheme, spec[1], args)
                 mac.agent.load_state_dict(th.load(out / successful["reference_checkpoint"]))
-                old_batch, stored_mask = batch_episodes(successful["episodes"], scheme, spec[1], "cpu")
-                with th.no_grad():
-                    q = unroll(mac, old_batch, old_batch.max_seq_length - 1)
-                    rebuilt_mask, _ = make_good_mask(old_batch, q, successful["delta"])
-                self.assertTrue(th.equal(rebuilt_mask, stored_mask))
+                # Rebuild with the same per-episode GRU batch size as reference collection.
+                # Batched GEMM can round a gap on the calibrated threshold differently.
+                for ep in successful["episodes"]:
+                    old_batch, stored_mask = batch_episodes([ep], scheme, spec[1], "cpu")
+                    with th.no_grad():
+                        q = unroll(mac, old_batch, old_batch.max_seq_length - 1)
+                        rebuilt_mask, _ = make_good_mask(old_batch, q, successful["delta"])
+                    self.assertTrue(th.equal(rebuilt_mask, stored_mask))
 
             checkpoints = [sorted((path / "models").glob("phase0000_*"))[0] / "agent.th"
                            for path in (out, baseline, zero)]

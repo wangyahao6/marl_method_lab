@@ -29,7 +29,7 @@ def main():
     while todo or active:
         while todo and len(active)<3:
             group,run=todo.pop(0)
-            command=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts4','--algorithm','vdn','--method','baseline' if group=='N' else 'softprotect','--seed','4242','--run-id',run,'--protocol','configs/continual/ts4_vdn_4242.json','--ts4-group',group]
+            command=[str(ROOT/'.venv/bin/python'),'scripts/run.py','--suite','ts4','--algorithm','vdn','--method','baseline' if group=='N' else 'softprotect','--seed','4242','--run-id',run,'--protocol','configs/continual/neuron_protection/softprotect/ts4_vdn_4242.json','--ts4-group',group]
             proc=subprocess.Popen(command,cwd=ROOT)
             state['runs'][run]=dict(group=group,state='running',pid=proc.pid);active[run]=proc;save()
         for run,proc in list(active.items()):

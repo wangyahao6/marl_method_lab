@@ -1,3 +1,4 @@
+from components.optimizer_checkpoint import load_optimizer_state
 import copy
 import numpy as np
 from torch import nn
@@ -439,4 +440,5 @@ class RMIXLearner:
         self.target_mac.load_models(path)
         if self.mixer is not None:
             self.mixer.load_state_dict(th.load("{}/mixer.th".format(path), map_location=lambda storage, loc: storage))
-        self.optimiser.load_state_dict(th.load("{}/opt.th".format(path), map_location=lambda storage, loc: storage))
+        state = th.load("{}/opt.th".format(path), map_location="cpu")
+        load_optimizer_state(self.optimiser, state, self.mac.agent)

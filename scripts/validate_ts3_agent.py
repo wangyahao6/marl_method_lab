@@ -2,7 +2,7 @@
 import copy,json,os,sys
 from pathlib import Path
 from types import SimpleNamespace
-ROOT=Path(__file__).resolve().parents[1];os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/ts3_agent_3535.json');sys.path.insert(0,str(ROOT/'drivers/continual'))
+ROOT=Path(__file__).resolve().parents[1];os.environ['MARL_PROTOCOL']=str(ROOT/'configs/continual/neuron_protection/softprotect/ts3_agent_3535.json');sys.path.insert(0,str(ROOT/'drivers/continual'))
 import ts3_train as t
 from ts3_protection import TS3Protection
 from protection import digest

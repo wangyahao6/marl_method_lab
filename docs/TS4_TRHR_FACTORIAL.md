@@ -8,10 +8,10 @@
 
 每 100 次 learner 更新保存各单元激活率、补偿、保护名单、梯度及实际参数增量。采样来源按四个阶段记录，即使 A₁、A₂ 阵容相同，来源仍可区分。条件激活继续按来源阶段、智能体槽位及目标动作可用性分组。结果由统一调度器在分支终态后汇总。
 
-同协议可通过 `--suite ts4 --algorithm vdn_1ff --method baseline --ts3-role full --protocol configs/continual/ts4_vdn_1ff_128_trhr_factorial.json` 启动 64 宽独立基线。每 100k 步及阶段末用当前阶段最近 32 局做只读单层检测，汇总按 A₁、B、C、A₂ 区分两段追猎者训练。
+同协议可通过 `--suite ts4 --algorithm vdn_1ff --method baseline --ts3-role full --protocol configs/continual/neuron_protection/trhr/ts4_vdn_1ff_128_trhr_factorial.json` 启动 64 宽独立基线。每 100k 步及阶段末用当前阶段最近 32 局做只读单层检测，汇总按 A₁、B、C、A₂ 区分两段追猎者训练。
 
 Windows 参数范围对照从原 A₁ 前缀续训 B、C、A₂。普通软保护两组都使用当前任务最近 32 局、严格 `>3` 和历史入选并集。`A_union_input` 保护前馈输入权重行和偏置，`A_union` 还保护对应的 GRU 输入列。两组使用同一 Windows SC2 版本，原 Ubuntu 的全范围组另有完整结果。
 
-CHI + TRHR 可用 --method softprotect_chi_trhr --ts3-group A_chi_union --ts3-role full 运行完整 TS4。TRHR 自 A₁ 的首次 learner 更新开始统计，A₁ 末用该组训练模型和最近 32 局生成首个 CHI 固定探针，B 起应用历史并集保护。参考配置为 configs/continual/ts4_vdn_1ff_128_chi_trhr.json。使用 --ts3-role branch 和原 A₁ 父分支则从 B 启用两种干预。
+CHI + TRHR 可用 --method softprotect_chi_trhr --ts3-group A_chi_union --ts3-role full 运行完整 TS4。TRHR 自 A₁ 的首次 learner 更新开始统计，A₁ 末用该组训练模型和最近 32 局生成首个 CHI 固定探针，B 起应用历史并集保护。参考配置为 configs/continual/neuron_protection/chi/ts4_vdn_1ff_128_chi_trhr.json。使用 --ts3-role branch 和原 A₁ 父分支则从 B 启用两种干预。
 
 双前馈 64 宽基线使用同一全序列入口，将 `--algorithm` 设为 `vdn`。从 A₁ 独立初始化，沿用逐任务探索和阶段评估，每 100k 步及阶段末分别记录 A1 和 A2 的状态加权活动及入选名单。

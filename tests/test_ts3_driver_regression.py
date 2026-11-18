@@ -16,7 +16,7 @@ from test_action_set_preference import ROOT, driver, jsonlines
 
 class TS3DriverTest(unittest.TestCase):
     def test_prefix_evaluates_and_saves_with_original_layout(self):
-        protocol = json.loads((ROOT / 'configs/continual/ts3_agent_3535.json').read_text())
+        protocol = json.loads((ROOT / 'configs/continual/neuron_protection/softprotect/ts3_agent_3535.json').read_text())
         # Zero budget exercises both boundary evaluations without collecting TD data.
         protocol['thresholds'] = [0] * len(protocol['order'])
         from hetero_environment import TEAMS

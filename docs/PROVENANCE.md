@@ -6,7 +6,7 @@
 - 用户软保护与连续任务相关模块复制自/home/wyh/qmix_mixer_knife_fig6_latest_ramp/scripts；保留原实现，仅适配仓库根路径、src路径、协议/输出入口，独立评价CLI。原队列、验证门槛、旧结果不导入。
 - src/main.py的PyYAML加载和collections.Mapping适配；结果输出路径隔离到run目录；src/run.py的TensorBoard路径同样隔离；runner应用2026-10-30已有的测试日志分支修复。初始差异见initial_changes.patch。
 - scripts/smac_entry.py沿用原run.run，增加显式Python随机数种子、CUDA种子和单线程Torch，完整配置通过Sacred保存；这些与原main入口的差异应在对照时保留说明。
-- 不修改learner损失、神经元干预实现、网络结构或默认干预频率。新增ReDo/reset YAML只改变方法name。
+- 导入时保留 learner 损失、神经元干预实现、网络结构及默认干预频率。新增 ReDo/reset YAML 只改变方法 name。
 
 ## 运行时
 
@@ -23,3 +23,7 @@ Continuous SMACv2 runs use runtime/SMACv2StarCraftII -> /home/wyh/stagnant_figur
 ## MEAL 设计参考材料（2026-11-09）
 
 `references/meal/` 收录 TTomilin/MEAL 固定提交 `8e7857c76eedc44623a7bfe987235f2a9aadb626` 的五个重点源码文件，仅作静态参考，不被训练导入。原作者 MIT 许可保存在该目录 LICENSE；来源及 SHA-256 见 SOURCE.json。不改变本仓库既有来源和许可记录，不声称完成 MEAL 复现或实现这些方法。设计用途及当前模块对应关系见 [MEAL 设计参考](MEAL_DESIGN_REFERENCE.md)。
+
+## RNNAgent 结构整理
+
+移除未参与前向的 `RNNAgent.fc1` 参数，隐藏状态从 `net[0].weight` 继承 dtype 和设备。保留原种子初始化的随机数消耗，实际网络、GRU、Q head 与 TRHR 接入沿用原实现。模型读取仅兼容成对且尺寸匹配的历史 fc1 键。旧优化器在确认 Agent 格式和原参数组顺序后去除 fc1 的两个槽位，保留其余状态。归档哈希可验证时，恢复日志保存原哈希并以实际网络参数重新计算可比较的父模型哈希。

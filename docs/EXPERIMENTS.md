@@ -36,10 +36,10 @@ TS3–TS8 和 history 的新 VDN 持续学习实验默认使用 `ft`，包括基
 
 ```sh
 .venv/bin/python scripts/run.py --suite ts4 --algorithm vdn --method baseline \
-  --protocol configs/continual/ts4_vdn_4242.json --seed 4242 \
+  --protocol configs/continual/neuron_protection/softprotect/ts4_vdn_4242.json --seed 4242 \
   --run-id ts4_vdn_ft_4242 --replay-on-switch ft --dry-run
 .venv/bin/python scripts/run.py --suite ts4 --algorithm vdn --method baseline \
-  --protocol configs/continual/ts4_vdn_4242.json --seed 4242 \
+  --protocol configs/continual/neuron_protection/softprotect/ts4_vdn_4242.json --seed 4242 \
   --run-id ts4_vdn_er_4242 --replay-on-switch er --dry-run
 ```
 
@@ -64,7 +64,7 @@ cd /home/wyh/marl_method_lab
 ## 连续任务示例（参考配置，不是已授权队列）
 
 ```sh
-.venv/bin/python scripts/run.py --suite continual --algorithm qmix --method softprotect --scenario task_switch --seed 1111 --run-id example_switch_softprotect_1111 --protocol configs/continual/knife_fig6.json --dry-run
+.venv/bin/python scripts/run.py --suite continual --algorithm qmix --method softprotect --scenario task_switch --seed 1111 --run-id example_switch_softprotect_1111 --protocol configs/continual/task_transfer/knife_fig6.json --dry-run
 ```
 
 种子由命令显式指定，阶段和训练设置来自参考方案及驱动；需要变化时新建有名称的方案文件，不反写旧运行配置。导入参考方案清除了旧队列顺序、重试编号和计划总运行数，不会恢复旧实验。连续任务当前保留原驱动的batch/replay/lr等设置，修改训练超参数时需同步驱动读取方式，不声称可用任意JSON键覆盖。
@@ -92,7 +92,7 @@ cd /home/wyh/marl_method_lab
 
 User request: soft-protection QMIX, 5gen_protoss task-switch, seed 1111, locations A / W / V / A+W+V. Each location starts from scratch for the inherited full 4M-step sequence (Stalker/Zealot alternating every 500k). Four runs, total 16M steps. Preserve replay, optimizer, target state and cumulative exploration across switches. Same 32-episode tests every 10k steps and at phase boundaries; same final independent 32-episode Zealot evaluation. Logical 5v5 continues to use the existing SMACv2 10gen_protoss map registration with capability n_units=5, as in the preceding task-switch experiment.
 
-Named protocols: `configs/continual/location_{A,W,V,AWV}_switch_1111.json`. Only location-related fields differ across them. Per-layer selection count is determined by the existing threshold; this is a location ablation, not an equal protected-parameter-budget experiment. No additional baseline or seed is scheduled.
+Named protocols: `configs/continual/neuron_protection/softprotect/location_{A,W,V,AWV}_switch_1111.json`. Only location-related fields differ across them. Per-layer selection count is determined by the existing threshold; this is a location ablation, not an equal protected-parameter-budget experiment. No additional baseline or seed is scheduled.
 
 Queue: `.venv/bin/python scripts/run_location_ablation.py`, two concurrent runs, order A, W, V, AWV. It invokes the public scripts/run.py, preserving each run's effective protocol, config, source snapshot and local Git identity. Failed runs are recorded without cancelling the remaining requested locations, and never silently retried. The old stopped experiment queue remains stopped.
 
@@ -102,7 +102,7 @@ Startup repair: initial attempts stopped at 0 training steps because the reposit
 
 ## Authorized ABA comparison (2026-10-31)
 
-User-requested seed 1111: QMIX baseline versus QMIX + W/V soft protection. Each starts independently from scratch: Stalker mirror 5v5 for 1M steps, Zealot mirror 5v5 for 500k, then Stalker for 500k (2M each, 4M total). Protocol: `configs/continual/aba_WV_switch_1111.json`. Inherited map registration is `10gen_protoss`, with capability n_units=n_enemies=5, representing logical 5gen_protoss.
+User-requested seed 1111: QMIX baseline versus QMIX + W/V soft protection. Each starts independently from scratch: Stalker mirror 5v5 for 1M steps, Zealot mirror 5v5 for 500k, then Stalker for 500k (2M each, 4M total). Protocol: `configs/continual/neuron_protection/softprotect/aba_WV_switch_1111.json`. Inherited map registration is `10gen_protoss`, with capability n_units=n_enemies=5, representing logical 5gen_protoss.
 
 Screen W+V once at the end of A1, using the existing latest-32-episode statistic and strict >3 threshold. Only B applies 0.1 to selected post-RMSprop parameter increments. A2 immediately clears both protected sets and outstanding release ramps, so all update scales are 1 from the first update. Method active_phases=[1] and detection_phases=[0] are zero-based. Reference recovery fields remain for compatibility but no recovery ramp applies in this protocol. No B screening, Agent protection, optimizer reset, replay reset, target reset or epsilon restart. Existing protocols without these phase options keep their previous behavior.
 
@@ -116,7 +116,7 @@ Direct verification before launch: Python syntax; dry-run effective protocol; CP
 
 New runs from scratch: QMIX baseline and W+V soft protection for each seed 3535, 2222 (four runs). Stalker 1M → Zealot 500k → Stalker 1M, 2.5M steps/run, 10M total. All method, environment, replay/optimizer/target retention, cumulative exploration and evaluation settings inherit the seed1111 ABA experiment. Detection only at A1 end; protection only in B; immediate all-one scaling on return A.
 
-Protocol: `configs/continual/aba_WV_A2_1M_3535_2222.json`. Queue: `.venv/bin/python scripts/run_aba_two_seeds.py`; maximum two concurrent runs, paired methods for 3535 then 2222. Single-run failures do not cancel the remaining requested runs; no automatic retries. Unique IDs: `qmix_ABA_A2_1M_{baseline,softprotect}_seed{3535,2222}_20261031`.
+Protocol: `configs/continual/neuron_protection/softprotect/aba_WV_A2_1M_3535_2222.json`. Queue: `.venv/bin/python scripts/run_aba_two_seeds.py`; maximum two concurrent runs, paired methods for 3535 then 2222. Single-run failures do not cancel the remaining requested runs; no automatic retries. Unique IDs: `qmix_ABA_A2_1M_{baseline,softprotect}_seed{3535,2222}_20261031`.
 
 Results/status: `results/aba_WV_A2_1M_seeds3535_2222_20261031/`. After training, independent final A evaluation (32 episodes/run) and per-seed curves/CSV/reports are generated under seed3535/ and seed2222/. The seed1111 2M schedule remains separate. Reusable run_aba.summarize now reads the seed and final phase budget from actual run config, rather than hardcoding the previous schedule. Direct checks: syntax and dry-run protocol; training/method code unchanged. No extra verification training or chat notification.
 
@@ -148,10 +148,10 @@ Authorized existing-baseline seeds1234/4567/3535, only high/middle/low method br
 
 沿用任务历史实验的镜像 5v5 SZC 路径，累计阈值 2M、4M、6M 后结束当前完整回合。每种方法从头训练 seed 3535、2222。四组均采用逐任务 ε 与 FT 的 TD 回放；偏好方法的历史胜局数据仍供其约束使用。原 SZC 基线使用累计 ε 和跨阶段共享 TD 池，只作为不同协议的历史参照。
 
-T1PR、FRPR、ASPR-Max 使用 `configs/continual/szc_vdn64_ft_preferences.json` 和 `vdn_action_set`；方法参数沿用原 T1PR、TS4 FRPR 和 SZC ASPR-Max 的设置。CHI 使用 `configs/continual/szc_vdn64_ft_a2_chi.json` 和 TS4 驱动的镜像环境，采用 `A2_chi`。在任务边界按固定探测集重评，严格大于 3 的最新名单替换旧名单，受保护更新系数 0.1，退出后 100k 步线性恢复。
+T1PR、FRPR、ASPR-Max 使用 `configs/continual/action_preference/szc/szc_vdn64_ft_preferences.json` 和 `vdn_action_set`；方法参数沿用原 T1PR、TS4 FRPR 和 SZC ASPR-Max 的设置。CHI 使用 `configs/continual/neuron_protection/chi/szc_vdn64_ft_a2_chi.json` 和 TS4 驱动的镜像环境，采用 `A2_chi`。在任务边界按固定探测集重评，严格大于 3 的最新名单替换旧名单，受保护更新系数 0.1，退出后 100k 步线性恢复。
 
 阶段末独立贪心评价每个已见任务 128 局，两个入口使用相同任务级种子块。定期当前任务评价为 32 局，TS4 驱动按全局步数对齐 25k 间隔，偏好驱动按阶段起点对齐。完整调度计划和终态汇总分别为 `results/szc_vdn64_ft_20261113/plan.json` 和同目录的 `summary.json`。
 
 2026-11-14 追加 `full_rank_preference_relu`、`top1_max_preference` 和无干预 VDN-ER，各跑 seed 3535、2222。六条路径沿用 `szc_vdn64_ft_preferences.json` 的逐任务 ε、镜像阵容、预算和评价。两种偏好变体使用各自默认参数和 FT，VDN-ER 在同一驱动中使用 `--method baseline --replay-on-switch er`。完整计划和汇总位于 `results/szc_vdn64_ft_20261113/with_variants_er/`。
 
-SZC 的 VDN-ER + CHI 使用 `configs/continual/szc_vdn64_er_a2_chi.json`，保持双层 `A2_chi` 的最新名单、阈值与恢复调度，TD 池改用同入口的任务均衡回放。seed 1111 与 3535 均从头训练，沿用 SZC 的 2M/2M/2M 预算、逐任务 ε 与评估设置。调度计划和终态汇总位于 `results/szc_vdn64_er_a2_chi/`。
+SZC 的 VDN-ER + CHI 使用 `configs/continual/neuron_protection/chi/szc_vdn64_er_a2_chi.json`，保持双层 `A2_chi` 的最新名单、阈值与恢复调度，TD 池改用同入口的任务均衡回放。seed 1111 与 3535 均从头训练，沿用 SZC 的 2M/2M/2M 预算、逐任务 ε 与评估设置。调度计划和终态汇总位于 `results/szc_vdn64_er_a2_chi/`。

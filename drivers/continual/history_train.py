@@ -4,7 +4,8 @@ from pathlib import Path
 from collections import deque
 from types import SimpleNamespace
 import hetero_train as h
-from common.checkpoints import (continuation_state, cpu_snapshot, restore_networks_and_optimizer,
+from common.checkpoints import (continuation_state, cpu_snapshot, parent_hash_fields,
+                                restore_networks_and_optimizer,
                                 save_stage_models)
 from common.evaluation import evaluate_block, fixed_seed_plan
 from common.metrics import Metrics, record_evaluation
@@ -70,7 +71,7 @@ def main():
             buffer=restore_replay_buffer(buffer,state['buffer'],P['order'][:-1]);episode=state['episode'];updates=state['updates']
             learner.last_target_update_episode=state['last_target_update_episode'];learner.log_stats_t=state['log_stats_t'];runner.t_env=state['t_env']
             mac.action_selector.epsilon=state['epsilon'];runner.env.restore_distribution(state['environment_distributions']);restore_rng(state['rng'])
-            write(out/'branch_restore.json',dict(parent=o.parent,t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,model_hash=base.parameter_hash(learner),parent_model_hash=state['model_hash'],rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process, distribution RNG restored'))
+            write(out/'branch_restore.json',dict(parent=o.parent,t_env=runner.t_env,episode=episode,updates=updates,buffer_episodes=buffer.episodes_in_buffer,model_hash=base.parameter_hash(learner),**parent_hash_fields(state),rng_match=digest(rng_state())==digest(state['rng']),engine='new SC2 process, distribution RNG restored'))
             del state
         def status(state='running', **extra):
             write_sequence_status(out, state, runner.t_env, phase, P['order'][phase],

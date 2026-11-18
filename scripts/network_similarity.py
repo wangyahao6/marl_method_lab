@@ -8,6 +8,8 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 from controllers import REGISTRY
 
+from modules.agents.rnn_agent import LEGACY_FC1_KEYS
+
 def write(p,o):
     tmp=p.with_suffix('.tmp');tmp.write_text(json.dumps(o,indent=2,allow_nan=False));tmp.replace(p)
 def csvwrite(p,rows):
@@ -70,7 +72,7 @@ def run(out,protocol):
             for a,b in itertools.combinations(sets[target],2):
                 sa=available[a][1];sb=available[b][1]
                 for group,prefix in [('A1_incoming','net.0.'),('A2_incoming','net.3.'),('GRU','rnn.'),('Q_head','fc2.'),('used_network',None)]:
-                    keys=[k for k in sa if k.startswith(prefix)] if prefix else [k for k in sa if not k.startswith('fc1.')]
+                    keys=[k for k in sa if k.startswith(prefix)] if prefix else [k for k in sa if k not in LEGACY_FC1_KEYS]
                     parameter_rows.append(dict(seed=seed,target=target,path_a=a,path_b=b,group=group,**pdistance([sa[k].numpy() for k in keys],[sb[k].numpy() for k in keys])))
         for probe in 'SZC':
             runpath=ROOT/'runs'/f'vdnh_{probe}_seed{seed}_20261103_attempt001'

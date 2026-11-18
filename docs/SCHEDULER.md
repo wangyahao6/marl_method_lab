@@ -30,7 +30,7 @@ A plan has an `id` and a `tasks` list. Each task includes a stable `id`, string-
   "id": "authorized-batch",
   "tasks": [{
     "id": "unique-run-id",
-    "argv": ["/home/wyh/marl_method_lab/.venv/bin/python", "scripts/run.py", "--suite", "ts3", "--algorithm", "vdn", "--method", "baseline", "--seed", "1234", "--run-id", "unique-run-id", "--protocol", "configs/continual/example.json", "--ts3-role", "prefix"],
+    "argv": ["/home/wyh/marl_method_lab/.venv/bin/python", "scripts/run.py", "--suite", "ts3", "--algorithm", "vdn", "--method", "baseline", "--seed", "1234", "--run-id", "unique-run-id", "--protocol", "configs/continual/neuron_protection/softprotect/ts3_vdn_A2_top3_1234_4567.json", "--ts3-role", "prefix"],
     "cwd": "/home/wyh/marl_method_lab",
     "run_dir": "/home/wyh/marl_method_lab/runs/unique-run-id",
     "type": "training",
