@@ -1,6 +1,6 @@
-# ASPR 首跑 · TS3 · VDN 双层 64 · seed 3535
+# ASPR-Max 首跑 · TS3 · VDN 双层 64 · seed 3535
 
-2026-11-12 授权一条 ASPR 训练路径。配置为 `configs/continual/ts3_vdn64_aspr_3535.json`，运行编号为 `ts3_vdn64_aspr_3535_20261112_attempt001`。
+2026-11-12 授权一条 ASPR-Max 训练路径。配置为 `configs/continual/ts3_vdn64_aspr_3535.json`，运行编号为 `ts3_vdn64_aspr_3535_20261112_attempt001`。
 
 沿用 TS3 标准 5v5 任务。己方固定 2 Stalker + 3 Zealot，敌方 A–E 分别为 2S3Z、4S1Z、1S4Z、3S2Z、5S0Z。每段名义 2M 环境步，使用累计 2/4/6/8/10M 阈值，在整局结束后切换。用原版两层前馈 64→64 与 GRU 64 的 `vdn`，从头训练，累计 ε 退火。TD replay 每阶段重建；在线和目标网络、RMSprop 及全局计数连续。λ=1、margin=0，每次采 8 条历史轨迹。阶段末目标 100 胜局，最多 4 个种子块 × 125 次尝试。
 
@@ -12,10 +12,10 @@
 - `action_set_updates.jsonl` 记录采样覆盖、各历史任务的有效状态和偏好统计、联合损失及耗时。
 - `action_set_probes.jsonl` 记录固定独立轨迹在各阶段的偏好保持，`retention.json` 和 `evaluations.jsonl` 记录 ACC/BWT/FWT、阶段矩阵与当前任务曲线。联合检查旧任务实际保留和当前任务学习。
 
-已有 seed 3535 双层基线 `ts3_vdn_typeunion_N_seed3535_20261102_attempt001` 可用于描述性参照。该基线跨阶段保留 TD replay，本次阶段重建，因此二者的差值无法单独归因给 ASPR。首跑用于验证覆盖、集合宽度、偏好保持及其与实际胜率的关系。本次提交一条新训练路径。
+已有 seed 3535 双层基线 `ts3_vdn_typeunion_N_seed3535_20261102_attempt001` 可用于描述性参照。该基线跨阶段保留 TD replay，本次阶段重建，因此二者的差值无法单独归因给 ASPR-Max。首跑用于验证覆盖、集合宽度、偏好保持及其与实际胜率的关系。本次提交一条新训练路径。
 
 ## 单层 64 补充路径
 
-运行 `ts3_vdn_1ff64_aspr_3535_20261112_attempt001` 使用 `vdn_1ff`（单层前馈 64、GRU 64），复用首跑的协议 JSON，TS3 阶段、种子 3535、累计 ε 退火、分阶段 TD replay、ASPR 超参数和评估保持一致。模型从相同训练种子独立初始化，各任务的 δ 由该路径自己的阶段末胜局确定。调度计划为 `results/ts3_vdn64_aspr_3535_20261112/plan_1ff64.json`。
+运行 `ts3_vdn_1ff64_aspr_3535_20261112_attempt001` 使用 `vdn_1ff`（单层前馈 64、GRU 64），复用首跑的协议 JSON，TS3 阶段、种子 3535、累计 ε 退火、分阶段 TD replay、ASPR-Max 超参数和评估保持一致。模型从相同训练种子独立初始化，各任务的 δ 由该路径自己的阶段末胜局确定。调度计划为 `results/ts3_vdn64_aspr_3535_20261112/plan_1ff64.json`。
 
-已有单层 64 基线 `ts3_vdn_1ff_N_seed3535_20261110_attempt001` 已完成。它使用逐任务重启 ε 和跨任务 replay，与本次 ASPR 路径的设置有差异，仅用于描述性参照。单双层 ASPR 比较在当前一个训练种子上解释。
+已有单层 64 基线 `ts3_vdn_1ff_N_seed3535_20261110_attempt001` 已完成。它使用逐任务重启 ε 和跨任务 replay，与本次 ASPR-Max 路径的设置有差异，仅用于描述性参照。单双层 ASPR-Max 比较在当前一个训练种子上解释。

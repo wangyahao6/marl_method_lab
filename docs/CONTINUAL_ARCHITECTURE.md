@@ -14,7 +14,7 @@
 ## 方法历史
 
 - `History` 按阶段或任务键保存对现有载荷的引用。调用方用映射接口注册和读取，使用 `save(path, payload)` 原子保存，使用 `load(path, device='cpu')` 读取可信本地 Torch 文件。固定探测集可在映射中只登记路径，按需读取。
-- `PreferenceHistory` 用 `restore_success` 恢复前缀已有的胜局池，用 `sample(current_task, batch_episodes, rng)` 按原策略选取旧任务最近的非空池和回合索引。ASPR 的好动作掩码、T1PR / FRPR 的参考 Q 值与对应轨迹一起保存，参考 Agent 使用阶段检查点路径。失败轨迹与固定评估探测集仍各用既有文件。
+- `PreferenceHistory` 用 `restore_success` 恢复前缀已有的胜局池，用 `sample(current_task, batch_episodes, rng)` 按原策略选取旧任务最近的非空池和回合索引。ASPR-Max 的好动作掩码、ASPR 的好动作掩码与参考 Q 值、T1PR / FRPR 的参考 Q 值与对应轨迹一起保存，参考 Agent 使用阶段检查点路径。失败轨迹与固定评估探测集仍各用既有文件。
 - CHI 继续使用 `chi_probes/phase*.th` 的 `batch` 与 `weights`。Local GEM 保持 CPU 历史和计算设备上的只读视图，CPU 执行时共享同一底层张量。GEM 的 `gem_state.th` 保留原有诊断字段，分支的参考轨迹仍从指定前缀的 `screen_input.th` 加载。TS4 的纵向诊断使用内存中的固定阶段探测。
 - 探测、标签和约束仍由各方法定义。新方法可以复用历史载荷接口并提供自己的抽样策略。已有 `action_set_memory/phaseNNNN/`、`chi_probes/` 和诊断快照可以直接读取。排名方法恢复仍要求成功池已具备 `old_q_values`。
 

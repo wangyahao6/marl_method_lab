@@ -22,10 +22,12 @@ from action_set_protocol import (
     TOPK_HIGH_REGRET_DEFAULTS, TOPK_WEIGHTED_DEFAULTS,
 )
 from protection import digest
-from learners.action_set_preference import batch_episodes, decision_masks
+from learners.action_set_preference import batch_episodes, decision_masks, make_good_mask
+from drivers.continual.memory import PreferenceHistory
 from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
-    RankingPreference, aggregate_pair_filter_statistics, full_rank_preference, full_rank_preference_raw,
+    RankingPreference, aggregate_pair_filter_statistics, aspr_preference, aspr_statistics,
+    full_rank_preference, full_rank_preference_raw,
     full_rank_preference_raw_loss, full_rank_preference_relu,
     full_rank_preference_unfiltered, full_rank_statistics, pair_filter_statistics, top1_max_preference,
     top1_max_statistics, top1_preference, top1_unfiltered_preference, top1_unfiltered_statistics,
@@ -47,6 +49,36 @@ METHOD_DEFAULTS = {
 
 
 class RankingTest(unittest.TestCase):
+    def test_aspr_cross_group_softplus_and_filtering(self):
+        # Interleave Good and Bad indices so both index orientations are exercised.
+        old = th.tensor([[5., 0., 4., 1., 3., 100.]]).repeat(3, 1)
+        current = th.tensor([[2., 4., 5., 2., 0., -100.]]).repeat(3, 1).requires_grad_()
+        legal = th.tensor([[True, True, True, True, True, False]]).repeat(3, 1)
+        good = th.tensor([[True, False, True, False, True, True]]).repeat(3, 1)
+        good[1] = legal[1]  # All legal actions are Good.
+        decisions = th.tensor([True, True, False])
+        for min_gap, floor, temperature, expected_count in ((0., .1, 1., 6), (.75, 4., 2., 5)):
+            settings = dict(RANK_DEFAULTS, min_gap=min_gap, q_scale_floor=floor, temperature=temperature)
+            loss, count, summary = aspr_preference(current, old, legal, decisions, settings, good=good)
+            scale = old[0, :5].std(unbiased=False).clamp_min(floor)
+            pairs = [(a, b) for a in (0, 2, 4) for b in (1, 3) if (old[0, a] - old[0, b]) / scale >= min_gap]
+            expected = th.stack([softplus((current[0, b] - current[0, a]) / (scale * temperature))
+                                 for a, b in pairs]).mean()
+            th.testing.assert_close(loss, expected)
+            self.assertEqual(count.item(), 1)
+            stats = aspr_statistics(summary.tolist())
+            self.assertEqual(stats["candidate_pairs"], 6)
+            self.assertEqual(stats["valid_pairs"], expected_count)
+            self.assertEqual(stats["all_action_ratio"], .5)
+            self.assertEqual(stats["average_good_set_size"], 4.)
+            self.assertEqual(stats["pair_keep_rate"], expected_count / 6)
+            violations = sum(current[0, a] <= current[0, b] for a, b in pairs).item()
+            self.assertEqual(stats["pair_violation_rate"], violations / expected_count)
+            gradient = th.autograd.grad(loss, current)[0]
+            th.testing.assert_close(gradient, th.autograd.grad(expected, current)[0])
+            self.assertFalse(gradient[:, 5].any())
+            self.assertFalse(gradient[1:].any())
+
     @classmethod
     def setUpClass(cls):
         th.set_num_threads(1)
@@ -577,6 +609,9 @@ class RankingTest(unittest.TestCase):
     def test_temperature_and_config_validation(self):
         protocol = json.loads(PROTOCOL_PATH.read_text())
         protocol["action_set"].pop("delta_by_task")
+        with self.assertRaisesRegex(ValueError, "action_set.delta_by_task"):
+            driver.validate(protocol, "vdn", "aspr_preference")
+        protocol["action_set"]["second_gap_quantile"] = 0.5
         for method in RANK_METHODS:
             effective = driver.validate(protocol, "vdn", method)
             defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
@@ -606,7 +641,7 @@ class RankingTest(unittest.TestCase):
             stage["steps"] = 16
         protocol["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0)
         protocol["action_set"].update(batch_episodes=4, success_episodes=2,
-                                      seed_offsets=[101, 102], attempts_per_seed=2)
+                                      seed_offsets=[101, 102], attempts_per_seed=2, probe_episodes_per_seed=1)
         original_config = driver.config
         def tiny_config(*args):
             return dict(original_config(*args), buffer_size=8, batch_size=2)
@@ -618,7 +653,7 @@ class RankingTest(unittest.TestCase):
         ), np.testing.suppress_warnings() as quiet:
             quiet.filter(UserWarning)
             out = Path(tmp)
-            for method in ("baseline", "action_set_preference", *RANK_METHODS, "zero"):
+            for method in ("baseline", "action_set_preference", "aspr_max_preference", *RANK_METHODS, "zero"):
                 run = out / method
                 run.mkdir()
                 active = "top1_preference" if method == "zero" else method
@@ -644,6 +679,13 @@ class RankingTest(unittest.TestCase):
             aspr = out / "action_set_preference"
             original = th.load(aspr / "action_set_memory/phase0000/success.th")
             original_samples = jsonlines(aspr / "action_set_updates.jsonl")
+            max_run = out / "aspr_max_preference"
+            for old_path in sorted((aspr / "models").glob("*/agent.th")):
+                first, second = th.load(old_path), th.load(max_run / old_path.relative_to(aspr))
+                self.assertTrue(all(th.equal(first[k], second[k]) for k in first))
+            for run in (aspr, max_run):
+                self.assertEqual([row["preference_loss"] for row in original_samples],
+                                 [row["preference_loss"] for row in jsonlines(run / "aspr_max_preference_updates.jsonl")])
             for method in RANK_METHODS:
                 run = out / method
                 pool = th.load(run / "action_set_memory/phase0000/success.th")
@@ -651,10 +693,37 @@ class RankingTest(unittest.TestCase):
                 for old, new in zip(original["episodes"], pool["episodes"]):
                     self.assertEqual((old["seed"], old["index"]), (new["seed"], new["index"]))
                     self.assertTrue(all(th.equal(v, new["data"][k]) for k, v in old["data"].items()))
-                    self.assertNotIn("good_mask", new)
+                    if method == "aspr_preference":
+                        self.assertTrue(th.equal(old["good_mask"], new["good_mask"]))
+                        self.assertEqual(pool["delta"], original["delta"])
+                    else:
+                        self.assertNotIn("good_mask", new)
                     self.assertNotIn("old_q_values", old["data"])
                     self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
                 samples = jsonlines(run / f"{method}_updates.jsonl")
+                if method == "aspr_preference":
+                    fields = {"candidate_pairs", "valid_pairs", "pair_keep_rate", "pair_violation_rate",
+                              "average_good_set_size", "singleton_ratio", "all_action_ratio"}
+                    self.assertTrue(all(fields <= row["pair_filter_stats"].keys() for row in samples))
+                    metrics = jsonlines(run / "experiment_metrics.jsonl")
+                    self.assertTrue(fields <= {row["metric"] for row in metrics})
+                    self.assertTrue(all(fields <= probes.keys()
+                                        for probes in jsonlines(run / "aspr_preference_probes.jsonl")))
+                    self.assertFalse((run / "action_set_probe_errors.jsonl").exists())
+                    restored = PreferenceHistory()
+                    restored.restore_success(run, [0], require_old_q=True, require_good=True)
+                    self.assertTrue(th.equal(restored[0]["episodes"][0]["good_mask"],
+                                             pool["episodes"][0]["good_mask"]))
+                    invalid = copy.deepcopy(pool)
+                    invalid["episodes"][0]["data"].pop("old_q_values")
+                    with patch.object(PreferenceHistory, "load", return_value=invalid):
+                        with self.assertRaisesRegex(ValueError, "old_q_values"):
+                            restored.restore_success(run, [0], require_old_q=True, require_good=True)
+                    invalid = copy.deepcopy(pool)
+                    invalid["episodes"][0].pop("good_mask")
+                    with patch.object(PreferenceHistory, "load", return_value=invalid):
+                        with self.assertRaisesRegex(ValueError, "good_mask"):
+                            restored.restore_success(run, [0], require_old_q=True, require_good=True)
                 for phase, tasks in enumerate((set(), {"stalker"}, {"stalker", "zealot"})):
                     phase_rows = [row for row in samples if row["phase"] == phase]
                     aspr_rows = [row for row in original_samples if row["phase"] == phase]
@@ -805,6 +874,9 @@ class RankingTest(unittest.TestCase):
             self.assertFalse(decisions[1, 1, 4])
             self.assertTrue(decisions[0, 1, 0])
             self.assertFalse(legal[0, 0, 0, 0])
+            good, _ = make_good_mask(batch, batch["old_q_values"][:, :-1], 0)
+            for ep, mask in zip(episodes, good):
+                ep["good_mask"] = mask[:ep["length"] + 1]
             for method in RANK_METHODS:
                 defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
                 settings = dict(defaults)

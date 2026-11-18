@@ -114,6 +114,7 @@
       },
       "interpretation_limits": [
         "只覆盖一个任务顺序与双层 VDN64。不同方法覆盖的训练种子不同。评估局数用于估计单次运行的表现。",
+        "归档方法标签 ASPR 和标识 action_set_preference 对应 ASPR-Max。本表未收录新版 aspr_preference。",
         "VDN-ER 与 VDN-ER+CHI 使用按任务平衡的 TD 回放。其余 SZC 组使用逐阶段清空或重建 TD 池。所有组按任务重启 ε。",
         "CHI 与现有 VDN-FT/ER 基线使用不同驱动。定期曲线使用实际 t_env。",
         "Raw/RawLoss 对原版 FRPR 的同种子比较沿用历史运行，代码与旧 Q 存储的差异见报告及 runs.csv。",

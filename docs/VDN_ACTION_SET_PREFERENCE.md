@@ -7,18 +7,19 @@ Action-Set Preference Replay（ASPR）用每个已完成任务的阶段末 Agent
 ```sh
 cd /home/wyh/marl_method_lab
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
-  --method action_set_preference --seed 3535 --run-id vdn_action_set_example_3535 \
-  --protocol configs/continual/vdn_action_set_example.json --dry-run
+  --method aspr_preference --seed 3535 --run-id szc_vdn64_aspr_seed3535_attempt001 \
+  --protocol configs/continual/szc_vdn64_aspr.json --dry-run
 ```
 
-示例只用于检查配置。使用同一协议配合 `--method baseline` 可做同入口对照。支持 `vdn`、`vdn_1ff`、`vdn_1ff_128`。配置按已有连续任务协议放在 JSON 中。
+`--dry-run` 检查配置并打印启动计划。使用同一协议配合 `--method baseline` 可做同入口对照。支持 `vdn`、`vdn_1ff`、`vdn_1ff_128`。ASPR-Max 使用 `--method aspr_max_preference` 和 `configs/continual/szc_vdn64_aspr_max.json`。旧协议中的 `action_set_preference` 仍指向 ASPR-Max。
 
 | 字段 | 用途 |
 | --- | --- |
 | `tasks` | 每个任务独立指定己方和敌方阵容，按 Stalker、Zealot、Colossus 计数。 |
 | `stages[].task`、`stages[].steps` | 任意长度的任务顺序与阶段内步数。达到步数后跑完当局，因此实际步数可以超出该阶段预算。 |
-| `action_set.weight` | λ，默认 1。设为 0 时禁用记忆采集和偏好损失。示例值尚未校准。 |
-| `action_set.margin` | 偏好间隔 m，默认 0。m=0 允许两组的最大 Q 打平。 |
+| `aspr_preference` | ASPR 使用 `weight=1.0`、`temperature=1.0`、`min_gap=0.5`、`q_scale_floor=0.1`。`weight=0` 禁用历史采集与偏好更新。 |
+| `action_set.weight` | ASPR-Max 的 λ，默认 1。设为 0 时禁用记忆采集和偏好损失。 |
+| `action_set.margin` | ASPR-Max 的偏好间隔 m，默认 0，允许两组最大 Q 打平。 |
 | `action_set.batch_episodes` | 每次 learner 更新采样的历史 episode 总数，默认 8。 |
 | `action_set.delta_by_task` | 为各任务显式设置绝对 Q 差阈值 δ。设置 0 只保留并列最优动作。 |
 | `action_set.second_gap_quantile` | 缺少显式 δ 时，从本阶段成功记忆中取有至少两个合法动作的有效决策的最优－次优 Q 差分位数。阶段末计算一次并冻结。无可用差值时记录并使用 0。 |
@@ -37,8 +38,8 @@ cd /home/wyh/marl_method_lab
 
 1. 保存 `models/phaseNNNN_<step>/agent.th`，用该状态创建独立的冻结 CPU Agent。贪心 runner 的随机状态与训练隔离。
 2. 在该阶段的任务环境中按多个种子采集完整 episode。胜局进入 `action_set_memory/phaseNNNN/success.th`，失败局进入同目录的 `failure.th`。达到种子尝试上限后继续阶段流程，`summary.json` 记录目标、实际胜局和缺口。
-3. 对每条胜局从零隐藏状态展开参考 Agent，用轨迹原动作生成上一动作输入。在每个有效决策中，保存所有满足 `legal[a] and max_legal_Q - Q[a] <= delta` 的动作。
-4. 池按阶段编号持久化，包含任务 ID、δ、输入/动作布局、参考 checkpoint 路径和 episode 列表。每条记录保存种子、局号、真实决策长度、胜负和截到最后观测的完整 `EpisodeBatch` 张量。成功记录附加布尔 `good_mask`。旧 Agent 在标记后退出，后续更新只读取轨迹和掩码。
+3. 在有效决策中，标记满足 `legal[a] and max_legal_Q - Q[a] <= delta` 的动作。ASPR 保存贪心 rollout 捕获的参考 Q，并用这份 Q 计算校准间隔与 Good Mask。ASPR-Max 沿用冻结 Agent 从零隐藏状态重放并标记的路径。
+4. 池按阶段编号持久化，包含任务 ID、δ、输入/动作布局、参考 checkpoint 路径和 episode 列表。每条成功记录保存轨迹和布尔 `good_mask`。ASPR 还保存 `data.old_q_values`，两项标签及 `avail_actions` 均含末尾观测，尺寸为 `[T,N,A]`。分支恢复时检查两项标签是否存在并与动作掩码对齐。
 
 回访会保存一个新阶段快照。当前任务在自己的回访阶段也只受其他任务约束。其他任务若有多次完成记录，采样最近一次非空池，所有较早快照继续留存。零胜局的池保留诊断信息，采样器跳过它。当前入口以一次进程执行整条序列。
 
@@ -58,9 +59,11 @@ cd /home/wyh/marl_method_lab
 
 真实最后一次决策参与约束，包括超时前最后一步。最终 bootstrap 观测、padding、终止后的帧和仅有 no-op 的死亡 Agent 均排除。无合法坏动作的状态只计入集合诊断。参考标记在有效状态遇到空集合时报告数据构建错误。
 
-每个有效状态计算 `relu(m + max_bad(Q) - max_good(Q))`。先对一个任务内的有效状态求平均，再对本次采样中至少有一个有效状态的任务等权平均；没有有效历史状态时偏好项为零。联合目标为 `TD_loss + weight * preference_loss`，一次反传。历史数据只进入偏好项；当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
+ASPR 枚举每个 Good 动作与每个合法 Bad 动作的配对。合法旧 Q 先减均值，再除以 `σ = max(std(Q_old[legal]), q_scale_floor)`。过滤归一化旧 Q 间隔小于 `min_gap` 或等于零的动作对。对保留的 `(g, b)` 计算 `softplus((Q_new[b] - Q_new[g]) / (σ * temperature))`。同组动作和额外 margin 不参与损失。ASPR-Max 每个有效状态计算 `relu(m + max_bad(Q) - max_good(Q))`。
 
-`action_set_updates.jsonl` 每次更新记录 TD、偏好、总损失，以及采样任务、源阶段、池大小、episode 编号与数量。任务级记录包括有效状态数、good/bad 的最大 Q 均值、违约比例（hinge 内部大于零）、合法贪心动作落在集合外的比例、集合大小和两种占比。没有定义的比率或最大值记 null。另记录历史分支准备耗时、CUDA 历史前向时间和完整 learner 更新耗时；联合反传的边际耗时可用同协议 baseline 对照估计。常规 learner 和 runner 指标沿用 `metrics.jsonl`。
+ASPR 先平均状态内保留的动作对。两版均对任务内有效状态求平均，再对本次含有效状态的历史任务等权平均，最后使用 `TD_loss + weight * preference_loss` 一次反传。历史数据作为偏好分支输入，当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
+
+ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`。逐更新汇总与各历史任务均记录候选与有效对数、保留比例、违反比例、平均 Good 集合大小、单元素比例、全合法动作比例。保留比例以非平局候选对为分母，违反比例以有效对为分母，新 Q 打平计为违反。ASPR-Max 写入 `aspr_max_preference_updates.jsonl` 和 `aspr_max_preference_probes.jsonl`，保留原 hinge 统计。旧别名同时写原 `action_set_updates.jsonl` 和 `action_set_probes.jsonl`，供历史读取器使用。常规训练指标沿用 `metrics.jsonl`。
 
 ## 代码位置与验证
 
@@ -71,7 +74,7 @@ cd /home/wyh/marl_method_lab
 
 ## 完整动作排序与 Top-1 偏好保持
 
-全排序偏好回放（FRPR）提供带间隔筛选的 Softplus（`full_rank_preference`）、无间隔筛选的 Softplus（`full_rank_preference_unfiltered`）和 ReLU（`full_rank_preference_relu`）。它们与首选偏好回放（T1PR，`top1_preference`、`top1_max_preference` 和 `top1_unfiltered_preference`）及 ASPR 共用 `vdn_action_set` 驱动。排序方法沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。采集时由阶段末冻结 Agent 从零 GRU 状态逐步前向，胜局在 `success.th` 的每条轨迹 `data.old_q_values` 中保存完整 FP32 动作 Q，包含末尾 bootstrap 观测对应的 Q。该字段与 `avail_actions` 同形状，采样时一起补齐时间轴。回放时直接读取旧 Q，当前 Agent 从零 GRU 状态展开历史观测，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。只有至少两个合法动作的智能体决策进入排序统计。最后一个真实决策参与约束，包括超时前最后一步。
+全排序偏好回放（FRPR）提供带间隔筛选的 Softplus（`full_rank_preference`）、无间隔筛选的 Softplus（`full_rank_preference_unfiltered`）和 ReLU（`full_rank_preference_relu`）。它们与首选偏好回放（T1PR，`top1_preference`、`top1_max_preference` 和 `top1_unfiltered_preference`）及 ASPR 共用 `vdn_action_set` 驱动。排序方法沿用阶段末贪心胜局采集、历史池目录和任务均衡采样。采集时由阶段末冻结 Agent 从零 GRU 状态逐步前向，胜局在 `success.th` 的每条轨迹 `data.old_q_values` 中保存完整 FP32 动作 Q，包含末尾 bootstrap 观测对应的 Q。该字段与 `avail_actions` 同形状，采样时一起补齐时间轴。回放时直接读取旧 Q，当前 Agent 从零 GRU 状态展开历史观测，沿用轨迹中的上一动作和 Agent ID。排序损失排除非法动作、只有 no-op 的死亡 Agent、bootstrap 观测、终止后的帧和 padding。FRPR/TKPR 等排序方法仅统计至少两个合法动作的决策。ASPR 的集合统计同时包含仅有一个合法动作的有效决策。最后一个真实决策参与约束，包括超时前最后一步。
 
 对每个智能体决策，令 `s = max(std(Q_old[合法动作]), q_scale_floor)`，标准差使用总体口径。旧模型的筛选间隔和当前模型的排序间隔均除以同一个冻结尺度 `s`。尺度下限保留了近似平局的识别能力。固定旧尺度使两个合法动作的情况也能通过当前 Q 间隔获得梯度。
 
@@ -262,7 +265,7 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
 #### 状态与更新统计
 
 - `historical_episode_count` 按历史回放的实际抽样次数计数，包含重复抽中的轨迹。`decision_states` 统计该方法进入筛选的智能体决策，排序偏好要求至少两个合法动作。`constrained_states` 按各历史任务实际用于损失聚合的状态数求和，High-Regret 的基础项和额外项在同一状态激活时只计一次。
-- `valid_pairs` 统计通过筛选的比较对。T1PR-Max 每个有效状态只比较旧首选和当前最强对手。ASPR 用动作集合的最大 Q 差计算损失，有历史样本时动作对计数为空。
+- `valid_pairs` 统计通过筛选的比较对。T1PR-Max 每个有效状态只比较旧首选和当前最强对手。ASPR 统计筛选后的 Good–Bad 对。ASPR-Max 用两组的最大 Q 计算 hinge，动作对计数为空。
 - `nonzero_loss_states` 统计单状态偏好项非零的决策，应用 Weighted 的最终状态权重。High-Regret 对非零基础项和启用的额外项取并集。计数在全局偏好系数乘入前完成。
 - `weight_histogram` 以通过动作对筛选的状态为样本，对最终归一化权重按 0、(0, 0.5)、[0.5, 1)、[1, 2)、[2, +∞) 分箱。落入均匀回退的有效权重计入 [1, 2)。`high_regret_loss_share` 为 `weighted_high_regret_loss / loss`，分母为该历史任务基础项与加权额外项的和，为零时记空。
 - `preference_participated_update` 表示本次有进入损失聚合的约束状态且全局偏好权重非零。`preference_participation_rate` 为本次进程的参与更新数除以送入偏好模块的更新数，包含历史记忆为空的更新。分支进程从自己的计数起算。梯度贡献仍以间隔采样的 `preference_grad_nonzero_agent` 为准。新增计数和分箱使用已有前向张量及汇总读回，梯度采样沿用原有计算。

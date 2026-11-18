@@ -63,6 +63,7 @@ def set_statistics(count, size, singleton, all_actions):
 
 
 def preference_loss(mac, batch, good, margin):
+    """ASPR-Max hinge objective for the legacy action-set method."""
     legal, decision = decision_masks(batch)
     good = good[:, :-1] & legal
     bad = legal & ~good

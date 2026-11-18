@@ -4,7 +4,9 @@ from functools import partial
 import torch as th
 from torch.nn.functional import softplus
 
-from learners.action_set_preference import ActionSetPreference, batch_episodes, decision_masks, unroll
+from learners.action_set_preference import (
+    ActionSetPreference, batch_episodes, decision_masks, set_counts, set_statistics, unroll,
+)
 
 
 WEIGHT_BINS = ("zero", "(0,0.5)", "[0.5,1)", "[1,2)", "[2,+inf)")
@@ -24,6 +26,11 @@ def reference_order(reference_q, legal, q_scale_floor):
 
 def full_rank_preference(current_q, reference_q, legal, decisions, settings, *, pair_audit=False):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings, pair_audit=pair_audit)
+
+
+def aspr_preference(current_q, reference_q, legal, decisions, settings, *, good):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           pair_audit=True, good=good & legal)
 
 
 def full_rank_preference_raw(current_q, reference_q, legal, decisions, settings):
@@ -73,7 +80,7 @@ def _topk_actions(reference_q, legal, effective_k):
 
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
                     k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
-                    confidence_weighted=False, high_regret=False):
+                    confidence_weighted=False, high_regret=False, good=None):
     current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
     if raw_reference:
         old = reference_q.detach()
@@ -89,6 +96,8 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
     action_count = legal.size(-1)
     unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
     candidates = unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
+    if good is not None:
+        candidates = candidates & (good.unsqueeze(-1) ^ good.unsqueeze(-2))
     eligible = candidates & (old_gap != 0)
     gap_key = "min_gap_raw" if raw_reference else "min_gap"
     pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings[gap_key])
@@ -115,6 +124,9 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
     loss, count, summary = summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
     if pair_audit:
         summary = th.cat((summary, th.stack((candidates.sum(), eligible.sum()))))
+    if good is not None:
+        violations = (pairs & (inverted_gap.detach() >= 0)).sum()
+        summary = th.cat((summary, violations.reshape(1), set_counts(legal, decisions, good)))
     if k is not None:
         violations = (pairs & (inverted_gap.detach() >= 0)).sum()
         effective_k_sum = effective_k.masked_fill(~decisions, 0).sum()
@@ -250,6 +262,15 @@ def full_rank_statistics(summary):
     return stats
 
 
+def aspr_statistics(summary):
+    stats = full_rank_statistics(summary[:9])
+    violations = int(summary[9])
+    stats.update(pair_violations=violations,
+                 pair_violation_rate=violations / stats["valid_pairs"] if stats["valid_pairs"] else None,
+                 **set_statistics(*summary[10:]))
+    return stats
+
+
 def topk_statistics(summary):
     stats = ranking_statistics(summary[:7])
     violations, effective_k_sum, clipped = summary[7:10]
@@ -317,7 +338,9 @@ class RankingPreference(ActionSetPreference):
 
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
+        self.use_good_mask = method == "aspr_preference"
         self.loss = {
+            "aspr_preference": aspr_preference,
             "full_rank_preference": partial(full_rank_preference, pair_audit=True),
             "full_rank_preference_unfiltered": full_rank_preference_unfiltered,
             "full_rank_preference_raw": full_rank_preference_raw,
@@ -330,7 +353,9 @@ class RankingPreference(ActionSetPreference):
             "top1_max_preference": top1_max_preference,
             "top1_unfiltered_preference": top1_unfiltered_preference,
         }[method]
-        if method in ("full_rank_preference", "full_rank_preference_unfiltered",
+        if self.use_good_mask:
+            self.statistics = aspr_statistics
+        elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
                       "full_rank_preference_raw", "full_rank_preference_raw_loss"):
             self.statistics = full_rank_statistics
         elif method == "top1_max_preference":
@@ -345,9 +370,12 @@ class RankingPreference(ActionSetPreference):
             self.statistics = topk_high_regret_statistics
 
     def task_loss(self, mac, pool, episodes):
-        batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
-                                  include_good=False, include_old_q=True)
+        batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
+                                     include_good=self.use_good_mask, include_old_q=True)
         legal, decisions = decision_masks(batch)
-        decisions = decisions & (legal.sum(dim=-1) >= 2)
         current_q = unroll(mac, batch, batch.max_seq_length - 1)
+        if self.use_good_mask:
+            return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions,
+                             self.settings, good=good[:, :-1])
+        decisions = decisions & (legal.sum(dim=-1) >= 2)
         return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions, self.settings)

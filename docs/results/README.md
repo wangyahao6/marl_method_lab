@@ -6,7 +6,7 @@
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
-| [SZC · 双层 VDN64 约束方法结果](comparisons/szc-vdn64/README.md) | 追猎者 → 狂热者 → 巨像，33 条独立运行，每阶段 2M 步 | 集中查看 FRPR-Raw、RawLoss、Unfiltered、ReLU、TKPR、T1PR、ASPR、CHI 与 VDN-FT/ER 的逐种子指标、同种子差值和诊断 CSV。 |
+| [SZC · 双层 VDN64 约束方法结果](comparisons/szc-vdn64/README.md) | 追猎者 → 狂热者 → 巨像，33 条独立运行，每阶段 2M 步 | 集中查看 FRPR-Raw、RawLoss、Unfiltered、ReLU、TKPR、T1PR、ASPR-Max、CHI 与 VDN-FT/ER 的逐种子指标、同种子差值和诊断 CSV。 |
 
 ## 回访与阶段干预消融
 

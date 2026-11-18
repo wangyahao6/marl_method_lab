@@ -16,11 +16,13 @@ import train as base
 from hetero_environment import ExactProtoss
 from learners.action_set_preference import (
     ActionSetPreference, batch_episodes, decision_masks, preference_loss,
-    preference_statistics, reference_gaps, set_counts, set_statistics, unroll,
+    reference_gaps, set_counts, set_statistics, unroll,
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
-from action_set_protocol import FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, shared_fork_protocol, validate, validate_fork
+from action_set_protocol import (
+    ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, shared_fork_protocol, validate, validate_fork,
+)
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, save_models
 from common.metrics import Metrics, record_evaluation
@@ -119,15 +121,22 @@ def greedy_runner(args, spec, expected_layout, agent_state, task, seed, *, q_ste
         runner.close_env()
 
 
-def reference_record(runner, batch, episode, *, q_steps=None):
+def reference_record(runner, batch, episode, *, q_steps=None, label_action_sets=False, store_old_q=False):
     if q_steps is not None:
         old_q = th.stack(q_steps)
         if old_q.shape != episode["data"]["avail_actions"].shape:
             raise ValueError("Collected Q values do not align with the stored episode")
         episode["data"]["old_q_values"] = old_q
-        return episode
+        if not label_action_sets:
+            return episode
+        q = old_q[None, :-1]
     batch = batch[:, :runner.t + 1]
-    q = unroll(runner.mac, batch, runner.t)
+    if q_steps is None and store_old_q:
+        old_q = unroll(runner.mac, batch, runner.t + 1)
+        episode["data"]["old_q_values"] = old_q[0].to(dtype=th.float32)
+        q = old_q[:, :-1]
+    elif q_steps is None:
+        q = unroll(runner.mac, batch, runner.t)
     _, decision = decision_masks(batch)
     return episode, reference_gaps(batch, q)[0], decision[0]
 
@@ -174,7 +183,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"]
-    label_action_sets = args.method == "action_set_preference"
+    label_action_sets = args.method in (*ASPR_MAX_METHODS, "aspr_preference")
     q_steps = [] if args.method in RANK_METHODS else None
     with isolated_rollouts():
         for block, offset in enumerate(offsets):
@@ -199,7 +208,8 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     wins += 1
                     if len(successful) >= target:
                         continue
-                    successful.append(reference_record(runner, batch, episode, q_steps=q_steps))
+                    successful.append(reference_record(runner, batch, episode, q_steps=q_steps,
+                                                       label_action_sets=label_action_sets))
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
     labels, diagnostics = {}, {}
     if label_action_sets:
@@ -251,7 +261,8 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
                     if probe_records is not None and index < probe_limit:
                         try:
                             episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
-                            probe_records.append(reference_record(runner, batch, episode))
+                            probe_records.append(reference_record(runner, batch, episode,
+                                                                   store_old_q=args.method == "aspr_preference"))
                         except Exception:
                             log_probe_error(traceback.format_exc())
             if remaining is not None:
@@ -278,7 +289,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         args.capture_timing = True
     logger = base.Logger(logging.getLogger(out.name))
     attach_legacy_metrics(logger, out)
-    metrics = Metrics(out, args.algorithm, args.method, seed, **({"role": role} if role else {}))
+    metric_method = "aspr_max_preference" if args.method in ASPR_MAX_METHODS else args.method
+    metrics = Metrics(out, args.algorithm, metric_method, seed, **({"role": role} if role else {}))
     runner = base.EpisodeRunner(args, logger)
     phase = episode = updates = 0
 
@@ -310,6 +322,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             learner.cuda()
         settings = protocol["action_set"]
         method = protocol["method"]
+        aspr = method == "aspr_preference"
 
         def record_preference(row):
             row["learner_update"] = updates + 1
@@ -319,9 +332,20 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     counts.update(historical["effective_k_histogram"])
                 row["effective_k_histogram"] = dict(counts)
             elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
-                            "full_rank_preference_raw", "full_rank_preference_raw_loss"):
+                            "full_rank_preference_raw", "full_rank_preference_raw_loss", "aspr_preference"):
                 row["pair_filter_stats"] = aggregate_pair_filter_statistics(row["historical_tasks"])
+            if aspr:
+                history = row["historical_tasks"]
+                totals = row["pair_filter_stats"]
+                violations = sum(item["pair_violations"] for item in history)
+                pairs = totals["valid_pairs"]
+                totals.update(pair_violations=violations, pair_violation_rate=violations / pairs if pairs else None)
+                for name in ("average_good_set_size", "singleton_ratio", "all_action_ratio"):
+                    weighted = sum(item[name] * item["decision_states"] for item in history if item["decision_states"])
+                    totals[name] = weighted / row["decision_states"] if row["decision_states"] else None
             base.append(out / f"{update_log}_updates.jsonl", row)
+            if method == "action_set_preference":
+                base.append(out / "action_set_updates.jsonl", row)
             metrics.preference(row, event="preference_update")
 
         def record_gradients(values):
@@ -331,8 +355,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     logger.log_stat(name, value, runner.t_env)
 
         preference = None
-        if method == "action_set_preference" and settings["weight"]:
-            update_log = "action_set"
+        if method in ASPR_MAX_METHODS and settings["weight"]:
+            update_log = "aspr_max_preference"
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
                                              record_preference)
         elif method in RANK_METHODS and protocol[method]["weight"] and role != "release":
@@ -395,7 +419,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             runner.env.restore_distribution(state["environment_distributions"])
             if preference is not None:
                 preference.rng.bit_generator.state = state["preference_rng"]
-                preference.history.restore_success(parent, range(first_phase), require_old_q=method in RANK_METHODS)
+                preference.history.restore_success(parent, range(first_phase),
+                                                   require_old_q=method in RANK_METHODS, require_good=aspr)
             restore_rng(state["rng"])
             base.write(out / "branch_restore.json", dict(
                 parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
@@ -472,7 +497,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             checkpoint = out / "models" / f"phase{phase:04d}_{runner.t_env}"
             save_models(learner, checkpoint)
             reference = agent_snapshot()
-            probe_records = ([] if method == "action_set_preference" and preference is not None
+            probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference") and preference is not None
                              and settings["probe_episodes_per_seed"] else None)
             row = {seen: evaluate(reference, seen, "stage_end", probe_records if seen == task else None)
                    for seen in dict.fromkeys(stage["task"] for stage in stages[:phase + 1])}
@@ -507,14 +532,19 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 for probe in probes.values():
                     try:
                         with th.no_grad():
-                            probe_batch, good = batch_episodes(probe["episodes"], augmented, groups, args.device)
-                            _, _, stats = preference_loss(mac, probe_batch, good, settings["margin"])
+                            if aspr:
+                                _, _, stats = preference.task_loss(mac, probe, probe["episodes"])
+                            else:
+                                probe_batch, good = batch_episodes(probe["episodes"], augmented, groups, args.device)
+                                _, _, stats = preference_loss(mac, probe_batch, good, settings["margin"])
                         row_metrics = dict(
                             phase=phase, t_env=runner.t_env, task=probe["task"],
                             source_phase=probe["source_phase"], delta=probe["delta"],
                             episodes=len(probe["episodes"]), win_rate=row[probe["task"]],
-                            **preference_statistics(stats.cpu().tolist()))
-                        base.append(out / "action_set_probes.jsonl", row_metrics)
+                            **preference.statistics(stats.cpu().tolist()))
+                        base.append(out / f"{update_log}_probes.jsonl", row_metrics)
+                        if method == "action_set_preference":
+                            base.append(out / "action_set_probes.jsonl", row_metrics)
                         metrics.preference(row_metrics, event="fixed_probe")
                     except Exception:
                         probe_error(probe["task"], traceback.format_exc())

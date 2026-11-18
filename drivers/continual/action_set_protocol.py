@@ -7,9 +7,11 @@ TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
+ASPR_MAX_METHODS = ("aspr_max_preference", "action_set_preference")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
-                "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS)
+                "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
+                "aspr_preference")
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
@@ -43,7 +45,7 @@ def settings_with_defaults(values, defaults, required=()):
 
 
 def validate(protocol, algorithm, method):
-    if algorithm not in ALGORITHMS or method not in ("baseline", "action_set_preference", *RANK_METHODS):
+    if algorithm not in ALGORITHMS or method not in ("baseline", *ASPR_MAX_METHODS, *RANK_METHODS):
         raise ValueError("vdn_action_set requires shared recurrent VDN and a supported preference method or baseline")
     if not isinstance(protocol, dict):
         raise ValueError("protocol must be a JSON object")
@@ -107,10 +109,6 @@ def validate(protocol, algorithm, method):
     probes = settings["probe_episodes_per_seed"]
     if type(probes) is not int or probes < 0:
         raise ValueError("action_set.probe_episodes_per_seed must be a nonnegative integer")
-    if method == "action_set_preference" and settings["weight"] and quantile is None:
-        missing = {stage["task"] for stage in stages} - deltas.keys()
-        if missing:
-            raise ValueError(f"action_set.delta_by_task is missing {sorted(missing)}")
     settings["delta_by_task"] = deltas
     candidates = settings["delta_candidates_by_task"]
     if (not isinstance(candidates, dict) or candidates.keys() - tasks.keys()
@@ -144,6 +142,12 @@ def validate(protocol, algorithm, method):
                     bound = "positive" if positive else "nonnegative"
                     raise ValueError(f"{name}.{key} must be finite and {bound}")
             ranking[name] = options
+    uses_sets = ((method in ASPR_MAX_METHODS and settings["weight"])
+                 or (method == "aspr_preference" and ranking[method]["weight"]))
+    if uses_sets and quantile is None:
+        missing = {stage["task"] for stage in stages} - deltas.keys()
+        if missing:
+            raise ValueError(f"action_set.delta_by_task is missing {sorted(missing)}")
     return dict(protocol, algorithm=algorithm, method=method, evaluation=evaluation,
                 action_set=settings, epsilon_on_switch=exploration, **ranking)
 

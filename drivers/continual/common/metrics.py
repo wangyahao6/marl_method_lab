@@ -79,6 +79,9 @@ class Metrics:
         if 'pair_filter_stats' not in row:
             fields += ('valid_pairs',)
         record_top1_max = self.identity['method'] == 'top1_max_preference'
+        if self.identity['method'] == 'aspr_preference' and event == 'fixed_probe':
+            fields += ('candidate_pairs', 'pair_keep_rate', 'pair_violation_rate',
+                       'average_good_set_size', 'singleton_ratio', 'all_action_ratio')
         if record_top1_max:
             fields += ('constrained_top1_flip_rate', 'margin_violation_rate')
         elif self.identity['method'] == 'top1_unfiltered_preference':
