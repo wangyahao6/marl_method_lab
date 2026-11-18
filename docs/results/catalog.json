@@ -122,6 +122,57 @@
       ]
     },
     {
+      "id": "szc-vdn64-tkpr-k1-shared",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64-tkpr-k1-shared/README.md",
+      "files": {
+        "runs": "comparisons/szc-vdn64-tkpr-k1-shared/runs.csv",
+        "evaluations": "comparisons/szc-vdn64-tkpr-k1-shared/evaluations.csv",
+        "learning_curves": "comparisons/szc-vdn64-tkpr-k1-shared/learning_curves.csv",
+        "stage_metrics": "comparisons/szc-vdn64-tkpr-k1-shared/stage_metrics.csv",
+        "paired_metrics": "comparisons/szc-vdn64-tkpr-k1-shared/paired_metrics.csv",
+        "preference_diagnostics": "comparisons/szc-vdn64-tkpr-k1-shared/preference_diagnostics.csv",
+        "gradient_diagnostics": "comparisons/szc-vdn64-tkpr-k1-shared/gradient_diagnostics.csv",
+        "timing_samples": "comparisons/szc-vdn64-tkpr-k1-shared/timing_samples.csv",
+        "timing_summary": "comparisons/szc-vdn64-tkpr-k1-shared/timing_summary.csv",
+        "timing_protocol": "comparisons/szc-vdn64-tkpr-k1-shared/timing_protocol.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_paired_branches",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "primary_control": {
+          "method": "VDN-FT",
+          "role": "shared-branch"
+        },
+        "additional_control": {
+          "method": "TKPR-K1",
+          "role": "shared-branch"
+        },
+        "matched_contrasts": {
+          "file": "paired_metrics",
+          "control_join_key": "control_run_id"
+        }
+      },
+      "interpretation_limits": [
+        "每个种子仅训练一次 S。阶段 0 的评估按 parent_run_id 读取，五个分支不得作为独立 S 样本。",
+        "各分支独立训练 Z 和 C，Z 末采集的历史胜局可随分支而不同。AUC 按各自实际阶段步数计算。",
+        "计时为 Z、C 的配对更新测量，使用相同快照与 TD batch，每阶段 120 对。"
+      ]
+    },
+    {
       "id": "ts4-vdn64-ranking",
       "category": "return-ablations",
       "report": "return-ablations/ts4-vdn64-ranking/README.md",
