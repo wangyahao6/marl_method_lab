@@ -1,6 +1,7 @@
 """Compare a successful ExactProtoss episode with three fresh action-only replays."""
 import argparse
 import copy
+from contextlib import contextmanager
 import gzip
 import hashlib
 import json
@@ -94,7 +95,8 @@ def trace_frame(env):
                 unit_state=units, unit_slots=slots, game_loop=observation.game_loop)
 
 
-def play(env, *, choose=None, source=None, sc2_seed, env_seed):
+@contextmanager
+def initialized_episode(env, *, source=None, sc2_seed, env_seed):
     from pysc2.lib.remote_controller import RemoteController
 
     raw = env.wrapped.env
@@ -135,11 +137,33 @@ def play(env, *, choose=None, source=None, sc2_seed, env_seed):
                         prob_obs_enemy=float(raw.prob_obs_enemy))
         if source is not None:
             restore_rng(source["global_rng_after_reset"])
+        yield dict(
+            sc2_seed=sc2_seed, env_seed=env_seed, create_game_seeds=launches, sc2_pid=pid,
+            sc2_version=portable(version), settings=settings, episode_config=episode_config,
+            position_rng_before=position_before, position_rng_after=position_after,
+            global_rng_before_reset=random_before, global_rng_after_reset=random_after,
+            generated_episode_config_matches=(portable(generated) == source["episode_config"]
+                                              if source is not None else None))
+
+
+def new_seeded_env(env_args, task, env_seed):
+    from hetero_environment import ExactProtoss
+    random.seed(env_seed)
+    np.random.seed(env_seed)
+    th.manual_seed(env_seed)
+    env = ExactProtoss(**dict(copy.deepcopy(env_args), seed=env_seed))
+    env.set_task(task)
+    return env
+
+
+def play(env, *, choose=None, source=None, sc2_seed, env_seed):
+    raw = env.wrapped.env
+    with initialized_episode(env, source=source, sc2_seed=sc2_seed, env_seed=env_seed) as initial:
         frames = []
         done = False
-        for step in range(env.episode_limit if source is None else len(source["steps"])):
+        for step in range(env.episode_limit if choose is not None else len(source["steps"])):
             current = trace_frame(env)
-            actions = choose(current, step) if source is None else source["steps"][step]["actions"]
+            actions = choose(current, step) if choose is not None else source["steps"][step]["actions"]
             if any(not mask[a] for mask, a in zip(current["avail_actions"], actions)):
                 frames.append(dict(current, actions=actions))
                 break
@@ -150,19 +174,12 @@ def play(env, *, choose=None, source=None, sc2_seed, env_seed):
             if done:
                 break
         final = trace_frame(env)
-    return dict(
-        sc2_seed=sc2_seed, env_seed=env_seed, create_game_seeds=launches, sc2_pid=pid,
-        sc2_version=portable(version), force_restarts=raw.force_restarts, settings=settings,
-        episode_config=episode_config, steps=frames, final=final, terminated=bool(done),
-        battle_won=bool(env.last_info.get("battle_won", False)),
-        position_rng_before=position_before, position_rng_after=position_after,
-        global_rng_before_reset=random_before, global_rng_after_reset=random_after,
-        global_rng_after_episode=global_rng(),
-        generated_episode_config_matches=(portable(generated) == source["episode_config"]
-                                          if source is not None else None))
+    return dict(initial, force_restarts=raw.force_restarts, steps=frames, final=final,
+                terminated=bool(done), battle_won=bool(env.last_info.get("battle_won", False)),
+                global_rng_after_episode=global_rng())
 
 
-def differences(reference, actual):
+def trace_comparator():
     first = None
     errors = {}
 
@@ -186,6 +203,16 @@ def differences(reference, actual):
         if first is None:
             first = dict(step=step, field=field, location=path)
 
+    def result():
+        if first is not None:
+            return dict(first, field_max_abs_error=errors.get(first["field"]))
+        return None
+
+    return check, result, errors
+
+
+def differences(reference, actual):
+    check, result, errors = trace_comparator()
     checks = {}
     for field in ("episode_config", "settings", "sc2_version", "create_game_seeds",
                   "position_rng_before", "position_rng_after", "global_rng_before_reset",
@@ -197,13 +224,15 @@ def differences(reference, actual):
     for step, (a, b) in enumerate(zip(reference["steps"], actual["steps"])):
         for field in a:
             check(a[field], b.get(field), step, field)
-    if len(reference["steps"]) != len(actual["steps"]) and first is None:
-        first = dict(step=min(len(reference["steps"]), len(actual["steps"])), field="length", location="")
+    if len(reference["steps"]) != len(actual["steps"]):
+        check(len(reference["steps"]), len(actual["steps"]),
+              min(len(reference["steps"]), len(actual["steps"])), "length")
     check(reference["terminated"], actual["terminated"], len(actual["steps"]), "terminated")
     check(reference["battle_won"], actual["battle_won"], len(actual["steps"]), "battle_won")
     if len(reference["steps"]) == len(actual["steps"]):
         for field, value in reference["final"].items():
             check(value, actual["final"][field], len(actual["steps"]), field)
+    first = result()
     if first is None:
         for field, ok in checks.items():
             if not ok:
@@ -232,7 +261,6 @@ def run(options):
     from action_set_train import base, augmented_scheme
     from common.runtime import episode_spec
     from components.episode_buffer import EpisodeBatch
-    from hetero_environment import ExactProtoss
 
     out.mkdir(parents=True, exist_ok=False)
     th.set_num_threads(1)
@@ -244,14 +272,6 @@ def run(options):
     mac.agent.load_state_dict(th.load(checkpoint, map_location="cpu"))
     mac.agent.eval().requires_grad_(False)
     batch = EpisodeBatch(scheme, groups, 1, info["episode_limit"] + 1, preprocess=preprocess)
-
-    def new_env():
-        random.seed(env_seed)
-        np.random.seed(env_seed)
-        th.manual_seed(env_seed)
-        env = ExactProtoss(**dict(copy.deepcopy(config["env_args"]), seed=env_seed))
-        env.set_task(options.task)
-        return env
 
     def choose(frame, step):
         batch.update({key: np.asarray(frame[key])[None, ...]
@@ -267,7 +287,7 @@ def run(options):
                     source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                     script_sha256=sha(Path(__file__)), argv=shlex.join([sys.executable, *sys.argv]))
     write(out / "metadata.json", metadata)
-    env = new_env()
+    env = new_seeded_env(config["env_args"], options.task, env_seed)
     try:
         mac.init_hidden(1)
         with th.inference_mode():
@@ -284,7 +304,7 @@ def run(options):
     results = []
     pids = {source["sc2_pid"]}
     for index in range(1, REPLAYS + 1):
-        env = new_env()
+        env = new_seeded_env(config["env_args"], options.task, env_seed)
         try:
             replay = play(env, source=source, sc2_seed=sc2_seed, env_seed=env_seed)
             store_trace(out / f"replay_{index}.json.gz", replay)

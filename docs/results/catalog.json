@@ -376,6 +376,37 @@
         "同批方法比较只有 seed 1111。其他两个 FRPR 端点使用较早训练实现。",
         "C 与 D 执行相同旧策略。同一旧权重的 C/D 分别共享各自的环境运行。"
       ]
+    },
+    {
+      "id": "szc-vdn64-counterfactual-action",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-counterfactual-action/README.md",
+      "files": {
+        "manifest": "behavioral-analysis/szc-vdn64-counterfactual-action/manifest.json",
+        "sites": "behavioral-analysis/szc-vdn64-counterfactual-action/sites.json",
+        "branches": "behavioral-analysis/szc-vdn64-counterfactual-action/branches.json",
+        "rnn_summary": "behavioral-analysis/szc-vdn64-counterfactual-action/rnn_summary.json",
+        "rnn_trace": "behavioral-analysis/szc-vdn64-counterfactual-action/rnn_trace.json.gz"
+      },
+      "task_order": [
+        "stalker"
+      ],
+      "training_seeds": [
+        1111
+      ],
+      "comparison": {
+        "kind": "single_agent_counterfactual",
+        "key": [
+          "trajectory_id",
+          "timestep",
+          "agent_id",
+          "action"
+        ]
+      },
+      "interpretation_limits": [
+        "覆盖单条 S 胜局、三个决策点与冻结旧策略的后续贪婪执行。",
+        "分组依据为该分支的终局胜负和有效性。"
+      ]
     }
   ]
 }

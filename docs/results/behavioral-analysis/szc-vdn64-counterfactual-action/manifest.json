@@ -1,0 +1,14 @@
+{
+  "source": "/home/wyh/marl_method_lab/results/smacv2_exact_replay_20261118_attempt001/evidence",
+  "source_sha256": "57022652b1192244e004a2a6cc64680431deb61427a598e3d41950d952528890",
+  "source_report_commit": "1401aeb",
+  "checkpoint": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+  "checkpoint_sha256": "158e651caa6b659f2d6f45994afe8e9df40ab8145382dba285de491f8629f477",
+  "source_commit": "54143d1fed9268aa82c399eb930f4a7d3778bc44",
+  "script_sha256": "eb6a01609b62902fa471a94d6a0bfad1402b523fdd0b18c10316aff0c80c72e7",
+  "replay_helper_sha256": "b4a940f792b396e2614e74e35174d85eaf99ef61e4bb4661ab371b3268018439",
+  "argv": "/home/wyh/marl_method_lab/.venv/bin/python /home/wyh/marl_method_lab/scripts/verify_smacv2_counterfactual.py --source /home/wyh/marl_method_lab/results/smacv2_exact_replay_20261118_attempt001/evidence --output /home/wyh/marl_method_lab/results/smacv2_counterfactual_20261118_attempt001/evidence",
+  "task": "stalker",
+  "env_seed": 91101,
+  "sc2_seed": 91101
+}
