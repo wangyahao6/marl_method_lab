@@ -49,6 +49,7 @@ def agent_gradient_metrics(agent, td_loss, weighted_pref_loss):
             if isfinite(value):
                 cosine = max(-1.0, min(1.0, value))
     return dict(td_grad_norm_agent=td_norm, preference_grad_norm_agent=pref_norm,
+                preference_grad_nonzero_agent=(pref_norm > 0 if pref_norm is not None else None),
                 preference_td_grad_ratio=ratio, td_preference_grad_cosine=cosine)
 
 

@@ -34,6 +34,7 @@ def trhr_settings(parser, overrides):
 def main():
     sys.path.insert(0, str(ROOT / 'drivers/continual'))
     from action_set_protocol import FORK_ROLES, RANK_METHODS, validate, validate_fork
+    from common.exploration import epsilon_on_switch
     preference_methods = ('action_set_preference', *RANK_METHODS)
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
@@ -388,7 +389,10 @@ def main():
         command=[sys.executable,str(ROOT/'drivers/continual/train.py'),'--algorithm',a.algorithm,'--condition',a.method,'--scenario',a.scenario,'--seed',str(a.seed)]
         details={'protocol':protocol,'scenario':a.scenario,'steps':protocol['scenarios'][a.scenario][-1][0]}
     if 'protocol' in details and a.suite != 'network_similarity':
-        protocol.setdefault('epsilon_on_switch', 'per_task')
+        try:
+            protocol['epsilon_on_switch'] = epsilon_on_switch(protocol)
+        except ValueError as exc:
+            p.error(str(exc))
     configurable_replay = (a.suite in ('ts3', 'ts4', 'ts5', 'ts6', 'ts7', 'ts8', 'history')
                            and a.algorithm in ('vdn', 'vdn_1ff', 'vdn_1ff_128')
                            and a.ts3_role != 'eval_fwt')

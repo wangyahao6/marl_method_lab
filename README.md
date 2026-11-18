@@ -10,6 +10,7 @@ MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本�
 - [MEAL 设计参考](docs/MEAL_DESIGN_REFERENCE.md)：神经元效用、历史重要性与梯度约束的参考材料；未接入训练，对照实验待自己的方法确定并取得初步结果后再设计。
 - [持续学习驱动架构](docs/CONTINUAL_ARCHITECTURE.md)
 - [实验用法](docs/EXPERIMENTS.md)：以后如何描述实验、运行与评价入口。
+- 新持续学习实验统一使用 `epsilon_on_switch: per_task`，每次任务切换从 `epsilon_start` 重新退火。 [配置与历史复现说明](configs/continual/README.md)
 - [来源与修改](docs/PROVENANCE.md)：上游、导入的方法、许可证差异、运行时依赖。
 
 ## 目录职责

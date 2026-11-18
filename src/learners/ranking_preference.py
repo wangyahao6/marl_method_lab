@@ -120,13 +120,17 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         histogram.scatter_add_(0, effective_k.reshape(-1), (pair_counts > 0).long().reshape(-1))
         summary = th.cat((summary, th.stack((violations, effective_k_sum, clipped)), histogram[1:]))
     if confidence_weighted:
-        summary = th.cat((summary, th.stack((mean_confidence, (valid & (confidence == 0)).sum()))))
+        summary = th.cat((summary, th.stack((mean_confidence, (valid & (confidence == 0)).sum(),
+                                              (valid & (weights != 0)).sum()))))
     if high_regret:
         hr_loss, active, regret = high_regret_penalty(current_q, reference_q, legal, decisions, scale, settings)
         count = ((pair_counts > 0) | active).sum()
-        loss = loss + settings["hr_weight"] * hr_loss
+        base_loss = loss
+        extra_loss = settings["hr_weight"] * hr_loss
+        loss = base_loss + extra_loss
         summary = th.cat((loss.detach().reshape(1), summary[1:],
-                          th.stack((active.sum(), hr_loss.detach(), regret))))
+                          th.stack((active.sum(), hr_loss.detach(), regret,
+                                    base_loss.detach(), extra_loss.detach()))))
     return loss, count, summary
 
 
@@ -248,17 +252,26 @@ def topk_statistics(summary):
 
 
 def topk_weighted_statistics(summary):
-    stats = topk_statistics(summary[:-2])
-    confidence, zero = summary[-2:]
-    stats.update(mean_state_confidence=confidence if stats["valid_states"] else None,
-                 zero_confidence_states=int(zero))
+    stats = topk_statistics(summary[:-3])
+    confidence, zero, nonzero = summary[-3:]
+    valid, decisions = stats["valid_states"], stats["decision_states"]
+    stats.update(mean_state_confidence=confidence if valid else None,
+                 zero_confidence_states=int(zero),
+                 nonzero_weight_states=int(nonzero),
+                 nonzero_weight_coverage=nonzero / decisions if decisions else None,
+                 nonzero_weight_fraction_of_valid=nonzero / valid if valid else None)
     return stats
 
 
 def topk_high_regret_statistics(summary):
-    stats = topk_statistics(summary[:-3])
-    count, loss, regret = summary[-3:]
-    stats.update(high_regret_states=int(count), high_regret_loss=loss if count else None,
+    stats = topk_statistics(summary[:-5])
+    count, loss, regret, base_loss, extra_loss = summary[-5:]
+    decisions = stats["decision_states"]
+    stats.update(high_regret_states=int(count),
+                 high_regret_fraction=count / decisions if decisions else None,
+                 high_regret_loss=loss if count else None,
+                 base_preference_loss=base_loss,
+                 weighted_high_regret_loss=extra_loss,
                  mean_high_regret=regret if count else None)
     if count:
         stats["loss"] = summary[0]

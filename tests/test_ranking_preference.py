@@ -1,6 +1,8 @@
 """Ranking loss checks and CPU sequence tests with real VDN/GRU."""
 import copy
 import json
+import subprocess
+import sys
 import logging
 from pathlib import Path
 from types import SimpleNamespace
@@ -432,6 +434,29 @@ class RankingTest(unittest.TestCase):
         self.assertEqual(stats["valid_states"], 2)
         self.assertEqual(stats["effective_k_histogram"], {"1": 1, "2": 0, "3": 1})
 
+    def test_action_set_exploration_defaults_and_history(self):
+        raw = json.loads(PROTOCOL_PATH.read_text())
+        raw.pop("epsilon_on_switch", None)
+        for requested in (None, "per_task", "cumulative_no_restart"):
+            protocol = dict(raw)
+            if requested is not None:
+                protocol["epsilon_on_switch"] = requested
+            expected = requested or "per_task"
+            with self.subTest(mode=requested), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "protocol.json"
+                path.write_text(json.dumps(protocol))
+                preview = json.loads(subprocess.check_output([
+                    sys.executable, "scripts/run.py", "--suite", "vdn_action_set",
+                    "--algorithm", "vdn", "--method", "topk_preference", "--seed", "1",
+                    "--protocol", str(path), "--run-id", "epsilon_config_test", "--dry-run",
+                ], cwd=driver.ROOT, text=True))["details"]["protocol"]
+                validated = driver.validate(protocol, "vdn", "topk_preference")
+                self.assertEqual(preview["epsilon_on_switch"], expected)
+                self.assertEqual(validated["epsilon_on_switch"], expected)
+                self.assertEqual(driver.config(preview, 1, Path(tmp))["epsilon_on_switch"], expected)
+                validated.pop("epsilon_on_switch")
+                self.assertEqual(driver.config(validated, 1, Path(tmp))["epsilon_on_switch"], "per_task")
+
     def test_agent_gradient_metrics_use_weighted_gradients_without_accumulation(self):
         agent = th.nn.Linear(2, 1, bias=True)
         mixer = th.nn.Parameter(th.tensor(2.))
@@ -439,7 +464,8 @@ class RankingTest(unittest.TestCase):
         td = (agent.weight * th.tensor([[3., 4.]])).sum() * mixer
         pref = 2 * (agent.weight * th.tensor([[-3., -4.]])).sum()
         expected = dict(td_grad_norm_agent=10., preference_grad_norm_agent=10.,
-                        preference_td_grad_ratio=1., td_preference_grad_cosine=-1.)
+                        preference_td_grad_ratio=1., td_preference_grad_cosine=-1.,
+                        preference_grad_nonzero_agent=True)
         self.assertEqual(agent_gradient_metrics(agent, td, pref), expected)
         self.assertTrue(th.equal(agent.weight.grad, th.ones_like(agent.weight)))
         self.assertIsNone(agent.bias.grad)
@@ -449,6 +475,13 @@ class RankingTest(unittest.TestCase):
         self.assertTrue(all(value is None for value in missing.values()))
         self.assertIsNone(agent_gradient_metrics(agent, td, mixer)["preference_grad_norm_agent"])
         self.assertIsNone(agent_gradient_metrics(agent, td, pref * th.inf)["preference_grad_norm_agent"])
+        contrast = agent.weight.sum()
+        nonzero_loss = 1. + contrast * 0.
+        zero_loss = contrast - contrast.detach()
+        self.assertEqual(nonzero_loss.item(), 1.)
+        self.assertFalse(agent_gradient_metrics(agent, td, nonzero_loss)["preference_grad_nonzero_agent"])
+        self.assertEqual(zero_loss.item(), 0.)
+        self.assertTrue(agent_gradient_metrics(agent, td, zero_loss)["preference_grad_nonzero_agent"])
         (td + pref).backward()
         self.assertIsNotNone(mixer.grad)
 
@@ -492,11 +525,21 @@ class RankingTest(unittest.TestCase):
                                         for row in phase0))
                     metrics = jsonlines(run / "experiment_metrics.jsonl")
                     monitor = [row for row in metrics if row["context"].get("event") == "gradient_monitor"]
-                    self.assertEqual(len(monitor), len(updates) // 100 * 4 if interval else 0)
+                    self.assertEqual(len(monitor), len(updates) // 100 * 5 if interval else 0)
+                    flags = {row["context"]["learner_update"]: row["value"] for row in metrics
+                             if row["metric"] == "preference_loss_nonzero"}
+                    self.assertEqual(flags, {i: float(row["preference_loss"] != 0)
+                                            for i, row in enumerate(updates, 1)})
                     if interval:
                         auxiliary = [row for row in monitor if row["metric"] == "preference_grad_norm_agent"]
                         self.assertEqual([row["context"]["learner_update"] for row in auxiliary],
                                          list(range(100, len(updates) + 1, 100)))
+                        observed = {row["context"]["learner_update"]: row["value"] for row in monitor
+                                    if row["metric"] == "preference_grad_nonzero_agent"}
+                        self.assertEqual(observed, {
+                            row["context"]["learner_update"]: (None if row["value"] is None
+                                                              else float(row["value"] > 0))
+                            for row in auxiliary})
                         self.assertIsNone(auxiliary[0]["value"])
                         self.assertTrue(any(row["value"] is not None for row in auxiliary[1:]))
                     if k is not None:

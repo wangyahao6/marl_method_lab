@@ -25,6 +25,7 @@ from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, save_models
 from common.metrics import Metrics, record_evaluation
 from common.records import attach_legacy_metrics
+from common.exploration import epsilon_on_switch
 from common.runtime import episode_spec, restore_rng, rng_state, td_sample
 from drivers.continual.memory import History, PreferenceHistory
 from drivers.continual.memory.episodes import pack_episode
@@ -47,7 +48,7 @@ def config(protocol, seed, out):
                device="cuda:0" if use_cuda else "cpu", local_results_path=str(out),
                algorithm=protocol["algorithm"], method=protocol["method"],
                t_max=sum(stage["steps"] for stage in protocol["stages"]),
-               epsilon_on_switch=protocol.get("epsilon_on_switch", "per_task"),
+               epsilon_on_switch=epsilon_on_switch(protocol),
                replay_on_switch=protocol.get("replay_on_switch", "ft"),
                gradient_monitor_interval=protocol.get("gradient_monitor_interval", 0),
                action_set=protocol["action_set"])
@@ -311,6 +312,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         method = protocol["method"]
 
         def record_preference(row):
+            row["learner_update"] = updates + 1
             if method in ("topk_preference", *TOPK_VARIANTS):
                 counts = Counter()
                 for historical in row["historical_tasks"]:
@@ -364,8 +366,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         if parent:
             state = th.load(parent / "return_state.th", map_location="cpu")
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
-            same_protocol = (shared_fork_protocol(state["protocol"]) == shared_fork_protocol(protocol)
-                             if role == "shared-branch" else state["protocol"] == protocol)
+            # Older direct launches used per-task exploration when the field was absent.
+            parent_protocol = {"epsilon_on_switch": "per_task", **state["protocol"]}
+            same_protocol = (shared_fork_protocol(parent_protocol) == shared_fork_protocol(protocol)
+                             if role == "shared-branch" else parent_protocol == protocol)
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())

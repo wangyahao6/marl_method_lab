@@ -180,7 +180,8 @@ class ActionSetPreference:
             row.update(self.statistics(values[offset:end]))
             offset = end
         self.log(dict(phase=self.phase, task=self.task, t_env=t_env, td_loss=values[0],
-                      total_loss=values[1], preference_loss=values[2], historical_tasks=rows,
+                      total_loss=values[1], preference_loss=values[2],
+                      preference_loss_nonzero=values[2] != 0, historical_tasks=rows,
                       historical_episode_count=sum(row["sampled_episodes"] for row in rows),
                       preference_prepare_seconds=elapsed, preference_forward_cuda_seconds=forward_cuda_seconds,
                       learner_update_seconds=update_seconds))

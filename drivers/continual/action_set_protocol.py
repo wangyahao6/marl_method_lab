@@ -1,6 +1,8 @@
 """Configuration for the standalone VDN action-set sequence."""
 from math import isfinite
 
+from common.exploration import epsilon_on_switch
+
 TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch")
 
@@ -71,8 +73,7 @@ def validate(protocol, algorithm, method):
 
     if protocol.get("phase_boundary", "relative") not in ("relative", "cumulative"):
         raise ValueError("phase_boundary must be relative or cumulative")
-    if protocol.get("epsilon_on_switch", "per_task") not in ("per_task", "cumulative_no_restart"):
-        raise ValueError("invalid epsilon_on_switch")
+    exploration = epsilon_on_switch(protocol)
 
     evaluation = settings_with_defaults(protocol.get("evaluation", {}), EVAL_DEFAULTS)
     if (not valid_seeds(evaluation["seeds"]) or not positive_integer(evaluation["episodes_per_seed"])
@@ -144,7 +145,7 @@ def validate(protocol, algorithm, method):
                     raise ValueError(f"{name}.{key} must be finite and {bound}")
             ranking[name] = options
     return dict(protocol, algorithm=algorithm, method=method, evaluation=evaluation,
-                action_set=settings, **ranking)
+                action_set=settings, epsilon_on_switch=exploration, **ranking)
 
 
 def validate_fork(protocol, role, parent):

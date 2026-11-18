@@ -60,7 +60,7 @@ MEAL 的成熟期意味着暂时不再替换；我们的 TRHR 是补偿而非重
 
 [vdn.py](../references/meal/upstream/experiments/algos/vdn.py) 保留 online/target，切换时重置 optimizer、n_updates 和 grad_steps，重新开始 epsilon 进度。它没有我们这种长期训练 replay，且支持显式任务 ID/多头。不要为了借鉴 CL 状态就改变执行策略的信息、输出头、优化器或回放规则。
 
-本仓库现在已有 epsilon_on_switch 和阶段日志：drivers/continual/train.py 的 log_task_epsilon、ts3_train.py 的边界调用；缺省 per_task 已出现在当前公共驱动中。旧批次累计 epsilon 记录不是当前源码的默认值证明。本次不重复实现探索重置，也不改变其配置。
+仓库已有 `epsilon_on_switch` 和 `log_task_epsilon` 阶段日志。新实验使用逐任务 ε 退火，历史对照采用各自的启动协议。 [配置索引](../configs/continual/README.md)
 
 当前 QLearner 已在在线 TD 前向使用 capture_activity，TRHR 与 A2 trace 复用统计入口。新统计应在同一有效样本口径下设计，避免另外注册无差别 forward hook。TRHR 按 window_updates 和有效条件处理低活动，详见 [TRHR](TRHR.md)。
 

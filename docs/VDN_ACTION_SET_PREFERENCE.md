@@ -149,7 +149,7 @@ cd /home/wyh/marl_method_lab
 
 ## SZC T1PR 第二版协议
 
-`configs/continual/szc_vdn64_t1pr_max.json` 沿用第一版 SZC 协议的任务顺序、预算、累计探索和评估设置。使用同一训练种子可分别预览两种方法。
+`configs/continual/szc_vdn64_t1pr_max.json` 沿用第一版 SZC 协议的任务顺序、预算和评估设置，使用项目标准的逐任务 ε 退火。用同一协议及训练种子预览两种方法。
 
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
@@ -157,12 +157,12 @@ cd /home/wyh/marl_method_lab
   --protocol configs/continual/szc_vdn64_t1pr_max.json --dry-run
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method top1_preference --seed 3535 --run-id szc_t1pr_3535 \
-  --protocol configs/continual/szc_vdn64_t1pr.json --dry-run
+  --protocol configs/continual/szc_vdn64_t1pr_max.json --dry-run
 ```
 
 ## SZC T1PR 无阈值协议
 
-`configs/continual/szc_vdn64_t1pr_unfiltered.json` 使用第一版 SZC 协议的任务顺序、步数、累计探索和评估设置。方法配置接受 `weight`、`temperature` 和 `q_scale_floor`，默认分别为 1.0、1.0 和 0.1。
+`configs/continual/szc_vdn64_t1pr_unfiltered.json` 使用第一版 SZC 协议的任务顺序、步数和评估设置，使用逐任务 ε 退火。方法配置接受 `weight`、`temperature` 和 `q_scale_floor`，默认分别为 1.0、1.0 和 0.1。
 
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
@@ -178,7 +178,7 @@ cd /home/wyh/marl_method_lab
 
 TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top-2 的间隔筛选整个决策，并给损失乘以置信度。在 K 覆盖全部合法动作中除最后一名外的排名时，每个有效动作对都被覆盖，TKPR 的损失和梯度等于 FRPR Softplus。
 
-`topk_preference` 配置接受 `weight`、`temperature`、`min_gap`、`q_scale_floor` 和 `k`，默认依次为 1.0、1.0、0.5、0.1 和 2。K 为正整数，运行时上限为环境的 `n_actions - 1`。SZC 协议沿用 `szc_vdn64_t1pr.json` 的任务、预算和评估，每阶段用 `epsilon_on_switch: per_task` 从初始 ε 重新退火。
+`topk_preference` 配置接受 `weight`、`temperature`、`min_gap`、`q_scale_floor` 和 `k`，默认依次为 1.0、1.0、0.5、0.1 和 2。K 为正整数，运行时上限为环境的 `n_actions - 1`。通用 SZC TKPR 示例沿用 `szc_vdn64_t1pr.json` 的任务、预算和评估，使用 `per_task`。K 值消融与共享 S 前缀协议也显式使用逐任务 ε 退火。 [配置索引](../configs/continual/README.md)
 
 `topk_preference_updates.jsonl` 和统一指标文件记录有效状态数、覆盖率、有效动作对数、Top-1 翻转率及以下诊断。
 
@@ -251,3 +251,10 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
 - **TKPR-K1-W** 通过 `topk_preference_weighted` 使用。旧 Top-1 与 Top-2 的差值除以原 TKPR 的冻结旧 Q 尺度得到置信度。对每个历史任务本次回放中至少有一个合格动作对的决策，除以这些决策的平均置信度，使权重均值为 1，再乘状态内动作对平均损失。若这批合格决策的置信度全为零，则采用均匀权重。
 - **TKPR-K1-HR** 通过 `topk_preference_high_regret` 使用。仅考虑合法动作上的有效决策。当新、旧贪婪动作不同，且旧模型对旧最优动作与新最优动作的 Q 差除以旧 Q 尺度达到 0.5，计算额外 `softplus((Q_new[new_best] - Q_new[old_best]) / old_scale / hr_temperature)`。每个历史任务对触发状态取平均，再以权重 1 加到原 TKPR-K1 的任务损失，温度为 1。贪婪动作并列时取动作索引最小者。无触发状态时额外项为零。
 - **配对计时** 在 K1 分支启用 `--capture-timing`，在 Z、C 进度约 25%、50%、75% 时保存更新前的真实 TD batch、在线／目标网络、优化器状态及偏好采样 RNG。单独运行 `scripts/benchmark_szc_tkpr_k1.py`。每个快照对两个条件分别预热 5 次并配对测量 20 次，交替顺序，GPU 前后同步。每次在计时区间外恢复同一状态。计时包括 learner 更新中的偏好采样、前向、反传和优化，文件写入、TD 抽样、环境交互及梯度诊断在区间外。
+
+### 偏好约束的生效诊断
+
+- `valid_pairs` 统计通过方法筛选的动作对。`preference_loss_nonzero` 统计每次更新聚合后的偏好损失标量是否非零，取全局偏好权重乘入前的值。
+- TKPR-K1-Weighted 的 `nonzero_weight_states` 按实际乘入损失的权重计数。全零置信度触发原有均匀权重回退时，这些有效状态也计入。`nonzero_weight_coverage` 以全部决策为分母，`nonzero_weight_fraction_of_valid` 以筛选后有有效动作对的状态为分母。
+- TKPR-K1-High-Regret 的 `high_regret_states` 和 `high_regret_fraction` 记录达到阈值的状态数及其占全部决策的比例。`base_preference_loss` 是原 K1 项，`high_regret_loss` 是激活状态上的额外项均值，`weighted_high_regret_loss` 是乘 `hr_weight` 后加入基础项的值。
+- `preference_grad_nonzero_agent` 根据加权偏好项对 Agent 参数实测的梯度范数计算，记录优化器、裁剪及 TD 合并前的梯度贡献。未定义的梯度记 null。采样频率沿用 `gradient_monitor_interval`，并用 `learner_update` 对齐偏好日志和梯度指标。

@@ -9,6 +9,7 @@ from common.checkpoints import (continuation_state, restore_networks_and_optimiz
 from common.evaluation import evaluate_block, fixed_seed_plan
 from common.metrics import Metrics, record_evaluation
 from common.records import attach_legacy_metrics
+from common.exploration import epsilon_on_switch
 from common.runtime import begin_environment_audit, episode_spec, log_phase_end, restore_rng, td_sample
 import numpy as np
 import torch as th
@@ -24,7 +25,7 @@ def config(seed,out):
     cfg={}
     for f in ['src/config/default.yaml','vendor/smacv2/smacv2/examples/configs/sc2_gen_protoss.yaml','src/config/algs/qmix.yaml']:base.merge(cfg,yaml.safe_load((ROOT/f).read_text()))
     cfg.update(seed=seed,device='cuda:0',use_cuda=True,env='hetero_protoss',batch_size=32,buffer_size=5000,lr=.0005,target_update_interval=200,hypernet_embed=64,test_nepisode=32,test_interval=25000,t_max=2500000,local_results_path=str(out),unique_token=out.name,save_model=False)
-    cfg['epsilon_on_switch'] = base.PROTOCOL.get('epsilon_on_switch', 'per_task')
+    cfg['epsilon_on_switch'] = epsilon_on_switch(base.PROTOCOL)
     cfg['env_args'].update(seed=seed,game_version='4.10');return cfg
 
 

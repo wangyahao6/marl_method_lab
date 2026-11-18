@@ -10,6 +10,8 @@ from unittest.mock import Mock
 import numpy as np
 import torch as th
 
+from components.action_selectors import EpsilonGreedyActionSelector
+from drivers.continual.common.exploration import epsilon_on_switch
 from drivers.continual.common.checkpoints import (
     continuation_state, parameter_hash, restore_networks_and_optimizer, save_stage_models,
 )
@@ -91,21 +93,31 @@ class CommonTest(unittest.TestCase):
             self.assertEqual((targets['t_env'], targets['episode'], targets['updates']), (234, 16, 14))
 
     def test_epsilon_events_preserve_reset_policy_and_rng(self):
-        selector = Mock()
-        selector.exploration_steps.return_value = 0
-        selector.training_epsilon.return_value = 1.0
-        runner = SimpleNamespace(mac=SimpleNamespace(action_selector=selector), t_env=52,
-                                 args=SimpleNamespace(epsilon_on_switch='per_task'))
-        with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp)
-            log_task_epsilon(runner, out, 1, 'A', 'start')
-            log_task_epsilon(runner, out, 1, 'A', 'end')
-            runner.args.epsilon_on_switch = 'cumulative'
-            log_task_epsilon(runner, out, 2, 'B', 'start')
-            selector.reset_exploration.assert_called_once_with(52)
-            self.assertEqual(rows(out/'task_epsilon.jsonl')[0], dict(
-                event='start', phase=1, task='A', t_env=52, exploration_steps=0,
-                epsilon=1., schedule='per_task'))
+        self.assertEqual(epsilon_on_switch({}), "per_task")
+        with self.assertRaisesRegex(ValueError, "epsilon_on_switch"):
+            epsilon_on_switch({"epsilon_on_switch": "cumulative"})
+        for mode, steps, epsilon in (("cumulative_no_restart", 40, .64), ("per_task", 0, 1.)):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as tmp:
+                selector = EpsilonGreedyActionSelector(SimpleNamespace(
+                    epsilon_start=1., epsilon_finish=.1, epsilon_anneal_time=100))
+                runner = SimpleNamespace(mac=SimpleNamespace(action_selector=selector), t_env=0,
+                                         args=SimpleNamespace(epsilon_on_switch=mode))
+                out = Path(tmp)
+                log_task_epsilon(runner, out, 0, 'A', 'start')
+                runner.t_env = 40
+                log_task_epsilon(runner, out, 0, 'A', 'end')
+                log_task_epsilon(runner, out, 1, 'B', 'start')
+                _, end, start = rows(out/'task_epsilon.jsonl')
+                self.assertAlmostEqual(end["epsilon"], .64)
+                self.assertEqual(start["exploration_steps"], steps)
+                self.assertAlmostEqual(start["epsilon"], epsilon)
+                self.assertAlmostEqual(selector.training_epsilon(50), epsilon - .09)
+                self.assertAlmostEqual(selector.training_epsilon(140), .1)
+                runner.t_env = 150
+                log_task_epsilon(runner, out, 2, 'C', 'start')
+                last = rows(out/'task_epsilon.jsonl')[-1]
+                self.assertAlmostEqual(last["epsilon"], 1. if mode == 'per_task' else .1)
+                self.assertEqual(last["exploration_steps"], 0 if mode == 'per_task' else 150)
         saved = rng_state()
         try:
             expected = (random.random(), np.random.rand(), th.rand(()).item())

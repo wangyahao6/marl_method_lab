@@ -50,6 +50,9 @@ class SharedTKPRTest(unittest.TestCase):
         stats = topk_weighted_statistics(summary.tolist())
         self.assertAlmostEqual(stats["mean_state_confidence"], confidence.mean().item())
         self.assertEqual(stats["zero_confidence_states"], 1)
+        self.assertEqual(stats["nonzero_weight_states"], 2)
+        self.assertAlmostEqual(stats["nonzero_weight_coverage"], 2 / 3)
+        self.assertAlmostEqual(stats["nonzero_weight_fraction_of_valid"], 2 / 3)
         self.assertEqual(stats["valid_pairs"], 5)
         expected_grad = th.autograd.grad(expected, new)[0]
         loss.backward()
@@ -65,6 +68,12 @@ class SharedTKPRTest(unittest.TestCase):
         b = topk_preference(new, old, legal, decisions, TOPK_WEIGHTED_DEFAULTS)
         th.testing.assert_close(a[0], b[0])
         self.assertEqual(a[1].item(), 1)
+        stats = topk_weighted_statistics(a[2].tolist())
+        self.assertEqual(stats["zero_confidence_states"], 1)
+        self.assertEqual(stats["nonzero_weight_states"], 1)
+        self.assertEqual(stats["nonzero_weight_coverage"], 1.)
+        _, _, summary = topk_preference_weighted(new, old, legal, ~decisions, TOPK_WEIGHTED_DEFAULTS)
+        self.assertIsNone(topk_weighted_statistics(summary.tolist())["nonzero_weight_coverage"])
 
     def test_high_regret_only_adds_loss_for_legal_changed_actions_at_threshold(self):
         old = th.tensor([[1., 0., 0.], [1., .1, 0.], [1., 0., 0.], [1., 0., 0.], [1., 0., 0.]],
@@ -82,6 +91,15 @@ class SharedTKPRTest(unittest.TestCase):
         stats = topk_high_regret_statistics(summary.tolist())
         self.assertEqual(stats["high_regret_states"], 1)
         self.assertEqual(stats["mean_high_regret"], 0.5)
+        self.assertEqual(stats["high_regret_fraction"], 1 / 4)
+        self.assertAlmostEqual(stats["base_preference_loss"], base.item())
+        self.assertAlmostEqual(stats["weighted_high_regret_loss"], extra.item())
+        disabled_loss, _, disabled_summary = topk_preference_high_regret(
+            new, old, legal, decisions, dict(settings, hr_weight=0.))
+        th.testing.assert_close(disabled_loss, base)
+        disabled = topk_high_regret_statistics(disabled_summary.tolist())
+        self.assertEqual(disabled["high_regret_states"], 1)
+        self.assertEqual(disabled["weighted_high_regret_loss"], 0.)
         th.testing.assert_close(th.autograd.grad(loss - base, new)[0], th.autograd.grad(extra, new)[0])
         self.assertIsNone(old.grad)
 

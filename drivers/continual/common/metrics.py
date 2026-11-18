@@ -75,6 +75,8 @@ class Metrics:
 
     def preference(self, row, event):
         fields = ('loss', 'violation_ratio', 'greedy_outside_ratio', 'top1_flip_rate', 'coverage')
+        if 'pair_filter_stats' not in row:
+            fields += ('valid_pairs',)
         record_top1_max = self.identity['method'] == 'top1_max_preference'
         if record_top1_max:
             fields += ('valid_states', 'constrained_top1_flip_rate', 'margin_violation_rate')
@@ -82,19 +84,27 @@ class Metrics:
             fields += ('mean_constrained_confidence',)
         elif self.identity['method'] in ('topk_preference', 'topk_preference_weighted',
                                            'topk_preference_high_regret'):
-            fields += ('valid_states', 'valid_pairs', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
+            fields += ('valid_states', 'pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
                        'effective_k_histogram', 'mean_state_confidence', 'zero_confidence_states',
-                       'high_regret_states', 'high_regret_loss', 'mean_high_regret')
+                       'nonzero_weight_states', 'nonzero_weight_coverage', 'nonzero_weight_fraction_of_valid',
+                       'high_regret_states', 'high_regret_fraction', 'high_regret_loss', 'mean_high_regret',
+                       'base_preference_loss', 'weighted_high_regret_loss')
+
+        context = dict(event=event)
+        if 'learner_update' in row:
+            context['learner_update'] = row['learner_update']
 
         def measurements():
             if record_top1_max:
-                yield 'preference_loss', row['preference_loss'], dict(event=event)
+                yield 'preference_loss', row['preference_loss'], context
+            if 'preference_loss_nonzero' in row:
+                yield 'preference_loss_nonzero', row['preference_loss_nonzero'], dict(context, scope='update')
             if 'effective_k_histogram' in row:
-                yield 'effective_k_histogram', row['effective_k_histogram'], dict(event=event, scope='update')
+                yield 'effective_k_histogram', row['effective_k_histogram'], dict(context, scope='update')
             for item in row.get('historical_tasks', [row]):
-                context = dict(event=event, source_task=item['task'], source_phase=item['source_phase'])
+                source = dict(context, source_task=item['task'], source_phase=item['source_phase'])
                 for name in fields:
-                    yield name, item.get(name), context
+                    yield name, item.get(name), source
 
         self._write('Mechanism', row['phase'], row['task'], row['t_env'], measurements())
         if 'pair_filter_stats' in row:
@@ -102,12 +112,12 @@ class Metrics:
 
             def pair_measurements():
                 for name, value in totals.items():
-                    yield name, value, dict(event=event, scope='update')
+                    yield name, value, dict(context, scope='update')
                 for item in row['historical_tasks']:
-                    context = dict(event=event, scope='historical_task', source_task=item['task'],
-                                   source_phase=item['source_phase'])
+                    source = dict(context, scope='historical_task', source_task=item['task'],
+                                  source_phase=item['source_phase'])
                     for name in totals:
-                        yield name, item[name], context
+                        yield name, item[name], source
 
             self._write('Mechanism', row['phase'], row['task'], row['t_env'],
                         pair_measurements(), keep_null=True)

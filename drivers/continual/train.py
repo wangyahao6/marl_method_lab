@@ -23,6 +23,7 @@ import yaml
 from common.checkpoints import parameter_hash, save_models
 from common.metrics import Metrics, record_evaluation
 from common.records import append, attach_legacy_metrics, write
+from common.exploration import epsilon_on_switch
 from common.runtime import begin_environment_audit, episode_spec, log_task_epsilon, td_sample
 from environment import SequentialProtoss
 from protection import SoftProtection, NullProtection
@@ -93,7 +94,7 @@ def main():
         cfg['scenario'] = o.scenario
         cfg.update(protocol_id=PROTOCOL['id'], condition=o.condition, phases=phases, interventions=PROTOCOL['interventions'] if o.condition=='softprotect' else [],
                    replay_on_switch='retain', optimizer_on_switch='retain',
-                   epsilon_on_switch=PROTOCOL.get('epsilon_on_switch', 'per_task'),
+                   epsilon_on_switch=epsilon_on_switch(PROTOCOL),
                    phase_boundary='exact_step_time_limit_bootstrap')
         write(out / 'config.json', cfg)
         if (ROOT / 'evidence/source_manifest.json').exists():
