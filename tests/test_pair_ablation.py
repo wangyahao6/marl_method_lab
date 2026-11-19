@@ -11,7 +11,9 @@ from torch.nn.functional import softplus
 from test_action_set_preference import driver, jsonlines
 from test_shared_tkpr_k1 import ForkableProtoss
 from action_set_protocol import PAIR_DEFAULTS, PAIR_RATIOS
-from learners.pair_ablation import STRUCTURES, ablation_loss, ablation_statistics, ratio_counts, select_pairs
+from learners.pair_ablation import (
+    PairAblationPreference, STRUCTURES, ablation_loss, ablation_statistics, ratio_counts, select_pairs,
+)
 from learners.ranking_preference import full_rank_preference, topk_preference
 
 
@@ -70,7 +72,7 @@ class PairAblationTest(unittest.TestCase):
                 if method in expected:
                     self.assertEqual(pairs, expected[method])
                 else:
-                    self.assertEqual(len(pairs), 4)
+                    self.assertEqual(len(pairs), 4 if method == "random_n_minus_1" else 7)
                     self.assertTrue(pairs <= full)
                     th.testing.assert_close(mask, select_pairs(old, legal, decisions, method, SEED)[0])
                 closure = strict_closure(pairs, old[0])
@@ -79,6 +81,35 @@ class PairAblationTest(unittest.TestCase):
                     self.assertEqual(closure, strict_closure(full, old[0]))
                 if method == "k1":
                     self.assertEqual(len(closure), 4)
+
+    def test_random_2n_minus_3_matches_union_budget_without_duplicate_pairs(self):
+        action_count = 11
+        legal_counts = th.arange(4, action_count + 1)
+        # Rotated legal sets exercise the original action index mapping.
+        actions = th.arange(action_count)
+        legal = (actions - legal_counts[:, None]) % action_count < legal_counts[:, None]
+        old = actions.float().expand_as(legal)
+        decisions = th.ones_like(legal_counts, dtype=th.bool)
+        random_mask, valid, _, _ = select_pairs(old, legal, decisions, "random_2n_minus_3", SEED)
+        union_mask, _, _, _ = select_pairs(old, legal, decisions, "k1_adjacent", SEED)
+        self.assertTrue(valid.all())
+        th.testing.assert_close(random_mask.sum(-1), 2 * legal_counts - 3)
+        th.testing.assert_close(random_mask.sum(-1), union_mask.sum(-1))
+        th.testing.assert_close(random_mask, select_pairs(old, legal, decisions, "random_2n_minus_3", SEED)[0])
+        for selected, legal_actions, count in zip(random_mask, legal, legal_counts):
+            pairs = pair_ids(selected, action_count)
+            self.assertEqual(len(pairs), 2 * int(count) - 3)
+            self.assertTrue(all(a < b and legal_actions[a] and legal_actions[b] for a, b in pairs))
+
+    def test_history_tasks_contribute_equally_and_empty_tasks_are_excluded(self):
+        losses = th.tensor([1., 5., 90.], requires_grad=True)
+        counts = th.tensor([2, 10, 0])
+        result = PairAblationPreference.reduce_task_losses(losses.unbind(), counts)
+        th.testing.assert_close(result, th.tensor(3.))
+        gradient, = th.autograd.grad(result, losses)
+        th.testing.assert_close(gradient, th.tensor([.5, .5, 0.]))
+        empty = PairAblationPreference.reduce_task_losses(losses.unbind(), th.zeros_like(counts))
+        th.testing.assert_close(empty, th.tensor(0.))
 
     def test_ratios_same_states_exact_budget_and_rounding(self):
         old = th.tensor([[5., 0., 2., 2., 3., 4.],
@@ -178,6 +209,8 @@ class PairAblationTest(unittest.TestCase):
             self.assertEqual(state["t_env"], parent_rows[0]["t_env"])
             summaries = {}
             for experiment, method in (("pair_structure", "pair_structure_adjacent"),
+                                       ("pair_structure", "pair_structure_random_n_minus_1"),
+                                       ("pair_structure", "pair_structure_random_2n_minus_3"),
                                        ("pair_ratio", "pair_ratio_0"),
                                        ("pair_ratio", "pair_ratio_100")):
                 run = root / method
@@ -192,6 +225,9 @@ class PairAblationTest(unittest.TestCase):
                 self.assertGreater(len(rows), 2)
                 self.assertEqual({row["phase"] for row in rows}, {1, 2})
                 self.assertTrue(all(row["preference_loss"] > 0 for row in rows))
+                for row in rows:
+                    history_losses = [item["loss"] for item in row["historical_tasks"] if item["valid_states"]]
+                    self.assertAlmostEqual(row["preference_loss"], sum(history_losses) / len(history_losses), places=6)
                 self.assertEqual({tuple(sorted(item["source_phase"] for item in row["historical_tasks"]))
                                   for row in rows if row["phase"] == 2}, {(0, 1)})
                 gradients = [row["value"] for row in jsonlines(run / "experiment_metrics.jsonl")
@@ -210,3 +246,16 @@ class PairAblationTest(unittest.TestCase):
                 self.assertEqual(zero["valid_state_sha256"], full["valid_state_sha256"])
                 self.assertNotEqual(zero["pair_mask_sha256"], full["pair_mask_sha256"])
                 self.assertEqual((zero["top1_ratio"], full["top1_ratio"]), (0., 1.))
+
+            small = summaries["pair_structure_random_n_minus_1"]
+            large = summaries["pair_structure_random_2n_minus_3"]
+            for low, high in zip(small, large):
+                self.assertEqual(low["selection"], "random_n_minus_1")
+                self.assertEqual(high["selection"], "random_2n_minus_3")
+                self.assertEqual(low["valid_state_sha256"], high["valid_state_sha256"])
+                self.assertEqual(low["valid_pairs"], 3 * low["valid_states"])
+                self.assertEqual(high["valid_pairs"], 5 * high["valid_states"])
+                for audit in (low, high):
+                    self.assertAlmostEqual(audit["top1_ratio"], audit["top1_pairs"] / audit["valid_pairs"])
+                    self.assertAlmostEqual(audit["pair_compression_rate"],
+                                           1 - audit["valid_pairs"] / audit["eligible_pairs"])
