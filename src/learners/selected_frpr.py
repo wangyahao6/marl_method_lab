@@ -78,7 +78,7 @@ class SelectedFRPR(ActionSetPreference):
             gaps, pairs, _ = pair_inventory(batch["old_q_values"][:, :-1], legal, decisions, self.settings)
             pairs, gaps = pairs[0], gaps[0]
             selected = th.zeros_like(pairs)
-            for step, agent in pairs.any(dim=(-2, -1)).nonzero().tolist():
+            for step, agent in pairs.flatten(-2).any(dim=-1).nonzero().tolist():
                 context = task, episode_id, step, agent
                 expected = set(oriented_pairs(gaps[step, agent], pairs[step, agent]))
                 scores = self.scores.get(context, {})

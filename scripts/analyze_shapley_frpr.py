@@ -124,7 +124,7 @@ def source_contexts(task, episode, batch, ft, frpr):
     raw, regret = action_regret(old_q, ft_actions, old_best, regret_scale.squeeze(-1))
     inventory = Counter(pair_mask.sum(dim=(-1, -2))[decisions].tolist())
     contexts = []
-    for step, agent in pair_mask.any(dim=(-1, -2)).nonzero().tolist():
+    for step, agent in pair_mask.flatten(-2).any(dim=-1).nonzero().tolist():
         phase = ("early", "middle", "late")[min(2, 3 * step // episode["length"])]
         loss = "low" if regret[step, agent] < 0.1 else "mid" if regret[step, agent] < 0.5 else "high"
         actions = legal[step, agent].nonzero().flatten().tolist()
