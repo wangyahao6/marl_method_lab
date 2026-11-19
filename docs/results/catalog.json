@@ -173,6 +173,50 @@
       ]
     },
     {
+      "id": "szc-vdn64-aspr-adam",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64-aspr-adam/README.md",
+      "files": {
+        "runs": "comparisons/szc-vdn64-aspr-adam/runs.csv",
+        "evaluations": "comparisons/szc-vdn64-aspr-adam/evaluations.csv",
+        "stage_metrics": "comparisons/szc-vdn64-aspr-adam/stage_metrics.csv",
+        "training_curves": "comparisons/szc-vdn64-aspr-adam/training_curves.csv",
+        "paired_metrics": "comparisons/szc-vdn64-aspr-adam/paired_metrics.csv",
+        "preference_diagnostics": "comparisons/szc-vdn64-aspr-adam/preference_diagnostics.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_and_optimizer_contrasts",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "primary_control": {
+          "method": "RMSprop VDN-FT",
+          "role": "branch"
+        },
+        "matched_contrasts": {
+          "file": "paired_metrics",
+          "control_join_key": "control_run_id",
+          "same_prefix_field": "same_s_prefix"
+        }
+      },
+      "interpretation_limits": [
+        "同优化器内按种子和父运行配对，跨优化器只匹配种子。两组从 S 起分别训练，实际代码版本见 runs.csv。",
+        "曲线取累计环境步数。training_curves 和 evaluations 分别记录带探索的训练与独立贪心评估。由 parent_run_id 找到每条分支的 S 前缀。",
+        "RMSprop 的 S、VDN-FT、TKPR-K1 与 TKPR-K1-W 复用共同前缀报告里的相同 run_id。"
+      ]
+    },
+    {
       "id": "ts4-vdn64-ranking",
       "category": "return-ablations",
       "report": "return-ablations/ts4-vdn64-ranking/README.md",
