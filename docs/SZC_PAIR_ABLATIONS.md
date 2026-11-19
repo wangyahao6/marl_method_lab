@@ -3,7 +3,7 @@
 双层 VDN64，seed 3535，5v5 Protoss，Stalker → Zealot → Colossus。
 沿用 SZC-1M 的累计切换阈值 1M／2M／3M、逐任务 ε 重启、FT 清空 TD 回放池和 RMSprop。
 共用参考线仅执行 TD 更新，在 S 阶段结束后保存分支快照，并生成 S、Z 两个胜局历史池。
-12 个分支在 S 结束处恢复同一套在线网络、目标网络、优化器和随机状态。Z 阶段使用共同的 S 池，
+13 个分支在 S 结束处恢复同一套在线网络、目标网络、优化器和随机状态。Z 阶段使用共同的 S 池，
 C 阶段使用共同的 S、Z 池。各分支的历史回放采样使用相同的种子和规则。当前任务的在线轨迹会随策略更新而变化。
 
 两个实验均按旧 Q 严格比较筛选动作对。当前 Q 差除以该位置合法旧 Q 的总体标准差，分母下限为 0.1。
@@ -14,7 +14,7 @@ Softplus 的 temperature 和辅助权重均为 1，min_gap 为 0。每个状态�
 
 [协议](../configs/continual/action_preference/pair_structure/szc_vdn64_pair_structure_1m.json) · 运行目录 `runs/pair_structure/`。
 
-六组共用合法动作数至少为 4 且所有合法旧 Q 均不相等的位置。
+七组共用合法动作数至少为 4 且所有合法旧 Q 均不相等的位置。
 
 | 组 | `--method` | 选择 |
 | --- | --- | --- |
@@ -24,8 +24,10 @@ Softplus 的 temperature 和辅助权重均为 1，min_gap 为 0。每个状态�
 | FRPR | `pair_structure_frpr` | 合法且旧 Q 不相等的全部无序对 |
 | Random-N-1 | `pair_structure_random_n_minus_1` | 从候选对无放回抽取 N−1 对 |
 | Random-(2N-3) | `pair_structure_random_2n_minus_3` | 从候选对无放回抽取 2N−3 对，与 TKPR-K1 + Adjacent 每状态等预算 |
+| Random-(2N-3)-Matched | `pair_structure_random_2n_minus_3_matched` | 保留全部 N−1 条 Top-1 对，从非 Top-1 对无放回抽取 N−2 条 |
 
-两组随机对照使用固定种子 3535，在历史池加入训练前生成掩码。组别可从运行方法名和
+匹配随机组与 TKPR-K1 + Adjacent 在每个有效状态均有 2N−3 对，Top-1 比例均为 (N−1)/(2N−3)。
+三组随机对照使用固定种子 3535，在历史池加入训练前生成掩码。组别可从运行方法名和
 `pair_ablation_memory/phase*/summary.json` 的 `selection` 字段区分。
 
 对以旧 Q 降序定向的边，任意相邻名次之间没有中间名次可供绕行。
@@ -59,12 +61,12 @@ Top-1 配额，剩余配额从非 Top-1 候选对中补齐。S 池与 S+Z 的 To
 
 ## 启动
 
-在方法仓库根目录执行。第一条命令只调用 13 次启动预览并写出计划。第二条命令提交共用参考线和两个实验的分支，
+在方法仓库根目录执行。第一条命令只调用 14 次启动预览并写出计划。第二条命令提交共用参考线和两个实验的分支，
 所有分支依赖参考线成功结束。每个新批次使用唯一标识。
 
 ```sh
-.venv/bin/python scripts/plan_pair_ablations.py szc_pair_v1_rev2_3535 > /tmp/szc_pair_v1_rev2_3535.json
-.venv/bin/python scheduler/service.py submit /tmp/szc_pair_v1_rev2_3535.json
+.venv/bin/python scripts/plan_pair_ablations.py szc_pair_matched_3535_20261119 > /tmp/szc_pair_matched_3535_20261119.json
+.venv/bin/python scheduler/service.py submit /tmp/szc_pair_matched_3535_20261119.json
 ```
 
 单元测试使用合成 Q 和脚本化 SMAC 接口验证选对、预算、固定掩码、传递闭包、共享恢复和 VDN 梯度。

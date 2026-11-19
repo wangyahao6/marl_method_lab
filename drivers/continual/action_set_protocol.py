@@ -13,7 +13,7 @@ RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
                 "aspr_preference")
 PAIR_STRUCTURES = {f"pair_structure_{selection}": selection for selection in (
-    "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3")}
+    "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3", "random_2n_minus_3_matched")}
 PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 80, 100)}
 PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS}
 PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS}

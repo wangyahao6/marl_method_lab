@@ -101,6 +101,34 @@ class PairAblationTest(unittest.TestCase):
             self.assertEqual(len(pairs), 2 * int(count) - 3)
             self.assertTrue(all(a < b and legal_actions[a] and legal_actions[b] for a, b in pairs))
 
+    def test_matched_random_preserves_full_top1_budget_and_ratio(self):
+        action_count = 11
+        legal_counts = th.arange(4, action_count + 1)
+        actions = th.arange(action_count)
+        legal = (actions - legal_counts[:, None]) % action_count < legal_counts[:, None]
+        old = actions.float().expand_as(legal)
+        decisions = th.ones_like(legal_counts, dtype=th.bool)
+        method = "random_2n_minus_3_matched"
+        mask, valid, counts, _ = select_pairs(old, legal, decisions, method, SEED)
+        union_mask, union_valid, union_counts, _ = select_pairs(old, legal, decisions, "k1_adjacent", SEED)
+        self.assertTrue(valid.all())
+        th.testing.assert_close(valid, union_valid)
+        th.testing.assert_close(mask, select_pairs(old, legal, decisions, method, SEED)[0])
+        self.assertFalse(th.equal(mask, union_mask))
+        th.testing.assert_close(mask.sum(-1), 2 * legal_counts - 3)
+        th.testing.assert_close(mask.sum(-1), union_mask.sum(-1))
+        th.testing.assert_close(counts[:, 2], legal_counts - 1)
+        th.testing.assert_close(counts[:, 2] / mask.sum(-1), union_counts[:, 2] / union_mask.sum(-1))
+        for selected, legal_actions in zip(mask, legal):
+            pairs = pair_ids(selected, action_count)
+            legal_ids = legal_actions.nonzero().flatten().tolist()
+            top = max(legal_ids)
+            top_pairs = {pair for pair in pairs if top in pair}
+            self.assertEqual(top_pairs, {(action, top) for action in legal_ids if action != top})
+            non_top = pairs - top_pairs
+            self.assertEqual(len(non_top), len(legal_ids) - 2)
+            self.assertTrue(all(a < b and a in legal_ids and b in legal_ids for a, b in non_top))
+
     def test_history_tasks_contribute_equally_and_empty_tasks_are_excluded(self):
         losses = th.tensor([1., 5., 90.], requires_grad=True)
         counts = th.tensor([2, 10, 0])
@@ -211,6 +239,8 @@ class PairAblationTest(unittest.TestCase):
             for experiment, method in (("pair_structure", "pair_structure_adjacent"),
                                        ("pair_structure", "pair_structure_random_n_minus_1"),
                                        ("pair_structure", "pair_structure_random_2n_minus_3"),
+                                       ("pair_structure", "pair_structure_random_2n_minus_3_matched"),
+                                       ("pair_structure", "pair_structure_k1_adjacent"),
                                        ("pair_ratio", "pair_ratio_0"),
                                        ("pair_ratio", "pair_ratio_100")):
                 run = root / method
@@ -259,3 +289,11 @@ class PairAblationTest(unittest.TestCase):
                     self.assertAlmostEqual(audit["top1_ratio"], audit["top1_pairs"] / audit["valid_pairs"])
                     self.assertAlmostEqual(audit["pair_compression_rate"],
                                            1 - audit["valid_pairs"] / audit["eligible_pairs"])
+
+            matched = summaries["pair_structure_random_2n_minus_3_matched"]
+            union = summaries["pair_structure_k1_adjacent"]
+            for random_audit, union_audit in zip(matched, union):
+                self.assertEqual(random_audit["selection"], "random_2n_minus_3_matched")
+                self.assertEqual(random_audit["valid_state_sha256"], union_audit["valid_state_sha256"])
+                for key in ("valid_pairs", "top1_pairs", "non_top1_pairs", "top1_ratio", "pair_compression_rate"):
+                    self.assertEqual(random_audit[key], union_audit[key])

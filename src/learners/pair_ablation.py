@@ -8,7 +8,8 @@ from learners.action_set_preference import ActionSetPreference, batch_episodes, 
 from learners.ranking_preference import pair_state_loss, ranking_statistics, reference_order, summarize
 
 
-STRUCTURES = ("k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3")
+STRUCTURES = ("k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1",
+              "random_2n_minus_3", "random_2n_minus_3_matched")
 
 
 def ranked_subset(candidates, scores, count):
@@ -54,6 +55,10 @@ def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
             selected = (eligible & top_pairs) | adjacent
         elif selection == "frpr":
             selected = eligible
+        elif selection == "random_2n_minus_3_matched":
+            scores = th.rand(eligible.shape, generator=generator, device=old_q.device)
+            non_top = ranked_subset(eligible & ~top_pairs, scores, legal_count - 2)
+            selected = (eligible & top_pairs) | non_top
         else:
             scores = th.rand(eligible.shape, generator=generator, device=old_q.device)
             pair_budget = 2 * legal_count - 3 if selection == "random_2n_minus_3" else budget
