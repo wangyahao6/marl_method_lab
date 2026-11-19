@@ -2,12 +2,14 @@ import csv
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch as th
 
-from test_action_set_preference import PROTOCOL_PATH, driver
+from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import RANK_DEFAULTS, SELECTED_METHODS, validate
 from drivers.continual.analysis.shapley_frpr import coalition_rows, exact_shapley, interactions
 from drivers.continual.memory.episodes import preference_episode_id
@@ -63,6 +65,51 @@ class ShapleyMathTest(unittest.TestCase):
         np.testing.assert_allclose(index, [6., -1.])
 
 
+class PilotOutputTest(unittest.TestCase):
+    def test_all_legal_actions_and_exact_caps(self):
+        import sys
+        sys.path.insert(0, str(driver.ROOT / "scripts"))
+        from analyze_shapley_frpr import evaluate
+
+        class Writer:
+            def __init__(self):
+                self.rows = []
+
+            def writerow(self, row):
+                self.rows.append(row)
+
+        context = dict(task="stalker", episode_id="trace", timestep=0, agent_id=0,
+                       legal_actions="[1, 2, 3]", M=1)
+        site = dict(greedy_action=3)
+        spec = (None, None, {"env_seed": 11, "sc2_seed": 11}, {}, [], set())
+        config = dict(max_exact_pairs=2, rollout_repeats=2, projection_margin=0.,
+                      softmax_temperature=1., top_k=1, sampling_seed=2222)
+        audit = dict(branch_rollouts=0, verified_branches=0, max_efficiency_error=0., coalitions=0,
+                     projection_residual=0., stationarity_residual=0.)
+        observed = []
+
+        def verified_branch(*args, **kwargs):
+            action = args[-2]
+            observed.append(action)
+            return dict(action=action, won=True, post_intervention_return=2. * action,
+                        environment_replay_consistent=True, rnn_consistent=True, first_difference=None)
+
+        writer = Writer()
+        with patch("analyze_shapley_frpr.branch", verified_branch):
+            _, rolls, values, _ = evaluate((context, site, [(1, 2)], [1e5, 0., 1., 2.]), spec,
+                                           config, writer, audit)
+            skip = dict(context, M=3)
+            evaluate((skip, site, [(1, 2), (1, 3), (2, 3)], [1e5, 0., 1., 2.]), spec, config, writer, audit)
+        self.assertEqual(observed, [1, 2, 3, 1, 2, 3])
+        self.assertEqual(len(rolls), audit["verified_branches"])
+        self.assertEqual(audit["coalitions"], 2)
+        self.assertEqual(values[0]["phi_win"], 0.)
+        self.assertEqual(skip["status"], "over_exact_cap")
+        for row in writer.rows:
+            self.assertEqual(json.loads(row["probabilities"])[0], 0.)
+        self.assertNotEqual(context["empty_softmax_return"], context["vdn_ft_greedy_return"])
+
+
 class SelectionTest(unittest.TestCase):
     def setUp(self):
         self.temp = TemporaryDirectory()
@@ -86,7 +133,6 @@ class SelectionTest(unittest.TestCase):
 
     def controller(self):
         scheme, groups, _ = self.spec
-        from types import SimpleNamespace
         args = SimpleNamespace(device="cpu")
         mac = SimpleNamespace(args=args, hidden_states=None, init_hidden=lambda _: None)
         # Distinct current gaps per action and observation expose context mismatches.
@@ -147,6 +193,35 @@ class SelectionTest(unittest.TestCase):
         reversed_scores = dict(reversed(list(scores.items())))
         self.assertEqual(original, choose_pairs(context, reversed_scores, self.settings, random_control=True))
         self.assertEqual(len(original), 2)
+
+    def test_driver_blocks_before_td_on_uncovered_historical_decisions(self):
+        self.write_scores(count=0)
+        protocol = json.loads(Path(PROTOCOL_PATH).read_text())
+        for stage in protocol["stages"]:
+            stage["steps"] = 16
+        protocol["evaluation"].update(seeds=[3, 4], episodes_per_seed=1, interval=0)
+        protocol["action_set"].update(success_episodes=1, seed_offsets=[101, 102], attempts_per_seed=2)
+        protocol["full_rank_preference"] = dict(min_gap=0.)
+        (self.path / "manifest.json").write_text(json.dumps(dict(frpr=dict(RANK_DEFAULTS, min_gap=0.))))
+        method = "shapley_selected_frpr"
+        protocol[method] = dict(selection_k=2, shapley_results=[str(self.path)])
+        actual = validate(protocol, "vdn", method)
+        out = self.path / "driver"
+        out.mkdir()
+        original_config = driver.config
+        with patch.dict(driver.base.environments, {"action_set_protoss": ScriptedProtoss}), patch.object(
+            driver, "config", lambda *args: dict(original_config(*args), buffer_size=8, batch_size=2)
+        ), patch.object(th.cuda, "is_available", return_value=False), np.testing.suppress_warnings() as quiet:
+            quiet.filter(UserWarning)
+            with self.assertRaisesRegex(ValueError, "Incomplete .* coverage before phase 1"):
+                driver.train_sequence(actual, 2222, out)
+        audit = jsonlines(out / "shapley_coverage.jsonl")[-1]
+        self.assertEqual(audit["covered"], 0)
+        self.assertGreater(audit["required"], 0)
+        self.assertEqual({row["phase"] for row in jsonlines(out / f"{method}_updates.jsonl")}, {0})
+        pool = th.load(out / "action_set_memory/phase0000/success.th", map_location="cpu")
+        self.assertTrue(all(ep["episode_id"] == preference_episode_id(pool["task"], ep)
+                            for ep in pool["episodes"]))
 
     def test_protocol_preserves_frpr_settings_and_requires_one_budget(self):
         protocol = json.loads(Path(PROTOCOL_PATH).read_text())

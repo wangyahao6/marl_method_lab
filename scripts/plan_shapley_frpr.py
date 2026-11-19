@@ -18,7 +18,7 @@ def main(args):
         case_config = output / "configs" / f"{case}.json"
         task = dict(id=f"{output.name}_{case}", cwd=str(ROOT), type="evaluation",
                     dependencies=[args.smoke_task] if args.smoke_task else [], resources=dict(ram_mib=2000),
-                    metadata=dict(results=str(output), branch_id="shapley-frpr-pilot", attempt=args.attempt),
+                    metadata=dict(results=str(output), attempt=args.attempt),
                     argv=[sys.executable, str(ROOT / "scripts/analyze_shapley_frpr.py"),
                           "--config", str(case_config), "--output", str(output / case)])
         tasks.append((settings, case_config, task))

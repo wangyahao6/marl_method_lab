@@ -48,7 +48,9 @@ def coalition_rows(q, legal, pairs, outcomes, margin, temperature):
         probabilities = softmax(z / temperature)
         if not np.isclose(probabilities.sum(), 1., atol=1e-12, rtol=0):
             raise ValueError("Invalid legal softmax probability mass")
-        values = np.einsum("a,ram->rm", probabilities, outcomes)
+        # Centering on one action keeps truly constant outcomes exact, including all-win branches.
+        anchor = outcomes[:, :1, :]
+        values = anchor[:, 0, :] + np.einsum("a,ram->rm", probabilities, outcomes - anchor)
         yield mask, z, probabilities, values, dict(
             before_violations=int(np.sum(matrix @ q < margin)),
             after_violations=int(np.sum(matrix @ z < margin - TOL)),
@@ -59,6 +61,8 @@ def coalition_rows(q, legal, pairs, outcomes, margin, temperature):
 def exact_shapley(values, m):
     if len(values) != 1 << m or not np.isfinite(values).all():
         raise ValueError("Exact Shapley requires every finite coalition value")
+    if m == 0:
+        return np.empty((0, *values.shape[1:])), np.zeros_like(values[0])
     masks = np.arange(1 << m)
     sizes = np.array([bin(mask).count("1") for mask in range(1 << m)])
     weights = np.array([1 / (m * comb(m - 1, k)) for k in range(m)])

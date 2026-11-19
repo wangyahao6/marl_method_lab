@@ -270,7 +270,16 @@ def evaluate(item, spec, cfg, writer, audit):
                     **metric_stats(phi[i])) for i in range(m)]
     inter = [dict(key, participant_i=i, participant_j=j, **metric_stats(index))
              for i, j, index in interactions(values, m)]
-    row["coalition_seconds"] = perf_counter() - start
+    singleton_magnitudes = [abs(pair["singleton_return"]) for pair in shapley]
+    low_singleton = {i for i, magnitude in enumerate(singleton_magnitudes)
+                     if magnitude <= np.median(singleton_magnitudes)}
+    synergistic = [item for item in inter if item["return_mean"] > 1e-12]
+    redundant = [item for item in inter if item["return_mean"] < -1e-12]
+    row.update(synergistic_pairs=len(synergistic), redundant_pairs=len(redundant),
+               low_singleton_synergistic_relations=len({
+                   item[key] for item in synergistic for key in ("participant_i", "participant_j")
+                   if item[key] in low_singleton
+               }), coalition_seconds=perf_counter() - start)
     return pair_rows, returns, shapley, inter
 
 
@@ -321,6 +330,8 @@ def aggregate(rows, pairs):
         yield dict(kind="context_summary", task=group[0], battle_phase=group[1], regret_stratum=group[2],
                    contexts=len(items), completed=len(measured), branch_rollouts=sum(row["branch_rollouts"] for row in items),
                    enumerated=sum(row["enumerated"] for row in items),
+                   **{name: sum(row[name] for row in measured) for name in (
+                       "synergistic_pairs", "redundant_pairs", "low_singleton_synergistic_relations")},
                    rollout_seconds=sum(row.get("rollout_seconds", 0) for row in items),
                    coalition_seconds=sum(row.get("coalition_seconds", 0) for row in items),
                    **{key: float(np.mean(data)) if data else None for key, data in values.items()},
@@ -378,11 +389,16 @@ def run(config_path, out):
         config_path, old_path, ft_path, old_protocol_path, ft_path.parents[2] / "protocol.json",
         old_path.parents[2] / "config.json", ft_path.parents[2] / "config.json",
         old_path.parents[2] / "env_info.json", ft_path.parents[2] / "env_info.json")]
-    manifest = dict(config=cfg, frpr=frpr, inputs=inputs, argv=sys.argv,
-                    code_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    snapshot = out / "source.tar.gz"
+    subprocess.run(["git", "archive", "--format=tar.gz", f"--output={snapshot}", commit,
+                    "src", "drivers/continual", "scripts/analyze_shapley_frpr.py",
+                    "scripts/verify_smacv2_replay.py", "scripts/verify_smacv2_counterfactual.py"],
+                   cwd=ROOT, check=True)
+    manifest = dict(config=cfg, frpr=frpr, inputs=inputs, argv=sys.argv, code_commit=commit,
                     code_dirty=bool(subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT)),
-                    python=platform.python_version(), torch=th.__version__, scipy=scipy.__version__,
-                    numpy=np.__version__, platform=platform.platform(), environment=env_info,
+                    source_archive_sha256=sha(snapshot), python=platform.python_version(), torch=th.__version__,
+                    scipy=scipy.__version__, numpy=np.__version__, platform=platform.platform(), environment=env_info,
                     env_args=old_policy.args.env_args, sc2path=os.environ["SC2PATH"], traces=[])
     write(out / "manifest.json", manifest)
     audit = dict(passed=False, source_attempts=[], replays=[], branch_rollouts=0, verified_branches=0,
