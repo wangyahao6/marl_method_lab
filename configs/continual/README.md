@@ -17,3 +17,12 @@
 [path_aliases.json](path_aliases.json) 将老的平铺路径映射到新位置。统一启动入口会解析旧路径，历史调度命令可沿用原值。这次迁移保留已有 JSON 的内容与协议 ID。复现请以对应运行的 `protocol.json`、`config.json`、`launch.json` 和源码版本为依据。历史快照中的旧路径原样保留。已退役参考继续保存在[原归档目录](../archive/continual/README.md)。本次归入上述研究目录，未另建 `legacy/` 迁移已知历史实验协议。
 
 [方法说明](../../docs/METHODS.md) · [实验用法](../../docs/EXPERIMENTS.md)
+
+## SZC-1M
+
+2026-11-19 新增每任务 1M 的 S→Z→C 版本，累计阈值为 1M/2M/3M，完整路径名义 3M 训练环境步，在阈值后的完整回合结束切换。
+
+- 偏好回放与基线入口使用 `action_preference/szc/szc_vdn64_ft_preferences_1m.json`，从同目录 `szc_vdn64_ft_preferences.json` 派生。
+- 双层 VDN A2 CHI 入口使用 `neuron_protection/chi/szc_vdn64_ft_a2_chi_1m.json`，从同目录 `szc_vdn64_ft_a2_chi.json` 派生。
+
+两份协议沿用各自母版的模型、方法参数、逐任务探索与评价设置。方法专用协议如 TKPR 的 K 设置应以所选方法协议为依据，再派生相同阶段预算。此次配置创建仅设置预算版本，具体训练方法与种子由运行指令选择。
