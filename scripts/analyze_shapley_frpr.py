@@ -56,6 +56,12 @@ def validate(cfg):
     if (not nonnegative(cfg["projection_margin"]) or not nonnegative(cfg["softmax_temperature"])
             or not cfg["softmax_temperature"]):
         raise ValueError("Invalid projection margin or behavioral softmax temperature")
+    seeds = cfg["seeds"]
+    if (not isinstance(seeds, list) or not seeds or any(
+            not isinstance(pair, list) or len(pair) != 2
+            or any(type(seed) is not int or not 0 <= seed < 2**31 for seed in pair) for pair in seeds)
+            or len({tuple(pair) for pair in seeds}) != len(seeds) or (cfg.get("archive") and len(seeds) != 1)):
+        raise ValueError("Configure unique [environment seed, SC2 seed] pairs, one pair for an archived trace")
     quotas = cfg["per_stratum"]
     if type(quotas) is int:
         if quotas <= 0:
@@ -271,8 +277,8 @@ def evaluate(item, spec, cfg, writer, audit):
     inter = [dict(key, participant_i=i, participant_j=j, **metric_stats(index))
              for i, j, index in interactions(values, m)]
     singleton_magnitudes = [abs(pair["singleton_return"]) for pair in shapley]
-    low_singleton = {i for i, magnitude in enumerate(singleton_magnitudes)
-                     if magnitude <= np.median(singleton_magnitudes)}
+    median_singleton = np.median(singleton_magnitudes)
+    low_singleton = {i for i, magnitude in enumerate(singleton_magnitudes) if magnitude <= median_singleton}
     synergistic = [item for item in inter if item["return_mean"] > 1e-12]
     redundant = [item for item in inter if item["return_mean"] < -1e-12]
     row.update(synergistic_pairs=len(synergistic), redundant_pairs=len(redundant),

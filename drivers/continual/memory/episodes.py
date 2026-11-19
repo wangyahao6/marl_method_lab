@@ -52,7 +52,8 @@ def preference_episode_id(task, episode):
     import json
 
     length = episode["length"]
-    digest = hashlib.sha256(json.dumps([task, length], ensure_ascii=False).encode())
+    identity = [task, episode.get("seed"), episode.get("index"), length]
+    digest = hashlib.sha256(json.dumps(identity, ensure_ascii=False).encode())
     for key in ("obs", "avail_actions", "actions_onehot", "old_q_values", "terminated", "filled"):
         # Bootstrap actions/Q/termination are unused, but the last filled flag is used.
         stop = length + 1 if key == "filled" else length
