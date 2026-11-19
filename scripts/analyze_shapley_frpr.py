@@ -274,20 +274,32 @@ def evaluate(item, spec, cfg, writer, audit):
     return pair_rows, returns, shapley, inter
 
 
-def history_inventory(path, frpr):
-    from learners.action_set_preference import batch_episodes
+def history_inventory(path, old_policy, frpr):
+    from learners.action_set_preference import batch_episodes, unroll
 
     pool = th.load(path, map_location="cpu")
     histogram = Counter()
+    recovered_q = 0
+    mac, _ = old_policy.episode()
     for episode in pool["episodes"]:
         # Only these fields are used by batch_episodes and decision_masks.
         scheme = {key: {} for key in episode["data"]}
-        batch, _ = batch_episodes([episode], scheme, {}, "cpu", include_good=False, include_old_q=True)
+        saved_q = "old_q_values" in episode["data"]
+        batch, _ = batch_episodes([episode], scheme, {}, "cpu", include_good=False, include_old_q=saved_q)
         legal, valid = decision_masks(batch)
         valid &= legal.sum(dim=-1) >= 2
-        _, mask, _ = pair_inventory(batch["old_q_values"][:, :-1], legal, valid, frpr)
+        if saved_q:
+            reference_q = batch["old_q_values"][:, :-1]
+        else:
+            recovered_q += 1
+            reference_q = unroll(mac, batch, batch.max_seq_length - 1)
+            actions = reference_q.masked_fill(~legal, -th.inf).argmax(dim=-1)
+            executed = batch["actions_onehot"][:, :-1].argmax(dim=-1)
+            if not th.equal(actions[valid], executed[valid]):
+                raise ValueError(f"Recomputed reference Q fails greedy action audit in {path}")
+        _, mask, _ = pair_inventory(reference_q, legal, valid, frpr)
         histogram.update(mask.sum(dim=(-1, -2))[valid].tolist())
-    return histogram
+    return histogram, dict(episodes=len(pool["episodes"]), recomputed_reference_episodes=recovered_q)
 
 
 def aggregate(rows, pairs):
@@ -352,16 +364,15 @@ def run(config_path, out):
     old_path, ft_path = (ROOT / cfg[k] for k in ("old_checkpoint", "ft_checkpoint"))
     if old_path.resolve() == ft_path.resolve() or sha(old_path) == sha(ft_path):
         raise ValueError("Old policy and VDN-FT need distinct checkpoints")
+    old_protocol_path = old_path.parents[2] / "protocol.json"
+    os.environ["MARL_PROTOCOL"] = str(old_protocol_path)
     old_policy, env_info = checked_policy(old_path)
     ft_policy, ft_info = checked_policy(ft_path)
     ft_protocol = read(ft_path.parents[2] / "protocol.json")
     if ft_protocol.get("method") != "baseline" or ft_protocol.get("replay_on_switch", "ft") != "ft":
         raise ValueError("The continuation policy requires a VDN-FT baseline checkpoint")
-    old_protocol_path = old_path.parents[2] / "protocol.json"
-    old_protocol = read(old_protocol_path)
     if ft_protocol.get("algorithm") not in ("vdn", "vdn_1ff", "vdn_1ff_128") or env_info != ft_info:
         raise ValueError("Model environment dimensions or action layout differ")
-    os.environ["MARL_PROTOCOL"] = str(old_protocol_path)
     task = cfg["task"]
     inputs = [{ "path": str(path), "sha256": sha(path)} for path in (
         config_path, old_path, ft_path, old_protocol_path, ft_path.parents[2] / "protocol.json",
@@ -384,7 +395,8 @@ def run(config_path, out):
         if cfg.get("inventory_pool"):
             path = ROOT / cfg["inventory_pool"]
             inputs.append(dict(path=str(path), sha256=sha(path)))
-            histograms["historical_preference_pool"] = history_inventory(path, frpr)
+            histograms["historical_preference_pool"], audit["historical_inventory"] = history_inventory(
+                path, old_policy, frpr)
         archive = cfg.get("archive")
         for i, seed_pair in enumerate(cfg["seeds"]):
             seeds = dict(zip(("env_seed", "sc2_seed"), seed_pair))
