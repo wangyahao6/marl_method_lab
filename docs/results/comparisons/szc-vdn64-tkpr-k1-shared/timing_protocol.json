@@ -1,0 +1,7 @@
+{
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "torch": "1.12.1+cu113",
+  "warmup_pairs_per_snapshot": 5,
+  "measured_pairs_per_snapshot": 20,
+  "sample_count": 240
+}
