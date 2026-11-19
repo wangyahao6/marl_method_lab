@@ -78,6 +78,13 @@ def _topk_actions(reference_q, legal, effective_k):
     return th.zeros_like(legal).scatter(-1, order, selected)
 
 
+def pair_state_loss(inverted_gap, pairs, temperature, pair_dims, penalty=None):
+    penalties = softplus(inverted_gap / temperature) if penalty is None else penalty(inverted_gap)
+    pair_counts = pairs.sum(dim=pair_dims)
+    state_loss = penalties.masked_fill(~pairs, 0).sum(dim=pair_dims) / pair_counts.clamp_min(1)
+    return state_loss, pair_counts
+
+
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
                     k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
                     confidence_weighted=False, high_regret=False, good=None):
@@ -109,9 +116,8 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
             pairs = pairs & (top.unsqueeze(-1) | top.unsqueeze(-2))
 
     inverted_gap = -old_gap.sign() * current_gap
-    penalties = softplus(inverted_gap / settings["temperature"]) if penalty is None else penalty(inverted_gap)
-    pair_counts = pairs.sum(dim=(-2, -1))
-    state_loss = penalties.masked_fill(~pairs, 0).sum(dim=(-2, -1)) / pair_counts.clamp_min(1)
+    state_loss, pair_counts = pair_state_loss(
+        inverted_gap, pairs, settings.get("temperature"), (-2, -1), penalty)
     if confidence_weighted:
         valid = pair_counts > 0
         weights = confidence.masked_fill(~valid, 0)

@@ -143,6 +143,11 @@ class ActionSetPreference:
         batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device)
         return preference_loss(mac, batch, good, self.settings["margin"])
 
+    @staticmethod
+    def reduce_task_losses(losses, counts):
+        included = counts > 0
+        return (th.stack(losses) * included).sum() / included.sum().clamp_min(1)
+
     def __call__(self, mac):
         start = perf_counter()
         rows, summaries, losses, valid_counts = [], [], [], []
@@ -166,8 +171,7 @@ class ActionSetPreference:
         counts = None
         if losses:
             counts = th.stack(valid_counts)
-            included = counts > 0
-            result = (th.stack(losses) * included).sum() / included.sum().clamp_min(1)
+            result = self.reduce_task_losses(losses, counts)
         if events is not None:
             events[1].record()
         self.report = (rows, summaries, counts, perf_counter() - start, events)
