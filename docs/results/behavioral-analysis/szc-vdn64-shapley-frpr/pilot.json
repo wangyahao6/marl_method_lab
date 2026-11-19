@@ -1,0 +1,186 @@
+{
+  "common": {
+    "per_stratum": 1,
+    "max_exact_pairs": 12,
+    "top_k": 3,
+    "rollout_repeats": 2,
+    "projection_margin": 0.0,
+    "softmax_temperature": 1.0,
+    "frpr": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1
+    }
+  },
+  "cases": {
+    "2222_s_after_z": {
+      "task": "stalker",
+      "training_seed": 2222,
+      "source_phase": 0,
+      "ft_phase": 1,
+      "sampling_seed": 2222,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed2222_20261113_attempt001/models/phase0001_4000011/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "seeds": [
+        [
+          91101,
+          91101
+        ],
+        [
+          91102,
+          91102
+        ],
+        [
+          91103,
+          91103
+        ],
+        [
+          91104,
+          91104
+        ]
+      ]
+    },
+    "2222_s_after_c": {
+      "task": "stalker",
+      "training_seed": 2222,
+      "source_phase": 0,
+      "ft_phase": 2,
+      "sampling_seed": 2222,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed2222_20261113_attempt001/models/phase0002_6000056/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "seeds": [
+        [
+          91101,
+          91101
+        ],
+        [
+          91102,
+          91102
+        ],
+        [
+          91103,
+          91103
+        ],
+        [
+          91104,
+          91104
+        ]
+      ]
+    },
+    "2222_z_after_c": {
+      "task": "zealot",
+      "training_seed": 2222,
+      "source_phase": 1,
+      "ft_phase": 2,
+      "sampling_seed": 2222,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed2222_20261113_attempt001/models/phase0002_6000056/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/action_set_memory/phase0001/success.th",
+      "seeds": [
+        [
+          91201,
+          91201
+        ],
+        [
+          91202,
+          91202
+        ],
+        [
+          91203,
+          91203
+        ],
+        [
+          91204,
+          91204
+        ]
+      ]
+    },
+    "3535_s_after_z": {
+      "task": "stalker",
+      "training_seed": 3535,
+      "source_phase": 0,
+      "ft_phase": 1,
+      "sampling_seed": 3535,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0001_4000038/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "seeds": [
+        [
+          91101,
+          91101
+        ],
+        [
+          91102,
+          91102
+        ],
+        [
+          91103,
+          91103
+        ],
+        [
+          91104,
+          91104
+        ]
+      ]
+    },
+    "3535_s_after_c": {
+      "task": "stalker",
+      "training_seed": 3535,
+      "source_phase": 0,
+      "ft_phase": 2,
+      "sampling_seed": 3535,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0002_6000046/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "seeds": [
+        [
+          91101,
+          91101
+        ],
+        [
+          91102,
+          91102
+        ],
+        [
+          91103,
+          91103
+        ],
+        [
+          91104,
+          91104
+        ]
+      ]
+    },
+    "3535_z_after_c": {
+      "task": "zealot",
+      "training_seed": 3535,
+      "source_phase": 1,
+      "ft_phase": 2,
+      "sampling_seed": 3535,
+      "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+      "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0002_6000046/agent.th",
+      "inventory_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0001/success.th",
+      "seeds": [
+        [
+          91201,
+          91201
+        ],
+        [
+          91202,
+          91202
+        ],
+        [
+          91203,
+          91203
+        ],
+        [
+          91204,
+          91204
+        ]
+      ]
+    }
+  }
+}

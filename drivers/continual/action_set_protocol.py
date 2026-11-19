@@ -9,7 +9,7 @@ FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pa
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 ASPR_MAX_METHODS = ("aspr_max_preference", "action_set_preference")
 SELECTED_METHODS = ("shapley_selected_frpr", "random_selected_frpr")
-RANK_METHODS = ("full_rank_preference", *SELECTED_METHODS, "full_rank_preference_relu", "full_rank_preference_unfiltered",
+RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
                 "aspr_preference")
@@ -19,7 +19,8 @@ PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 8
 PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS}
 PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS}
 PAIR_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0, q_scale_floor=0.1, pair_seed=3535)
-PREFERENCE_RANK_METHODS = (*RANK_METHODS, *PAIR_METHODS)
+HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS)
+PREFERENCE_RANK_METHODS = (*HISTORY_RANK_METHODS, *PAIR_METHODS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
@@ -126,7 +127,7 @@ def validate(protocol, algorithm, method):
                    for values in candidates.values())):
         raise ValueError("action_set.delta_candidates_by_task requires lists of nonnegative thresholds keyed by task")
     ranking = {}
-    for name in RANK_METHODS:
+    for name in HISTORY_RANK_METHODS:
         if method == name or name in protocol or (name == "full_rank_preference" and method in SELECTED_METHODS):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
@@ -221,7 +222,7 @@ def validate_fork(protocol, role, parent):
             raise ValueError("a shared S prefix requires FT and at least two stages")
         if role == "shared-prefix" and (method not in RANK_METHODS or not protocol[method]["weight"]):
             raise ValueError("a shared prefix needs an enabled ranking method to collect old Q")
-        if role == "shared-branch" and method not in ("baseline", *RANK_METHODS):
+        if role == "shared-branch" and method not in ("baseline", *HISTORY_RANK_METHODS):
             raise ValueError("a shared branch supports the baseline and ranking methods")
         return
     if role:
@@ -241,7 +242,7 @@ def matching_shared_protocol(parent, branch):
     method = branch["method"]
     if method in SELECTED_METHODS and "full_rank_preference" not in previous:
         previous["full_rank_preference"] = RANK_DEFAULTS
-    if method not in previous and method in RANK_METHODS and method != parent["method"]:
+    if method not in previous and method in HISTORY_RANK_METHODS and method != parent["method"]:
         previous[method] = requested[method]
     return previous == requested
 

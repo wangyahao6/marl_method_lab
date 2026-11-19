@@ -449,8 +449,15 @@ def run(config_path, out):
             eligible.extend(context_rows)
             episodes.append(episode)
 
+        selection = list(sampled(eligible, cfg["per_stratum"], cfg["sampling_seed"]))
+        available_counts = Counter((a[0]["battle_phase"], a[0]["regret_stratum"]) for a in eligible)
+        sample_counts = Counter((a[0]["battle_phase"], a[0]["regret_stratum"]) for a in selection)
+        csv_output(out / "strata_inventory.csv", [
+            dict(task=task, battle_phase=phase, regret_stratum=regret, available=available_counts[phase, regret],
+                 sampled=sample_counts[phase, regret])
+            for phase in ("early", "middle", "late") for regret in ("low", "mid", "high")])
         with csv_output(out / "coalition_values.csv", None, COALITION_FIELDS) as writer:
-            for item in sampled(eligible, cfg["per_stratum"], cfg["sampling_seed"]):
+            for item in selection:
                 row = item[0]
                 rows.append(row)
                 p, r, s, ii = evaluate(item, sources[row["episode_id"]], cfg, writer, audit)
@@ -464,6 +471,10 @@ def run(config_path, out):
         if episodes:
             th.save(dict(task=task, phase=cfg["source_phase"], layout=env_info["action_layout"],
                          reference_sha256=sha(old_path), episodes=episodes), out / "trace_pool.th")
+    except Exception as exc:
+        audit["error"] = f"{type(exc).__name__}: {exc}"
+        audit["passed"] = False
+        raise
     finally:
         complete = sum(row.get("status") == "complete" for row in rows)
         audit.update(eligible_contexts=len(eligible), sampled_contexts=len(rows), completed_contexts=complete,

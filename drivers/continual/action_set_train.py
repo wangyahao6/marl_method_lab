@@ -23,7 +23,7 @@ from learners.ranking_preference import RankingPreference, aggregate_pair_filter
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
 from action_set_protocol import (
-    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
+    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
     matching_pair_reference, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
@@ -33,7 +33,7 @@ from common.records import attach_legacy_metrics
 from common.exploration import epsilon_on_switch
 from common.runtime import episode_spec, restore_rng, rng_state, td_sample
 from drivers.continual.memory import History, PreferenceHistory
-from drivers.continual.memory.episodes import pack_episode
+from drivers.continual.memory.episodes import pack_episode, preference_episode_id
 import numpy as np
 import torch as th
 import yaml
@@ -218,7 +218,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"]
     label_action_sets = args.method in (*ASPR_MAX_METHODS, "aspr_preference")
-    q_steps = [] if args.method in RANK_METHODS else None
+    q_steps = [] if args.method in HISTORY_RANK_METHODS else None
     with isolated_rollouts():
         for block, offset in enumerate(offsets):
             seed = (args.seed + offset) % 2**31
@@ -245,6 +245,9 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     successful.append(reference_record(runner, batch, episode, q_steps=q_steps,
                                                        label_action_sets=label_action_sets))
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
+    if args.method in SELECTED_METHODS:
+        for episode in successful:
+            episode["episode_id"] = preference_episode_id(task, episode)
     labels, diagnostics = {}, {}
     if label_action_sets:
         successful, labels, diagnostics = label_successful_memory(successful, settings, task)
@@ -538,7 +541,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                                settings, augmented, groups, out)
                 else:
                     preference.history.restore_success(parent, range(first_phase),
-                                                       require_old_q=method in RANK_METHODS, require_good=aspr)
+                                                       require_old_q=method in HISTORY_RANK_METHODS, require_good=aspr)
             restore_rng(state["rng"])
             parent_hash = dict(parent_model_hash=state["model_hash"])
             if getattr(mac.agent, "loaded_legacy_fc1", False):
