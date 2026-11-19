@@ -20,8 +20,10 @@ from learners.action_set_preference import (
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
+from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
 from action_set_protocol import (
-    ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, TOPK_VARIANTS, matching_shared_protocol, validate, validate_fork,
+    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, RANK_METHODS, TOPK_VARIANTS,
+    matching_pair_reference, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models
@@ -55,7 +57,7 @@ def config(protocol, seed, out):
                gradient_monitor_interval=protocol.get("gradient_monitor_interval", 0),
                optimizer=protocol.get("optimizer", "rmsprop"),
                action_set=protocol["action_set"])
-    if protocol["method"] in RANK_METHODS:
+    if protocol["method"] in PREFERENCE_RANK_METHODS:
         cfg[protocol["method"]] = protocol[protocol["method"]]
     cfg["env_args"].update(seed=seed, game_version=protocol.get("sc2_game_version", "4.10"),
                            rosters=protocol["tasks"])
@@ -311,7 +313,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         args.preference_role = role
         args.parent = str(parent) if parent else None
         args.preference_weight = (protocol[protocol["method"]]["weight"]
-                                  if role != "release" and protocol["method"] in RANK_METHODS else 0.0)
+                                  if role not in ("release", "pair-reference")
+                                  and protocol["method"] in PREFERENCE_RANK_METHODS else 0.0)
     if capture_timing:
         args.capture_timing = True
     logger = base.Logger(logging.getLogger(out.name))
@@ -350,9 +353,13 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         settings = protocol["action_set"]
         method = protocol["method"]
         aspr = method == "aspr_preference"
+        pair_ablation = method in PAIR_METHODS
+        shared_history = PreferenceHistory()
 
         def record_preference(row):
             row["learner_update"] = updates + 1
+            if pair_ablation:
+                row["pair_ablation_stats"] = aggregate_ablation_statistics(row["historical_tasks"])
             if method in ("topk_preference", *TOPK_VARIANTS):
                 counts = Counter()
                 for historical in row["historical_tasks"]:
@@ -386,11 +393,15 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             update_log = "aspr_max_preference"
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
                                              record_preference)
-        elif method in RANK_METHODS and protocol[method]["weight"] and role != "release":
+        elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role != "release":
             update_log = method
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
-            preference = RankingPreference(method, ranking, np.random.default_rng(seed), augmented, groups,
-                                            record_preference)
+            if pair_ablation:
+                preference = PairAblationPreference(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
+                                                    augmented, groups, record_preference)
+            else:
+                preference = RankingPreference(method, ranking, np.random.default_rng(seed), augmented, groups,
+                                                record_preference)
 
         stages = protocol["stages"]
         evaluation = protocol["evaluation"]
@@ -413,20 +424,55 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             record_evaluation(out, metrics, dict(phase=phase, label=label, t_env=runner.t_env, **row))
             return row["win_rate"]
 
+        def save_fork_state():
+            th.save(dict(
+                fork_role=role, protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
+                target_agent=learner.target_mac.agent.state_dict(),
+                last_target_update_episode=learner.last_target_update_episode,
+                learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
+                train_returns=runner.train_returns, train_stats=runner.train_stats,
+                epsilon=mac.action_selector.epsilon, exploration_start=mac.action_selector.exploration_start,
+                environment_distributions=runner.env.distribution_state(), rng=rng_state(),
+                preference_rng=preference.rng.bit_generator.state, model_hash=base.parameter_hash(learner),
+            ), out / "return_state.th")
+
+        def prepare_shared_pair_pool(source_phase):
+            pool = shared_history[source_phase]
+            prior_budget = sum(item["pair_budget"] for item in preference.history.values())
+            episodes, audit = preference.prepare_pool(pool, prior_budget=prior_budget)
+            preference.history[source_phase] = dict(pool, episodes=episodes, pair_budget=audit["valid_pairs"])
+            path = out / "pair_ablation_memory" / f"phase{source_phase:04d}"
+            History.save(path / "selection.th", [ep["pair_mask"] for ep in episodes])
+            base.write(path / "summary.json", dict(
+                selection=PAIR_METHODS[method], pair_seed=preference.settings["pair_seed"],
+                source_pool=str(PreferenceHistory.phase_path(parent, source_phase) / "success.th"),
+                **audit))
+
         first_phase = 0
         if parent:
             state = th.load(parent / "return_state.th", map_location="cpu")
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
             # Older direct launches used per-task exploration when the field was absent.
             parent_protocol = {"epsilon_on_switch": "per_task", **state["protocol"]}
-            same_protocol = (matching_shared_protocol(parent_protocol, protocol)
-                             if role == "shared-branch" else parent_protocol == protocol)
+            if pair_ablation:
+                prefix_role = "pair-reference"
+                same_protocol = matching_pair_reference(parent_protocol, protocol)
+            else:
+                same_protocol = (matching_shared_protocol(parent_protocol, protocol)
+                                 if role == "shared-branch" else parent_protocol == protocol)
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())
+            if pair_ablation:
+                report["stages"] = report["stages"][:1]
+                # Z must be treated as unseen when restoring at the S boundary.
+                next_task = stages[1]["task"]
+                before_first_training = {next_task: report["before_first_training"][next_task]}
+            else:
+                before_first_training = report["before_first_training"]
             if role == "shared-branch" and len(report["stages"]) != 1:
                 raise ValueError("a shared prefix must contain exactly its first stage")
-            initial, before = report["initial_reference"], report["before_first_training"]
+            initial, before = report["initial_reference"], before_first_training
             for entry in report["stages"]:
                 latest[entry["task"]] = entry["win_rates"][entry["task"]]
                 results.append(dict(entry, checkpoint=str(parent / entry["checkpoint"])))
@@ -446,7 +492,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             runner.env.restore_distribution(state["environment_distributions"])
             if preference is not None:
                 preference.rng.bit_generator.state = state["preference_rng"]
-                if aspr and role == "shared-branch":
+                if pair_ablation:
+                    shared_history.restore_success(parent, range(len(stages) - 1), require_old_q=True)
+                    prepare_shared_pair_pool(0)
+                elif aspr and role == "shared-branch":
                     restore_aspr_shared_memory(preference.history, parent, range(first_phase),
                                                settings, augmented, groups, out)
                 else:
@@ -476,8 +525,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             er_buffer = make_replay_buffer(args, [stage["task"] for stage in stages],
                                            scheme, groups, info["episode_limit"] + 1, preprocess)
 
-        stop_phase = {"prefix": len(stages) - 1, "shared-prefix": 1}.get(role, len(stages))
-        training_preference = None if role == "shared-prefix" else preference
+        stop_phase = {"prefix": len(stages) - 1, "shared-prefix": 1,
+                      "pair-reference": len(stages) - 1}.get(role, len(stages))
+        training_preference = None if role in ("shared-prefix", "pair-reference") else preference
         monitor_interval = args.gradient_monitor_interval
         for phase in range(first_phase, stop_phase):
             stage = stages[phase]
@@ -552,7 +602,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     before[next_task] = evaluate(reference, next_task, "next_unseen")
             base.write(out / "retention.json", dict(stages=results, initial_reference=initial,
                                                    before_first_training=before))
-            if preference is not None:
+            if pair_ablation:
+                if phase + 1 < stop_phase:
+                    prepare_shared_pair_pool(phase)
+            elif preference is not None:
                 status("collecting_memory")
                 pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
                                       task, phase, settings, out)
@@ -584,17 +637,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                         metrics.preference(row_metrics, event="fixed_probe")
                     except Exception:
                         probe_error(probe["task"], traceback.format_exc())
+            if role == "pair-reference" and phase == 0:
+                save_fork_state()
         if role in ("prefix", "shared-prefix"):
-            th.save(dict(
-                fork_role=role, protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
-                target_agent=learner.target_mac.agent.state_dict(),
-                last_target_update_episode=learner.last_target_update_episode,
-                learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
-                train_returns=runner.train_returns, train_stats=runner.train_stats,
-                epsilon=mac.action_selector.epsilon, exploration_start=mac.action_selector.exploration_start,
-                environment_distributions=runner.env.distribution_state(), rng=rng_state(),
-                preference_rng=preference.rng.bit_generator.state, model_hash=base.parameter_hash(learner),
-            ), out / "return_state.th")
+            save_fork_state()
         status("completed")
     except BaseException:
         status("failed", error=traceback.format_exc())

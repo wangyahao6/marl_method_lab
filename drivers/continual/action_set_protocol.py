@@ -4,7 +4,7 @@ from math import isfinite
 from common.exploration import epsilon_on_switch
 
 TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret")
-FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch")
+FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 ASPR_MAX_METHODS = ("aspr_max_preference", "action_set_preference")
@@ -12,6 +12,13 @@ RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
                 "aspr_preference")
+PAIR_STRUCTURES = {f"pair_structure_{selection}": selection for selection in (
+    "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1")}
+PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 80, 100)}
+PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS}
+PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS}
+PAIR_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0, q_scale_floor=0.1, pair_seed=3535)
+PREFERENCE_RANK_METHODS = (*RANK_METHODS, *PAIR_METHODS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
@@ -45,7 +52,7 @@ def settings_with_defaults(values, defaults, required=()):
 
 
 def validate(protocol, algorithm, method):
-    if algorithm not in ALGORITHMS or method not in ("baseline", *ASPR_MAX_METHODS, *RANK_METHODS):
+    if algorithm not in ALGORITHMS or method not in ("baseline", *ASPR_MAX_METHODS, *PREFERENCE_RANK_METHODS):
         raise ValueError("vdn_action_set requires shared recurrent VDN and a supported preference method or baseline")
     if not isinstance(protocol, dict):
         raise ValueError("protocol must be a JSON object")
@@ -144,6 +151,24 @@ def validate(protocol, algorithm, method):
                     bound = "positive" if positive else "nonnegative"
                     raise ValueError(f"{name}.{key} must be finite and {bound}")
             ranking[name] = options
+    experiment = protocol.get("pair_ablation_experiment")
+    if experiment is not None or method in PAIR_METHODS:
+        if not isinstance(experiment, str) or experiment not in PAIR_ABLATIONS:
+            raise ValueError("pair ablation requires its own experiment protocol")
+        methods = PAIR_ABLATIONS[experiment]
+        if method not in ("full_rank_preference", *methods):
+            raise ValueError("pair ablation requires its own experiment protocol and method")
+        if algorithm != "vdn" or len(stages) != 3 or len({stage["task"] for stage in stages}) != 3:
+            raise ValueError("pair ablation requires three distinct stages with shared VDN")
+        for name in methods:
+            if name != method and name not in protocol:
+                continue
+            options = settings_with_defaults(protocol.get(name, {}), PAIR_DEFAULTS)
+            if (any(not nonnegative(value) for value in options.values())
+                    or any(options[key] != value for key, value in PAIR_DEFAULTS.items() if key != "pair_seed")
+                    or not valid_seeds([options["pair_seed"]])):
+                raise ValueError(f"{name} requires the fixed ablation settings and a valid pair_seed")
+            ranking[name] = options
     uses_sets = ((method in ASPR_MAX_METHODS and settings["weight"])
                  or (method == "aspr_preference" and ranking[method]["weight"]))
     if uses_sets and quantile is None:
@@ -158,6 +183,16 @@ def validate_fork(protocol, role, parent):
     if bool(parent) != (role in ("keep", "release", "shared-branch")):
         raise ValueError("keep, release and shared-branch require --parent; other roles take no parent")
     method = protocol["method"]
+    if role == "pair-reference":
+        if method != "full_rank_preference" or not protocol.get("pair_ablation_experiment") or not protocol[method]["weight"]:
+            raise ValueError("pair-reference requires enabled FRPR on a pair ablation protocol")
+        return
+    if method in PAIR_METHODS:
+        if role != "shared-branch":
+            raise ValueError("pair ablation branches require --preference-role shared-branch and the reference run as --parent")
+        return
+    if protocol.get("pair_ablation_experiment"):
+        raise ValueError("pair ablation FRPR is used with --preference-role pair-reference")
     if role in ("shared-prefix", "shared-branch"):
         if protocol.get("replay_on_switch", "ft") != "ft" or len(protocol["stages"]) < 2:
             raise ValueError("a shared S prefix requires FT and at least two stages")
@@ -190,3 +225,10 @@ def valid_seeds(seeds):
     return (isinstance(seeds, list) and bool(seeds)
             and all(type(seed) is int and 0 <= seed < 2**31 for seed in seeds)
             and len(set(seeds)) == len(seeds))
+
+
+def matching_pair_reference(parent, branch):
+    """Compare the TD, environment and history settings across the two ablation protocols."""
+    ignored = {"id", "method", "pair_ablation_experiment", *PAIR_METHODS}
+    return ({key: value for key, value in parent.items() if key not in ignored}
+            == {key: value for key, value in branch.items() if key not in ignored})

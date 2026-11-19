@@ -3,6 +3,8 @@
 | 目录 | 用途 |
 | --- | --- |
 | [action_preference/szc](action_preference/szc) | SZC 的 FRPR、T1PR、TKPR、ASPR、ASPR-Max 及对照。共享前缀使用 `szc_vdn64_tkpr_k1_shared.json`。 |
+| [action_preference/pair_structure](action_preference/pair_structure) | SZC-1M 动作对结构消融。 |
+| [action_preference/pair_ratio](action_preference/pair_ratio) | SZC-1M Top-1 约束比例消融。 |
 | [action_preference/examples](action_preference/examples) | 动作集合协议示例。 |
 | [action_preference/historical](action_preference/historical) | 历史首跑和回访协议，包括累计 ε 的早期 SZC T1PR 与 ASPR-Max。 |
 | [neuron_protection/softprotect](neuron_protection/softprotect) | A/W/V、异质 Agent、TS3/TS4 软保护与历史对照。Windows 128 单元软保护协议仍可定位。 |
@@ -26,3 +28,5 @@
 - 双层 VDN A2 CHI 入口使用 `neuron_protection/chi/szc_vdn64_ft_a2_chi_1m.json`，从同目录 `szc_vdn64_ft_a2_chi.json` 派生。
 
 两份协议沿用各自母版的模型、方法参数、逐任务探索与评价设置。方法专用协议如 TKPR 的 K 设置应以所选方法协议为依据，再派生相同阶段预算。此次配置创建仅设置预算版本，具体训练方法与种子由运行指令选择。
+
+两组 seed 3535 动作对消融的设置、诊断及启动命令见 [SZC-1M 动作对消融](../../docs/SZC_PAIR_ABLATIONS.md)。

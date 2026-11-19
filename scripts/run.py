@@ -11,9 +11,9 @@ def git(*args):
 
 def main():
     sys.path.insert(0, str(ROOT / 'drivers/continual'))
-    from action_set_protocol import ASPR_MAX_METHODS, FORK_ROLES, RANK_METHODS, validate
+    from action_set_protocol import ASPR_MAX_METHODS, FORK_ROLES, PREFERENCE_RANK_METHODS, validate
     from common.exploration import epsilon_on_switch
-    preference_methods = (*ASPR_MAX_METHODS, *RANK_METHODS)
+    preference_methods = (*ASPR_MAX_METHODS, *PREFERENCE_RANK_METHODS)
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--suite',choices=['smac','continual','hetero','ts3','ts4','ts5','ts6','ts7','ts8','history','network_similarity','vdn_action_set'],required=True)
     p.add_argument('--algorithm',choices=['qmix','qplex','dmix','rmix','vdn','vdn_1ff','vdn_1ff_128'],required=True)
@@ -85,6 +85,10 @@ def main():
         spec = builders[a.suite](a, p, out, env)
     command, env, details = spec.command, spec.env, spec.details
     protocol = details.get('protocol')
+    if a.suite == 'vdn_action_set' and protocol.get('pair_ablation_experiment'):
+        out = out.parent / protocol['pair_ablation_experiment'] / out.name
+        env['MARL_RUN_DIR'] = str(out)
+        env['MARL_PROTOCOL'] = str(out / 'protocol.json')
     if 'protocol' in details and a.suite != 'network_similarity':
         try:
             protocol['epsilon_on_switch'] = epsilon_on_switch(protocol)

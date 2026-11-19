@@ -1,0 +1,153 @@
+{
+  "id": "szc_vdn64_pair_structure_1m",
+  "tasks": {
+    "stalker": {
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "zealot": {
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "colossus": {
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    }
+  },
+  "stages": [
+    {
+      "task": "stalker",
+      "steps": 1000000
+    },
+    {
+      "task": "zealot",
+      "steps": 1000000
+    },
+    {
+      "task": "colossus",
+      "steps": 1000000
+    }
+  ],
+  "phase_boundary": "cumulative",
+  "epsilon_on_switch": "per_task",
+  "action_set": {
+    "weight": 1.0,
+    "margin": 0.0,
+    "batch_episodes": 8,
+    "success_episodes": 100,
+    "seed_offsets": [
+      301001,
+      302001,
+      303001,
+      304001
+    ],
+    "attempts_per_seed": 125,
+    "second_gap_quantile": 0.5,
+    "probe_episodes_per_seed": 4,
+    "delta_candidates_by_task": {
+      "stalker": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "zealot": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "colossus": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ]
+    }
+  },
+  "evaluation": {
+    "seeds": [
+      91001,
+      91002
+    ],
+    "episodes_per_seed": 16,
+    "focus_seeds": [
+      91101,
+      91102,
+      91103,
+      91104
+    ],
+    "focus_episodes_per_seed": 32,
+    "task_seed_stride": 100,
+    "interval": 25000
+  },
+  "sc2_game_version": "4.10",
+  "full_rank_preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1
+  },
+  "replay_on_switch": "ft",
+  "gradient_monitor_interval": 100,
+  "pair_ablation_experiment": "pair_structure",
+  "pair_structure_k1": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1,
+    "pair_seed": 3535
+  },
+  "pair_structure_adjacent": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1,
+    "pair_seed": 3535
+  },
+  "pair_structure_k1_adjacent": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1,
+    "pair_seed": 3535
+  },
+  "pair_structure_frpr": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1,
+    "pair_seed": 3535
+  },
+  "pair_structure_random_n_minus_1": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0,
+    "q_scale_floor": 0.1,
+    "pair_seed": 3535
+  }
+}
