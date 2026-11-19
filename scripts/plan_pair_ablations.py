@@ -1,4 +1,7 @@
-"""Print the SZC-1M pair ablation scheduler plan without submitting it."""
+"""Preview the shared SZC-1M reference and every registered ablation branch.
+
+Print the resulting scheduler plan without submitting it.
+"""
 import argparse
 import json
 import subprocess

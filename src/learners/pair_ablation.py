@@ -8,7 +8,7 @@ from learners.action_set_preference import ActionSetPreference, batch_episodes, 
 from learners.ranking_preference import pair_state_loss, ranking_statistics, reference_order, summarize
 
 
-STRUCTURES = ("k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1")
+STRUCTURES = ("k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3")
 
 
 def ranked_subset(candidates, scores, count):
@@ -37,8 +37,9 @@ def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
     order = old_q.masked_fill(~legal, -th.inf).argsort(dim=-1, descending=True)
     top = order[..., :1]
     top_pairs = (left == top) | (right == top)
-    budget = (legal.sum(dim=-1) - 1).clamp_min(0)
-    valid = decisions & (budget >= 3)
+    legal_count = legal.sum(dim=-1)
+    budget = (legal_count - 1).clamp_min(0)
+    valid = decisions & (legal_count >= 4)
     generator = th.Generator(device=old_q.device).manual_seed(seed)
 
     if selection in STRUCTURES:
@@ -55,7 +56,8 @@ def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
             selected = eligible
         else:
             scores = th.rand(eligible.shape, generator=generator, device=old_q.device)
-            selected = ranked_subset(eligible, scores, budget)
+            pair_budget = 2 * legal_count - 3 if selection == "random_2n_minus_3" else budget
+            selected = ranked_subset(eligible, scores, pair_budget)
     else:
         non_top = eligible & ~top_pairs
         unique_top = (eligible & top_pairs).sum(dim=-1) == budget
@@ -140,10 +142,6 @@ class PairAblationPreference(ActionSetPreference):
                                 *counts.flatten(0, -2).sum(dim=0).tolist())
         return prepared, dict(stats, **audit, episodes=len(episodes),
                               valid_state_sha256=valid_hash.hexdigest(), pair_mask_sha256=mask_hash.hexdigest())
-
-    @staticmethod
-    def reduce_task_losses(losses, counts):
-        return (th.stack(losses) * counts).sum() / counts.sum().clamp_min(1)
 
     def task_loss(self, mac, pool, episodes):
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
