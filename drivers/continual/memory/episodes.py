@@ -44,3 +44,19 @@ def pack_episode(batch, length, **metadata):
         key: value[0, :length + 1].detach().cpu().clone()
         for key, value in batch.data.transition_data.items()
     })
+
+
+def preference_episode_id(task, episode):
+    """Hash exact FRPR inputs, including saved reference Q, independently of list order."""
+    import hashlib
+    import json
+
+    length = episode["length"]
+    digest = hashlib.sha256(json.dumps([task, length], ensure_ascii=False).encode())
+    for key in ("obs", "avail_actions", "actions_onehot", "old_q_values", "terminated", "filled"):
+        # Bootstrap actions/Q/termination are unused, but the last filled flag is used.
+        stop = length + 1 if key == "filled" else length
+        values = episode["data"][key][:stop].detach().cpu().contiguous()
+        digest.update(json.dumps([key, str(values.dtype), list(values.shape)]).encode())
+        digest.update(values.numpy().tobytes())
+    return digest.hexdigest()

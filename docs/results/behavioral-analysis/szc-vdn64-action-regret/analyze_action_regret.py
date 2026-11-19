@@ -25,6 +25,7 @@ from controllers import REGISTRY
 from drivers.continual.common.runtime import episode_spec
 from learners.action_set_preference import decision_masks, unroll
 from learners.ranking_preference import reference_order
+from learners.action_regret import action_regret
 
 LOSS_BINS = (0.1, 0.5, 1.0)
 LOSS_NAMES = ("lt_0_1", "0_1_to_0_5", "0_5_to_1", "ge_1")
@@ -171,12 +172,12 @@ def old_values(mac, batch, steps, legal):
 def contrast(mac, batch, steps, legal, valid, reference):
     old_q, best, old_actions, scale, confidence = reference
     new_actions = legal_q(mac, batch, steps, legal).argmax(dim=-1)
-    raw = (best - old_q.gather(-1, new_actions.unsqueeze(-1)).squeeze(-1))[0]
+    raw, norm = (values[0] for values in action_regret(old_q, new_actions, best, scale))
     if not torch.isfinite(raw).all() or (raw < 0).any():
         raise ValueError("Invalid regret for a legal action")
     mask = valid[0]
     raw = raw.masked_fill(~mask, 0)
-    norm = raw / scale[0]
+    norm = norm.masked_fill(~mask, 0)
     flipped = ((old_actions != new_actions)[0] & mask)
     return dict(raw=raw.numpy(), norm=norm.numpy(), flipped=flipped.numpy(),
                 valid=mask.numpy(), confidence=confidence[0].numpy(),

@@ -81,7 +81,7 @@ def select(mac, batch, step):
     return dict(q=q, actions=actions, hidden_before=before, hidden_after=mac.hidden_states.tolist())
 
 
-def offline_records(policy, source):
+def offline_records(policy, source, *, include_batch=False):
     mac, batch = policy.episode()
     records = []
     for step, frame in enumerate(source["steps"]):
@@ -93,7 +93,7 @@ def offline_records(policy, source):
         records.append(dict(q=q.tolist(), actions=greedy, hidden_before=before,
                             hidden_after=mac.hidden_states.tolist()))
         add_action(batch, frame["actions"], step)
-    return records
+    return (records, batch) if include_batch else records
 
 
 def selected_sites(source, records):
@@ -114,11 +114,13 @@ def selected_sites(source, records):
     return sites
 
 
-def branch(policy, make_env, seed_args, source, records, site, action, used_pids):
+def branch(policy, make_env, seed_args, source, records, site, action, used_pids, *,
+           same_policy=True, trajectory_id="szc-frpr-1111-s-91101-episode0"):
     target, agent = site["timestep"], site["agent_id"]
     candidate, = (item for item in site["candidates"] if item["action"] == action)
     baseline = action == site["greedy_action"]
-    result = dict(trajectory_id="szc-frpr-1111-s-91101-episode0", site=site["name"],
+    match_full_trace = baseline and same_policy
+    result = dict(trajectory_id=trajectory_id, site=site["name"],
                   timestep=target, agent_id=agent, greedy_action=site["greedy_action"],
                   greedy_q=site["greedy_q"], **candidate, baseline=baseline,
                   label="Uncertain", environment_replay_consistent=None, rnn_consistent=None,
@@ -148,7 +150,7 @@ def branch(policy, make_env, seed_args, source, records, site, action, used_pids
             done = False
             for step in range(policy.episode_limit):
                 frame = trace_frame(env)
-                if step <= target or (baseline and step < len(source["steps"])):
+                if step <= target or (match_full_trace and step < len(source["steps"])):
                     for key, value in frame.items():
                         compare(source["steps"][step][key], value, step, key)
                     if diff():
@@ -180,7 +182,7 @@ def branch(policy, make_env, seed_args, source, records, site, action, used_pids
                 rewards.append(float(reward))
                 trace_actions.append(actions)
                 result["rollout_steps"] = len(rewards)
-                if step < target or (baseline and step < len(source["steps"])):
+                if step < target or (match_full_trace and step < len(source["steps"])):
                     expected = source["steps"][step]
                     for key, value in dict(actions=actions, reward=float(reward), terminated=bool(done),
                                            battle_won=bool(info.get("battle_won")), info=portable(info)).items():
@@ -193,7 +195,7 @@ def branch(policy, make_env, seed_args, source, records, site, action, used_pids
                     raise ValueError("SC2 force restart")
                 if done:
                     break
-            if baseline:
+            if match_full_trace:
                 compare(len(source["steps"]), len(rewards), min(len(rewards), len(source["steps"])), "length")
                 for key, value in trace_frame(env).items():
                     compare(source["final"][key], value, len(rewards), key)
@@ -204,6 +206,7 @@ def branch(policy, make_env, seed_args, source, records, site, action, used_pids
             result.update(won=won, label="Uncertain" if timeout else "Good" if won else "Bad",
                           termination_reason="timeout" if timeout else "victory" if won else "battle_loss",
                           final_info=portable(info), episode_return=sum(rewards), actions=trace_actions,
+                          rewards=rewards, post_intervention_return=sum(rewards[target:]),
                           post_intervention_steps=len(rewards) - target - 1)
     except Exception as exc:
         result.update(error=f"{type(exc).__name__}: {exc}", termination_reason="invalid_or_environment_error")

@@ -20,9 +20,10 @@ from learners.action_set_preference import (
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
 from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
+from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
 from action_set_protocol import (
-    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, RANK_METHODS, TOPK_VARIANTS,
+    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
     matching_pair_reference, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
@@ -353,6 +354,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         settings = protocol["action_set"]
         method = protocol["method"]
         aspr = method == "aspr_preference"
+        selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
         shared_history = PreferenceHistory()
 
@@ -399,6 +401,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 preference = PairAblationPreference(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
                                                     augmented, groups, record_preference)
+            elif selected_frpr:
+                preference = SelectedFRPR(method, ranking, np.random.default_rng(seed), augmented, groups,
+                                          record_preference)
             else:
                 preference = RankingPreference(method, ranking, np.random.default_rng(seed), augmented, groups,
                                                 record_preference)
@@ -447,6 +452,39 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 selection=PAIR_METHODS[method], pair_seed=preference.settings["pair_seed"],
                 source_pool=str(PreferenceHistory.phase_path(parent, source_phase) / "success.th"),
                 **audit))
+
+        def prepare_selected_history(current_task):
+            import hashlib
+
+            latest_pools = {pool["task"]: (source_phase, pool)
+                            for source_phase, pool in preference.history.items()
+                            if pool["task"] != current_task and pool["episodes"]}
+            audits = []
+            for source_phase, pool in latest_pools.values():
+                if "shapley_coverage" in pool:
+                    audits.append(pool["shapley_coverage"])
+                    continue
+                trace_path = preference.settings.get("trace_pools", {}).get(str(source_phase))
+                if trace_path:
+                    trace_pool = History.load(trace_path)
+                    checkpoint = out / pool["reference_checkpoint"]
+                    if (trace_pool["task"] != pool["task"] or trace_pool["phase"] != source_phase
+                            or trace_pool["layout"] != expected_layout or not trace_pool["episodes"]
+                            or trace_pool["reference_sha256"] != hashlib.sha256(checkpoint.read_bytes()).hexdigest()):
+                        raise ValueError(f"Trace pool does not match task, layout and old checkpoint: {trace_path}")
+                    pool = dict(pool, episodes=trace_pool["episodes"])
+                prepared, audit = preference.prepare_pool(pool)
+                audits.append(audit)
+                if audit["covered"] == audit["required"]:
+                    preference.history[source_phase] = dict(prepared, shapley_coverage=audit)
+            required = sum(row["required"] for row in audits)
+            covered = sum(row["covered"] for row in audits)
+            base.append(out / "shapley_coverage.jsonl", dict(
+                phase=phase, task=current_task, required=required, covered=covered,
+                coverage=covered / required if required else None, pools=audits))
+            if covered != required:
+                raise ValueError(f"Incomplete {method} coverage before phase {phase}: {covered}/{required}; "
+                                 "see shapley_coverage.jsonl")
 
         first_phase = 0
         if parent:
@@ -532,6 +570,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         for phase in range(first_phase, stop_phase):
             stage = stages[phase]
             task = stage["task"]
+            if selected_frpr and training_preference is not None:
+                prepare_selected_history(task)
             begin = runner.t_env
             nominal_end += stage["steps"]
             end = nominal_end if protocol.get("phase_boundary") == "cumulative" else begin + stage["steps"]

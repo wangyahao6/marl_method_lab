@@ -13,19 +13,27 @@ WEIGHT_BINS = ("zero", "(0,0.5)", "[0.5,1)", "[1,2)", "[2,+inf)")
 
 
 @th.no_grad()
-def reference_order(reference_q, legal, q_scale_floor):
+def reference_scale(reference_q, legal, q_scale_floor):
     count = legal.sum(dim=-1, keepdim=True).clamp_min(1)
     mean = reference_q.masked_fill(~legal, 0).sum(dim=-1, keepdim=True) / count
     centered = (reference_q - mean).masked_fill(~legal, 0)
     scale = (centered.square().sum(dim=-1, keepdim=True) / count).sqrt().clamp_min(q_scale_floor)
+    return mean, centered, scale
+
+
+@th.no_grad()
+def reference_order(reference_q, legal, q_scale_floor):
+    _, centered, scale = reference_scale(reference_q, legal, q_scale_floor)
     best_two = reference_q.masked_fill(~legal, -th.inf).topk(2, dim=-1).indices
     best, second = reference_q.gather(-1, best_two).unbind(dim=-1)
-    confidence = ((best - second) / scale.squeeze(-1)).masked_fill(count.squeeze(-1) < 2, 0)
+    confidence = ((best - second) / scale.squeeze(-1)).masked_fill(legal.sum(dim=-1) < 2, 0)
     return centered / scale, scale, best_two[..., :1], confidence
 
 
-def full_rank_preference(current_q, reference_q, legal, decisions, settings, *, pair_audit=False):
-    return _full_rank_loss(current_q, reference_q, legal, decisions, settings, pair_audit=pair_audit)
+def full_rank_preference(current_q, reference_q, legal, decisions, settings, *, pair_audit=False,
+                         pair_selection=None):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           pair_audit=pair_audit, pair_selection=pair_selection)
 
 
 def aspr_preference(current_q, reference_q, legal, decisions, settings, *, good):
@@ -85,9 +93,23 @@ def pair_state_loss(inverted_gap, pairs, temperature, pair_dims, penalty=None):
     return state_loss, pair_counts
 
 
+def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unfiltered=False, good=None):
+    """Pair mask shared by FRPR training and offline analysis; old is already standardized."""
+    old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
+    action_count = legal.size(-1)
+    unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
+    candidates = unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
+    if good is not None:
+        candidates = candidates & (good.unsqueeze(-1) ^ good.unsqueeze(-2))
+    eligible = candidates & (old_gap != 0)
+    gap_key = "min_gap_raw" if raw_reference else "min_gap"
+    pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings[gap_key])
+    return old_gap, candidates, eligible, pairs
+
+
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
                     k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
-                    confidence_weighted=False, high_regret=False, good=None):
+                    confidence_weighted=False, high_regret=False, good=None, pair_selection=None):
     current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
     if raw_reference:
         old = reference_q.detach()
@@ -99,15 +121,11 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         old, scale, best, confidence = reference_order(reference_q, legal, settings["q_scale_floor"])
         if not raw_loss:
             current_gap = current_gap / scale.unsqueeze(-1)
-    old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
+    old_gap, candidates, eligible, pairs = full_rank_pairs(
+        old, legal, decisions, settings, raw_reference=raw_reference, unfiltered=unfiltered, good=good)
     action_count = legal.size(-1)
-    unique_pairs = th.ones((action_count, action_count), device=legal.device, dtype=th.bool).triu(1)
-    candidates = unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
-    if good is not None:
-        candidates = candidates & (good.unsqueeze(-1) ^ good.unsqueeze(-2))
-    eligible = candidates & (old_gap != 0)
-    gap_key = "min_gap_raw" if raw_reference else "min_gap"
-    pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings[gap_key])
+    if pair_selection is not None:
+        pairs = pairs & pair_selection
     if k is not None:
         max_k = (legal.sum(dim=-1) - 1).clamp_min(0)
         effective_k = max_k.clamp_max(k)

@@ -1,0 +1,13 @@
+{
+  "task": "stalker",
+  "source_phase": 0,
+  "old_checkpoint": "runs/szc_vdn64_frpr_seed1111_attempt001/models/phase0000_2000051/agent.th",
+  "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed2222_20261113_attempt001/models/phase0001_4000011/agent.th",
+  "archive": "results/smacv2_exact_replay_20261118_attempt001/evidence",
+  "inventory_pool": "runs/szc_vdn64_frpr_seed1111_attempt001/action_set_memory/phase0000/success.th",
+  "seeds": [[91101, 91101]],
+  "per_stratum": {"early/low": 1},
+  "sampling_seed": 1111,
+  "max_exact_pairs": 15,
+  "top_k": 3
+}

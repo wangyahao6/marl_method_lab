@@ -8,7 +8,8 @@ FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pa
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
 ASPR_MAX_METHODS = ("aspr_max_preference", "action_set_preference")
-RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
+SELECTED_METHODS = ("shapley_selected_frpr", "random_selected_frpr")
+RANK_METHODS = ("full_rank_preference", *SELECTED_METHODS, "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
                 "aspr_preference")
@@ -126,7 +127,7 @@ def validate(protocol, algorithm, method):
         raise ValueError("action_set.delta_candidates_by_task requires lists of nonnegative thresholds keyed by task")
     ranking = {}
     for name in RANK_METHODS:
-        if method == name or name in protocol:
+        if method == name or name in protocol or (name == "full_rank_preference" and method in SELECTED_METHODS):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
@@ -138,6 +139,28 @@ def validate(protocol, algorithm, method):
                 "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
             }.get(name, RANK_DEFAULTS)
+            if name in SELECTED_METHODS:
+                defaults = ranking.get("full_rank_preference", RANK_DEFAULTS)
+                options = settings_with_defaults(protocol.get(name, {}), defaults, (
+                    "selection_k", "selection_ratio", "selection_seed", "shapley_results", "trace_pools"))
+                config = {key: options.pop(key) for key in list(options) if key not in defaults}
+                k, ratio = config.get("selection_k"), config.get("selection_ratio")
+                sources, pools = config.get("shapley_results"), config.get("trace_pools", {})
+                seed = config.get("selection_seed", 0)
+                if (k is None) == (ratio is None) or (k is not None and not positive_integer(k)) or (
+                        ratio is not None and (not nonnegative(ratio) or not 0 < ratio <= 1)):
+                    raise ValueError(f"{name} needs exactly one positive selection_k or selection_ratio in (0, 1]")
+                if (not isinstance(sources, list) or not sources
+                        or any(not isinstance(path, str) or not path for path in sources)
+                        or not valid_seeds([seed]) or not isinstance(pools, dict)
+                        or set(pools) - {str(i) for i in range(len(stages))}
+                        or any(not isinstance(path, str) or not path for path in pools.values())):
+                    raise ValueError(f"Invalid {name} shapley_results, selection_seed, or trace_pools")
+                if options != defaults:
+                    raise ValueError(f"{name} inherits the FRPR loss settings from full_rank_preference")
+                config["selection_seed"] = seed
+                ranking[name] = dict(options, **config)
+                continue
             options = settings_with_defaults(protocol.get(name, {}), defaults)
             for key, value in options.items():
                 if key == "k":
@@ -216,6 +239,8 @@ def matching_shared_protocol(parent, branch):
     previous, requested = shared_settings(parent), shared_settings(branch)
     # A new branch method can supply its own settings when the prefix had no such method.
     method = branch["method"]
+    if method in SELECTED_METHODS and "full_rank_preference" not in previous:
+        previous["full_rank_preference"] = RANK_DEFAULTS
     if method not in previous and method in RANK_METHODS and method != parent["method"]:
         previous[method] = requested[method]
     return previous == requested
