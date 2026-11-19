@@ -1,0 +1,71 @@
+{
+  "code_commit": "942b2ee",
+  "frpr": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "inputs": [
+    {
+      "seed": 2222,
+      "task": "stalker",
+      "checkpoint": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0000_2000007/agent.th",
+      "checkpoint_sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c",
+      "historical_pool": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "pool_sha256": "4eed2d8991169ea871bb4920eee4af61112d47ac82410fd4bc4912e6785a6651",
+      "episodes": 100,
+      "recomputed_reference_episodes": 100,
+      "mean": 10.74662741134596,
+      "median": 10.0,
+      "maximum": 38,
+      "over_cap": 7902,
+      "nonzero": 21891
+    },
+    {
+      "seed": 2222,
+      "task": "zealot",
+      "checkpoint": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/models/phase0001_4000037/agent.th",
+      "checkpoint_sha256": "49ffcd505b228ed26336f00ed89a69009d9bdbaad648c5fc265e4b044ad5ec88",
+      "historical_pool": "runs/szc_vdn64_ft_frpr_seed2222_20261113_attempt001/action_set_memory/phase0001/success.th",
+      "pool_sha256": "bf7204f61e1db4c980367a1883914a701a08b8b5604be701f89e648f8a1d2a25",
+      "episodes": 100,
+      "recomputed_reference_episodes": 100,
+      "mean": 10.899082167832168,
+      "median": 11.0,
+      "maximum": 38,
+      "over_cap": 7952,
+      "nonzero": 22043
+    },
+    {
+      "seed": 3535,
+      "task": "stalker",
+      "checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+      "checkpoint_sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a",
+      "historical_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "pool_sha256": "5e9c284eb01f731bec354fc87500be2314aceadf3e5920f15bc1792d2a619e2b",
+      "episodes": 100,
+      "recomputed_reference_episodes": 100,
+      "mean": 11.00506307014098,
+      "median": 10.0,
+      "maximum": 38,
+      "over_cap": 8119,
+      "nonzero": 22443
+    },
+    {
+      "seed": 3535,
+      "task": "zealot",
+      "checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0001_4000053/agent.th",
+      "checkpoint_sha256": "c2b0edbf44f80577d9e31c5707f0f74f40905fbddf99a2fb89f5aecb4c762261",
+      "historical_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0001/success.th",
+      "pool_sha256": "2cc22fee6d172ecd7ba5bb85fd91dfb65ba9c96541b4a333b58a14df5efef56d",
+      "episodes": 100,
+      "recomputed_reference_episodes": 100,
+      "mean": 11.017654751525718,
+      "median": 11.0,
+      "maximum": 38,
+      "over_cap": 8226,
+      "nonzero": 22628
+    }
+  ]
+}

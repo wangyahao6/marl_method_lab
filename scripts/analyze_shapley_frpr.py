@@ -35,7 +35,7 @@ def csv_output(path, rows, fields=()):
     @contextlib.contextmanager
     def stream():
         with path.open("w", newline="") as file:
-            writer = csv.DictWriter(file, fieldnames=fields)
+            writer = csv.DictWriter(file, fieldnames=fields, lineterminator="\n")
             writer.writeheader()
             yield writer
     if rows is None:
