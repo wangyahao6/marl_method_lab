@@ -236,7 +236,7 @@ def run_case(config, out):
     def follow_frozen(item, spec, settings, writer, audit):
         if item[0]["episode_id"] in model["discovery_context_ids"]:
             raise ValueError("Validation episode overlaps Discovery")
-        return validate_context(item, spec, cfg, audit, fit, chosen, outcomes)
+        return validate_context(item, spec, dict(settings, **cfg), audit, fit, chosen, outcomes)
 
     try:
         return run(out / "validation_config.json", validation, evaluator=follow_frozen,
