@@ -37,3 +37,5 @@
 - [运行清单](runs.csv)和[配置快照](configs/)记录实际训练版本、父运行和累计／新增步数。
 - [逐次评估](evaluations.csv)、[阶段指标](stage_metrics.csv)、[学习曲线数据](learning_curves.csv)和[终点对照差值](paired_final.csv)。终点差值为方法减对照，单位为百分点。分支的 S 阶段评估通过父运行的 phase 0 关联。
 - [参考历史池](reference_pools.csv)和[固定掩码诊断](pool_diagnostics.csv)。[历史回放诊断](preference_diagnostics.csv)包含重复采样，[偏好更新](update_diagnostics.csv)按训练阶段汇总，[梯度诊断](gradient_diagnostics.csv)每 100 次更新抽样。
+
+旧 Q 差距、排名距离与 Matched 逐状态配对见[离线动作对诊断](pair-gap-analysis/README.md)。

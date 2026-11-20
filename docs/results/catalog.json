@@ -310,7 +310,11 @@
         "pool_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/pool_diagnostics.csv",
         "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/preference_diagnostics.csv",
         "update_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/update_diagnostics.csv",
-        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/gradient_diagnostics.csv"
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/gradient_diagnostics.csv",
+        "pair_gap_summary": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/pair_gap_summary.csv",
+        "pair_gap_by_rank_distance": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/pair_gap_by_rank_distance.csv",
+        "rank_distance_distribution": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/rank_distance_distribution.csv",
+        "matched_vs_adjacent": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/matched_vs_adjacent.csv"
       },
       "task_order": [
         "stalker",
@@ -338,7 +342,8 @@
         "13 个分支共用一个 S 末恢复点。父运行的 phase 0 可用于重算分支指标，父运行的 Z 及其 C 训练前评价属于 TD 参考线。",
         "所有分支共用参考线采集的 S/Z 胜局。pool_diagnostics 按固定池计数，preference_diagnostics 包含重复采样。",
         "仅 seed 3535。Ratio-60/80/100 启动源码与其他组不同，核对范围见报告。"
-      ]
+      ],
+      "pair_gap_analysis_report": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/README.md"
     },
     {
       "id": "szc-vdn64-greedy-action-agreement",
