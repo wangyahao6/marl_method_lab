@@ -1,9 +1,16 @@
+from pathlib import Path
+import sys
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from drivers.continual.analysis.shapley_frpr import coalition_rows, exact_shapley
 from drivers.continual.analysis.shapley_mc import batched_shapley, fit_transfer, transferred_scores
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from summarize_shapley_validation import bootstrap
+from validate_shapley_frpr import validate_context
 
 
 SETTINGS = dict(batch=64, minimum=256, maximum=1024, abs_tol=.002, rel_tol=.10,
@@ -56,6 +63,32 @@ class ShapleyPermutationTest(unittest.TestCase):
         scores, seen = transferred_scores(("late", "high"), [a, b, c], fit)
         self.assertEqual(scores, [1., 0., .5])
         self.assertEqual(seen, [True, True, False])
+
+
+    def test_validation_masks_are_frozen_before_outcome_collection(self):
+        pairs = [(1, 2), (2, 3)]
+        fit = fit_transfer([(("early", "low"), pairs, [1., -1.])], 3)
+        cfg = dict(top_k=1, random_seeds=[101, 102], rollout_repeats=1,
+                   projection_margin=0., softmax_temperature=1.)
+        row = dict(task="stalker", episode_id="held_out", timestep=1, agent_id=2,
+                   battle_phase="early", regret_stratum="low", legal_actions="[1, 2, 3]")
+        item = (row, None, pairs, [0., -2., 1., 3.])
+        selections, values = [], []
+        def audited_collector(*args):
+            self.assertEqual(len(selections), 5)
+            self.assertEqual(values, [])
+            return np.asarray([[[0., 0.], [1., 0.], [2., 1.]]]), []
+        audit = dict(coalitions=0, projection_residual=0., stationarity_residual=0.)
+        with patch("validate_shapley_frpr.collect_action_branches", audited_collector):
+            validate_context(item, None, cfg, audit, fit, selections, values)
+        self.assertEqual(next(r["mask"] for r in selections if r["arm"] == "shapley_topk"), 1)
+        self.assertEqual(row["status"], "complete")
+        self.assertEqual(len(values), 5)
+
+    def test_bootstrap_pairs_repeated_contexts_with_same_initial_seed(self):
+        rows = [{"task": "stalker", "env_seed": seed} for seed in (1, 1, 2, 2)]
+        self.assertEqual(bootstrap(rows, [0., 2., 2., 4.], 5000, 5), (2, 1., 3.))
+        self.assertEqual(bootstrap(rows[:2], [0., 2.], 100, 5), (1, None, None))
 
 
 if __name__ == "__main__":
