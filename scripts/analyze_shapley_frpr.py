@@ -191,14 +191,10 @@ COALITION_FIELDS = (*KEYS, "mask", "size", "projected_q_legal", "probabilities",
                                            for field in ("mean", "variance", "ci_low", "ci_high")))
 
 
-def evaluate(item, spec, cfg, writer, audit):
-    row, site, pairs, q = item
+def collect_action_branches(item, spec, cfg, audit):
+    """Run and audit the same all-legal-action branches for a new analysis."""
+    row, site, _, _ = item
     key = {name: row[name] for name in KEYS}
-    pair_rows = [dict(key, participant=i, preferred_action=p, dispreferred_action=d)
-                 for i, (p, d) in enumerate(pairs)]
-    if row["M"] > cfg["max_exact_pairs"]:
-        row.update(status="over_exact_cap", enumerated=0, branch_rollouts=0)
-        return pair_rows, [], [], []
     ft_policy, make_env, seeds, source, records, used_pids = spec
     actions = json.loads(row["legal_actions"])
     outcomes, returns = [], []
@@ -222,6 +218,19 @@ def evaluate(item, spec, cfg, writer, audit):
         if len(results) == len(actions):
             outcomes.append(results)
     row.update(branch_rollouts=len(returns), rollout_seconds=perf_counter() - start)
+    return np.asarray(outcomes), returns
+
+
+def evaluate(item, spec, cfg, writer, audit):
+    row, site, pairs, q = item
+    key = {name: row[name] for name in KEYS}
+    pair_rows = [dict(key, participant=i, preferred_action=p, dispreferred_action=d)
+                 for i, (p, d) in enumerate(pairs)]
+    if row["M"] > cfg["max_exact_pairs"]:
+        row.update(status="over_exact_cap", enumerated=0, branch_rollouts=0)
+        return pair_rows, [], [], []
+    actions = json.loads(row["legal_actions"])
+    outcomes, returns = collect_action_branches(item, spec, cfg, audit)
     if len(outcomes) != cfg["rollout_repeats"]:
         row.update(status="invalid_branch", enumerated=0)
         return pair_rows, returns, [], []
@@ -371,7 +380,7 @@ def checked_policy(checkpoint):
 
 
 @th.inference_mode()
-def run(config_path, out):
+def run(config_path, out, *, evaluator=evaluate, sampler=sampled, snapshot_paths=()):
     cfg = dict(projection_margin=0., softmax_temperature=1., rollout_repeats=1)
     cfg.update(read(config_path))
     frpr = validate(cfg)
@@ -399,7 +408,7 @@ def run(config_path, out):
     snapshot = out / "source.tar.gz"
     subprocess.run(["git", "archive", "--format=tar.gz", f"--output={snapshot}", commit,
                     "src", "drivers/continual", "scripts/analyze_shapley_frpr.py",
-                    "scripts/verify_smacv2_replay.py", "scripts/verify_smacv2_counterfactual.py"],
+                    "scripts/verify_smacv2_replay.py", "scripts/verify_smacv2_counterfactual.py", *snapshot_paths],
                    cwd=ROOT, check=True)
     manifest = dict(config=cfg, frpr=frpr, inputs=inputs, argv=sys.argv, code_commit=commit,
                     code_dirty=bool(subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT)),
@@ -471,7 +480,7 @@ def run(config_path, out):
             eligible.extend(context_rows)
             episodes.append(episode)
 
-        selection = list(sampled(eligible, cfg["per_stratum"], cfg["sampling_seed"]))
+        selection = list(sampler(eligible, cfg["per_stratum"], cfg["sampling_seed"]))
         available_counts = Counter((a[0]["battle_phase"], a[0]["regret_stratum"]) for a in eligible)
         sample_counts = Counter((a[0]["battle_phase"], a[0]["regret_stratum"]) for a in selection)
         csv_output(out / "strata_inventory.csv", [
@@ -482,14 +491,15 @@ def run(config_path, out):
             for item in selection:
                 row = item[0]
                 rows.append(row)
-                p, r, s, ii = evaluate(item, sources[row["episode_id"]], cfg, writer, audit)
+                p, r, s, ii = evaluator(item, sources[row["episode_id"]], cfg, writer, audit)
                 pairs.extend(p)
                 returns.extend(r)
                 shapley.extend(s)
                 inter.extend(ii)
                 print(row["task"], row["battle_phase"], row["regret_stratum"],
                       f"M={row['M']}", row["status"], flush=True)
-        audit["passed"] = bool(shapley) and audit["branch_rollouts"] == audit["verified_branches"]
+        audit["passed"] = any(row.get("status") == "complete" for row in rows) and (
+            audit["branch_rollouts"] == audit["verified_branches"])
         if episodes:
             th.save(dict(task=task, phase=cfg["source_phase"], layout=env_info["action_layout"],
                          reference_sha256=sha(old_path), episodes=episodes), out / "trace_pool.th")
@@ -510,7 +520,7 @@ def run(config_path, out):
         csv_output(out / "action_returns.csv", returns, (*KEYS, "action", "repeat"))
         csv_output(out / "shapley_values.csv", shapley, (*PAIR_FIELDS, "phi_return", "phi_win"))
         csv_output(out / "interactions.csv", inter, (*KEYS, "participant_i", "participant_j"))
-        summary = list(aggregate(rows, shapley)) if all("status" in row for row in rows) else []
+        summary = list(aggregate(rows, shapley)) if evaluator is evaluate and all("status" in row for row in rows) else []
         for source, counts in sorted(histograms.items()):
             flat = [m for m, count in counts.items() for _ in range(count)]
             if flat:

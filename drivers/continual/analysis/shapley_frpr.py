@@ -32,7 +32,7 @@ def project(q, constraints, margin):
     return result.x, feasible_error, float(stationarity), int(result.nit)
 
 
-def coalition_rows(q, legal, pairs, outcomes, margin, temperature):
+def coalition_rows(q, legal, pairs, outcomes, margin, temperature, *, masks=None):
     """Yield a single solve per coalition and values for both outcomes and all repeats."""
     legal = np.asarray(legal, dtype=int)
     q = np.asarray(q, dtype=float)[legal]
@@ -41,7 +41,7 @@ def coalition_rows(q, legal, pairs, outcomes, margin, temperature):
     for i, (preferred, dispreferred) in enumerate(pairs):
         constraints[i, positions[preferred]] = 1
         constraints[i, positions[dispreferred]] = -1
-    for mask in range(1 << len(pairs)):
+    for mask in range(1 << len(pairs)) if masks is None else masks:
         use = [i for i in range(len(pairs)) if mask & (1 << i)]
         matrix = constraints[use]
         z, primal, stationarity, iterations = project(q, matrix, margin)
