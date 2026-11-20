@@ -7,7 +7,7 @@
 - SZC 使用双层 VDN64 和镜像 5v5 Protoss。训练检查点种子为 3535 和 2222。每个种子覆盖学完 Z 评 S、学完 C 评 S、学完 C 评 Z。旧任务阶段末 FRPR 模型提供偏好，独立 VDN-FT 的 Z/C 阶段末模型提供当前 Q 和后续策略。检查点见 [pilot.json](pilot.json)。
 - S 使用环境／SC2 种子 91101–91104，Z 使用 91201–91204。每个条件最多采样 9 个决策。按回合实际长度三等分，并按原 Action Regret 的归一化损失 [0, 0.1)、[0.1, 0.5)、[0.5, +∞) 分档，每个交叉分层最多一个。每个候选动作在相同初始化下重复两次。区间描述配对重复，在确定性回放下可以退化为零宽度。
 - 使用标准 FRPR 参数 min_gap=0.5、q_scale_floor=0.1、损失温度及权重均为 1。投影 margin 为 0，行为 Softmax 温度为 1，行为对照 K 为 3。抽样后记录并跳过 M > 12 的决策，每个获准决策枚举至多 4,096 个联盟。per_stratum 支持独立配额及全量采样。
-- Ubuntu 已提交六个 Pilot 任务，运行组为 szc_vdn64_shapley_frpr_pilot_20261119_attempt001。任务依赖 szc_vdn64_shapley_frpr_smoke_20261119_attempt001。提交时 Smoke 等待既有任务释放调度槽位。Smoke 复用已归档的 57 步 seed 91101 胜局，与 VDN-FT seed 2222 配对。离线预检抽到 S 第 14 步 Agent 0，6 个合法动作、10 条关系、1,024 个联盟。
+- Ubuntu 的真实环境 Smoke 与六个 Pilot 任务均已完成，运行组为 szc_vdn64_shapley_frpr_pilot_20261119_attempt001。六组共抽样 54 个决策，43 个进入精确计算并完成，510 个逐动作分支均通过核验。Smoke 复用已归档的 57 步 seed 91101 胜局，配对 VDN-FT seed 2222。后续研究将本 Pilot 的 43 个决策纳入 Discovery，并在留出轨迹上评价冻结选择。 [独立验证](../szc-vdn64-shapley-frpr-validation/README.md)
 
 ## 参与者和联盟值
 

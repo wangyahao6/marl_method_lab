@@ -266,11 +266,7 @@
         "pool_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/pool_diagnostics.csv",
         "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/preference_diagnostics.csv",
         "update_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/update_diagnostics.csv",
-        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/gradient_diagnostics.csv",
-        "pair_gap_summary": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/pair_gap_summary.csv",
-        "pair_gap_by_rank_distance": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/pair_gap_by_rank_distance.csv",
-        "rank_distance_distribution": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/rank_distance_distribution.csv",
-        "matched_vs_adjacent": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/matched_vs_adjacent.csv"
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-ratio/gradient_diagnostics.csv"
       },
       "task_order": [
         "stalker",
@@ -298,8 +294,7 @@
         "13 个分支共用一个 S 末恢复点。父运行的 phase 0 可用于重算分支指标，父运行的 Z 及其 C 训练前评价属于 TD 参考线。",
         "所有分支共用参考线采集的 S/Z 胜局。pool_diagnostics 按固定池计数，preference_diagnostics 包含重复采样。",
         "仅 seed 3535。Ratio-60/80/100 启动源码与其他组不同，核对范围见报告。"
-      ],
-      "pair_gap_analysis_report": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/README.md"
+      ]
     },
     {
       "id": "szc-vdn64-greedy-action-agreement",
@@ -455,6 +450,53 @@
       "interpretation_limits": [
         "覆盖单条 S 胜局、三个决策点与冻结旧策略的后续贪婪执行。",
         "分组依据为该分支的终局胜负和有效性。"
+      ]
+    },
+    {
+      "id": "szc-vdn64-shapley-frpr-validation",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/README.md",
+      "files": {
+        "paired_summary": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/paired_summary.csv",
+        "validation_contexts": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/validation_contexts.csv",
+        "discovery_contexts": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/discovery_contexts.csv",
+        "exact_comparison": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/exact_comparison.csv",
+        "approximation_summary": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/approximation_summary.csv",
+        "transfer_stability": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/transfer_stability.csv",
+        "validation_values_by_seed": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/validation_values_by_seed.csv",
+        "protocol": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/protocol.json",
+        "audit": "behavioral-analysis/szc-vdn64-shapley-frpr-validation/audit.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "comparison": {
+        "kind": "held_out_trajectory_coalition_evaluation",
+        "key": [
+          "case",
+          "task",
+          "episode_id",
+          "timestep",
+          "agent_id"
+        ],
+        "arms": [
+          "empty",
+          "full",
+          "random_topk",
+          "shapley_topk"
+        ],
+        "random_repeats": 16
+      },
+      "interpretation_limits": [
+        "冻结 VDN64，评价旧任务胜局上的单步动作干预。",
+        "跨独立历史轨迹迁移 Discovery 的有向关系分数。环境种子在建局时使用。",
+        "胜率是同一目标决策上对实际动作分支的加权期望。"
       ]
     }
   ]

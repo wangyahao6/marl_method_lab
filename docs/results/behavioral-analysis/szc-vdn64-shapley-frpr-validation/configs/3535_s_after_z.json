@@ -1,0 +1,137 @@
+{
+  "top_k": 3,
+  "max_exact_pairs": 12,
+  "projection_margin": 0.0,
+  "softmax_temperature": 1.0,
+  "random_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016
+  ],
+  "stratum_shrinkage": 3,
+  "monte_carlo": {
+    "batch": 128,
+    "minimum": 512,
+    "maximum": 2048,
+    "abs_tol": 0.001,
+    "rel_tol": 0.1,
+    "min_top_overlap": 0.6666666666666666,
+    "stable_batches": 2,
+    "stop_early": true
+  },
+  "environment": {
+    "per_stratum": 1,
+    "max_exact_pairs": 12,
+    "top_k": 3,
+    "rollout_repeats": 2,
+    "projection_margin": 0.0,
+    "softmax_temperature": 1.0,
+    "frpr": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1
+    },
+    "task": "stalker",
+    "training_seed": 3535,
+    "source_phase": 0,
+    "ft_phase": 1,
+    "sampling_seed": 3535,
+    "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+    "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0001_4000038/agent.th",
+    "inventory_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+    "seeds": [
+      [
+        91101,
+        91101
+      ],
+      [
+        91102,
+        91102
+      ],
+      [
+        91103,
+        91103
+      ],
+      [
+        91104,
+        91104
+      ]
+    ]
+  },
+  "pilot": "/home/wyh/marl_method_lab/results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z",
+  "sampling_seed": 3535,
+  "discovery_seeds": [
+    [
+      91101,
+      91101
+    ],
+    [
+      91102,
+      91102
+    ],
+    [
+      91103,
+      91103
+    ],
+    [
+      91104,
+      91104
+    ]
+  ],
+  "validation_seeds": [
+    [
+      92101,
+      92101
+    ],
+    [
+      92102,
+      92102
+    ],
+    [
+      92103,
+      92103
+    ],
+    [
+      92104,
+      92104
+    ],
+    [
+      92105,
+      92105
+    ],
+    [
+      92106,
+      92106
+    ],
+    [
+      92107,
+      92107
+    ],
+    [
+      92108,
+      92108
+    ]
+  ],
+  "pilot_discovery_env_seeds": [
+    91101,
+    91102,
+    91103,
+    91104
+  ],
+  "discovery_per_stratum": 1,
+  "validation_per_stratum": 2
+}

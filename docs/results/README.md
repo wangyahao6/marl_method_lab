@@ -34,3 +34,4 @@
 | [SZC · VDN64 旧策略估计的动作价值损失](behavioral-analysis/szc-vdn64-action-regret/README.md) | 复用 AGR 的 1,408 局归档轨迹 | 比较动作变化的归一化损失、置信度和 VDN 团队损失。 |
 | [SZC · VDN64 高损失动作的环境干预](behavioral-analysis/szc-vdn64-action-intervention/README.md) | 冻结 VDN64，新策略、高损失纠正、全纠正、旧策略各 128 局 | 比较实测胜率、回报和干预量。 |
 | [SZC · 单智能体反事实动作干预](behavioral-analysis/szc-vdn64-counterfactual-action/README.md) | 同一 S 胜局三个决策点，冻结旧策略 | 检查 GRU 恢复，比较各合法动作的旧 Q 与干预后胜负。 |
+| [SZC · Shapley-FRPR 独立验证](behavioral-analysis/szc-vdn64-shapley-frpr-validation/README.md) | 2222/3535，2 个旧任务与 3 个冻结端点 | 精确与排列近似对照，在留出胜局上配对比较 Shapley、随机及全量关系。 |
