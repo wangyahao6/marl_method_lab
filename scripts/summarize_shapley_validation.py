@@ -207,7 +207,8 @@ def summarize(run, out, smoke=None):
     configs.mkdir()
     models = out / "frozen_discovery"
     models.mkdir()
-    all_contexts, checks, errors, wins, choices, fits, stability, inventory = [], [], [], [], [], [], [], []
+    all_contexts, checks, errors, fits = [], [], [], []
+    wins, choices, stability, inventory, draws = [], [], [], [], []
     audit = dict(run=run.name, plan_sha256=sha(run / "plan.json"), cases={}, failures={})
     if smoke is not None:
         name = "2222_s_after_z"
@@ -232,7 +233,7 @@ def summarize(run, out, smoke=None):
                 raise ValueError(f"Paired rows differ from audited context count: {case}")
             for dest, file in ((all_contexts, "discovery_contexts.csv"), (checks, "convergence.csv"),
                                (errors, "exact_comparison.csv"), (choices, "validation_selections.csv"),
-                               (fits, "discovery_shapley.csv")):
+                               (fits, "discovery_shapley.csv"), (draws, "validation_values.csv")):
                 dest.extend(tagged(case, folder / file))
             case_stability = list(transfer_stability(case, folder, case_contexts, protocol["stratum_shrinkage"]))
             stability.extend(case_stability)
@@ -245,6 +246,7 @@ def summarize(run, out, smoke=None):
                        ("convergence.csv", checks), ("exact_comparison.csv", errors),
                        ("approximation_summary.csv", approx), ("validation_selections.csv", choices),
                        ("validation_contexts.csv", wins), ("validation_inventory.csv", inventory),
+                       ("validation_values_by_seed.csv", draws),
                        ("transfer_stability.csv", stability),
                        ("paired_summary.csv", comparisons)):
         csv_output(out / file, rows, ("case",) if file != "paired_summary.csv" else ("dimension", "group"))
