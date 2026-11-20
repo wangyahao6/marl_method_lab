@@ -19,12 +19,12 @@ from learners.action_set_preference import (
     reference_gaps, set_counts, set_statistics, unroll,
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
-from learners.ranking_preference import RankingPreference, aggregate_pair_filter_statistics
+from learners.ranking_preference import RankPositionPreference, RankingPreference, aggregate_pair_filter_statistics
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
 from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
-    matching_pair_reference, matching_shared_protocol, validate, validate_fork,
+    RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models
@@ -58,6 +58,8 @@ def config(protocol, seed, out):
                gradient_monitor_interval=protocol.get("gradient_monitor_interval", 0),
                optimizer=protocol.get("optimizer", "rmsprop"),
                action_set=protocol["action_set"])
+    if protocol.get("rank_position_diagnostics"):
+        cfg["rank_position_diagnostics"] = True
     if protocol["method"] in PREFERENCE_RANK_METHODS:
         cfg[protocol["method"]] = protocol[protocol["method"]]
     cfg["env_args"].update(seed=seed, game_version=protocol.get("sc2_game_version", "4.10"),
@@ -360,6 +362,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
         shared_history = PreferenceHistory()
+        anchor_rank = RANK_POSITION_METHODS.get(method)
+        if method == "topk_preference" and protocol.get("rank_position_diagnostics"):
+            anchor_rank = 1
 
         def record_preference(row):
             row["learner_update"] = updates + 1
@@ -403,6 +408,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             if pair_ablation:
                 preference = PairAblationPreference(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
+                                                    augmented, groups, record_preference)
+            elif anchor_rank is not None:
+                preference = RankPositionPreference(anchor_rank, ranking, np.random.default_rng(seed),
                                                     augmented, groups, record_preference)
             elif selected_frpr:
                 preference = SelectedFRPR(method, ranking, np.random.default_rng(seed), augmented, groups,

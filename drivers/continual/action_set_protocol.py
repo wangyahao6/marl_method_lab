@@ -19,7 +19,8 @@ PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 8
 PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS}
 PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS}
 PAIR_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0, q_scale_floor=0.1, pair_seed=3535)
-HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS)
+RANK_POSITION_METHODS = {"tkpr_r2": 2, "tkpr_r3": 3}
+HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS, *RANK_POSITION_METHODS)
 PREFERENCE_RANK_METHODS = (*HISTORY_RANK_METHODS, *PAIR_METHODS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
@@ -128,7 +129,9 @@ def validate(protocol, algorithm, method):
         raise ValueError("action_set.delta_candidates_by_task requires lists of nonnegative thresholds keyed by task")
     ranking = {}
     for name in HISTORY_RANK_METHODS:
-        if method == name or name in protocol or (name == "full_rank_preference" and method in SELECTED_METHODS):
+        if (method == name or name in protocol
+                or (name == "full_rank_preference" and method in SELECTED_METHODS)
+                or (name == "topk_preference" and method in RANK_POSITION_METHODS)):
             defaults = {
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
@@ -162,6 +165,13 @@ def validate(protocol, algorithm, method):
                 config["selection_seed"] = seed
                 ranking[name] = dict(options, **config)
                 continue
+            if name in RANK_POSITION_METHODS:
+                anchor_base = ranking["topk_preference"]
+                if anchor_base["k"] != 1:
+                    raise ValueError(f"{name} inherits settings from TKPR-K1")
+                defaults = {key: value for key, value in anchor_base.items() if key != "k"}
+                if settings_with_defaults(protocol.get(name, {}), defaults) != defaults:
+                    raise ValueError(f"{name} must use the same loss settings as TKPR-K1")
             options = settings_with_defaults(protocol.get(name, {}), defaults)
             for key, value in options.items():
                 if key == "k":
@@ -175,6 +185,10 @@ def validate(protocol, algorithm, method):
                     bound = "positive" if positive else "nonnegative"
                     raise ValueError(f"{name}.{key} must be finite and {bound}")
             ranking[name] = options
+    rank_audit = protocol.get("rank_position_diagnostics", False)
+    if type(rank_audit) is not bool or (rank_audit and
+            (method not in ("topk_preference", *RANK_POSITION_METHODS) or ranking["topk_preference"]["k"] != 1)):
+        raise ValueError("rank_position_diagnostics applies to TKPR-K1 and single-rank methods")
     experiment = protocol.get("pair_ablation_experiment")
     if experiment is not None or method in PAIR_METHODS:
         if not isinstance(experiment, str) or experiment not in PAIR_ABLATIONS:
@@ -235,7 +249,7 @@ def validate_fork(protocol, role, parent):
 
 def matching_shared_protocol(parent, branch):
     def shared_settings(protocol):
-        return {"optimizer": "rmsprop", **{key: value for key, value in protocol.items() if key != "method"}}
+        return {"optimizer": "rmsprop", **{key: value for key, value in protocol.items() if key not in ("method", "rank_position_diagnostics")}}
 
     previous, requested = shared_settings(parent), shared_settings(branch)
     # A new branch method can supply its own settings when the prefix had no such method.

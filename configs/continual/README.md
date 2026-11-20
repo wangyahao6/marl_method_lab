@@ -30,3 +30,5 @@
 两份协议沿用各自母版的模型、方法参数、逐任务探索与评价设置。方法专用协议如 TKPR 的 K 设置应以所选方法协议为依据，再派生相同阶段预算。此次配置创建仅设置预算版本，具体训练方法与种子由运行指令选择。
 
 两组 seed 3535 动作对消融的设置、诊断及启动命令见 [SZC-1M 动作对消融](../../docs/SZC_PAIR_ABLATIONS.md)。
+
+双层 VDN64 的 TKPR-K1／R2／R3 单排名消融使用 `action_preference/szc/szc_vdn64_tkpr_rank_position.json`，沿用 2M × 3 的共同前缀协议。

@@ -109,7 +109,7 @@ def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unf
 
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
                     k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
-                    confidence_weighted=False, high_regret=False, good=None, pair_selection=None):
+                    confidence_weighted=False, high_regret=False, good=None, pair_selection=None, anchor=None):
     current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
     if raw_reference:
         old = reference_q.detach()
@@ -176,7 +176,75 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
                           th.stack((nonzero.sum(),)), summary[7:],
                           th.stack((active.sum(), hr_loss.detach(), regret,
                                     base_loss.detach(), extra_loss.detach()))))
+    if anchor is not None:
+        summary = th.cat((summary, anchor_statistics_tensor(
+            anchor, current_q, legal, decisions, candidates, eligible, pairs, inverted_gap)))
     return loss, count, summary
+
+
+@th.no_grad()
+def rank_anchor(reference_q, legal, rank):
+    order = th.sort(reference_q.masked_fill(~legal, -th.inf), dim=-1, descending=True, stable=True).indices
+    index = order[..., rank - 1:rank]
+    return th.zeros_like(legal).scatter(-1, index, True) & legal
+
+
+def anchor_pairs(anchor):
+    return anchor.unsqueeze(-1) | anchor.unsqueeze(-2)
+
+
+def rank_position_preference(current_q, reference_q, legal, decisions, settings, *, rank):
+    decisions = decisions & (legal.sum(dim=-1) >= 2)
+    anchor = rank_anchor(reference_q, legal, rank)
+    if rank == 1:
+        # Audited K1 uses the existing K1 loss path verbatim.
+        return _full_rank_loss(current_q, reference_q, legal, decisions, settings, k=1, anchor=anchor)
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           pair_selection=anchor_pairs(anchor), anchor=anchor)
+
+
+@th.no_grad()
+def anchor_statistics_tensor(anchor, current_q, legal, decisions, candidates, eligible, pairs, inverted_gap):
+    endpoints = anchor_pairs(anchor)
+    valid = pairs.any(dim=-1).any(dim=-1)
+    order = th.sort(current_q.masked_fill(~legal, -th.inf), dim=-1, descending=True, stable=True).indices
+    rank = ((order.argsort(dim=-1) + 1) * anchor).sum(dim=-1)
+    histogram = rank.new_zeros(legal.size(-1) + 1)
+    histogram.scatter_add_(0, rank.flatten(), valid.long().flatten())
+    totals = th.stack(((candidates & endpoints).sum(), (eligible & endpoints).sum(),
+                       (pairs & (inverted_gap >= 0)).sum(), (anchor.any(dim=-1) & decisions).sum()))
+    return th.cat((totals, histogram[1:]))
+
+
+def rank_position_statistics(summary, *, rank, action_count):
+    base = summary[:-(action_count + 4)]
+    stats = topk_statistics(base) if rank == 1 else ranking_statistics(base)
+    candidates, eligible, violations, available, *histogram = map(int, summary[len(base):])
+    pairs, states = stats["valid_pairs"], stats["valid_states"]
+    stats.update(pair_filter_statistics(candidates, eligible, pairs))
+    stats.update(anchor_old_rank=rank, anchor_available_states=available, pair_violations=violations,
+                 pair_violation_rate=violations / pairs if pairs else None,
+                 mean_valid_pairs=pairs / states if states else None,
+                 anchor_new_rank_histogram={str(i): n for i, n in enumerate(histogram, 1)},
+                 anchor_mean_new_rank=sum(i * n for i, n in enumerate(histogram, 1)) / states if states else None,
+                 anchor_rank_retained_rate=histogram[rank - 1] / states if states else None)
+    return stats
+
+
+class RankPositionPreference(ActionSetPreference):
+    def __init__(self, rank, settings, rng, scheme, groups, log):
+        super().__init__(settings, rng, scheme, groups, log)
+        self.rank = rank
+        self.statistics = partial(rank_position_statistics, rank=rank,
+                                  action_count=scheme["avail_actions"]["vshape"][0])
+
+    def task_loss(self, mac, pool, episodes):
+        batch, _ = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
+                                  include_good=False, include_old_q=True)
+        legal, decisions = decision_masks(batch)
+        current_q = unroll(mac, batch, batch.max_seq_length - 1)
+        return rank_position_preference(current_q, batch["old_q_values"][:, :-1], legal, decisions,
+                                        self.settings, rank=self.rank)
 
 
 def high_regret_penalty(current_q, reference_q, legal, decisions, scale, settings):

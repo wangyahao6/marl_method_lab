@@ -275,3 +275,20 @@ FRPR Softplus、FRPR-Unfiltered、FRPR-Raw 和 FRPR-RawLoss 每次更新都在�
 `configs/continual/action_preference/szc/szc_vdn64_adam_shared.json` 使用 Adam 和同一个 VDN 学习率，沿用 SZC 的逐任务 ε、FT、预算和评价。每个种子先完成 Adam S 前缀，再把同一模型、目标网络和 Adam 状态恢复到 TKPR-K1、TKPR-K1-W 与 FRPR。未指定优化器的旧协议默认 RMSprop。共享分支要求优化器匹配。
 
 `szc_vdn64_aspr_from_tkpr_s.json` 与 `szc_vdn64_frpr_from_tkpr_s.json` 接续既有的 RMSprop TKPR-K1 S 前缀。共享分支可增加旧前缀未配置的自身方法参数。ASPR 从父 S 胜局池保存的旧 Q 离线校准 δ、生成 Good Mask，并在自己的运行目录保存派生池与来源。早期 TKPR 前缀未采集 ASPR 的 S 固定探测轨迹。
+
+
+## TKPR 单排名位置消融
+
+`tkpr_r2` 与 `tkpr_r3` 分别选择合法旧 Q 严格降序中的第 2、3 名作为单个锚点。并列按原始动作索引升序处理。
+只有锚点与其他合法动作的无序对参与筛选，所以与旧 Top-1 之间最多保留一条直接边。旧 Q 相同的对排除，
+其余在合法旧 Q 总体标准差归一化后按 TKPR-K1 的 `min_gap=0.5` 筛选。方法继承 K1 的 Softplus、温度和权重，
+按状态内动作对、历史任务内有效状态和有有效状态的任务依次等权平均。合法动作数不足锚点名次的状态产生零对。
+
+SZC 双层 VDN64 采用 2M/2M/2M 累计预算、逐任务 ε 和 FT，seed 2222、3535 使用已归档的共同 S 前缀。
+每个种子重跑 K1 并用相同诊断记录 R2、R3。按照阶段和历史任务记录有效覆盖、动作对过滤和排序违反率，
+以及有效状态中锚点的新策略排名直方图。当前 Q 并列按动作索引稳定处理，选中对出现当前 Q 并列计为排序违反。
+`rank_position_diagnostics` 为 K1 启用这些观测，原 K1 损失仍走其原有路径。
+
+```sh
+.venv/bin/python scripts/plan_tkpr_rank_positions.py szc_tkpr_rank_position_20261120
+```
