@@ -1,0 +1,10 @@
+task,battle_phase,regret_stratum,available,sampled
+zealot,early,low,56,1
+zealot,early,mid,30,1
+zealot,early,high,97,1
+zealot,middle,low,40,1
+zealot,middle,mid,9,1
+zealot,middle,high,96,1
+zealot,late,low,40,1
+zealot,late,mid,21,1
+zealot,late,high,36,1

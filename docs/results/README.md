@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | [SZC · 双层 VDN64 约束方法结果](comparisons/szc-vdn64/README.md) | 追猎者 → 狂热者 → 巨像，33 条独立运行，每阶段 2M 步 | 集中查看 FRPR-Raw、RawLoss、Unfiltered、ReLU、TKPR、T1PR、ASPR-Max、CHI 与 VDN-FT/ER 的逐种子指标、同种子差值和诊断 CSV。 |
 | [SZC · TKPR-K1 共同前缀对照](comparisons/szc-vdn64-tkpr-k1-shared/README.md) | 双层 VDN64，seed 2222、3535，各 1 个 S 前缀与 5 个 Z→C 分支 | 学习曲线、ACC/BWT/FWT/AUC、同前缀差值、偏好诊断和 Z/C 配对更新时间。 |
+| [SZC · ASPR 与 Adam 优化器对照](comparisons/szc-vdn64-aspr-adam/README.md) | 双层 VDN64，seed 2222、3535，每阶段 2M 步 | 新版 ASPR、Adam TKPR-K1/K1-W/FRPR、RMSprop 与 VDN-FT 的训练及贪心曲线、端点和配对差。 |
 
 ## 回访与阶段干预消融
 
@@ -35,3 +36,4 @@
 | [SZC · VDN64 高损失动作的环境干预](behavioral-analysis/szc-vdn64-action-intervention/README.md) | 冻结 VDN64，新策略、高损失纠正、全纠正、旧策略各 128 局 | 比较实测胜率、回报和干预量。 |
 | [SZC · 单智能体反事实动作干预](behavioral-analysis/szc-vdn64-counterfactual-action/README.md) | 同一 S 胜局三个决策点，冻结旧策略 | 检查 GRU 恢复，比较各合法动作的旧 Q 与干预后胜负。 |
 | [SZC · Shapley-FRPR 独立验证](behavioral-analysis/szc-vdn64-shapley-frpr-validation/README.md) | 2222/3535，2 个旧任务与 3 个冻结端点 | 精确与排列近似对照，在留出胜局上配对比较 Shapley、随机及全量关系。 |
+| [SZC · Shapley-FRPR](behavioral-analysis/szc-vdn64-shapley-frpr/README.md) | 双层 VDN64，seed 2222 和 3535，六个行为 Pilot | 真实动作分支、精确联盟枚举、回报与胜率 Shapley、同预算随机对照。 |

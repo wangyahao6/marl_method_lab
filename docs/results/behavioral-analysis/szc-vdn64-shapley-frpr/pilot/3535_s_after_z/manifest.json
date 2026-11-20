@@ -1,0 +1,326 @@
+{
+  "config": {
+    "projection_margin": 0.0,
+    "softmax_temperature": 1.0,
+    "rollout_repeats": 2,
+    "per_stratum": 1,
+    "max_exact_pairs": 12,
+    "top_k": 3,
+    "frpr": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1
+    },
+    "task": "stalker",
+    "training_seed": 3535,
+    "source_phase": 0,
+    "ft_phase": 1,
+    "sampling_seed": 3535,
+    "old_checkpoint": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+    "ft_checkpoint": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0001_4000038/agent.th",
+    "inventory_pool": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+    "seeds": [
+      [
+        91101,
+        91101
+      ],
+      [
+        91102,
+        91102
+      ],
+      [
+        91103,
+        91103
+      ],
+      [
+        91104,
+        91104
+      ]
+    ]
+  },
+  "frpr": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "inputs": [
+    {
+      "path": "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/configs/3535_s_after_z.json",
+      "sha256": "2ea7f633c90414f5d5b5a5c4dd765005ea505179c4c61d0d8cf6be0a0d63a8b2"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/models/phase0000_2000032/agent.th",
+      "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/models/phase0001_4000038/agent.th",
+      "sha256": "8c9be21810627536273daa4e9419c85e95cf443926a6272d0895a92f2d6e5b11"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/protocol.json",
+      "sha256": "a0963b07d56345b7e6dc230ecbbd6915e78fb5c3973c43b96fb9d9ad8e6fe338"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/protocol.json",
+      "sha256": "b09239f11a439da44313a726b316441c91886daa3bb805d57f6b7fdedd2ecbd4"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/config.json",
+      "sha256": "4d5d98e3be9a28701d5f2e577a5c8f2cbc8abe7a07c7e5bc88c0d8761acdcf1d"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/config.json",
+      "sha256": "fb2a03e3f90a1227d45e2435246c16920df2011ca01089626eae86331b78071d"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/env_info.json",
+      "sha256": "d26d88ea4817f55e25bef8e9f70696962b29907bf895a146c8b348cc785c2e87"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_baseline_seed3535_20261113_attempt001/env_info.json",
+      "sha256": "d26d88ea4817f55e25bef8e9f70696962b29907bf895a146c8b348cc785c2e87"
+    },
+    {
+      "path": "runs/szc_vdn64_ft_frpr_seed3535_20261113_attempt001/action_set_memory/phase0000/success.th",
+      "sha256": "5e9c284eb01f731bec354fc87500be2314aceadf3e5920f15bc1792d2a619e2b"
+    }
+  ],
+  "argv": [
+    "scripts/analyze_shapley_frpr.py",
+    "--config",
+    "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/configs/3535_s_after_z.json",
+    "--output",
+    "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z"
+  ],
+  "code_commit": "0b82d8d4bbe73650fd7bed6e570afab6e13447b1",
+  "code_dirty": false,
+  "source_archive_sha256": "9423c8024f5dbaf42afd8e823a986b8f3e7afb62f142224f4fb9f537040b30f0",
+  "python": "3.8.10",
+  "torch": "1.12.1+cu113",
+  "scipy": "1.10.1",
+  "numpy": "1.23.5",
+  "platform": "Linux-5.15.0-139-generic-x86_64-with-glibc2.29",
+  "environment": {
+    "state_shape": 130,
+    "obs_shape": 92,
+    "cap_shape": 3,
+    "n_actions": 11,
+    "n_agents": 5,
+    "episode_limit": 200,
+    "agent_features": [
+      "health",
+      "energy/cooldown",
+      "rel_x",
+      "rel_y",
+      "shield",
+      "type_0",
+      "type_1",
+      "type_2"
+    ],
+    "enemy_features": [
+      "health",
+      "rel_x",
+      "rel_y",
+      "shield",
+      "type_0",
+      "type_1",
+      "type_2"
+    ],
+    "action_layout": {
+      "obs_shape": 92,
+      "state_shape": 130,
+      "n_agents": 5,
+      "n_actions": 11,
+      "n_enemies": 5,
+      "map_type": "protoss_gen",
+      "attack_offset": 6,
+      "unit_type_bits": 3
+    }
+  },
+  "env_args": {
+    "continuing_episode": false,
+    "difficulty": "7",
+    "game_version": "4.10",
+    "map_name": "10gen_protoss",
+    "move_amount": 2,
+    "obs_all_health": true,
+    "obs_instead_of_state": false,
+    "obs_last_action": false,
+    "obs_own_health": true,
+    "obs_pathing_grid": false,
+    "obs_terrain_height": false,
+    "obs_timestep_number": false,
+    "reward_death_value": 10,
+    "reward_defeat": 0,
+    "reward_negative_scale": 0.5,
+    "reward_only_positive": true,
+    "reward_scale": true,
+    "reward_scale_rate": 20,
+    "reward_sparse": false,
+    "reward_win": 200,
+    "replay_dir": "",
+    "replay_prefix": "",
+    "conic_fov": false,
+    "use_unit_ranges": true,
+    "min_attack_range": 2,
+    "obs_own_pos": true,
+    "num_fov_actions": 12,
+    "capability_config": {
+      "n_units": 5,
+      "n_enemies": 5,
+      "team_gen": {
+        "dist_type": "weighted_teams",
+        "unit_types": [
+          "stalker",
+          "zealot",
+          "colossus"
+        ],
+        "weights": [
+          0.45,
+          0.45,
+          0.1
+        ],
+        "observe": true,
+        "env_key": "team_gen",
+        "n_units": 5,
+        "n_enemies": 5
+      },
+      "start_positions": {
+        "dist_type": "surrounded_and_reflect",
+        "p": 0.5,
+        "map_x": 32,
+        "map_y": 32,
+        "env_key": "start_positions",
+        "n_units": 5,
+        "n_enemies": 5
+      }
+    },
+    "state_last_action": true,
+    "state_timestep_number": false,
+    "step_mul": 8,
+    "heuristic_ai": false,
+    "debug": false,
+    "prob_obs_enemy": 1.0,
+    "action_mask": true,
+    "seed": 3535,
+    "rosters": {
+      "stalker": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "zealot": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "colossus": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      }
+    }
+  },
+  "sc2path": "runtime/SMACv2StarCraftII",
+  "traces": [
+    {
+      "path": "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z/source_000.json.gz",
+      "sha256": "2b8ccd696c054d30798d15193d55988d863532dff1187f1ebba2e831b898ded8",
+      "seeds": {
+        "env_seed": 91101,
+        "sc2_seed": 91101
+      },
+      "settings": {
+        "stochastic_attack": false,
+        "stochastic_health": false,
+        "prob_obs_enemy": 1.0
+      },
+      "sc2_version": [
+        "4.10.0",
+        75689,
+        "B89B5D6FA7CBF6452E721311BFBC6CB2",
+        null
+      ]
+    },
+    {
+      "path": "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z/source_001.json.gz",
+      "sha256": "caaf0437552fa0a62d7920393e7f6e0854b04174715750b86e9c8784c188e805",
+      "seeds": {
+        "env_seed": 91102,
+        "sc2_seed": 91102
+      },
+      "settings": {
+        "stochastic_attack": false,
+        "stochastic_health": false,
+        "prob_obs_enemy": 1.0
+      },
+      "sc2_version": [
+        "4.10.0",
+        75689,
+        "B89B5D6FA7CBF6452E721311BFBC6CB2",
+        null
+      ]
+    },
+    {
+      "path": "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z/source_002.json.gz",
+      "sha256": "a68b0ba6a8f98b50c7114c693b9a8b9b570e6f3132f05935e5ce9184b61c86f4",
+      "seeds": {
+        "env_seed": 91103,
+        "sc2_seed": 91103
+      },
+      "settings": {
+        "stochastic_attack": false,
+        "stochastic_health": false,
+        "prob_obs_enemy": 1.0
+      },
+      "sc2_version": [
+        "4.10.0",
+        75689,
+        "B89B5D6FA7CBF6452E721311BFBC6CB2",
+        null
+      ]
+    },
+    {
+      "path": "results/szc_vdn64_shapley_frpr_pilot_20261119_attempt001/3535_s_after_z/source_003.json.gz",
+      "sha256": "7c9b813c7df8e913768a94c5fe461962cfb072815537e91ff1f4c56fac02db28",
+      "seeds": {
+        "env_seed": 91104,
+        "sc2_seed": 91104
+      },
+      "settings": {
+        "stochastic_attack": false,
+        "stochastic_health": false,
+        "prob_obs_enemy": 1.0
+      },
+      "sc2_version": [
+        "4.10.0",
+        75689,
+        "B89B5D6FA7CBF6452E721311BFBC6CB2",
+        null
+      ]
+    }
+  ]
+}

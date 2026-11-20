@@ -1,0 +1,225 @@
+{
+  "passed": true,
+  "source_attempts": [
+    {
+      "env_seed": 91201,
+      "sc2_seed": 91201,
+      "clean": true,
+      "won": true,
+      "archived": false,
+      "seconds": 5.069896275177598
+    },
+    {
+      "env_seed": 91202,
+      "sc2_seed": 91202,
+      "clean": true,
+      "won": true,
+      "archived": false,
+      "seconds": 4.994617188349366
+    },
+    {
+      "env_seed": 91203,
+      "sc2_seed": 91203,
+      "clean": true,
+      "won": true,
+      "archived": false,
+      "seconds": 5.097674708813429
+    },
+    {
+      "env_seed": 91204,
+      "sc2_seed": 91204,
+      "clean": true,
+      "won": true,
+      "archived": false,
+      "seconds": 5.062451805919409
+    }
+  ],
+  "replays": [
+    {
+      "env_seed": 91201,
+      "sc2_seed": 91201,
+      "environment": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "state": 0.0,
+          "obs": 0.0,
+          "unit_state": 0.0,
+          "reward": 0.0
+        },
+        "steps": 50,
+        "sc2_pid": 881922,
+        "checks": {
+          "episode_config": true,
+          "settings": true,
+          "sc2_version": true,
+          "create_game_seeds": true,
+          "position_rng_before": true,
+          "position_rng_after": true,
+          "global_rng_before_reset": true,
+          "global_rng_after_reset": true,
+          "global_rng_after_episode": true,
+          "same_generated_episode_config": true,
+          "fresh_game_without_forced_restart": true
+        },
+        "create_game_seeds": [
+          91201
+        ]
+      },
+      "rnn": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "q": 0.0,
+          "hidden_before": 0.0,
+          "hidden_after": 0.0
+        }
+      },
+      "distinct_process": true
+    },
+    {
+      "env_seed": 91202,
+      "sc2_seed": 91202,
+      "environment": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "state": 0.0,
+          "obs": 0.0,
+          "unit_state": 0.0,
+          "reward": 0.0
+        },
+        "steps": 51,
+        "sc2_pid": 882101,
+        "checks": {
+          "episode_config": true,
+          "settings": true,
+          "sc2_version": true,
+          "create_game_seeds": true,
+          "position_rng_before": true,
+          "position_rng_after": true,
+          "global_rng_before_reset": true,
+          "global_rng_after_reset": true,
+          "global_rng_after_episode": true,
+          "same_generated_episode_config": true,
+          "fresh_game_without_forced_restart": true
+        },
+        "create_game_seeds": [
+          91202
+        ]
+      },
+      "rnn": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "q": 0.0,
+          "hidden_before": 0.0,
+          "hidden_after": 0.0
+        }
+      },
+      "distinct_process": true
+    },
+    {
+      "env_seed": 91203,
+      "sc2_seed": 91203,
+      "environment": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "state": 0.0,
+          "obs": 0.0,
+          "unit_state": 0.0,
+          "reward": 0.0
+        },
+        "steps": 58,
+        "sc2_pid": 882344,
+        "checks": {
+          "episode_config": true,
+          "settings": true,
+          "sc2_version": true,
+          "create_game_seeds": true,
+          "position_rng_before": true,
+          "position_rng_after": true,
+          "global_rng_before_reset": true,
+          "global_rng_after_reset": true,
+          "global_rng_after_episode": true,
+          "same_generated_episode_config": true,
+          "fresh_game_without_forced_restart": true
+        },
+        "create_game_seeds": [
+          91203
+        ]
+      },
+      "rnn": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "q": 0.0,
+          "hidden_before": 0.0,
+          "hidden_after": 0.0
+        }
+      },
+      "distinct_process": true
+    },
+    {
+      "env_seed": 91204,
+      "sc2_seed": 91204,
+      "environment": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "state": 0.0,
+          "obs": 0.0,
+          "unit_state": 0.0,
+          "reward": 0.0
+        },
+        "steps": 63,
+        "sc2_pid": 882562,
+        "checks": {
+          "episode_config": true,
+          "settings": true,
+          "sc2_version": true,
+          "create_game_seeds": true,
+          "position_rng_before": true,
+          "position_rng_after": true,
+          "global_rng_before_reset": true,
+          "global_rng_after_reset": true,
+          "global_rng_after_episode": true,
+          "same_generated_episode_config": true,
+          "fresh_game_without_forced_restart": true
+        },
+        "create_game_seeds": [
+          91204
+        ]
+      },
+      "rnn": {
+        "passed": true,
+        "first_difference": null,
+        "max_abs_error": {
+          "q": 0.0,
+          "hidden_before": 0.0,
+          "hidden_after": 0.0
+        }
+      },
+      "distinct_process": true
+    }
+  ],
+  "branch_rollouts": 82,
+  "verified_branches": 82,
+  "coalitions": 2594,
+  "max_efficiency_error": 2.498001805406602e-16,
+  "projection_residual": 0.0,
+  "stationarity_residual": 5.186331834129769e-16,
+  "historical_inventory": {
+    "episodes": 100,
+    "recomputed_reference_episodes": 100
+  },
+  "eligible_contexts": 957,
+  "sampled_contexts": 9,
+  "completed_contexts": 7,
+  "skipped_exact_cap": 2,
+  "full_trace_pool_coverage": 0.0073145245559038665,
+  "source_collection_rollouts": 4,
+  "verified_replay_rollouts": 4,
+  "total_seconds": 446.6078113913536
+}
