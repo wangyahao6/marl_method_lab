@@ -1,0 +1,288 @@
+run_id,method,seed,role,parent_run_id,phase,task,label,t_env,phase_steps,wins,episodes,win_pct
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,phase_start,0,0,0,32,0.0
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,25029,25029,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,50008,50008,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,75062,75062,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,100041,100041,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,125026,125026,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,150011,150011,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,175022,175022,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,200043,200043,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,225043,225043,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,250038,250038,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,275014,275014,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,300032,300032,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,325028,325028,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,350032,350032,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,375040,375040,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,400036,400036,3,32,9.375
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,425000,425000,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,450053,450053,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,475008,475008,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,500019,500019,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,525033,525033,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,550050,550050,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,575031,575031,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,600030,600030,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,625017,625017,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,650021,650021,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,675020,675020,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,700027,700027,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,725031,725031,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,750035,750035,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,775035,775035,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,800031,800031,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,825037,825037,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,850026,850026,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,875032,875032,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,900030,900030,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,925012,925012,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,950060,950060,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,periodic,975025,975025,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,Shared S,3535,shared-prefix,,0,stalker,stage_end,1000035,1000035,32,128,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1025053,25018,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1050048,50013,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1075039,75004,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1100105,100070,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1125060,125025,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1150088,150053,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1175040,175005,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1200079,200044,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1225096,225061,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1250038,250003,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1275043,275008,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1300056,300021,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1325062,325027,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1350172,350137,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1375038,375003,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1400086,400051,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1425068,425033,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1450039,450004,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1475067,475032,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1500079,500044,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1525075,525040,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1550035,550000,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1575064,575029,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1600049,600014,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1625063,625028,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1650035,650000,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1675086,675051,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1700072,700037,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1725060,725025,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1750080,750045,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1775045,775010,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1800088,800053,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1825080,825045,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1850037,850002,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1875051,875016,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1900091,900056,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1925060,925025,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1950058,950023,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1975093,975058,24,32,75.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,stage_end,2000028,999993,83,128,64.84375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,phase_start,2000028,0,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2025089,25061,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2050066,50038,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2075099,75071,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2100083,100055,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2125086,125058,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2150086,150058,2,32,6.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2175052,175024,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2200079,200051,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2225073,225045,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2250039,250011,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2275050,275022,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2300057,300029,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2325028,325000,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2350106,350078,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2375116,375088,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2400028,400000,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2425127,425099,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2450121,450093,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2475048,475020,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2500073,500045,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2525035,525007,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2550068,550040,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2575035,575007,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2600058,600030,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2625044,625016,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2650106,650078,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2675061,675033,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2700123,700095,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2725099,725071,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2750048,750020,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2775046,775018,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2800086,800058,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2825050,825022,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2850115,850087,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2875065,875037,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2900038,900010,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2925041,925013,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2950084,950056,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2975112,975084,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,TKPR-K1,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,stage_end,3000013,999985,55,128,42.96875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1025049,25014,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1050038,50003,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1075069,75034,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1100121,100086,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1125070,125035,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1150041,150006,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1175058,175023,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1200039,200004,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1225088,225053,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1250078,250043,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1275132,275097,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1300105,300070,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1325077,325042,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1350043,350008,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1375078,375043,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1400051,400016,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1425056,425021,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1450063,450028,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1475085,475050,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1500063,500028,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1525071,525036,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1550121,550086,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1575107,575072,24,32,75.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1600046,600011,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1625040,625005,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1650054,650019,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1675066,675031,26,32,81.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1700072,700037,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1725084,725049,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1750058,750023,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1775041,775006,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1800048,800013,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1825088,825053,27,32,84.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1850068,850033,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1875057,875022,25,32,78.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1900076,900041,26,32,81.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1925056,925021,26,32,81.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1950059,950024,26,32,81.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1975063,975028,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,stage_end,2000056,1000021,86,128,67.1875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,phase_start,2000056,0,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2025108,25052,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2050079,50023,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2075089,75033,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2100109,100053,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2125084,125028,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2150180,150124,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2175124,175068,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2200121,200065,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2225080,225024,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2250130,250074,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2275060,275004,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2300100,300044,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2325062,325006,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2350127,350071,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2375077,375021,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2400132,400076,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2425073,425017,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2450090,450034,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2475096,475040,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2500116,500060,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2525097,525041,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2550115,550059,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2575136,575080,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2600105,600049,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2625065,625009,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2650081,650025,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2675091,675035,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2700138,700082,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2725137,725081,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2750100,750044,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2775111,775055,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2800085,800029,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2825126,825070,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2850086,850030,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2875065,875009,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2900104,900048,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2925136,925080,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2950120,950064,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2975062,975006,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,TKPR-K1-W,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,stage_end,3000057,1000001,66,128,51.5625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1025079,25044,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1050042,50007,0,32,0.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1075052,75017,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1100113,100078,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1125061,125026,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1150040,150005,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1175118,175083,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1200060,200025,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1225062,225027,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1250078,250043,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1275055,275020,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1300050,300015,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1325040,325005,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1350037,350002,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1375047,375012,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1400104,400069,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1425039,425004,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1450079,450044,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1475062,475027,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1500058,500023,19,32,59.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1525070,525035,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1550076,550041,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1575044,575009,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1600038,600003,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1625062,625027,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1650076,650041,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1675076,675041,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1700062,700027,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1725036,725001,21,32,65.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1750065,750030,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1775057,775022,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1800071,800036,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1825035,825000,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1850038,850003,20,32,62.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1875079,875044,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1900051,900016,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1925127,925092,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1950055,950020,23,32,71.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,periodic,1975083,975048,22,32,68.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,1,zealot,stage_end,2000038,1000003,85,128,66.40625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,phase_start,2000038,0,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2025073,25035,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2050105,50067,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2075050,75012,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2100072,100034,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2125143,125105,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2150092,150054,6,32,18.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2175108,175070,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2200111,200073,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2225082,225044,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2250081,250043,5,32,15.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2275146,275108,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2300040,300002,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2325063,325025,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2350076,350038,10,32,31.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2375078,375040,7,32,21.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2400130,400092,8,32,25.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2425153,425115,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2450123,450085,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2475045,475007,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2500087,500049,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2525074,525036,9,32,28.125
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2550081,550043,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2575095,575057,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2600061,600023,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2625057,625019,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2650040,650002,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2675095,675057,4,32,12.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2700041,700003,13,32,40.625
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2725077,725039,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2750086,750048,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2775057,775019,12,32,37.5
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2800147,800109,11,32,34.375
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2825054,825016,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2850060,850022,18,32,56.25
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2875109,875071,17,32,53.125
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2900049,900011,15,32,46.875
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2925092,925054,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2950094,950056,14,32,43.75
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,periodic,2975050,975012,16,32,50.0
+szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,FRPR,3535,shared-branch,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,2,colossus,stage_end,3000068,1000030,57,128,44.53125

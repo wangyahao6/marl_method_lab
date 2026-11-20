@@ -1,0 +1,5 @@
+method,control_method,seed,phase,training_task,run_id,control_run_id,parent_run_id,acc_pct_delta,bwt_pp_delta,fwt_pp_delta,learning_auc_pct_delta
+TKPR-K1-W,TKPR-K1,3535,1,zealot,szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,-0.78125,-3.90625,0.0,6.591618846988311
+TKPR-K1-W,TKPR-K1,3535,2,colossus,szc_vdn64_rmsprop_1m_3535_20261120_k1w_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,-0.78125,-6.640625,-0.78125,5.106253752111542
+FRPR,TKPR-K1,3535,1,zealot,szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,-1.5625,-4.6875,0.0,2.1297234118508683
+FRPR,TKPR-K1,3535,2,colossus,szc_vdn64_rmsprop_1m_3535_20261120_frpr_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_k1_attempt001,szc_vdn64_rmsprop_1m_3535_20261120_S_attempt001,-1.0416666666666714,-3.125,-1.171875,-0.6445309208184113

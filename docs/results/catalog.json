@@ -173,6 +173,49 @@
       ]
     },
     {
+      "id": "szc-vdn64-rmsprop-1m",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64-rmsprop-1m/README.md",
+      "files": {
+        "evaluations": "comparisons/szc-vdn64-rmsprop-1m/evaluations.csv",
+        "gradient_diagnostics": "comparisons/szc-vdn64-rmsprop-1m/gradient_diagnostics.csv",
+        "learning_curves": "comparisons/szc-vdn64-rmsprop-1m/learning_curves.csv",
+        "paired_metrics": "comparisons/szc-vdn64-rmsprop-1m/paired_metrics.csv",
+        "preference_diagnostics": "comparisons/szc-vdn64-rmsprop-1m/preference_diagnostics.csv",
+        "runs": "comparisons/szc-vdn64-rmsprop-1m/runs.csv",
+        "stage_metrics": "comparisons/szc-vdn64-rmsprop-1m/stage_metrics.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_branches",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "primary_control": {
+          "method": "TKPR-K1",
+          "role": "shared-branch"
+        },
+        "matched_contrasts": {
+          "file": "paired_metrics",
+          "control_join_key": "control_run_id"
+        }
+      },
+      "interpretation_limits": [
+        "只有一个训练种子。TKPR-K1 是同 S 前缀的比较参照。",
+        "S 阶段的数据按 parent_run_id 关联。三个分支均从同一份 RMSprop 状态开始，各自训练 Z 与 C。",
+        "AUC 是按阶段实际步数归一化的当前任务贪心胜率梯形积分。"
+      ]
+    },
+    {
       "id": "szc-vdn64-aspr-adam",
       "category": "comparisons",
       "report": "comparisons/szc-vdn64-aspr-adam/README.md",
