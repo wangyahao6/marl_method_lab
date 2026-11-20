@@ -20,6 +20,7 @@
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
 | [SZC · TKPR K 值消融](parameter-ablations/szc-vdn64-tkpr-k/README.md) | 双层 VDN64，seed 1111，K=1、2、3、5 与 FRPR | 阶段末胜率、当前任务曲线、有效 K 分布及梯度诊断。 |
+| [SZC-1M · 动作对结构与 Top-1 比例](parameter-ablations/szc-vdn64-pair-structure-ratio/README.md) | 双层 VDN64，seed 3535，共用 S/Z 历史池，7 个结构组与 6 个比例组 | 逐任务胜率、等预算对照、实际比例、传递闭包和偏好梯度诊断。 |
 
 ## 机制诊断
 

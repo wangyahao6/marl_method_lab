@@ -1,0 +1,3 @@
+run_id,source_phase,historical_task,requested_wins,stored_wins,shortfall,failed_rollouts,reference_checkpoint
+szc_pair_matched_3535_20261119_reference,0,stalker,100,100,0,322,models/phase0000_1000035/agent.th
+szc_pair_matched_3535_20261119_reference,1,zealot,100,100,0,29,models/phase0001_2000029/agent.th
