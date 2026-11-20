@@ -451,6 +451,121 @@
         "覆盖单条 S 胜局、三个决策点与冻结旧策略的后续贪婪执行。",
         "分组依据为该分支的终局胜负和有效性。"
       ]
+    },
+    {
+      "id": "szc-vdn64-shapley-frpr",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-vdn64-shapley-frpr/README.md",
+      "files": {
+        "case_summary": "behavioral-analysis/szc-vdn64-shapley-frpr/case_summary.csv",
+        "pilot_config": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot.json",
+        "historical_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/historical_inventory.csv",
+        "smoke_audit": "behavioral-analysis/szc-vdn64-shapley-frpr/smoke/audit.json"
+      },
+      "case_files": {
+        "2222_s_after_c": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_c/summary.csv"
+        },
+        "2222_s_after_z": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_s_after_z/summary.csv"
+        },
+        "2222_z_after_c": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/2222_z_after_c/summary.csv"
+        },
+        "3535_s_after_c": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_c/summary.csv"
+        },
+        "3535_s_after_z": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_s_after_z/summary.csv"
+        },
+        "3535_z_after_c": {
+          "action_returns": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/action_returns.csv",
+          "audit": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/audit.json",
+          "coalition_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/coalition_values.csv",
+          "contexts": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/contexts.csv",
+          "frpr_pairs": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/frpr_pairs.csv",
+          "interactions": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/interactions.csv",
+          "manifest": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/manifest.json",
+          "shapley_values": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/shapley_values.csv",
+          "strata_inventory": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/strata_inventory.csv",
+          "summary": "behavioral-analysis/szc-vdn64-shapley-frpr/pilot/3535_z_after_c/summary.csv"
+        }
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "comparison": {
+        "kind": "counterfactual_shapley_projection",
+        "key": [
+          "case_id",
+          "task",
+          "episode_id",
+          "timestep",
+          "agent_id"
+        ],
+        "outcomes": [
+          "return",
+          "win"
+        ],
+        "top_k": 3,
+        "max_exact_pairs": 12
+      },
+      "interpretation_limits": [
+        "冻结策略行为评价覆盖 43 个完成决策，另有 11 个抽样决策超过精确枚举上限。",
+        "Top-3 用于同一批动作分支上的样本内投影比较。",
+        "该批次的结论限于行为评价。"
+      ]
     }
   ]
 }

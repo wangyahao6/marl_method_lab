@@ -1,0 +1,11 @@
+task,episode_id,timestep,agent_id,participant,preferred_action,dispreferred_action,phi_return,phi_win,rank_return,rank_win,singleton_return,top_k,random_top_k,repeat_top_k_frequency,return_mean,return_variance,return_ci_low,return_ci_high,win_mean,win_variance,win_ci_low,win_ci_high
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,0,3,1,0.0,0.0,5.5,6.5,0.0,True,False,1.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,1,4,1,1.0473230972252198e-05,2.3699669225866002e-06,1.0,1.0,1.0472278461293172e-05,True,False,1.0,1.0473230972252198e-05,,,,2.3699669225866002e-06,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,2,6,1,0.0,0.0,5.5,6.5,0.0,False,False,0.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,3,4,2,0.0,0.0,5.5,6.5,0.0,False,True,0.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,4,2,5,-0.00012472559289733456,1.4664842298258174e-06,10.0,2.0,-0.00012472654540829353,False,False,0.0,-0.00012472559289733456,,,,1.4664842298258174e-06,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,5,6,2,0.0,0.0,5.5,6.5,0.0,False,False,0.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,6,3,5,0.0,0.0,5.5,6.5,0.0,True,True,1.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,7,6,3,0.0,0.0,5.5,6.5,0.0,False,False,0.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,8,4,5,0.0,0.0,5.5,6.5,0.0,False,True,0.0,0.0,,,,0.0,,,
+stalker,71d3d363f57fb8ed5e43edd97a1454b13bb43b61a2412b46e5d5a12f8db4a692,14,0,9,6,5,0.0,0.0,5.5,6.5,0.0,False,False,0.0,0.0,,,,0.0,,,

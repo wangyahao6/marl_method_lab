@@ -1,0 +1,10 @@
+task,battle_phase,regret_stratum,available,sampled
+stalker,early,low,32,1
+stalker,early,mid,9,0
+stalker,early,high,52,0
+stalker,middle,low,40,0
+stalker,middle,mid,5,0
+stalker,middle,high,31,0
+stalker,late,low,33,0
+stalker,late,mid,10,0
+stalker,late,high,6,0
