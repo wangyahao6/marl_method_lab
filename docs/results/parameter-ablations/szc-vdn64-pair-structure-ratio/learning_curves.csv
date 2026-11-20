@@ -1,0 +1,1149 @@
+run_id,method,seed,role,parent_run_id,phase,task,label,t_env,phase_steps,wins,episodes,win_pct
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,phase_start,0,0,0,32,0.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,25029,25029,4,32,12.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,50008,50008,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,75062,75062,4,32,12.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,100041,100041,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,125026,125026,4,32,12.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,150011,150011,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,175022,175022,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,200043,200043,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,225043,225043,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,250038,250038,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,275014,275014,5,32,15.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,300032,300032,5,32,15.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,325028,325028,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,350032,350032,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,375040,375040,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,400036,400036,3,32,9.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,425000,425000,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,450053,450053,13,32,40.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,475008,475008,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,500019,500019,9,32,28.125
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,525033,525033,5,32,15.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,550050,550050,9,32,28.125
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,575031,575031,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,600030,600030,8,32,25.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,625017,625017,8,32,25.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,650021,650021,8,32,25.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,675020,675020,10,32,31.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,700027,700027,11,32,34.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,725031,725031,10,32,31.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,750035,750035,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,775035,775035,14,32,43.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,800031,800031,9,32,28.125
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,825037,825037,11,32,34.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,850026,850026,10,32,31.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,875032,875032,9,32,28.125
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,900030,900030,19,32,59.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,925012,925012,11,32,34.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,950060,950060,12,32,37.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,periodic,975025,975025,9,32,28.125
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,stage_end,1000035,1000035,32,128,25.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1025052,25017,4,32,12.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1050076,50041,6,32,18.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1075114,75079,8,32,25.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1100059,100024,7,32,21.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1125089,125054,16,32,50.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1150052,150017,16,32,50.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1175049,175014,20,32,62.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1200070,200035,13,32,40.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1225084,225049,14,32,43.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1250091,250056,22,32,68.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1275072,275037,14,32,43.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1300048,300013,19,32,59.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1325088,325053,16,32,50.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1350089,350054,18,32,56.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1375081,375046,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1400041,400006,18,32,56.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1425080,425045,15,32,46.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1450036,450001,16,32,50.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1475093,475058,23,32,71.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1500046,500011,16,32,50.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1525117,525082,20,32,62.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1550056,550021,24,32,75.0
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1575042,575007,23,32,71.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1600041,600006,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1625056,625021,23,32,71.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1650105,650070,20,32,62.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1675063,675028,20,32,62.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1700079,700044,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1725070,725035,19,32,59.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1750047,750012,26,32,81.25
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1775050,775015,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1800066,800031,23,32,71.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1825062,825027,23,32,71.875
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1850063,850028,20,32,62.5
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1875086,875051,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1900044,900009,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1925096,925061,21,32,65.625
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1950126,950091,19,32,59.375
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,periodic,1975066,975031,22,32,68.75
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,1,zealot,stage_end,2000029,999994,95,128,74.21875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025043,25008,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050071,50036,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075107,75072,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100051,100016,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125082,125047,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150057,150022,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175053,175018,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200036,200001,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225042,225007,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250050,250015,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275074,275039,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300081,300046,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325052,325017,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350061,350026,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375068,375033,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400072,400037,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425091,425056,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450046,450011,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475057,475022,22,32,68.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500056,500021,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525106,525071,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550069,550034,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575058,575023,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600047,600012,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625041,625006,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650072,650037,24,32,75.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675076,675041,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700093,700058,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725065,725030,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750079,750044,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775092,775057,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800097,800062,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825070,825035,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850093,850058,22,32,68.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875091,875056,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900061,900026,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925073,925038,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950071,950036,25,32,78.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975037,975002,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000004,999969,87,128,67.96875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000004,0,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025106,25102,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050057,50053,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075006,75002,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100045,100041,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125088,125084,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150079,150075,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175022,175018,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200074,200070,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225016,225012,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250108,250104,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275069,275065,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300014,300010,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325103,325099,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350080,350076,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375057,375053,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400065,400061,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425059,425055,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450094,450090,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475012,475008,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500014,500010,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525027,525023,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550019,550015,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575010,575006,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600028,600024,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625060,625056,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650041,650037,1,32,3.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675077,675073,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700044,700040,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725021,725017,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750061,750057,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775027,775023,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800056,800052,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825039,825035,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850010,850006,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875060,875056,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900010,900006,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925020,925016,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950035,950031,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975011,975007,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000018,1000014,74,128,57.8125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025056,25021,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050068,50033,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075052,75017,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100062,100027,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125052,125017,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150050,150015,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175069,175034,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200079,200044,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225071,225036,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250044,250009,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275072,275037,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300044,300009,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325083,325048,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350084,350049,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375091,375056,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400044,400009,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425084,425049,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450036,450001,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475048,475013,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500059,500024,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525052,525017,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550036,550001,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575038,575003,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600091,600056,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625043,625008,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650081,650046,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675086,675051,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700078,700043,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725093,725058,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750056,750021,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775055,775020,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800057,800022,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825076,825041,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850080,850045,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875075,875040,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900114,900079,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925072,925037,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950045,950010,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975060,975025,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000006,999971,60,128,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000006,0,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025089,25083,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050053,50047,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075042,75036,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100077,100071,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125018,125012,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150068,150062,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175042,175036,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200011,200005,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225056,225050,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250015,250009,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275043,275037,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300031,300025,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325054,325048,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350018,350012,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375088,375082,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400065,400059,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425072,425066,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450032,450026,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475041,475035,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500077,500071,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525030,525024,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550103,550097,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575059,575053,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600054,600048,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625008,625002,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650048,650042,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675037,675031,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700053,700047,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725117,725111,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750110,750104,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775044,775038,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800033,800027,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825060,825054,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850019,850013,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875014,875008,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900021,900015,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925040,925034,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950029,950023,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975071,975065,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_adjacent,Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000060,1000054,59,128,46.09375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025035,25000,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050075,50040,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075035,75000,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100101,100066,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125065,125030,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150070,150035,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175058,175023,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200087,200052,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225049,225014,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250037,250002,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275054,275019,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300042,300007,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325104,325069,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350076,350041,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375083,375048,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400088,400053,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425081,425046,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450067,450032,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475059,475024,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500060,500025,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525070,525035,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550064,550029,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575078,575043,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600071,600036,23,32,71.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625061,625026,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650111,650076,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675101,675066,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700083,700048,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725102,725067,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750076,750041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775077,775042,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800067,800032,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825089,825054,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850057,850022,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875082,875047,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900069,900034,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925035,925000,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950069,950034,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975084,975049,22,32,68.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000018,999983,79,128,61.71875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000018,0,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025025,25007,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050027,50009,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075056,75038,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100087,100069,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125079,125061,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150103,150085,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175055,175037,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200100,200082,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225047,225029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250031,250013,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275077,275059,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300055,300037,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325056,325038,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350077,350059,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375100,375082,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400077,400059,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425072,425054,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450029,450011,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475018,475000,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500108,500090,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525155,525137,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550059,550041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575066,575048,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600115,600097,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625066,625048,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650034,650016,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675028,675010,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700057,700039,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725088,725070,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750111,750093,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775055,775037,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800040,800022,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825029,825011,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850024,850006,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875040,875022,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900022,900004,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925055,925037,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950092,950074,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975125,975107,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000061,1000043,58,128,45.3125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025066,25031,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050052,50017,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075056,75021,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100074,100039,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125052,125017,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150057,150022,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175047,175012,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200048,200013,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225056,225021,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250051,250016,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275062,275027,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300036,300001,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325067,325032,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350053,350018,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375059,375024,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400053,400018,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425085,425050,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450065,450030,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475078,475043,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500061,500026,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525077,525042,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550076,550041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575068,575033,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600053,600018,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625086,625051,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650077,650042,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675070,675035,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700074,700039,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725067,725032,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750037,750002,22,32,68.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775088,775053,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800091,800056,22,32,68.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825058,825023,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850045,850010,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875085,875050,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900083,900048,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925038,925003,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950067,950032,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975120,975085,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000018,999983,80,128,62.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000018,0,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025090,25072,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050101,50083,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075042,75024,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100069,100051,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125060,125042,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150055,150037,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175059,175041,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200093,200075,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225052,225034,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250121,250103,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275067,275049,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300026,300008,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325045,325027,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350077,350059,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375107,375089,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400020,400002,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425124,425106,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450115,450097,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475065,475047,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500065,500047,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525047,525029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550035,550017,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575041,575023,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600025,600007,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625030,625012,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650053,650035,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675050,675032,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700020,700002,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725093,725075,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750074,750056,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775103,775085,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800044,800026,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825092,825074,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850072,850054,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875040,875022,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900076,900058,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925082,925064,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950046,950028,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975096,975078,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_frpr,FRPR,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000066,1000048,51,128,39.84375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025041,25006,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050054,50019,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075070,75035,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100045,100010,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125035,125000,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150067,150032,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175071,175036,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200087,200052,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225065,225030,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250055,250020,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275046,275011,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300083,300048,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325046,325011,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350064,350029,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375070,375035,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400068,400033,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425073,425038,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450040,450005,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475059,475024,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500059,500024,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525048,525013,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550075,550040,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575051,575016,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600066,600031,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625089,625054,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650065,650030,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675060,675025,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700035,700000,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725083,725048,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750036,750001,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775097,775062,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800064,800029,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825051,825016,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850035,850000,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875075,875040,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900077,900042,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925088,925053,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950041,950006,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975050,975015,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000012,999977,82,128,64.0625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000012,0,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025049,25037,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050048,50036,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075067,75055,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100044,100032,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125028,125016,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150032,150020,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175057,175045,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200037,200025,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225044,225032,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250074,250062,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275012,275000,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300032,300020,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325089,325077,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350035,350023,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375054,375042,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400033,400021,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425084,425072,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450040,450028,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475053,475041,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500044,500032,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525029,525017,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550018,550006,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575018,575006,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600074,600062,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625060,625048,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650072,650060,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675015,675003,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700053,700041,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725072,725060,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750088,750076,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775094,775082,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800074,800062,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825106,825094,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850054,850042,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875014,875002,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900076,900064,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925021,925009,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950061,950049,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975083,975071,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,Random-N-1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000033,1000021,50,128,39.0625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025057,25022,1,32,3.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050060,50025,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075079,75044,1,32,3.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100071,100036,2,32,6.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125049,125014,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150078,150043,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175074,175039,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200094,200059,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225047,225012,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250057,250022,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275053,275018,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300060,300025,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325105,325070,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350038,350003,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375035,375000,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400084,400049,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425038,425003,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450092,450057,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475081,475046,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500089,500054,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525104,525069,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550061,550026,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575075,575040,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600083,600048,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625096,625061,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650039,650004,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675062,675027,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700059,700024,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725043,725008,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750039,750004,23,32,71.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775060,775025,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800040,800005,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825066,825031,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850087,850052,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875086,875051,24,32,75.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900065,900030,20,32,62.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925069,925034,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950073,950038,21,32,65.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975060,975025,18,32,56.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000010,999975,70,128,54.6875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000010,0,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025075,25065,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050022,50012,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075040,75030,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100030,100020,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125060,125050,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150044,150034,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175050,175040,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200083,200073,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225025,225015,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250076,250066,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275052,275042,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300087,300077,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325053,325043,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350062,350052,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375132,375122,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400053,400043,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425042,425032,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450061,450051,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475012,475002,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500054,500044,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525047,525037,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550096,550086,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575036,575026,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600025,600015,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625041,625031,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650027,650017,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675011,675001,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700025,700015,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725041,725031,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750037,750027,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775052,775042,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800036,800026,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825044,825034,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850102,850092,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875047,875037,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900061,900051,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925065,925055,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950066,950056,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975044,975034,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,Random-(2N-3),3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000009,999999,58,128,45.3125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025069,25034,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050041,50006,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075081,75046,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100044,100009,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125090,125055,3,32,9.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150048,150013,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175075,175040,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200070,200035,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225058,225023,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250044,250009,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275083,275048,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300079,300044,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325084,325049,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350064,350029,6,32,18.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375043,375008,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400105,400070,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425084,425049,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450093,450058,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475107,475072,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500057,500022,5,32,15.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525144,525109,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550077,550042,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575060,575025,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600098,600063,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625059,625024,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650053,650018,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675080,675045,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700068,700033,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725039,725004,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750039,750004,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775064,775029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800113,800078,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825082,825047,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850036,850001,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875094,875059,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900086,900051,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925052,925017,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950049,950014,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975066,975031,17,32,53.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000017,999982,70,128,54.6875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000017,0,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025046,25029,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050099,50082,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075070,75053,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100081,100064,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125060,125043,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150042,150025,7,32,21.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175028,175011,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200019,200002,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225103,225086,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250050,250033,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275043,275026,4,32,12.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300079,300062,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325055,325038,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350080,350063,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375049,375032,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400125,400108,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425117,425100,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450064,450047,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475108,475091,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500027,500010,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525070,525053,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550027,550010,8,32,25.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575047,575030,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600036,600019,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625024,625007,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650026,650009,10,32,31.25
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675026,675009,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700083,700066,15,32,46.875
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725091,725074,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750068,750051,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775077,775060,16,32,50.0
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800074,800057,11,32,34.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825097,825080,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850093,850076,12,32,37.5
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875020,875003,9,32,28.125
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900068,900051,13,32,40.625
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925085,925068,19,32,59.375
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950042,950025,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975074,975057,14,32,43.75
+szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000044,1000027,58,128,45.3125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025079,25044,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050082,50047,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075045,75010,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100047,100012,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125046,125011,1,32,3.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150075,150040,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175078,175043,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200048,200013,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225056,225021,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250089,250054,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275068,275033,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300136,300101,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325094,325059,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350072,350037,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375044,375009,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400054,400019,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425072,425037,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450062,450027,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475047,475012,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500075,500040,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525069,525034,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550076,550041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575065,575030,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600076,600041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625089,625054,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650060,650025,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675067,675032,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700067,700032,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725084,725049,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750087,750052,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775054,775019,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800082,800047,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825045,825010,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850093,850058,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875035,875000,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900044,900009,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925037,925002,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950051,950016,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975077,975042,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000046,1000011,83,128,64.84375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000046,0,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025048,25002,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050072,50026,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075061,75015,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100073,100027,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125080,125034,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150093,150047,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175120,175074,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200055,200009,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225079,225033,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250117,250071,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275131,275085,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300074,300028,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325127,325081,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350115,350069,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375098,375052,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400047,400001,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425047,425001,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450085,450039,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475154,475108,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500098,500052,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525124,525078,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550082,550036,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575100,575054,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600063,600017,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625052,625006,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650075,650029,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675109,675063,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700111,700065,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725063,725017,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750052,750006,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775135,775089,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800076,800030,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825112,825066,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850115,850069,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875149,875103,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900073,900027,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925107,925061,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950118,950072,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975128,975082,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000045,999999,53,128,41.40625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025096,25061,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050090,50055,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075082,75047,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100088,100053,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125107,125072,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150057,150022,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175074,175039,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200036,200001,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225094,225059,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250071,250036,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275108,275073,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300037,300002,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325062,325027,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350049,350014,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375041,375006,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400089,400054,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425071,425036,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450086,450051,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475038,475003,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500102,500067,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525062,525027,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550091,550056,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575036,575001,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600068,600033,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625089,625054,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650094,650059,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675079,675044,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700060,700025,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725091,725056,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750039,750004,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775037,775002,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800078,800043,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825059,825024,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850080,850045,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875047,875012,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900051,900016,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925051,925016,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950076,950041,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975064,975029,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000044,1000009,71,128,55.46875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000044,0,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025080,25036,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050138,50094,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075067,75023,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100053,100009,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125057,125013,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150054,150010,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175075,175031,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200104,200060,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225106,225062,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250073,250029,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275138,275094,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300099,300055,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325111,325067,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350054,350010,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375130,375086,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400151,400107,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425073,425029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450080,450036,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475142,475098,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500061,500017,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525076,525032,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550086,550042,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575131,575087,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600102,600058,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625087,625043,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650150,650106,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675140,675096,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700070,700026,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725075,725031,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750135,750091,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775110,775066,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800057,800013,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825120,825076,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850120,850076,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875116,875072,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900111,900067,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925092,925048,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950139,950095,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975145,975101,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_20,Ratio-20,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000055,1000011,65,128,50.78125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025082,25047,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050064,50029,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075086,75051,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100070,100035,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125104,125069,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150091,150056,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175090,175055,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200058,200023,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225045,225010,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250061,250026,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275036,275001,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300081,300046,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325098,325063,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350049,350014,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375045,375010,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400089,400054,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425106,425071,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450050,450015,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475079,475044,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500064,500029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525148,525113,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550082,550047,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575069,575034,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600049,600014,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625035,625000,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650090,650055,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675071,675036,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700083,700048,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725053,725018,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750043,750008,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775060,775025,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800078,800043,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825098,825063,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850093,850058,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875046,875011,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900079,900044,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925116,925081,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950087,950052,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975065,975030,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000005,999970,67,128,52.34375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000005,0,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025014,25009,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050022,50017,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075011,75006,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100067,100062,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125064,125059,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150082,150077,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175056,175051,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200102,200097,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225093,225088,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250030,250025,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275139,275134,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300045,300040,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325058,325053,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350068,350063,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375040,375035,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400031,400026,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425068,425063,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450055,450050,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475092,475087,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500015,500010,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525032,525027,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550090,550085,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575061,575056,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600090,600085,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625093,625088,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650015,650010,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675013,675008,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700063,700058,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725094,725089,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750056,750051,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775026,775021,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800057,800052,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825121,825116,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850041,850036,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875120,875115,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900061,900056,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925082,925077,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950038,950033,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975036,975031,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_40,Ratio-40,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000013,1000008,50,128,39.0625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025050,25015,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050074,50039,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075047,75012,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100074,100039,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125084,125049,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150039,150004,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175064,175029,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200042,200007,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225043,225008,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250052,250017,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275061,275026,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300085,300050,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325040,325005,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350048,350013,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375074,375039,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400072,400037,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425035,425000,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450059,450024,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475064,475029,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500047,500012,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525079,525044,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550038,550003,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575087,575052,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600058,600023,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625111,625076,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650043,650008,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675051,675016,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700066,700031,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725060,725025,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750040,750005,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775049,775014,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800108,800073,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825062,825027,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850040,850005,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875040,875005,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900078,900043,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925044,925009,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950069,950034,22,32,68.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975092,975057,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000031,999996,67,128,52.34375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000031,0,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025065,25034,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050179,50148,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075087,75056,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100098,100067,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125090,125059,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150055,150024,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175076,175045,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200106,200075,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225092,225061,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250086,250055,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275087,275056,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300057,300026,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325102,325071,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350194,350163,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375093,375062,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400031,400000,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425054,425023,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450052,450021,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475064,475033,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500092,500061,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525077,525046,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550072,550041,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575057,575026,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600117,600086,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625081,625050,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650075,650044,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675077,675046,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700099,700068,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725111,725080,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750069,750038,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775090,775059,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800101,800070,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825071,825040,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850087,850056,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875087,875056,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900048,900017,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925077,925046,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950076,950045,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975095,975064,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_60,Ratio-60,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000045,1000014,54,128,42.1875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025044,25009,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050088,50053,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075048,75013,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100067,100032,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125098,125063,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150043,150008,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175040,175005,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200112,200077,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225045,225010,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250039,250004,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275086,275051,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300069,300034,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325128,325093,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350086,350051,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375102,375067,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400089,400054,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425088,425053,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450112,450077,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475075,475040,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500060,500025,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525107,525072,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550097,550062,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575043,575008,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600042,600007,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625088,625053,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650084,650049,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675092,675057,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700047,700012,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725054,725019,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750079,750044,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775087,775052,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800067,800032,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825089,825054,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850057,850022,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875062,875027,22,32,68.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900070,900035,23,32,71.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925096,925061,22,32,68.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950058,950023,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975050,975015,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000064,1000029,82,128,64.0625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000064,0,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025114,25050,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050085,50021,0,32,0.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075121,75057,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100087,100023,5,32,15.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125134,125070,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150094,150030,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175092,175028,6,32,18.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200148,200084,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225123,225059,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250146,250082,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275066,275002,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300110,300046,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325136,325072,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350119,350055,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375068,375004,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400077,400013,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425123,425059,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450121,450057,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475094,475030,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500069,500005,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525095,525031,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550156,550092,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575079,575015,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600070,600006,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625117,625053,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650112,650048,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675078,675014,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700149,700085,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725078,725014,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750079,750015,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775139,775075,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800119,800055,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825171,825107,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850087,850023,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875080,875016,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900093,900029,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925095,925031,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950128,950064,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975115,975051,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_80,Ratio-80,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000111,1000047,58,128,45.3125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,phase_start,1000035,0,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1025043,25008,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1050071,50036,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1075107,75072,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1100051,100016,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1125082,125047,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1150057,150022,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1175053,175018,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1200036,200001,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1225042,225007,2,32,6.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1250050,250015,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1275074,275039,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1300081,300046,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1325052,325017,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1350061,350026,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1375068,375033,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1400101,400066,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1425093,425058,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1450051,450016,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1475077,475042,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1500037,500002,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1525075,525040,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1550062,550027,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1575081,575046,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1600095,600060,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1625080,625045,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1650061,650026,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1675061,675026,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1700116,700081,24,32,75.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1725109,725074,20,32,62.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1750049,750014,23,32,71.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1775079,775044,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1800046,800011,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1825054,825019,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1850073,850038,17,32,53.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1875086,875051,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1900049,900014,21,32,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1925058,925023,22,32,68.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1950065,950030,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,periodic,1975073,975038,22,32,68.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,stage_end,2000045,1000010,84,128,65.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,phase_start,2000045,0,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2025075,25030,8,32,25.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2050057,50012,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2075112,75067,4,32,12.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2100082,100037,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2125082,125037,7,32,21.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2150101,150056,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2175156,175111,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2200124,200079,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2225118,225073,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2250061,250016,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2275108,275063,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2300060,300015,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2325065,325020,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2350117,350072,9,32,28.125
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2375105,375060,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2400089,400044,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2425090,425045,3,32,9.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2450075,450030,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2475073,475028,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2500096,500051,10,32,31.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2525117,525072,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2550079,550034,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2575111,575066,19,32,59.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2600078,600033,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2625073,625028,11,32,34.375
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2650084,650039,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2675111,675066,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2700079,700034,13,32,40.625
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2725071,725026,12,32,37.5
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2750046,750001,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2775118,775073,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2800087,800042,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2825096,825051,16,32,50.0
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2850109,850064,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2875127,875082,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2900108,900063,18,32,56.25
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2925119,925074,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2950126,950081,15,32,46.875
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,periodic,2975110,975065,14,32,43.75
+szc_pair_matched_3535_20261119_pair_ratio_100,Ratio-100,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,stage_end,3000028,999983,71,128,55.46875
