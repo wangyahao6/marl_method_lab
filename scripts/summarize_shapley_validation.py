@@ -1,5 +1,6 @@
 """Audit a Shapley-FRPR validation run and export lightweight paired results."""
 import argparse
+import json
 from collections import Counter, defaultdict
 from pathlib import Path
 import shutil
@@ -7,7 +8,7 @@ import shutil
 import numpy as np
 
 from validate_shapley_frpr import KEYS, csv_output, key, load_csv, read, sha, stratum, write
-from drivers.continual.analysis.shapley_mc import compare, fit_transfer, transferred_scores
+from drivers.continual.analysis.shapley_mc import compare, fit_transfer, ordered_top, transferred_scores
 
 
 ARMS = ("empty", "full", "random_topk", "shapley_topk")
@@ -54,7 +55,8 @@ def paired_rows(case, folder, random_seeds):
         result = {name: row[name] for name in (*KEYS, "battle_phase", "regret_stratum", "env_seed", "M",
                                                 "transfer_observed_pairs", "transfer_observed_selected",
                                                 "selected_count")}
-        result.update(case=case, training_seed=int(case.split("_")[0]), outcome_phase=case.split("_", 1)[1])
+        result.update(case=case, training_seed=int(case.split("_")[0]), outcome_phase=case.split("_", 1)[1],
+                      m_regime="M>12" if int(row["M"]) > 12 else "M<=12")
         for arm in ARMS:
             samples = np.asarray(list(arms[arm].values()))
             for i, metric in enumerate(("return", "win")):
@@ -69,7 +71,7 @@ def paired_rows(case, folder, random_seeds):
 def summaries(rows, cfg):
     groups = defaultdict(list)
     for row in rows:
-        for category in ("case", "training_seed", "task", "battle_phase", "regret_stratum", "outcome_phase"):
+        for category in ("case", "training_seed", "task", "battle_phase", "regret_stratum", "outcome_phase", "m_regime"):
             groups[category, row[category]].append(row)
     groups["aggregate", "all"] = rows
     for (dimension, name), group in groups.items():
@@ -138,19 +140,22 @@ def transfer_stability(case, folder, contexts, shrinkage):
               [float(pair["phi_return"]) for pair in discovery_pairs[key(row)]])
              for row in load_csv(folder / "discovery_contexts.csv")]
     seeds = sorted({record[0] for record in known})
-    if len(seeds) < 2:
-        return
     fit = fit_transfer([data[1:] for data in known], shrinkage)
     leaveouts = [(seed, fit_transfer([data[1:] for data in known if data[0] != seed], shrinkage))
-                 for seed in seeds]
+                 for seed in seeds] if len(seeds) > 1 else []
     candidates = read_pairs(folder / "validation" / "frpr_pairs.csv")
+    selected = {key(row): [tuple(pair) for pair in json.loads(row["selected_pairs"])]
+                for row in load_csv(folder / "validation_selections.csv") if row["arm"] == "shapley_topk"}
     for row in contexts:
         pairs = [relation(pair) for pair in candidates[key(row)]]
         baseline = np.asarray(transferred_scores(stratum(row), pairs, fit)[0])
+        k = int(row["selected_count"])
+        if [pairs[i] for i in ordered_top(baseline, pairs, k)] != selected[key(row)]:
+            raise ValueError(f"Frozen ranking does not reproduce selected pairs for {key(row)}")
         for seed, leaveout in leaveouts:
             held = np.asarray(transferred_scores(stratum(row), pairs, leaveout)[0])
             yield dict(case=case, **dict(zip(KEYS, key(row))), removed_discovery_env_seed=seed,
-                       **compare(baseline, held, pairs, int(row["selected_count"])))
+                       **compare(baseline, held, pairs, k))
 
 
 def pilot_equivalence(folder, pilot):
