@@ -153,8 +153,23 @@ def transfer_stability(case, folder, contexts, shrinkage):
                        **compare(baseline, held, pairs, int(row["selected_count"])))
 
 
+def pilot_equivalence(folder, pilot):
+    """Check the exact bridge against the original Pilot using the same action evidence."""
+    sources = {key(row): row["source"] for row in load_csv(folder / "discovery_contexts.csv")}
+    current = [row for row in load_csv(folder / "discovery_shapley.csv")
+               if sources[key(row)] == "pilot_exact"]
+    original = {(key(row), relation(row)): row for row in load_csv(pilot / "shapley_values.csv")}
+    errors = [abs(float(row[metric]) - float(original[key(row), relation(row)][metric]))
+              for row in current for metric in ("phi_return", "phi_win")]
+    max_error = max(errors, default=0.)
+    if max_error > 1e-9:
+        raise ValueError(f"Exact results differ from the Pilot in {folder}: {max_error}")
+    return dict(relations=len(current), max_absolute_difference=max_error)
+
+
 def check_case(folder, config):
     frozen = read(folder / "frozen_discovery.json")
+    cfg = read(config)
     if frozen["config_sha256"] != sha(config):
         raise ValueError(f"Frozen Discovery config mismatch in {folder}")
     discovery = read(folder / "discovery" / "audit.json")
@@ -176,7 +191,7 @@ def check_case(folder, config):
                 discovery_env_seeds=sorted(observed_discovery),
                 validation_env_seeds=sorted(observed_validation),
                 validation_winning_episodes=len({row["episode_id"] for row in completed}),
-                overlap=False)
+                exact_pilot_reproduction=pilot_equivalence(folder, Path(cfg["pilot"])), overlap=False)
 
 
 def summarize(run, out, smoke=None):
@@ -185,7 +200,9 @@ def summarize(run, out, smoke=None):
     out.mkdir(parents=True, exist_ok=False)
     configs = out / "configs"
     configs.mkdir()
-    all_contexts, checks, errors, wins, choices, fits, stability = [], [], [], [], [], [], []
+    models = out / "frozen_discovery"
+    models.mkdir()
+    all_contexts, checks, errors, wins, choices, fits, stability, inventory = [], [], [], [], [], [], [], []
     audit = dict(run=run.name, plan_sha256=sha(run / "plan.json"), cases={}, failures={})
     if smoke is not None:
         name = "2222_s_after_z"
@@ -201,6 +218,11 @@ def summarize(run, out, smoke=None):
             if not (evidence["discovery"]["passed"] and evidence["validation"]["passed"]):
                 audit["failures"][case] = "One or more trace or branch audits failed"
             case_contexts = list(paired_rows(case, folder, protocol["random_seeds"]))
+            shutil.copyfile(folder / "frozen_discovery.json", models / f"{case}.json")
+            inventory.extend({name: row.get(name) for name in (
+                "case", *KEYS, "env_seed", "battle_phase", "regret_stratum", "M", "status", "branch_rollouts",
+                "transfer_observed_pairs", "transfer_observed_selected", "selected_count")}
+                for row in tagged(case, folder / "validation" / "contexts.csv"))
             if len(case_contexts) != evidence["validation"]["completed_contexts"]:
                 raise ValueError(f"Paired rows differ from audited context count: {case}")
             for dest, file in ((all_contexts, "discovery_contexts.csv"), (checks, "convergence.csv"),
@@ -217,11 +239,14 @@ def summarize(run, out, smoke=None):
     for file, rows in (("discovery_contexts.csv", all_contexts), ("discovery_shapley.csv", fits),
                        ("convergence.csv", checks), ("exact_comparison.csv", errors),
                        ("approximation_summary.csv", approx), ("validation_selections.csv", choices),
-                       ("validation_contexts.csv", wins), ("transfer_stability.csv", stability),
+                       ("validation_contexts.csv", wins), ("validation_inventory.csv", inventory),
+                       ("transfer_stability.csv", stability),
                        ("paired_summary.csv", comparisons)):
         csv_output(out / file, rows, ("case",) if file != "paired_summary.csv" else ("dimension", "group"))
     audit["discovery_contexts"] = len(all_contexts)
     audit["discovery_by_method"] = dict(Counter(row["method"] for row in all_contexts))
+    audit["discovery_episode_ids"] = len({(row["case"].split("_")[0], row["task"], row["episode_id"])
+                                          for row in all_contexts})
     audit["validation_contexts"] = len(wins)
     audit["validation_episode_ids"] = len({(row["training_seed"], row["task"], row["episode_id"]) for row in wins})
     audit["selected_relations"] = sum(int(row["selected_count"]) for row in wins)
