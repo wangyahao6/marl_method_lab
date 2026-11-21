@@ -1,5 +1,41 @@
 # SZC-1M 动作对消融第一版
 
+## 结构组 min_gap=0.5 复验
+
+独立批次 `szc_pair_structure_gap05_3535_20261121` 使用
+[`pair_structure_gap05` 协议](../configs/continual/action_preference/pair_structure_gap05/szc_vdn64_pair_structure_gap05_1m.json)。
+七个结构组沿用下表的 CLI 方法名，参考线和分支共用 S 末模型、优化器、随机状态及 S、Z 历史池。
+训练、评估和历史池参数复制自第一版结构协议，只将七组的 `min_gap` 设为 0.5。
+
+对每个合法且旧 Q 不相等的对，先按原结构确定候选，再用 `reference_order` 的合法动作总体标准差及
+`q_scale_floor=0.1` 计算归一化差距，仅保留差距至少 0.5 的对。随机组从通过筛选的候选中固定种子
+3535 无放回抽样，掩码在历史池加入训练前生成并保存。为使 Random-(2N-3) 仍有完整预算，
+七组统一使用合法动作至少 4 个、旧 Q 无并列、通过筛选的对至少 `2N−3` 个的状态。
+K1+Adjacent 中非 Top-1 相邻边可能被筛掉；Matched 逐状态保留与其相同的通过筛选 Top-1 对数，
+再从通过筛选的非 Top-1 候选中抽取与其相同数量的对。因此二者筛选后逐状态对数及 Top-1 比例相同，
+不再保证每个状态恰有 `2N−3` 对。Random-(2N-3) 仍严格选取 `2N−3` 对。
+
+历史池 `summary.json` 增加 `gap_eligible_pairs`、`gap_filtered_pairs`、`gap_filter_rate`、
+`pair_coverage`、`ordering_edges`、`selected_ordering_edges`、`ordering_edge_coverage` 和
+`complete_order_coverage`。原有统计记录筛选前合法候选、筛选前不并列候选、实际选择数、状态覆盖率、
+Top-1 比例与相对筛选前候选的压缩率。完整排序覆盖率以**全部严格相邻边**为分母，
+被间隔筛掉的相邻边不会误算为已覆盖。
+逐更新诊断另记录在选对有效状态上、全部合法旧 Q 不并列动作对的 Kendall tau-a、
+旧 Q 对新策略贪心动作的平均归一化 regret，以及所选状态的 Top-1 保持率。
+梯度范数及与 TD 梯度的余弦相似度沿用既有 learner 采样日志。
+
+第一版参考线与七个结构组实际从 `c6b7002` 启动。
+已核对 `c6b7002` 的 `pair_ablation.py`：`eligible` 只检查合法且旧 Q 不相等，结构组从该集合直接选对，
+并未应用数值门槛。该版配置中的 `min_gap=0` 与这一行为一致。本次另有筛选后随机配额和共同有效状态
+规则，因此结果应按实际选对与覆盖率比较，不预设为严格单变量对照。
+
+启动预览及正式提交使用：
+
+```sh
+.venv/bin/python scripts/plan_pair_structure_gap05.py szc_pair_structure_gap05_3535_20261121 > results/szc_pair_structure_gap05_3535_20261121/plan.json
+.venv/bin/python scheduler/service.py submit results/szc_pair_structure_gap05_3535_20261121/plan.json
+```
+
 双层 VDN64，seed 3535，5v5 Protoss，Stalker → Zealot → Colossus。
 沿用 SZC-1M 的累计切换阈值 1M／2M／3M、逐任务 ε 重启、FT 清空 TD 回放池和 RMSprop。
 共用参考线仅执行 TD 更新，在 S 阶段结束后保存分支快照，并生成 S、Z 两个胜局历史池。

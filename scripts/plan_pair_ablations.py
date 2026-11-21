@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "drivers/continual"))
 from action_set_protocol import PAIR_ABLATIONS
 
 
-def build_plan(batch_id):
+def build_plan(batch_id, experiments=("pair_structure", "pair_ratio")):
     common = [sys.executable, "scripts/run.py", "--suite", "vdn_action_set",
               "--algorithm", "vdn", "--seed", "3535"]
     reference_id = f"{batch_id}_reference"
@@ -33,8 +33,9 @@ def build_plan(batch_id):
                           dependencies=[reference_id] if parent else []))
         return run_dir
 
-    parent = task("pair_structure", "full_rank_preference", reference_id, "pair-reference")
-    for experiment, methods in PAIR_ABLATIONS.items():
+    parent = task(experiments[0], "full_rank_preference", reference_id, "pair-reference")
+    for experiment in experiments:
+        methods = PAIR_ABLATIONS[experiment]
         for method in methods:
             task(experiment, method, f"{batch_id}_{method}", "shared-branch", parent)
     return dict(id=batch_id, tasks=tasks)

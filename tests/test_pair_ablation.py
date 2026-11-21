@@ -10,7 +10,7 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import driver, jsonlines
 from test_shared_tkpr_k1 import ForkableProtoss
-from action_set_protocol import PAIR_DEFAULTS, PAIR_RATIOS
+from action_set_protocol import PAIR_DEFAULTS, PAIR_GAP05_DEFAULTS, PAIR_RATIOS
 from learners.pair_ablation import (
     PairAblationPreference, STRUCTURES, ablation_loss, ablation_statistics, ratio_counts, select_pairs,
 )
@@ -81,6 +81,48 @@ class PairAblationTest(unittest.TestCase):
                     self.assertEqual(closure, strict_closure(full, old[0]))
                 if method == "k1":
                     self.assertEqual(len(closure), 4)
+
+    def test_gap05_filters_before_selection_and_matches_filtered_union(self):
+        old = th.tensor([[6., 4., 2., 1., 0.],
+                         [6., 4., 2., 1., 0.],
+                         [10., 9.7, 9.4, 2., 0.]])
+        legal = th.ones_like(old, dtype=th.bool)
+        decisions = th.ones(3, dtype=th.bool)
+        expected_valid = [True, True, False]
+        scale = old[0].std(unbiased=False).clamp_min(.1)
+        eligible = {(i, j) for i in range(5) for j in range(i + 1, 5)
+                    if abs(float(old[0, i] - old[0, j])) / float(scale) >= .5}
+        self.assertEqual(len(eligible), 8)
+        masks = {}
+        for method in STRUCTURES:
+            with self.subTest(method=method):
+                mask, valid, _, audit = select_pairs(old, legal, decisions, method, SEED,
+                                                      min_gap=.5, q_scale_floor=.1)
+                self.assertEqual(valid.tolist(), expected_valid)
+                self.assertEqual(pair_ids(mask[0], 5) <= eligible, True)
+                self.assertFalse(mask[2].any())
+                self.assertEqual(audit["gap_eligible_pairs"], 16)
+                self.assertEqual(audit["complete_order_states"], 0)
+                th.testing.assert_close(mask, select_pairs(old, legal, decisions, method, SEED,
+                                                           min_gap=.5, q_scale_floor=.1)[0])
+                masks[method] = mask
+        for state in (0, 1):
+            union = pair_ids(masks["k1_adjacent"][state], 5)
+            matched = pair_ids(masks["random_2n_minus_3_matched"][state], 5)
+            self.assertEqual({p for p in union if 0 in p}, {p for p in matched if 0 in p})
+            self.assertEqual(len(union - {p for p in union if 0 in p}),
+                             len(matched - {p for p in matched if 0 in p}))
+            self.assertEqual(len(union), len(matched))
+            self.assertEqual(len(pair_ids(masks["random_2n_minus_3"][state], 5)), 7)
+            self.assertEqual(len(pair_ids(masks["random_n_minus_1"][state], 5)), 4)
+
+    def test_gap05_protocol_isolated_from_existing_config(self):
+        self.assertEqual(protocol("pair_structure")["pair_structure_k1"]["min_gap"], 0)
+        gap = protocol("pair_structure_gap05")
+        self.assertEqual(gap["pair_ablation_experiment"], "pair_structure_gap05")
+        for method in STRUCTURES:
+            self.assertEqual(gap[f"pair_structure_{method}"], PAIR_GAP05_DEFAULTS)
+        self.assertEqual(PAIR_DEFAULTS["min_gap"], 0)
 
     def test_random_2n_minus_3_matches_union_budget_without_duplicate_pairs(self):
         action_count = 11
@@ -204,6 +246,10 @@ class PairAblationTest(unittest.TestCase):
             self.assertGreater(float(gradient.norm()), 0)
             self.assertEqual(float(gradient[1, 4]), 0)
             self.assertEqual(ablation_statistics(summary.tolist())["coverage"], 1.)
+            stats = ablation_statistics(summary.tolist())
+            self.assertTrue(-1 <= stats["kendall_tau_a"] <= 1)
+            self.assertGreaterEqual(stats["mean_normalized_regret"], 0)
+            self.assertTrue(0 <= stats["selected_top1_retention"] <= 1)
 
     def test_reference_and_shared_branch_use_prepared_masks(self):
         def tiny_protocol(experiment, method):

@@ -29,12 +29,17 @@ def ratio_counts(budget, percent, generator, prior_budget):
 
 
 @th.no_grad()
-def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
+def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0,
+                 min_gap=0, q_scale_floor=0.1):
     """Return masks over upper-triangular pairs indexed by original action ID."""
     left, right = th.triu_indices(legal.size(-1), legal.size(-1), offset=1, device=legal.device)
     legal_pairs = legal[..., left] & legal[..., right]
     distinct = old_q[..., left] != old_q[..., right]
     eligible = legal_pairs & distinct
+    # Use the same population standard deviation and floor as reference_order.
+    standardized, _, _, _ = reference_order(old_q, legal, q_scale_floor)
+    gap = (standardized[..., left] - standardized[..., right]).abs()
+    filtered = eligible & (gap >= min_gap)
     order = old_q.masked_fill(~legal, -th.inf).argsort(dim=-1, descending=True)
     top = order[..., :1]
     top_pairs = (left == top) | (right == top)
@@ -45,24 +50,31 @@ def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
 
     if selection in STRUCTURES:
         valid &= ~(legal_pairs & ~distinct).any(dim=-1)
+        if min_gap:
+            # The largest random control needs 2N-3 eligible edges. Applying this
+            # condition to every structure keeps their decision states identical.
+            valid &= filtered.sum(dim=-1) >= 2 * legal_count - 3
         ranks = order.argsort(dim=-1)
-        adjacent = eligible & ((ranks[..., left] - ranks[..., right]).abs() == 1)
+        all_adjacent = eligible & ((ranks[..., left] - ranks[..., right]).abs() == 1)
+        adjacent = filtered & all_adjacent
         if selection == "k1":
-            selected = eligible & top_pairs
+            selected = filtered & top_pairs
         elif selection == "adjacent":
             selected = adjacent
         elif selection == "k1_adjacent":
-            selected = (eligible & top_pairs) | adjacent
+            selected = (filtered & top_pairs) | adjacent
         elif selection == "frpr":
-            selected = eligible
+            selected = filtered
         elif selection == "random_2n_minus_3_matched":
             scores = th.rand(eligible.shape, generator=generator, device=old_q.device)
-            non_top = ranked_subset(eligible & ~top_pairs, scores, legal_count - 2)
-            selected = (eligible & top_pairs) | non_top
+            # Match the filtered non-Top-1 count of K1+Adjacent state by state.
+            non_top_budget = (adjacent & ~top_pairs).sum(dim=-1)
+            non_top = ranked_subset(filtered & ~top_pairs, scores, non_top_budget)
+            selected = (filtered & top_pairs) | non_top
         else:
             scores = th.rand(eligible.shape, generator=generator, device=old_q.device)
             pair_budget = 2 * legal_count - 3 if selection == "random_2n_minus_3" else budget
-            selected = ranked_subset(eligible, scores, pair_budget)
+            selected = ranked_subset(filtered, scores, pair_budget)
     else:
         non_top = eligible & ~top_pairs
         unique_top = (eligible & top_pairs).sum(dim=-1) == budget
@@ -77,7 +89,11 @@ def select_pairs(old_q, legal, decisions, selection, seed, *, prior_budget=0):
     diagnostics = {}
     if selection in STRUCTURES:
         # A strictly oriented pair set has full closure iff it contains every adjacent edge.
-        diagnostics["complete_order_states"] = int((valid & ~(adjacent & ~selected).any(dim=-1)).sum())
+        diagnostics["complete_order_states"] = int((valid & ~(all_adjacent & ~selected).any(dim=-1)).sum())
+        diagnostics["ordering_edges"] = int((all_adjacent & valid[..., None]).sum())
+        diagnostics["selected_ordering_edges"] = int((all_adjacent & selected).sum())
+        diagnostics["gap_eligible_pairs"] = int((filtered & valid[..., None]).sum())
+        diagnostics["gap_filtered_pairs"] = int(((eligible & ~filtered) & valid[..., None]).sum())
     else:
         diagnostics["budget_mismatch_states"] = int((valid & (selected.sum(dim=-1) != budget)).sum())
     return selected, valid, counts, diagnostics
@@ -94,7 +110,11 @@ def pair_statistics(decisions, valid, pairs, candidates, eligible, top_pairs):
 
 def ablation_statistics(summary):
     stats = ranking_statistics(summary[:7])
-    stats.update(pair_statistics(summary[3], summary[1], summary[2], *summary[7:]))
+    stats.update(pair_statistics(summary[3], summary[1], summary[2], *summary[7:10]))
+    if len(summary) >= 13:
+        stats.update(kendall_tau_a=summary[10] if summary[1] else None,
+                     mean_normalized_regret=summary[11] if summary[1] else None,
+                     selected_top1_retention=summary[12] if summary[1] else None)
     return stats
 
 
@@ -111,7 +131,19 @@ def ablation_loss(current_q, old_q, legal, decisions, settings, selected, counts
     direction = (old_q[..., left] - old_q[..., right]).sign()
     state_loss, pair_counts = pair_state_loss(-direction * current_gap, selected, settings["temperature"], (-1,))
     loss, count, summary = summarize(state_loss, pair_counts, current_q, legal, decisions, best, confidence)
-    return loss, count, th.cat((summary, counts.sum(dim=tuple(range(counts.ndim - 1)))))
+    with th.no_grad():
+        active = selected.any(dim=-1)
+        all_pairs = legal[..., left] & legal[..., right] & (direction != 0)
+        agreement = direction * current_gap.detach().sign()
+        tau = agreement.masked_fill(~all_pairs, 0).sum(dim=-1) / all_pairs.sum(dim=-1).clamp_min(1)
+        greedy = current_q.detach().masked_fill(~legal, -th.inf).argmax(dim=-1)
+        old_best = old_q.gather(-1, best).squeeze(-1)
+        regret = (old_best - old_q.gather(-1, greedy.unsqueeze(-1)).squeeze(-1)) / scale.squeeze(-1)
+        active_count = active.sum().clamp_min(1)
+        diagnostics = th.stack((tau.masked_fill(~active, 0).sum() / active_count,
+                                regret.masked_fill(~active, 0).sum() / active_count,
+                                ((greedy == best.squeeze(-1)) & active).sum() / active_count))
+    return loss, count, th.cat((summary, counts.sum(dim=tuple(range(counts.ndim - 1))), diagnostics))
 
 
 class PairAblationPreference(ActionSetPreference):
@@ -133,7 +165,8 @@ class PairAblationPreference(ActionSetPreference):
         legal, decisions = decision_masks(batch)
         selected, valid, counts, audit = select_pairs(
             batch["old_q_values"][:, :-1], legal, decisions, self.selection, self.settings["pair_seed"],
-            prior_budget=prior_budget)
+            prior_budget=prior_budget, min_gap=self.settings["min_gap"],
+            q_scale_floor=self.settings["q_scale_floor"])
         prepared = []
         valid_hash = hashlib.sha256()
         mask_hash = hashlib.sha256()
@@ -145,6 +178,15 @@ class PairAblationPreference(ActionSetPreference):
             prepared.append(dict(episode, pair_mask=mask, pair_counts=pair_counts[:length].clone()))
         stats = pair_statistics(int(decisions.sum()), int(valid.sum()), int(selected.sum()),
                                 *counts.flatten(0, -2).sum(dim=0).tolist())
+        if self.selection in STRUCTURES:
+            audit["ordering_edge_coverage"] = (audit["selected_ordering_edges"] / audit["ordering_edges"]
+                                                if audit["ordering_edges"] else None)
+            audit["complete_order_coverage"] = (audit["complete_order_states"] / stats["valid_states"]
+                                                 if stats["valid_states"] else None)
+            audit["gap_filter_rate"] = (audit["gap_filtered_pairs"] / stats["eligible_pairs"]
+                                        if stats["eligible_pairs"] else None)
+            audit["pair_coverage"] = (stats["valid_pairs"] / stats["eligible_pairs"]
+                                      if stats["eligible_pairs"] else None)
         return prepared, dict(stats, **audit, episodes=len(episodes),
                               valid_state_sha256=valid_hash.hexdigest(), pair_mask_sha256=mask_hash.hexdigest())
 
