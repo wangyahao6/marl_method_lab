@@ -1,0 +1,173 @@
+{
+  "protocol": {
+    "id": "szc_vdn64_tkpr_k1_shared",
+    "tasks": {
+      "stalker": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "zealot": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "colossus": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      }
+    },
+    "stages": [
+      {
+        "task": "stalker",
+        "steps": 2000000
+      },
+      {
+        "task": "zealot",
+        "steps": 2000000
+      },
+      {
+        "task": "colossus",
+        "steps": 2000000
+      }
+    ],
+    "phase_boundary": "cumulative",
+    "epsilon_on_switch": "per_task",
+    "evaluation": {
+      "seeds": [
+        91001,
+        91002
+      ],
+      "episodes_per_seed": 16,
+      "interval": 25000,
+      "focus_seeds": [
+        91101,
+        91102,
+        91103,
+        91104
+      ],
+      "focus_episodes_per_seed": 32,
+      "task_seed_stride": 100
+    },
+    "replay_on_switch": "ft",
+    "sc2_game_version": "4.10",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {
+        "stalker": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "zealot": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "colossus": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ]
+      },
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "gradient_monitor_interval": 100,
+    "topk_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1,
+      "k": 1
+    },
+    "top1_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1
+    },
+    "topk_preference_weighted": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1,
+      "k": 1
+    },
+    "topk_preference_high_regret": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1,
+      "k": 1,
+      "hr_threshold": 0.5,
+      "hr_weight": 1.0,
+      "hr_temperature": 1.0
+    },
+    "rank_position_diagnostics": true,
+    "algorithm": "vdn",
+    "method": "tkpr_r2",
+    "tkpr_r2": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1
+    }
+  },
+  "launch_git_commit": "c5f86109747c3c6206b68f273ccc40fa48a79498",
+  "source_sha256": {
+    "src/learners/ranking_preference.py": "05e28cd79bbac2edd676124a9c3596022153d920d315807e6d6fdb851d55a015",
+    "drivers/continual/action_set_train.py": "d1884e4d88ec6be73524ade92fdc31f2332716980d0eacaae8b9e7da9c2b4569",
+    "drivers/continual/action_set_protocol.py": "bffc9b5ff0012e78fdf61ad3e38d599dab62ecf59033f2a8497d3442e828da1f"
+  },
+  "branch_restore": {
+    "parent": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+    "checkpoint": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/models/phase0000_2000032",
+    "role": "shared-branch",
+    "preference_weight": 1.0,
+    "t_env": 2000032,
+    "episode": 36050,
+    "updates": 36019,
+    "last_target_update_episode": 36000,
+    "model_hash": "0eca2259c1cd41acc273b570079fdb5293f1b5cfcd91ce8e593daf2e97328d57",
+    "parent_model_hash": "0eca2259c1cd41acc273b570079fdb5293f1b5cfcd91ce8e593daf2e97328d57",
+    "archived_parent_model_hash": "5b384e469fe3ce6395048ba8300a15beef62e1c9e2f736370d44db70c478ed74",
+    "engine": "new SC2 process, distribution RNG restored"
+  }
+}

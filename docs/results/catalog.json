@@ -340,6 +340,52 @@
       ]
     },
     {
+      "id": "szc-vdn64-tkpr-rank-position",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-tkpr-rank-position/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-tkpr-rank-position/runs.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-tkpr-rank-position/evaluations.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-tkpr-rank-position/stage_metrics.csv",
+        "learning_curves": "parameter-ablations/szc-vdn64-tkpr-rank-position/learning_curves.csv",
+        "paired_metrics": "parameter-ablations/szc-vdn64-tkpr-rank-position/paired_metrics.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-tkpr-rank-position/preference_diagnostics.csv",
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-tkpr-rank-position/gradient_diagnostics.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_with_historical_control",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "inherited_parent_phase": 0,
+        "in_batch_methods": [
+          "TKPR-R2",
+          "TKPR-R3"
+        ],
+        "historical_control": "TKPR-K1",
+        "matched_contrasts": {
+          "file": "paired_metrics",
+          "control_join_key": "control_run_id"
+        }
+      },
+      "interpretation_limits": [
+        "本批 TKPR-K1 两条运行在 Z 阶段因 SC2 连接故障失败；本批完整终点仅 R2/R3 四条。",
+        "历史 TKPR-K1 与同 seed 的 R2/R3 使用同一 S 父运行，但启动提交不同（2c761c4 对 c5f8610），不是本批同版本对照。",
+        "R2/R3 的有效动作对数量和状态覆盖率随锚点改变；C 阶段各分支的 Z 历史池也可能不同。"
+      ]
+    },
+    {
       "id": "szc-vdn64-pair-structure-ratio",
       "category": "parameter-ablations",
       "report": "parameter-ablations/szc-vdn64-pair-structure-ratio/README.md",

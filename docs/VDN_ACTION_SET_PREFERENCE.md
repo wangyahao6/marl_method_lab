@@ -292,3 +292,6 @@ SZC 双层 VDN64 采用 2M/2M/2M 累计预算、逐任务 ε 和 FT，seed 2222�
 ```sh
 .venv/bin/python scripts/plan_tkpr_rank_positions.py szc_tkpr_rank_position_20261120
 ```
+
+本批 R2/R3 四条分支完成，重跑的两条 K1 在 Z 阶段遭遇 SC2 连接故障；
+逐种子结果与历史 K1 参照见[排名位置消融报告](results/parameter-ablations/szc-vdn64-tkpr-rank-position/README.md)。
