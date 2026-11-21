@@ -749,7 +749,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 save_fork_state()
         if role in ("prefix", "shared-prefix"):
             save_fork_state()
-        if aspr_group:
+        if aspr_group and preference is not None:
             export_group_results(out, preference.history, augmented, groups,
                                  protocol[method]["group_count"], method)
         status("completed")

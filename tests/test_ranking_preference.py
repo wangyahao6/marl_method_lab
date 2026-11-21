@@ -741,11 +741,24 @@ class RankingTest(unittest.TestCase):
                     if method == "aspr_preference":
                         self.assertTrue(th.equal(old["good_mask"], new["good_mask"]))
                         self.assertEqual(pool["delta"], original["delta"])
+                    elif method in ASPR_GROUP_DEFAULTS:
+                        self.assertEqual(new["group_ids"].shape, new["data"]["avail_actions"].shape)
+                        self.assertTrue((new["group_ids"][-1] == -1).all())
                     else:
                         self.assertNotIn("good_mask", new)
                     self.assertNotIn("old_q_values", old["data"])
                     self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
                 samples = jsonlines(run / f"{method}_updates.jsonl")
+                if method in ASPR_GROUP_DEFAULTS:
+                    restored = PreferenceHistory()
+                    restored.restore_success(run, [0], require_old_q=True, require_group=True)
+                    th.testing.assert_close(restored[0]["episodes"][0]["group_ids"],
+                                            pool["episodes"][0]["group_ids"])
+                    for name in ("aspr_group_summary.csv", "aspr_group_distribution.csv",
+                                 "aspr_group_training_sampled.csv"):
+                        self.assertTrue((run / name).is_file())
+                    self.assertTrue(all("group_size_distribution" in historical
+                                        for row in samples for historical in row["historical_tasks"]))
                 if method == "aspr_preference":
                     fields = {"candidate_pairs", "valid_pairs", "pair_keep_rate", "pair_violation_rate",
                               "average_good_set_size", "singleton_ratio", "all_action_ratio"}

@@ -34,7 +34,7 @@ def export_group_results(out, history, scheme, groups, group_count, method):
     write_csv(out / "aspr_group_distribution.csv", distribution, distribution_fields)
 
     sampled = defaultdict(lambda: dict(sampled_episodes=0, decision_states=0, legal_actions=0,
-                                       action_count=0, empty_states=0, candidate_pairs=0,
+                                       action_count=0, empty_states=0, candidate_pairs=0, eligible_pairs=0,
                                        valid_pairs=0, pair_violations=0, distribution=defaultdict(int)))
     log = out / f"{method}_updates.jsonl"
     if log.exists():
@@ -48,6 +48,7 @@ def export_group_results(out, history, scheme, groups, group_count, method):
                     row["decision_states"] += task["group_decision_states"]
                     row["legal_actions"] += task["group_legal_actions"]
                     row["candidate_pairs"] += task["candidate_pairs"]
+                    row["eligible_pairs"] += task["eligible_pairs"]
                     row["valid_pairs"] += task["valid_pairs"]
                     row["pair_violations"] += task["pair_violations"]
                     for size, count in histogram.items():
@@ -58,7 +59,8 @@ def export_group_results(out, history, scheme, groups, group_count, method):
     for key, values in sorted(sampled.items()):
         phase, training_task, source_phase, historical_task, group = key
         states, legal = values["decision_states"], values["legal_actions"]
-        candidates, valid = values["candidate_pairs"], values["valid_pairs"]
+        candidates, eligible, valid = (values["candidate_pairs"], values["eligible_pairs"],
+                                       values["valid_pairs"])
         for size, count in sorted(values["distribution"].items(), key=lambda item: int(item[0])):
             rows.append(dict(training_phase=phase, training_task=training_task,
                              source_phase=source_phase, historical_task=historical_task, group=group,
@@ -67,10 +69,11 @@ def export_group_results(out, history, scheme, groups, group_count, method):
                              action_ratio=values["action_count"] / legal if legal else None,
                              empty_ratio=values["empty_states"] / states if states else None,
                              group_size=size, state_count=count, candidate_pairs=candidates,
-                             valid_pairs=valid, pair_keep_rate=valid / candidates if candidates else None,
+                             eligible_pairs=eligible, valid_pairs=valid,
+                             pair_keep_rate=valid / eligible if eligible else None,
                              pair_violation_rate=values["pair_violations"] / valid if valid else None))
     fields = ("training_phase", "training_task", "source_phase", "historical_task", "group",
               "sampled_episodes", "decision_states", "mean_actions", "action_ratio", "empty_ratio",
-              "group_size", "state_count", "candidate_pairs", "valid_pairs", "pair_keep_rate",
+              "group_size", "state_count", "candidate_pairs", "eligible_pairs", "valid_pairs", "pair_keep_rate",
               "pair_violation_rate")
     write_csv(out / "aspr_group_training_sampled.csv", rows, fields)
