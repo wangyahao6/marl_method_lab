@@ -435,6 +435,48 @@
       "pair_gap_analysis_report": "parameter-ablations/szc-vdn64-pair-structure-ratio/pair-gap-analysis/README.md"
     },
     {
+      "id": "szc-vdn64-pair-structure-gap05",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-pair-structure-gap05/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-pair-structure-gap05/runs.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-pair-structure-gap05/evaluations.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-pair-structure-gap05/stage_metrics.csv",
+        "learning_curves": "parameter-ablations/szc-vdn64-pair-structure-gap05/learning_curves.csv",
+        "pool_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-gap05/pool_diagnostics.csv",
+        "closure_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-gap05/closure_diagnostics.csv",
+        "update_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-gap05/update_diagnostics.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-gap05/preference_diagnostics.csv",
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-structure-gap05/gradient_diagnostics.csv",
+        "paired_old_gap0": "parameter-ablations/szc-vdn64-pair-structure-gap05/paired_old_gap0.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_cross_version_descriptive",
+        "match_on": [
+          "seed"
+        ],
+        "inherited_parent_phase": 0,
+        "matched_contrasts": {
+          "file": "paired_old_gap0",
+          "control_join_key": "old_run_id"
+        }
+      },
+      "interpretation_limits": [
+        "仅 seed 3535；8 个本批任务均从 f63cbe1 完成，共用相同 S 末模型和 S/Z 历史池。",
+        "上一批 min_gap=0 的七个结构分支实际从 c6b7002 启动，旧实现只排除旧 Q 相等动作对。两批参考历史池逐元素相同，但结构组选对代码与部分驱动源码不同。",
+        "0.5 筛选同时改变共同有效状态集合、各组实际动作对数量与 Top-1 比例；与旧批次的终点差值是描述性跨版本对照，不是严格单变量因果估计。"
+      ]
+    },
+    {
       "id": "szc-vdn64-greedy-action-agreement",
       "category": "behavioral-analysis",
       "report": "behavioral-analysis/szc-vdn64-greedy-action-agreement/README.md",

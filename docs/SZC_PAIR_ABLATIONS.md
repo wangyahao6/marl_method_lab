@@ -4,6 +4,7 @@
 
 独立批次 `szc_pair_structure_gap05_3535_20261121` 使用
 [`pair_structure_gap05` 协议](../configs/continual/action_preference/pair_structure_gap05/szc_vdn64_pair_structure_gap05_1m.json)。
+8/8 个任务已完成；实际筛选、传递闭包和与第一版的对照见[结果报告](results/parameter-ablations/szc-vdn64-pair-structure-gap05/README.md)。
 七个结构组沿用下表的 CLI 方法名，参考线和分支共用 S 末模型、优化器、随机状态及 S、Z 历史池。
 训练、评估和历史池参数复制自第一版结构协议，只将七组的 `min_gap` 设为 0.5。
 

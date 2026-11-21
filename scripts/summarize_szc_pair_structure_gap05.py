@@ -1,6 +1,7 @@
 """Export verified SZC pair-structure gap-0.5 results from finished scheduler runs."""
 import csv
 import json
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -8,15 +9,15 @@ from statistics import mean
 
 from summarize_szc_tkpr_k1_shared import gradient_rows, records, stage_rows
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+ROOT = Path(os.environ.get("MARL_REPO_ROOT", Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(ROOT / "src"))
 import torch as th
 from learners.pair_ablation import select_pairs
 
 
-ROOT = Path(__file__).resolve().parents[1]
 BATCH = "szc_pair_structure_gap05_3535_20261121"
 RUNS = ROOT / "runs" / "pair_structure_gap05"
-OUT = ROOT / "docs/results/parameter-ablations/szc-vdn64-pair-structure-gap05"
+OUT = Path(os.environ.get("SZC_GAP05_OUT", ROOT / "docs/results/parameter-ablations/szc-vdn64-pair-structure-gap05"))
 OLD = ROOT / "docs/results/parameter-ablations/szc-vdn64-pair-structure-ratio"
 NAMES = {
     "k1": "TKPR-K1", "adjacent": "Adjacent", "k1_adjacent": "TKPR-K1 + Adjacent",
@@ -196,7 +197,11 @@ def main():
             if summary.get("pair_seed") != 3535 or not summary.get("pair_mask_sha256"):
                 raise ValueError("missing fixed pair mask: " + run_id)
             pools.append(dict(identity, source_phase=phase,
-                              historical_task=("stalker", "zealot")[phase], **summary))
+                              historical_task=("stalker", "zealot")[phase], **summary,
+                              post_gap_pair_coverage=ratio(summary["valid_pairs"], summary["gap_eligible_pairs"]),
+                              post_gap_compression_rate=(1 - ratio(summary["valid_pairs"],
+                                                                   summary["gap_eligible_pairs"])
+                                                         if summary["gap_eligible_pairs"] else None)))
         grouped = defaultdict(list)
         history = defaultdict(list)
         for row in records(path / (run_id[len(BATCH)+1:] + "_updates.jsonl")):

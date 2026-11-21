@@ -1,0 +1,15 @@
+run_id,method,source_phase,historical_task,valid_states,strict_pairs,closure_pairs,complete_order_states,closure_coverage,complete_order_coverage
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1,TKPR-K1,0,stalker,13006,290893,69832,0,0.24006077836180315,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_adjacent,Adjacent,0,stalker,13006,290893,21028,0,0.07228774841608426,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,0,stalker,13006,290893,82499,0,0.28360599945684495,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_frpr,FRPR,0,stalker,13006,290893,189506,0,0.6514629090421564,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_n_minus_1,Random-N-1,0,stalker,13006,290893,90864,0,0.31236227753847634,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3,Random-(2N-3),0,stalker,13006,290893,157408,0,0.5411199306961666,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,0,stalker,13006,290893,81972,0,0.2817943367492514,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1,TKPR-K1,1,zealot,12283,242457,63819,0,0.2632178076937354,0.0
+szc_pair_structure_gap05_3535_20261121_pair_structure_adjacent,Adjacent,1,zealot,12283,242457,24660,37,0.10170875660426384,0.0030122934136611575
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,1,zealot,12283,242457,78490,37,0.3237275063207084,0.0030122934136611575
+szc_pair_structure_gap05_3535_20261121_pair_structure_frpr,FRPR,1,zealot,12283,242457,163558,37,0.6745855966212565,0.0030122934136611575
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_n_minus_1,Random-N-1,1,zealot,12283,242457,80987,2,0.33402623970435996,0.00016282667100871122
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3,Random-(2N-3),1,zealot,12283,242457,138186,12,0.569940236825499,0.0009769600260522674
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,1,zealot,12283,242457,77500,8,0.31964430806287303,0.0006513066840348449

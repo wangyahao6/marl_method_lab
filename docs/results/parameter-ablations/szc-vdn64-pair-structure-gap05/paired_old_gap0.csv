@@ -1,0 +1,15 @@
+run_id,method,phase,old_run_id,stalker_win_pct_delta,zealot_win_pct_delta,colossus_win_pct_delta,acc_pct_delta,bwt_pp_delta,fwt_pp_delta,learning_auc_pct_delta
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1,TKPR-K1,1,szc_pair_matched_3535_20261119_pair_structure_k1,-4.6875,-0.78125,,-2.734375,-4.6875,0.0,10.614114315102228
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1,TKPR-K1,2,szc_pair_matched_3535_20261119_pair_structure_k1,4.6875,-4.6875,-5.46875,-1.8229166666666714,0.390625,2.734375,4.616919137666983
+szc_pair_structure_gap05_3535_20261121_pair_structure_adjacent,Adjacent,1,szc_pair_matched_3535_20261119_pair_structure_adjacent,4.6875,25.0,,14.84375,4.6875,0.0,14.294853988421416
+szc_pair_structure_gap05_3535_20261121_pair_structure_adjacent,Adjacent,2,szc_pair_matched_3535_20261119_pair_structure_adjacent,-7.03125,0.78125,7.8125,0.5208333333333286,-15.625,-1.953125,7.4000250627306805
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,1,szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,4.6875,6.25,,5.46875,4.6875,0.0,8.906809320453412
+szc_pair_structure_gap05_3535_20261121_pair_structure_k1_adjacent,TKPR-K1 + Adjacent,2,szc_pair_matched_3535_20261119_pair_structure_k1_adjacent,-5.46875,5.46875,11.71875,3.90625,-3.125,2.734375,12.682141751993864
+szc_pair_structure_gap05_3535_20261121_pair_structure_frpr,FRPR,1,szc_pair_matched_3535_20261119_pair_structure_frpr,-4.6875,1.5625,,-1.5625,-4.6875,0.0,5.48521632950218
+szc_pair_structure_gap05_3535_20261121_pair_structure_frpr,FRPR,2,szc_pair_matched_3535_20261119_pair_structure_frpr,0.78125,-1.5625,10.9375,3.3854166666666714,-1.171875,3.90625,1.541989932524281
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_n_minus_1,Random-N-1,1,szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,-0.78125,9.375,,4.296875,-0.78125,0.0,11.916105822519242
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_n_minus_1,Random-N-1,2,szc_pair_matched_3535_20261119_pair_structure_random_n_minus_1,11.71875,3.90625,11.71875,9.114583333333329,3.125,1.5625,-0.2841566599972225
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3,Random-(2N-3),1,szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,3.125,14.84375,,8.984375,3.125,0.0,3.312432068230528
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3,Random-(2N-3),2,szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3,2.34375,-7.03125,5.46875,0.2604166666666643,-9.765625,0.0,11.009116524026854
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,1,szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,-3.125,-5.46875,,-4.296875,-3.125,0.0,8.448757934148716
+szc_pair_structure_gap05_3535_20261121_pair_structure_random_2n_minus_3_matched,Random-(2N-3)-Matched,2,szc_pair_matched_3535_20261119_pair_structure_random_2n_minus_3_matched,-5.46875,0.78125,13.28125,2.8645833333333357,0.390625,6.25,7.079483442529856
