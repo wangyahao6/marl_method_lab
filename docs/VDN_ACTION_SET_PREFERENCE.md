@@ -63,6 +63,12 @@ ASPR 枚举每个 Good 动作与每个合法 Bad 动作的配对。合法旧 Q �
 
 ASPR 先平均状态内保留的动作对。两版均对任务内有效状态求平均，再对本次含有效状态的历史任务等权平均，最后使用 `TD_loss + weight * preference_loss` 一次反传。历史数据作为偏好分支输入，当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
 
+### ASPR-3G 与 ASPR-4G
+
+`aspr_3g_preference` 和 `aspr_4g_preference` 是独立多组分支，二组 `aspr_preference` 的 Good/Bad 标签及损失路径保持不变。每个有效决策只取合法动作的旧 Q，用现有 `reference_scale()` 在状态内标准化；按 Q 从高到低排序后，把相同 Q 合成不可拆分的连续单元。确定性动态规划求一维 K-means 的最小组内平方误差，实际组数为 `min(group_count, 合法动作数, 不同 Q 数)`。组中心从高到低编号为 G1 到 G4；非法动作、无效决策和最终 bootstrap 位置标为 `group_ids=-1`。
+
+多组分支只枚举不同组的无序合法动作对，同组不约束。旧 Q 与新 Q 差距仍按同一个旧策略尺度归一化，经 `min_gap=0.5` 过滤后复用 ASPR/FRPR 的 Softplus、温度、状态内平均、历史任务等权聚合和 TD 联合更新。历史 `success.th` 保存与 `old_q_values`、`avail_actions` 同形状的 `group_ids`；从 TKPR-K1 共享 S 前缀分支时，只在新分支目录用父池旧 Q 生成标签，不修改父运行。`aspr_group_summary.csv` 与 `aspr_group_distribution.csv` 记录已存轨迹的组大小及空组分布；`aspr_group_training_sampled.csv` 按训练阶段、历史任务汇总实际抽取轨迹，重复抽取重复计数，并记录跨组候选/有效动作对和违反率。
+
 ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`。逐更新汇总与各历史任务均记录候选与有效对数、保留比例、违反比例、平均 Good 集合大小、单元素比例、全合法动作比例。保留比例以非平局候选对为分母，违反比例以有效对为分母，新 Q 打平计为违反。ASPR-Max 写入 `aspr_max_preference_updates.jsonl` 和 `aspr_max_preference_probes.jsonl`，保留原 hinge 统计。旧别名同时写原 `action_set_updates.jsonl` 和 `action_set_probes.jsonl`，供历史读取器使用。常规训练指标沿用 `metrics.jsonl`。
 
 ## 代码位置与验证

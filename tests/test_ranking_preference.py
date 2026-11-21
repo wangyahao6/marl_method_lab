@@ -16,6 +16,7 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import (
+    ASPR_GROUP_DEFAULTS,
     FRPR_RAW_DEFAULTS, FRPR_RAW_LOSS_DEFAULTS, FRPR_UNFILTERED_DEFAULTS,
     RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
     TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
@@ -37,6 +38,7 @@ from learners.ranking_preference import (
 
 
 METHOD_DEFAULTS = {
+    **ASPR_GROUP_DEFAULTS,
     "full_rank_preference_relu": RANK_RELU_DEFAULTS,
     "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
     "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
@@ -920,6 +922,8 @@ class RankingTest(unittest.TestCase):
             good, _ = make_good_mask(batch, batch["old_q_values"][:, :-1], 0)
             for ep, mask in zip(episodes, good):
                 ep["good_mask"] = mask[:ep["length"] + 1]
+            for ep in episodes:
+                ep["group_ids"] = driver.label_group_memory([ep], scheme, groups, 4, .1)[0]["group_ids"]
             for method in RANK_METHODS:
                 defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
                 settings = dict(defaults)
