@@ -4,6 +4,7 @@ Example: PYTHONPATH=src python -m single_agent.train --method DQN-TKPR-K1
 """
 
 import argparse
+from collections import deque
 import copy
 from datetime import datetime
 import json
@@ -75,12 +76,17 @@ def run(config, method, seed, output, steps_per_task=None):
     (output / "config.json").write_text(json.dumps(dict(config, method=method, seed=seed,
         steps_per_task=steps_per_task or config["steps_per_task"]), indent=2) + "\n")
     report = []
+    progress_path = output / "progress.jsonl"
+    episodes_path = output / "episodes.jsonl"
     for task_index, task in enumerate(GOALS):
         if task_index:
             learner.switch_task()
         env = GoalMountainCar(task)
         budget = steps_per_task or config["steps_per_task"]
         completed = successes = preference_updates = 0
+        episode_length = 0
+        recent_successes = deque(maxlen=100)
+        latest_update = None
         observation, _ = env.reset(seed=seed + task_index * 10000)
         try:
             for step in range(budget):
@@ -88,13 +94,29 @@ def run(config, method, seed, output, steps_per_task=None):
                 next_observation, reward, terminated, truncated, _ = env.step(action)
                 learner.observe(observation, action, reward, next_observation, terminated, truncated)
                 result = learner.update(memory)
+                if result is not None:
+                    latest_update = result
                 if result and result["preference_loss"] != 0:
                     preference_updates += 1
+                episode_length += 1
                 observation = next_observation
                 if terminated or truncated:
                     completed += 1
                     successes += int(terminated)
+                    recent_successes.append(int(terminated))
+                    with episodes_path.open("a") as stream:
+                        stream.write(json.dumps(dict(task=task, method=method, task_step=step + 1,
+                            episode=completed, length=episode_length, return_=-episode_length,
+                            success=bool(terminated))) + "\n")
+                    episode_length = 0
                     observation, _ = env.reset(seed=seed + task_index * 10000 + completed)
+                if (step + 1) % config.get("progress_interval", 10000) == 0 or step + 1 == budget:
+                    with progress_path.open("a") as stream:
+                        stream.write(json.dumps(dict(task=task, method=method, task_step=step + 1,
+                            environment_steps=learner.steps, episodes=completed, successes=successes,
+                            recent_100_success_rate=(sum(recent_successes) / len(recent_successes)
+                                                     if recent_successes else None),
+                            preference_updates=preference_updates, latest_update=latest_update)) + "\n")
         finally:
             env.close()
         torch.save({"online": learner.online.state_dict(), "target": learner.target.state_dict(),

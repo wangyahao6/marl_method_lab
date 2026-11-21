@@ -11,6 +11,7 @@ import torch
 
 from learners.ranking_preference import topk_preference_weighted
 from single_agent.dqn import DQNLearner
+from single_agent.evaluate import evaluate
 from single_agent.memory import PreferenceMemory
 from single_agent.mountaincar import GOALS, GoalMountainCar
 from single_agent.preference import frpr_loss, preference_loss
@@ -140,6 +141,10 @@ class SingleAgentTKPRTest(unittest.TestCase):
             self.assertTrue(all((output / f"{task}_preference_memory.pt").exists() for task in GOALS))
             self.assertTrue((output / "source.tar.gz").exists())
             self.assertTrue((output / "git_revision.txt").exists())
+            self.assertEqual(len((output / "progress.jsonl").read_text().splitlines()), 3)
+            rows = evaluate(output, episodes=1)
+            self.assertEqual(len(rows), 9)
+            self.assertTrue((output / "evaluations.json").exists())
 
 
 if __name__ == "__main__":
