@@ -138,12 +138,6 @@
     "hr_weight": 1.0,
     "hr_temperature": 1.0
   },
-  "aspr_preference": {
-    "weight": 1.0,
-    "temperature": 1.0,
-    "min_gap": 0.5,
-    "q_scale_floor": 0.1
-  },
   "optimizer": "rmsprop",
   "aspr_3g_preference": {
     "weight": 1.0,
