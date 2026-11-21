@@ -164,6 +164,8 @@ class ActionSetPreference:
             rows.append(dict(task=pool["task"], source_phase=pool["phase"],
                              pool_size=len(pool["episodes"]), episode_ids=episode_ids,
                              sampled_episodes=len(episode_ids)))
+            if hasattr(self, "sample_diagnostics"):
+                rows[-1].update(self.sample_diagnostics(episodes))
             summaries.append(summary)
             losses.append(loss)
             valid_counts.append(count)

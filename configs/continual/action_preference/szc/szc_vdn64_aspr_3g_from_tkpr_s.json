@@ -1,0 +1,155 @@
+{
+  "id": "szc_vdn64_tkpr_k1_shared",
+  "tasks": {
+    "stalker": {
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "zealot": {
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "colossus": {
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    }
+  },
+  "stages": [
+    {
+      "task": "stalker",
+      "steps": 2000000
+    },
+    {
+      "task": "zealot",
+      "steps": 2000000
+    },
+    {
+      "task": "colossus",
+      "steps": 2000000
+    }
+  ],
+  "phase_boundary": "cumulative",
+  "epsilon_on_switch": "per_task",
+  "evaluation": {
+    "seeds": [
+      91001,
+      91002
+    ],
+    "episodes_per_seed": 16,
+    "focus_seeds": [
+      91101,
+      91102,
+      91103,
+      91104
+    ],
+    "focus_episodes_per_seed": 32,
+    "task_seed_stride": 100,
+    "interval": 25000
+  },
+  "replay_on_switch": "ft",
+  "sc2_game_version": "4.10",
+  "action_set": {
+    "weight": 1.0,
+    "margin": 0.0,
+    "batch_episodes": 8,
+    "success_episodes": 100,
+    "seed_offsets": [
+      301001,
+      302001,
+      303001,
+      304001
+    ],
+    "attempts_per_seed": 125,
+    "second_gap_quantile": 0.5,
+    "probe_episodes_per_seed": 4,
+    "delta_candidates_by_task": {
+      "stalker": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "zealot": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ],
+      "colossus": [
+        0,
+        0.01,
+        0.05,
+        0.1
+      ]
+    }
+  },
+  "gradient_monitor_interval": 100,
+  "topk_preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "k": 1
+  },
+  "top1_preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "topk_preference_weighted": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "k": 1
+  },
+  "topk_preference_high_regret": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "k": 1,
+    "hr_threshold": 0.5,
+    "hr_weight": 1.0,
+    "hr_temperature": 1.0
+  },
+  "aspr_preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "optimizer": "rmsprop",
+  "aspr_3g_preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "group_count": 3
+  }
+}

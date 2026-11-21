@@ -27,6 +27,7 @@ from drivers.continual.memory import PreferenceHistory
 from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
     RankingPreference, aggregate_pair_filter_statistics, aspr_preference, aspr_statistics,
+    aspr_group_preference, aspr_group_statistics, group_old_q,
     full_rank_preference, full_rank_preference_raw,
     full_rank_preference_raw_loss, full_rank_preference_relu,
     full_rank_preference_unfiltered, full_rank_statistics, pair_filter_statistics, top1_max_preference,
@@ -49,6 +50,48 @@ METHOD_DEFAULTS = {
 
 
 class RankingTest(unittest.TestCase):
+    def test_aspr_grouping_exact_ties_and_cross_group_loss(self):
+        old = th.tensor([[10., 10., 9.9, 5., 5., 0., -100.]])
+        legal = th.tensor([[True] * 6 + [False]])
+        decision = th.tensor([True])
+        groups = group_old_q(old, legal, decision, 4, .1)
+        self.assertEqual(groups.tolist(), [[0, 0, 1, 2, 2, 3, -1]])
+        th.testing.assert_close(groups, group_old_q(old, legal, decision, 4, .1))
+        self.assertEqual(group_old_q(old, legal, decision, 3, .1)[0, 0].item(), 0)
+        self.assertEqual(group_old_q(old, legal, decision, 3, .1)[0, 1].item(), 0)
+        for k in (3, 4):
+            ids = group_old_q(old, legal, decision, k, .1)
+            current = th.tensor([[1., 2., 3., 4., 5., 6., 100.]], requires_grad=True)
+            settings = dict(RANK_DEFAULTS, group_count=k, min_gap=0)
+            loss, count, summary = aspr_group_preference(current, old, legal, decision,
+                                                         settings, group_ids=ids)
+            scale = old[0, :6].std(unbiased=False).clamp_min(.1)
+            pairs = [(a, b) for a in range(6) for b in range(a + 1, 6)
+                     if ids[0, a] != ids[0, b] and old[0, a] != old[0, b]]
+            expected = th.stack([softplus((current[0, b] - current[0, a]) / scale)
+                                 for a, b in pairs]).mean()
+            th.testing.assert_close(loss, expected)
+            th.testing.assert_close(th.autograd.grad(loss, current)[0],
+                                    th.autograd.grad(expected, current)[0])
+            self.assertEqual(count.item(), 1)
+            stats = aspr_group_statistics(summary.tolist())
+            self.assertEqual(stats["candidate_pairs"], len(pairs))
+            self.assertEqual(stats["valid_pairs"], len(pairs))
+            self.assertFalse(current.grad)
+
+    def test_aspr_grouping_small_and_invalid_states(self):
+        old = th.tensor([[3., 3., 3., 99.], [1., 0., 0., 0.], [3., 2., 1., 0.]])
+        legal = th.tensor([[True, True, True, False], [True, False, False, False], [True] * 4])
+        decisions = th.tensor([True, True, False])
+        ids = group_old_q(old, legal, decisions, 4, .1)
+        self.assertEqual(ids.tolist(), [[0, 0, 0, -1], [0, -1, -1, -1], [-1] * 4])
+        current = old.clone().requires_grad_()
+        loss, count, summary = aspr_group_preference(current, old, legal, decisions,
+                                                     dict(RANK_DEFAULTS, group_count=4), group_ids=ids)
+        self.assertEqual(count.item(), 0)
+        self.assertEqual(loss.item(), 0)
+        self.assertEqual(aspr_group_statistics(summary.tolist())["candidate_pairs"], 0)
+
     def test_aspr_cross_group_softplus_and_filtering(self):
         # Interleave Good and Bad indices so both index orientations are exercised.
         old = th.tensor([[5., 0., 4., 1., 3., 100.]]).repeat(3, 1)
