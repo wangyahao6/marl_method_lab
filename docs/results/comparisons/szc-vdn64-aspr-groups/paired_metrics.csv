@@ -1,0 +1,13 @@
+run_id,control_run_id,method,control_method,seed,phase,training_task,same_s_prefix,acc_pct_delta,bwt_pp_delta,fwt_pp_delta,learning_auc_pct_delta
+szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed2222_attempt001,ASPR-3G,ASPR-2G,2222,1,zealot,True,0.390625,-2.34375,0.0,2.5195599176085324
+szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed2222_attempt001,ASPR-3G,ASPR-2G,2222,2,colossus,True,1.5625,4.6875,5.078125,-0.2648021372817766
+szc_vdn64_aspr_4g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed2222_attempt001,ASPR-4G,ASPR-2G,2222,1,zealot,True,-5.46875,1.5625,0.0,-2.6571743421076235
+szc_vdn64_aspr_4g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001,ASPR-4G,ASPR-3G,2222,1,zealot,True,-5.859375,3.90625,0.0,-5.176734259716156
+szc_vdn64_aspr_4g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed2222_attempt001,ASPR-4G,ASPR-2G,2222,2,colossus,True,-6.510416666666664,3.515625,0.390625,-4.7566272921636354
+szc_vdn64_aspr_4g_shared_20261121_seed2222_attempt001,szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001,ASPR-4G,ASPR-3G,2222,2,colossus,True,-8.072916666666664,-1.171875,-4.6875,-4.491825154881859
+szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed3535_attempt001,ASPR-3G,ASPR-2G,3535,1,zealot,True,1.5625,0.78125,0.0,-4.282162874979335
+szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed3535_attempt001,ASPR-3G,ASPR-2G,3535,2,colossus,True,-5.208333333333336,-1.171875,-1.5625,-4.257989120497889
+szc_vdn64_aspr_4g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed3535_attempt001,ASPR-4G,ASPR-2G,3535,1,zealot,True,0.78125,2.34375,0.0,0.6985590478846788
+szc_vdn64_aspr_4g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001,ASPR-4G,ASPR-3G,3535,1,zealot,True,-0.78125,1.5625,0.0,4.980721922864014
+szc_vdn64_aspr_4g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_adam_20261118_rmsprop_aspr_seed3535_attempt001,ASPR-4G,ASPR-2G,3535,2,colossus,True,0.2604166666666714,2.734375,-1.5625,-7.289756254079414
+szc_vdn64_aspr_4g_shared_20261121_seed3535_attempt001,szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001,ASPR-4G,ASPR-3G,3535,2,colossus,True,5.468750000000007,3.90625,0.0,-3.031767133581525
