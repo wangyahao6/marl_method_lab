@@ -15,6 +15,38 @@ from vdn_chi import reassess, save_probe_batch
 
 
 class MemoryTest(unittest.TestCase):
+    def test_tkpr_refresh_per_task_sampling_and_paired_q_retention(self):
+        history = PreferenceHistory()
+        for phase, task in enumerate(('S', 'Z', 'C', 'D')):
+            count = 3 if task == 'S' else 100
+            history[phase] = dict(task=task, phase=phase, episodes=[
+                dict(id=i, data=dict(old_q_values=th.full((2, 5, 11), float(i))),
+                     reference_phase=phase, reference_checkpoint=f'phase{phase}/agent.th')
+                for i in range(count)])
+        rng = np.random.default_rng(7)
+        sampled = history.sample_per_task('D', 8, rng)
+        self.assertEqual({pool['task']: len(ids) for pool, ids in sampled}, {'S': 8, 'Z': 8, 'C': 8})
+        self.assertEqual(len(set(sampled[0][1])), 3)
+        self.assertEqual(len(set(sampled[1][1])), 8)
+        self.assertEqual(sum(len(ids) for _, ids in history.sample('D', 8, rng)), 8)
+
+        new = [dict(id=100 + i, data=dict(old_q_values=th.full((2, 5, 11), float(100 + i))),
+                    reference_phase=4, reference_checkpoint='phase4/agent.th') for i in range(50)]
+        sample_state = rng.bit_generator.state
+        update = history.refresh('Z', new, 100, np.random.default_rng(11))
+        self.assertEqual(rng.bit_generator.state, sample_state)
+        self.assertEqual((update['old_count'], update['new_count'], update['replaced'], update['final_size']),
+                         (100, 50, 50, 100))
+        self.assertEqual(len(history), 4)
+        self.assertEqual(sum(ep['reference_phase'] == 1 for ep in history[1]['episodes']), 50)
+        self.assertEqual(sum(ep['reference_phase'] == 4 for ep in history[1]['episodes']), 50)
+        for ep in history[1]['episodes']:
+            self.assertTrue(th.equal(ep['data']['old_q_values'],
+                                     th.full((2, 5, 11), float(ep['id']))))
+        short = history.refresh('Z', new[:17], 100, np.random.default_rng(12))
+        self.assertEqual((short['replaced'], short['final_size']), (17, 100))
+        self.assertEqual(history.refresh('Z', [], 100, np.random.default_rng(13))['replaced'], 0)
+
     def test_restore_existing_preference_pools_and_sample_in_place(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

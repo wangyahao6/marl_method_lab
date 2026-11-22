@@ -137,6 +137,8 @@ class ActionSetPreference:
         self.update_started = perf_counter()
 
     def sample(self):
+        if "batch_episodes_per_task" in self.settings:
+            return self.history.sample_per_task(self.task, self.settings["batch_episodes_per_task"], self.rng)
         return self.history.sample(self.task, self.settings["batch_episodes"], self.rng)
 
     def task_loss(self, mac, pool, episodes):

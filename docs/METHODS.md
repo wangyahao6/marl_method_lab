@@ -35,7 +35,7 @@
 
 [方法与协议](VDN_ACTION_SET_PREFERENCE.md)使用历史成功轨迹约束当前 Agent 的局部 Q 排序，支持任意长度的 5v5 Protoss 任务序列。ASPR 使用 `--suite vdn_action_set --method aspr_preference`，对 Good × Bad 动作对应用 FRPR/TKPR 的归一化 Softplus。ASPR-Max 使用 `--method aspr_max_preference`，通过两组的最大 Q 计算 ReLU hinge，兼容旧标识 `action_set_preference`。同入口的 `--method baseline` 提供对照。[ASPR-Max 的 TS3 首次实验](TS3_ASPR_PROTOCOL.md)记录 seed 3535 的配置与诊断。
 
-同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。全排序可选 `--method full_rank_preference`（Softplus）、`--method full_rank_preference_unfiltered`（无间隔筛选的 Softplus）或 `--method full_rank_preference_relu`（无 margin 的 ReLU）。首选动作偏好可选 `--method top1_preference`（成对 Softplus）、`--method top1_max_preference`（最强竞争动作的平方 hinge）或 `--method top1_unfiltered_preference`（取消置信度硬筛选的加权 Softplus）。[TKPR](VDN_ACTION_SET_PREFERENCE.md#top-k-偏好回放tkpr) 使用 `--method topk_preference` 选择，由 K 限定参与 FRPR Softplus 的动作对。这些方法共用阶段末冻结 Agent 与历史胜局回放。[FRPR-Raw 与 FRPR-RawLoss](VDN_ACTION_SET_PREFERENCE.md#frpr-raw-与-frpr-rawloss) 分别移除全部 Q 值标准化和仅移除损失中的当前 Q 缩放。
+同一套 VDN 驱动也支持[完整动作排序与 Top-1 偏好保持](VDN_ACTION_SET_PREFERENCE.md#完整动作排序与-top-1-偏好保持)。全排序可选 `--method full_rank_preference`（Softplus）、`--method full_rank_preference_unfiltered`（无间隔筛选的 Softplus）或 `--method full_rank_preference_relu`（无 margin 的 ReLU）。首选动作偏好可选 `--method top1_preference`（成对 Softplus）、`--method top1_max_preference`（最强竞争动作的平方 hinge）或 `--method top1_unfiltered_preference`（取消置信度硬筛选的加权 Softplus）。[TKPR](VDN_ACTION_SET_PREFERENCE.md#top-k-偏好回放tkpr) 使用 `--method topk_preference` 选择，由 K 限定参与 FRPR Softplus 的动作对；`--method tkpr_refresh` 复用 TKPR-K1 损失，按历史任务分别采样并在阶段末刷新成功轨迹池。[FRPR-Raw 与 FRPR-RawLoss](VDN_ACTION_SET_PREFERENCE.md#frpr-raw-与-frpr-rawloss) 分别移除全部 Q 值标准化和仅移除损失中的当前 Q 缩放。
 
 ### Shapley 与随机筛选 FRPR
 

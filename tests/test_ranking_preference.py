@@ -46,6 +46,7 @@ METHOD_DEFAULTS = {
     "top1_max_preference": TOP1_MAX_DEFAULTS,
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
     "topk_preference": TOPK_DEFAULTS,
+    "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
     "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
     "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
 }
@@ -703,6 +704,8 @@ class RankingTest(unittest.TestCase):
                 run.mkdir()
                 active = "top1_preference" if method == "zero" else method
                 configured = copy.deepcopy(protocol)
+                if active == "tkpr_refresh":
+                    configured["action_set"]["refresh_success_episodes"] = 1
                 if active in RANK_METHODS:
                     configured[active] = dict(weight=0 if method == "zero" else 0.5)
                     defaults = METHOD_DEFAULTS.get(active, RANK_DEFAULTS)
@@ -731,7 +734,13 @@ class RankingTest(unittest.TestCase):
             for run in (aspr, max_run):
                 self.assertEqual([row["preference_loss"] for row in original_samples],
                                  [row["preference_loss"] for row in jsonlines(run / "aspr_max_preference_updates.jsonl")])
+            refreshed = th.load(out / "tkpr_refresh/action_set_memory/phase0000/success.th")
+            self.assertEqual(len(refreshed["episodes"]), 2)
+            self.assertEqual(sum(ep["reference_phase"] in (0, 1) for ep in refreshed["episodes"]), 1)
+            self.assertEqual(sum(ep["reference_phase"] == 2 for ep in refreshed["episodes"]), 1)
             for method in RANK_METHODS:
+                if method == "tkpr_refresh":
+                    continue
                 run = out / method
                 pool = th.load(run / "action_set_memory/phase0000/success.th")
                 self.assertEqual(len(original["episodes"]), len(pool["episodes"]))
@@ -916,6 +925,23 @@ class RankingTest(unittest.TestCase):
                 self.assertEqual(stored.dtype, th.float32)
                 self.assertFalse(stored.requires_grad)
                 self.assertTrue(th.equal(stored, th.stack([q for _, q in captured])))
+                cursor += size
+            self.assertEqual(cursor, len(observed))
+
+            observed.clear()
+            args.method = "tkpr_refresh"
+            refreshed = driver.collect_memory(args, spec, expected_layout, mac.agent.state_dict(),
+                                              checkpoint, "stalker", 1, settings, out,
+                                              target=2, persist=False)
+            self.assertNotIn("reference_checkpoint", refreshed)
+            self.assertEqual(len(refreshed["episodes"]), 2)
+            cursor = 0
+            for ep in refreshed["episodes"]:
+                self.assertEqual((ep["reference_phase"], ep["reference_checkpoint"]),
+                                 (1, "source_checkpoint/agent.th"))
+                size = ep["length"] + 1
+                self.assertTrue(th.equal(ep["data"]["old_q_values"],
+                                         th.stack([q for _, q in observed[cursor:cursor + size]])))
                 cursor += size
             self.assertEqual(cursor, len(observed))
 

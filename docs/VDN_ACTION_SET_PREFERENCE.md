@@ -93,7 +93,7 @@ ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`�
 
 - **T1PR 无阈值版（`top1_unfiltered_preference`）** 使用与第一版相同的成对 Softplus 和置信度权重 `c`。所有至少有两个合法动作且 `c > 0` 的有效决策都参与约束，包括低于第一版 `min_gap` 的决策。旧首选动作并列的决策仍被排除。每个历史任务另记 `mean_constrained_confidence`，即参与约束的决策的平均置信度，零有效状态时记 null。该指标也写入 `experiment_metrics.jsonl`。
 
-成对损失先对每个决策的动作对取均值。各方法再对历史任务内有约束的决策取均值，最后对本次采样中有约束的任务等权平均。历史项使用 `TD_loss + weight * preference_loss` 接入已有的一次反传。历史池的 `reference_checkpoint` 记录 Q 的来源。早期胜局池须离线补齐 `old_q_values` 才能用于新代码的继续约束分支。ASPR 继续使用集合标记、δ 校准与固定集合 probe。每次独立运行的历史池来自该次运行自己的阶段末模型，因此同一采集协议下的实际轨迹可能随训练分化。
+成对损失先对每个决策的动作对取均值。各方法再对历史任务内有约束的决策取均值，最后对本次采样中有约束的任务等权平均。历史项使用 `TD_loss + weight * preference_loss` 接入已有的一次反传。原方法历史池的 `reference_checkpoint` 记录 Q 的来源；`tkpr_refresh` 逐轨迹记录来源。早期胜局池须离线补齐 `old_q_values` 才能用于新代码的继续约束分支。ASPR 继续使用集合标记、δ 校准与固定集合 probe。每次独立运行的历史池来自该次运行自己的阶段末模型，因此同一采集协议下的实际轨迹可能随训练分化。
 
 配置写入协议 JSON 的同名顶层对象 `full_rank_preference`、`full_rank_preference_unfiltered`、`full_rank_preference_relu`、`top1_preference`、`top1_max_preference` 或 `top1_unfiltered_preference`，由 `--method` 独立选择。可以按方法分别覆盖以下默认值。
 
@@ -180,6 +180,8 @@ cd /home/wyh/marl_method_lab
 ```
 
 ## Top-K 偏好回放（TKPR）
+
+`tkpr_refresh` 独立使用 TKPR-K1 损失。每次更新从每个非当前任务的非空历史池各采 8 条轨迹；池内优先无放回，不足 8 条时有放回，各任务损失仍等权平均。原 `topk_preference` 保持跨任务总共 8 条。每阶段末评价后，当前策略为首次出现的任务采集最多 100 条成功轨迹，并为所有已有池的任务各采集最多 50 条。满池时随机保留 50 条旧轨迹，采到的新成功轨迹替换等量旧轨迹；不足 50 条则只替换实际采到的数量，零成功时保持原池。每个任务只有一个生效池，最多 100 条。新轨迹的 `old_q_values` 由采集它的当前策略生成，并与轨迹一起保存 `reference_phase`、`reference_checkpoint`；保留轨迹的 Q 值不变。更新摘要见 `tkpr_refresh_memory_updates.jsonl`。[独立配置](../configs/continual/action_preference/szc/szc_vdn64_tkpr_refresh.json)。
 
 `topk_preference` 按旧模型 Q 值对每个有效智能体决策的合法动作降序排列。同值时动作索引较小者在前。设合法动作数为 N，实际取 `K_eff = min(K, N - 1)`，少于两个合法动作的决策跳过。从 FRPR 的无序合法动作对中保留至少一个端点属于旧模型 Top-K 的对。K=2 时，旧模型排名第一与第二之间的关系以及这两个动作各自与低位动作的关系都受约束。
 

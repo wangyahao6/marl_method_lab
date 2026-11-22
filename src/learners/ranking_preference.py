@@ -554,6 +554,7 @@ class RankingPreference(ActionSetPreference):
             "full_rank_preference_raw_loss": full_rank_preference_raw_loss,
             "full_rank_preference_relu": full_rank_preference_relu,
             "topk_preference": topk_preference,
+            "tkpr_refresh": topk_preference,
             "topk_preference_weighted": topk_preference_weighted,
             "topk_preference_high_regret": topk_preference_high_regret,
             "top1_preference": top1_preference,
@@ -571,7 +572,7 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_max_statistics
         elif method == "top1_unfiltered_preference":
             self.statistics = top1_unfiltered_statistics
-        elif method == "topk_preference":
+        elif method in ("topk_preference", "tkpr_refresh"):
             self.statistics = topk_statistics
         elif method == "topk_preference_weighted":
             self.statistics = topk_weighted_statistics

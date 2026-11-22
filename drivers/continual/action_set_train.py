@@ -251,11 +251,11 @@ def restore_group_shared_memory(history, parent, phases, scheme, groups, ranking
 
 
 def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out,
-                   ranking=None):
+                   ranking=None, *, target=None, persist=True):
     start = perf_counter()
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
-    target = settings["success_episodes"]
+    target = settings["success_episodes"] if target is None else target
     label_action_sets = args.method in (*ASPR_MAX_METHODS, "aspr_preference")
     q_steps = [] if args.method in HISTORY_RANK_METHODS else None
     with isolated_rollouts():
@@ -294,18 +294,25 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
         successful = label_group_memory(successful, augmented_scheme(spec), spec[1],
                                         ranking["group_count"], ranking["q_scale_floor"])
         diagnostics = group_diagnostics(successful, augmented_scheme(spec), spec[1], ranking["group_count"])
-    path = PreferenceHistory.phase_path(out, phase)
-    path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
-    pool = dict(task=task, phase=phase, layout=expected_layout,
-                reference_checkpoint=checkpoint_path, episodes=successful, **labels)
-    History.save(path / "success.th", pool)
-    History.save(path / "failure.th", dict(task=task, phase=phase, episodes=failed))
-    base.write(path / "summary.json", dict(
-        task=task, phase=phase, reference_checkpoint=checkpoint_path,
-        requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
-        failed=len(failed), blocks=blocks, collection_seconds=perf_counter() - start,
-        **labels, **diagnostics))
+    if args.method == "tkpr_refresh":
+        for episode in successful:
+            episode["reference_phase"] = phase
+            episode["reference_checkpoint"] = checkpoint_path
+        pool = dict(task=task, phase=phase, layout=expected_layout, episodes=successful, **labels)
+    else:
+        pool = dict(task=task, phase=phase, layout=expected_layout,
+                    reference_checkpoint=checkpoint_path, episodes=successful, **labels)
+    if persist:
+        path = PreferenceHistory.phase_path(out, phase)
+        path.mkdir(parents=True, exist_ok=False)
+        History.save(path / "success.th", pool)
+        History.save(path / "failure.th", dict(task=task, phase=phase, episodes=failed))
+        base.write(path / "summary.json", dict(
+            task=task, phase=phase, reference_checkpoint=checkpoint_path,
+            requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
+            failed=len(failed), blocks=blocks, collection_seconds=perf_counter() - start,
+            **labels, **diagnostics))
     return pool
 
 
@@ -445,6 +452,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     logger.log_stat(name, value, runner.t_env)
 
         preference = None
+        refresh_rng = np.random.default_rng(seed + 170071) if method == "tkpr_refresh" else None
         if method in ASPR_MAX_METHODS and settings["weight"]:
             update_log = "aspr_max_preference"
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
@@ -452,6 +460,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role != "release":
             update_log = method
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
+            if method == "tkpr_refresh":
+                ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
             if pair_ablation:
                 preference_type = (PairDistancePreference if method in (*PAIR_DISTANCE, *PAIR_GAP_FAR_MID)
                                    else PairAblationPreference)
@@ -709,6 +719,29 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 if phase + 1 < stop_phase:
                     prepare_shared_pair_pool(phase)
+            elif preference is not None and method == "tkpr_refresh":
+                status("collecting_memory")
+                seen_tasks = dict.fromkeys(stage["task"] for stage in stages[:phase + 1])
+                for memory_task in seen_tasks:
+                    existing = next((pool for pool in preference.history.values()
+                                     if pool["task"] == memory_task), None)
+                    target = (settings["refresh_success_episodes"] if existing is not None
+                              else settings["success_episodes"])
+                    new_pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
+                                              memory_task, phase, settings, out, target=target,
+                                              persist=existing is None)
+                    if existing is None:
+                        preference.history[phase] = new_pool
+                        update = dict(old_count=0, new_count=len(new_pool["episodes"]), replaced=0,
+                                      final_size=len(new_pool["episodes"]), phase=phase)
+                    else:
+                        update = preference.history.refresh(memory_task, new_pool["episodes"],
+                                                            settings["success_episodes"], refresh_rng)
+                        if update["new_count"]:
+                            History.save(PreferenceHistory.phase_path(out, update["phase"]) / "success.th",
+                                         preference.history[update["phase"]])
+                    base.append(out / "tkpr_refresh_memory_updates.jsonl",
+                                dict(task=memory_task, update_phase=phase, **update))
             elif preference is not None:
                 status("collecting_memory")
                 pool = collect_memory(args, spec, expected_layout, reference, checkpoint,

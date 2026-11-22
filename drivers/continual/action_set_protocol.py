@@ -3,7 +3,7 @@ from math import isfinite
 
 from common.exploration import epsilon_on_switch
 
-TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret")
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
@@ -113,13 +113,22 @@ def validate(protocol, algorithm, method):
     if type(evaluation["task_seed_stride"]) is not int or evaluation["task_seed_stride"] < 0:
         raise ValueError("task_seed_stride must be a nonnegative integer")
 
-    settings = settings_with_defaults(protocol.get("action_set", {}), DEFAULTS, ("delta_by_task",))
+    refresh_defaults = (dict(batch_episodes_per_task=8, refresh_success_episodes=50)
+                        if method == "tkpr_refresh" else {})
+    settings = settings_with_defaults(protocol.get("action_set", {}),
+                                      dict(DEFAULTS, **refresh_defaults), ("delta_by_task",))
     for key in ("weight", "margin"):
         if not nonnegative(settings[key]):
             raise ValueError(f"action_set.{key} must be finite and nonnegative")
     for key in ("batch_episodes", "success_episodes", "attempts_per_seed"):
         if not positive_integer(settings[key]):
             raise ValueError(f"action_set.{key} must be a positive integer")
+    if method == "tkpr_refresh":
+        for key in refresh_defaults:
+            if not positive_integer(settings.get(key)):
+                raise ValueError(f"action_set.{key} must be a positive integer")
+        if settings["refresh_success_episodes"] > settings["success_episodes"]:
+            raise ValueError("refresh_success_episodes exceeds success_episodes")
     if not valid_seeds(settings["seed_offsets"]) or len(settings["seed_offsets"]) < 2:
         raise ValueError("action_set.seed_offsets requires at least two unique seeds")
     deltas = settings.get("delta_by_task", {})
@@ -151,6 +160,7 @@ def validate(protocol, algorithm, method):
                 "full_rank_preference_raw_loss": FRPR_RAW_LOSS_DEFAULTS,
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
+                "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
                 "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
                 "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,

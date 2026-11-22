@@ -56,7 +56,8 @@ class PreferenceHistory(History):
                         raise ValueError(f'{path} requires group_ids aligned with avail_actions')
                     if ep['data']['old_q_values'].shape != shape:
                         raise ValueError(f'{path} requires old_q_values aligned with avail_actions')
-            pool['reference_checkpoint'] = str(parent / pool['reference_checkpoint'])
+            if 'reference_checkpoint' in pool:
+                pool['reference_checkpoint'] = str(parent / pool['reference_checkpoint'])
             self[phase] = pool
 
     def sample(self, current_task, batch_episodes, rng):
@@ -75,3 +76,22 @@ class PreferenceHistory(History):
             episode_ids = rng.choice(size, count, replace=count > size).tolist()
             result.append((pool, episode_ids))
         return result
+
+    def sample_per_task(self, current_task, batch_episodes, rng):
+        pools = {pool['task']: pool for pool in self.values()
+                 if pool['task'] != current_task and pool['episodes']}
+        return [(pool, rng.choice(len(pool['episodes']), batch_episodes,
+                                  replace=len(pool['episodes']) < batch_episodes).tolist())
+                for pool in pools.values()]
+
+    def refresh(self, task, new_episodes, capacity, rng):
+        phase, pool = next((phase, pool) for phase, pool in self.items() if pool['task'] == task)
+        old = pool['episodes']
+        new = new_episodes[:capacity]
+        if not new:
+            return dict(old_count=len(old), new_count=0, replaced=0, final_size=len(old), phase=phase)
+        kept_count = min(len(old), capacity - len(new))
+        kept_ids = rng.choice(len(old), kept_count, replace=False).tolist()
+        self[phase] = dict(pool, episodes=[old[i] for i in kept_ids] + new)
+        return dict(old_count=len(old), new_count=len(new), replaced=len(old) - kept_count,
+                    final_size=len(self[phase]['episodes']), phase=phase)
