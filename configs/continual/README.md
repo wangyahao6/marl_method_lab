@@ -3,6 +3,7 @@
 | 目录 | 用途 |
 | --- | --- |
 | [action_preference/szc](action_preference/szc) | SZC 的 FRPR、T1PR、TKPR、`tkpr_refresh`、ASPR、ASPR-Max 及对照。共享前缀使用 `szc_vdn64_tkpr_k1_shared.json`。 |
+| [action_preference/ts5](action_preference/ts5) | TS5 seed 3535 的 TKPR-K1、TKPR-Refresh、VDN-FT、VDN-ER 四组独立协议；五阶段各 2M，使用同一单前馈层 VDN。 |
 | [action_preference/pair_structure](action_preference/pair_structure) | SZC-1M 动作对结构消融。 |
 | [action_preference/pair_ratio](action_preference/pair_ratio) | SZC-1M Top-1 约束比例消融。 |
 | [action_preference/pair_distance](action_preference/pair_distance) | SZC-1M Top-1 加 Near、Mid、Far、随机和 MaxGap 额外对结构比较。 |
