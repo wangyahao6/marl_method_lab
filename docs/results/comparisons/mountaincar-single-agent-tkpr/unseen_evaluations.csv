@@ -1,0 +1,13 @@
+run_id,method,seed,phase,task,label,t_env,wins,episodes,success_pct,mean_return,mean_episode_length,evaluation_seed_start
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,0,T2,unseen_probe,300000,0,100,0.0,-200.0,200.0,92000
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,0,T3,unseen_probe,300000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,1,T3,unseen_probe,600000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,0,T2,unseen_probe,300000,0,100,0.0,-200.0,200.0,92000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,0,T3,unseen_probe,300000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,1,T3,unseen_probe,600000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,0,T2,unseen_probe,300000,0,100,0.0,-200.0,200.0,92000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,0,T3,unseen_probe,300000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,1,T3,unseen_probe,600000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,0,T2,unseen_probe,300000,0,100,0.0,-200.0,200.0,92000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,0,T3,unseen_probe,300000,0,100,0.0,-200.0,200.0,93000
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,1,T3,unseen_probe,600000,0,100,0.0,-200.0,200.0,93000

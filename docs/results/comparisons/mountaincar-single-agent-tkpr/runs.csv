@@ -1,0 +1,5 @@
+run_id,method,seed,role,parent_run_id,commit,status,exit_code,replay_on_switch,epsilon_on_switch,completed_global_steps,trained_steps,config,reference_states,preference_updates
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,independent,,1e6212585d35124e2c488f81948fbe7dfbeac741,completed,0,clear,per_task,900000,900000,configs/mountaincar_tkpr_3535_20261122_dqn_ft.json,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,independent,,1e6212585d35124e2c488f81948fbe7dfbeac741,completed,0,clear,per_task,900000,900000,configs/mountaincar_tkpr_3535_20261122_dqn_tkpr_k1.json,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,independent,,1e6212585d35124e2c488f81948fbe7dfbeac741,completed,0,clear,per_task,900000,900000,configs/mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w.json,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,independent,,1e6212585d35124e2c488f81948fbe7dfbeac741,completed,0,clear,per_task,900000,900000,configs/mountaincar_tkpr_3535_20261122_dqn_tkpr_k2.json,0,0

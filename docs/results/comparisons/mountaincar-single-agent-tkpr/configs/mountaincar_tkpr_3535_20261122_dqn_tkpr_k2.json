@@ -1,0 +1,22 @@
+{
+  "steps_per_task": 300000,
+  "learning_rate": 0.001,
+  "gamma": 0.99,
+  "batch_size": 64,
+  "replay_capacity": 100000,
+  "learning_starts": 5000,
+  "target_update_steps": 1000,
+  "gradient_clip": 10,
+  "epsilon_final": 0.05,
+  "epsilon_decay_steps": 100000,
+  "reference_collection_episodes": 100,
+  "progress_interval": 10000,
+  "preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "method": "DQN-TKPR-K2",
+  "seed": 3535
+}

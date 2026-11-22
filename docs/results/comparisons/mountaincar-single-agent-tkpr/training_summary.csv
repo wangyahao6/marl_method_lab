@@ -1,0 +1,13 @@
+run_id,method,seed,phase,task,steps,training_episodes,training_successes,reference_attempts,reference_successes,reference_states,preference_updates
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,0,T1,300000,1500,1,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,1,T2,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,2,T3,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,0,T1,300000,1500,1,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,1,T2,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,2,T3,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,0,T1,300000,1500,1,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,1,T2,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,2,T3,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,0,T1,300000,1500,1,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,1,T2,300000,1500,0,100,0,0,0
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,2,T3,300000,1500,0,100,0,0,0

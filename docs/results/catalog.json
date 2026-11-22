@@ -793,6 +793,33 @@
         "跨独立历史轨迹迁移 Discovery 的有向关系分数。环境种子在建局时使用。",
         "胜率是同一目标决策上对实际动作分支的加权期望。"
       ]
+    },
+    {
+      "id": "mountaincar-single-agent-tkpr",
+      "category": "comparisons",
+      "report": "comparisons/mountaincar-single-agent-tkpr/README.md",
+      "files": {
+        "runs": "comparisons/mountaincar-single-agent-tkpr/runs.csv",
+        "training_summary": "comparisons/mountaincar-single-agent-tkpr/training_summary.csv",
+        "evaluations": "comparisons/mountaincar-single-agent-tkpr/evaluations.csv",
+        "unseen_evaluations": "comparisons/mountaincar-single-agent-tkpr/unseen_evaluations.csv",
+        "stage_metrics": "comparisons/mountaincar-single-agent-tkpr/stage_metrics.csv",
+        "learning_curves": "comparisons/mountaincar-single-agent-tkpr/learning_curves.csv"
+      },
+      "task_order": ["T1", "T2", "T3"],
+      "training_seeds": [3535],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "independent_runs_matched_by_seed",
+        "match_on": ["seed"],
+        "primary_control": {"method": "DQN-FT", "role": "independent"}
+      },
+      "interpretation_limits": [
+        "MountainCar 的 wins 字段是达到目标位置的成功局数；学习曲线来自探索策略，阶段评估来自独立贪心策略。",
+        "仅一个训练种子；四条运行的冻结参考采集均无成功轨迹，历史偏好状态和偏好更新均为零。",
+        "四种方法实际训练路径一致，不能检验 TKPR 保护收益；BWT 为零成功率之差，不代表成功保持。",
+        "未见任务阶段末探测另存 unseen_evaluations.csv；FWT 缺少初始模型参考，留空。"
+      ]
     }
   ]
 }

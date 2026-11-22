@@ -1,0 +1,13 @@
+run_id,method,seed,role,parent_run_id,phase,training_task,start,t_env,T1_success_pct,T2_success_pct,T3_success_pct,acc_pct,bwt_pp,fwt_pp,learning_auc_pct
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,independent,,0,T1,0,300000,0.0,,,0.0,,,
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,independent,,1,T2,300000,600000,0.0,0.0,,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_ft,DQN-FT,3535,independent,,2,T3,600000,900000,0.0,0.0,0.0,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,independent,,0,T1,0,300000,0.0,,,0.0,,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,independent,,1,T2,300000,600000,0.0,0.0,,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1,DQN-TKPR-K1,3535,independent,,2,T3,600000,900000,0.0,0.0,0.0,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,independent,,0,T1,0,300000,0.0,,,0.0,,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,independent,,1,T2,300000,600000,0.0,0.0,,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w,DQN-TKPR-K1-W,3535,independent,,2,T3,600000,900000,0.0,0.0,0.0,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,independent,,0,T1,0,300000,0.0,,,0.0,,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,independent,,1,T2,300000,600000,0.0,0.0,,0.0,0.0,,
+mountaincar_tkpr_3535_20261122_dqn_tkpr_k2,DQN-TKPR-K2,3535,independent,,2,T3,600000,900000,0.0,0.0,0.0,0.0,0.0,,
