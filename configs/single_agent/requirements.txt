@@ -1,3 +1,4 @@
 torch
 gymnasium
 numpy
+minatar==1.0.15

@@ -1,11 +1,7 @@
-"""Run T1→T2→T3 continual MountainCar training.
-
-Example: PYTHONPATH=src python -m single_agent.train --method DQN-TKPR-K1
-"""
+"""Seven-interval continual MinAtar CNN-DQN and TKPR training."""
 
 import argparse
 from collections import deque
-import copy
 from datetime import datetime
 import json
 from pathlib import Path
@@ -17,133 +13,149 @@ import numpy as np
 import torch
 
 from single_agent.dqn import DQNLearner
-from single_agent.memory import PreferenceMemory
-from single_agent.mountaincar import GOALS, GoalMountainCar
+from single_agent.evaluate import evaluate_stage, retention_metrics
+from single_agent.memory import PreferenceMemory, collect_reference
+from single_agent.minatar_env import GAMES, make_env
 
 
-DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "configs/single_agent/mountaincar_tkpr.json"
-REPO_ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_CONFIG = ROOT / "configs/single_agent/minatar_tkpr.json"
+
+
+def make_schedule(seed, intervals=7):
+    rng = random.Random(seed)
+    first = list(GAMES)
+    rng.shuffle(first)
+    return first + [rng.choice(GAMES) for _ in range(intervals - len(GAMES))]
 
 
 def snapshot_source(output):
-    files = [*sorted((REPO_ROOT / "src/single_agent").glob("*.py")),
-             REPO_ROOT / "src/learners/ranking_preference.py",
-             REPO_ROOT / "src/learners/action_set_preference.py",
-             REPO_ROOT / "configs/single_agent/mountaincar_tkpr.json"]
+    files = [*sorted((ROOT / "src/single_agent").glob("*.py")),
+             ROOT / "src/learners/ranking_preference.py",
+             ROOT / "src/learners/action_set_preference.py",
+             ROOT / "configs/single_agent/minatar_tkpr.json"]
     with tarfile.open(output / "source.tar.gz", "w:gz") as archive:
         for path in files:
-            archive.add(path, arcname=path.relative_to(REPO_ROOT))
-    revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
+            archive.add(path, arcname=path.relative_to(ROOT))
+    revision = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
                               check=True, capture_output=True, text=True).stdout.strip()
     (output / "git_revision.txt").write_text(revision + "\n")
 
 
-def collect_successes(task, model, episodes, seed):
-    """Collect only successful episodes under the frozen task-end policy."""
-    frozen = copy.deepcopy(model).eval().requires_grad_(False)
-    env = GoalMountainCar(task)
-    successes = []
-    try:
-        for episode in range(episodes):
-            observation, _ = env.reset(seed=seed + episode)
-            trajectory = []
-            while True:
-                trajectory.append(observation.copy())
-                with torch.no_grad():
-                    action = int(frozen(torch.as_tensor(observation)).argmax().item())
-                observation, _, terminated, truncated, _ = env.step(action)
-                if terminated or truncated:
-                    if terminated:
-                        successes.append(trajectory)
-                    break
-    finally:
-        env.close()
-    return successes
+def append_json(path, record):
+    with path.open("a") as stream:
+        stream.write(json.dumps(record) + "\n")
 
 
-def run(config, method, seed, output, steps_per_task=None):
-    if method not in ("DQN-FT", "DQN-TKPR-K1", "DQN-TKPR-K1-W", "DQN-TKPR-K2"):
-        raise ValueError(method)
+def run(config, method, seed, output, *, schedule=None, device=None):
+    config = dict(config)
+    schedule = list(schedule) if schedule is not None else make_schedule(seed, config["intervals"])
+    if not schedule or any(game not in GAMES for game in schedule):
+        raise ValueError("Schedule must contain MinAtar games")
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.set_num_threads(1)
-    learner = DQNLearner(config, method, seed)
+    if torch.cuda.is_available():
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    learner = DQNLearner(config, method, seed, device)
     memory = PreferenceMemory()
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     snapshot_source(output)
-    (output / "config.json").write_text(json.dumps(dict(config, method=method, seed=seed,
-        steps_per_task=steps_per_task or config["steps_per_task"]), indent=2) + "\n")
-    report = []
-    progress_path = output / "progress.jsonl"
-    episodes_path = output / "episodes.jsonl"
-    for task_index, task in enumerate(GOALS):
-        if task_index:
-            learner.switch_task()
-        env = GoalMountainCar(task)
-        budget = steps_per_task or config["steps_per_task"]
-        completed = successes = preference_updates = 0
-        episode_length = 0
-        recent_successes = deque(maxlen=100)
+    (output / "config.json").write_text(json.dumps(dict(config, method=method, seed=seed), indent=2) + "\n")
+    (output / "task_schedule.json").write_text(json.dumps(dict(seed=seed, games=schedule), indent=2) + "\n")
+    evaluations, summary = [], []
+    for stage, game in enumerate(schedule):
+        changed = learner.switch_game(game)
+        env = make_env(game)
+        observation, _ = env.reset(seed=seed + stage * 100000)
+        completed, episode_return, episode_length, preference_updates = 0, 0.0, 0, 0
+        recent_returns = deque(maxlen=100)
         latest_update = None
-        observation, _ = env.reset(seed=seed + task_index * 10000)
         try:
-            for step in range(budget):
+            for task_step in range(1, config["interval_steps"] + 1):
                 action = learner.act(observation)
                 next_observation, reward, terminated, truncated, _ = env.step(action)
                 learner.observe(observation, action, reward, next_observation, terminated, truncated)
-                result = learner.update(memory)
-                if result is not None:
-                    latest_update = result
-                if result and result["preference_loss"] != 0:
-                    preference_updates += 1
+                metrics = learner.update(memory,
+                    diagnostics=learner.steps % config["diagnostics_interval"] == 0)
+                if metrics is not None:
+                    latest_update = metrics
+                    if metrics["preference_loss"] != 0:
+                        preference_updates += 1
+                    if "constrained_states" in metrics:
+                        append_json(output / "updates.jsonl", dict(stage=stage, game=game,
+                            task_step=task_step, environment_steps=learner.steps, **metrics))
+                episode_return += reward
                 episode_length += 1
                 observation = next_observation
                 if terminated or truncated:
                     completed += 1
-                    successes += int(terminated)
-                    recent_successes.append(int(terminated))
-                    with episodes_path.open("a") as stream:
-                        stream.write(json.dumps(dict(task=task, method=method, task_step=step + 1,
-                            episode=completed, length=episode_length, return_=-episode_length,
-                            success=bool(terminated))) + "\n")
-                    episode_length = 0
-                    observation, _ = env.reset(seed=seed + task_index * 10000 + completed)
-                if (step + 1) % config.get("progress_interval", 10000) == 0 or step + 1 == budget:
-                    with progress_path.open("a") as stream:
-                        stream.write(json.dumps(dict(task=task, method=method, task_step=step + 1,
-                            environment_steps=learner.steps, episodes=completed, successes=successes,
-                            recent_100_success_rate=(sum(recent_successes) / len(recent_successes)
-                                                     if recent_successes else None),
-                            preference_updates=preference_updates, latest_update=latest_update)) + "\n")
+                    recent_returns.append(episode_return)
+                    append_json(output / "episodes.jsonl", dict(stage=stage, game=game,
+                        task_step=task_step, episode=completed, return_=episode_return,
+                        length=episode_length, complete=True))
+                    episode_return, episode_length = 0.0, 0
+                    observation, _ = env.reset()
+                if task_step % config["progress_interval"] == 0 or task_step == config["interval_steps"]:
+                    append_json(output / "progress.jsonl", dict(stage=stage, game=game,
+                        task_step=task_step, environment_steps=learner.steps,
+                        completed_episodes=completed,
+                        recent_100_mean_return=(float(np.mean(recent_returns)) if recent_returns else None),
+                        preference_updates=preference_updates,
+                        latest_td_loss=latest_update["td_loss"] if latest_update else None,
+                        latest_preference_loss=latest_update["preference_loss"] if latest_update else None))
+            if episode_length:
+                append_json(output / "episodes.jsonl", dict(stage=stage, game=game,
+                    task_step=config["interval_steps"], episode=completed + 1,
+                    return_=episode_return, length=episode_length, complete=False))
         finally:
             env.close()
-        torch.save({"online": learner.online.state_dict(), "target": learner.target.state_dict(),
-                    "optimizer": learner.optimizer.state_dict(), "environment_steps": learner.steps},
-                   output / f"{task}_checkpoint.pt")
-        trajectories = collect_successes(task, learner.online,
-                         config["reference_collection_episodes"], seed + task_index * 10000 + 5000)
-        recorded = memory.add_successful_trajectories(task, trajectories, learner.online)
-        torch.save(memory.tasks[task], output / f"{task}_preference_memory.pt")
-        report.append(dict(task=task, steps=budget, episodes=completed, training_successes=successes,
-                           reference_successes=len(trajectories), reference_states=recorded,
-                           preference_updates=preference_updates))
-        (output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
-    return report
+        torch.save(dict(online=learner.online.state_dict(), target=learner.target.state_dict(),
+                        optimizer=learner.optimizer.state_dict(), environment_steps=learner.steps,
+                        stage=stage, game=game), output / f"stage_{stage}_checkpoint.pt")
+        stage_rows = evaluate_stage(learner.online, stage, episodes=config["evaluation_episodes"],
+                                    seed_base=config["evaluation_seed_base"])
+        evaluations.extend(stage_rows)
+        for row in stage_rows:
+            append_json(output / "evaluations.jsonl", row)
+        if stage == len(schedule) - 1:
+            final_rows = evaluate_stage(learner.online, stage,
+                episodes=config["final_evaluation_episodes"],
+                seed_base=config["final_evaluation_seed_base"], kind="final")
+            evaluations.extend(final_rows)
+            for row in final_rows:
+                append_json(output / "evaluations.jsonl", row)
+        if game not in memory.tasks:
+            collection_seed = seed + config["collection_seed_base"] + GAMES.index(game) * 100000
+            reference = collect_reference(game, learner.online, config["reference_steps"],
+                                          collection_seed, stage)
+            memory.add_reference(**reference)
+            memory.save(game, output / f"memory_{game}.pt")
+        summary.append(dict(stage=stage, game=game, switched_game=changed,
+                            environment_steps=learner.steps, trained_steps=config["interval_steps"],
+                            completed_episodes=completed, preference_updates=preference_updates,
+                            memory_states={name: len(record["states"])
+                                           for name, record in memory.tasks.items()}))
+        (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    retention = retention_metrics(schedule, evaluations)
+    (output / "retention.json").write_text(json.dumps(retention, indent=2) + "\n")
+    return summary
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
-    parser.add_argument("--method", choices=["DQN-FT", "DQN-TKPR-K1", "DQN-TKPR-K1-W", "DQN-TKPR-K2"], required=True)
+    parser.add_argument("--method", choices=DQNLearner.METHODS, required=True)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--steps-per-task", type=int, help="Short smoke runs only; default is 300000")
+    parser.add_argument("--device", choices=("cpu", "cuda"))
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
-    output = args.output or Path("runs") / f"mountaincar_{args.method}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
-    print(json.dumps(run(config, args.method, args.seed, output, args.steps_per_task), indent=2))
+    output = args.output or Path("runs") / f"minatar_{args.method}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
+    print(json.dumps(run(config, args.method, args.seed, output, device=args.device), indent=2))
 
 
 if __name__ == "__main__":
