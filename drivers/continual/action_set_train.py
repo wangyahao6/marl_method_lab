@@ -19,9 +19,13 @@ from learners.action_set_preference import (
     reference_gaps, set_counts, set_statistics, unroll,
 )
 from components.task_replay import log_first_replay_batch, make_replay_buffer, start_replay_task
-from learners.ranking_preference import RankPositionPreference, RankingPreference, aggregate_pair_filter_statistics
+from learners.ranking_preference import (
+    RankPositionPreference, RankingPreference, aggregate_pair_filter_statistics,
+    group_old_q, group_diagnostics,
+)
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
+from drivers.continual.aspr_group_export import export_group_results
 from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
     RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, validate, validate_fork,
@@ -214,7 +218,38 @@ def restore_aspr_shared_memory(history, parent, phases, settings, scheme, groups
                    **labels, **diagnostics))
 
 
-def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out):
+def label_group_memory(episodes, scheme, groups, group_count, q_scale_floor):
+    labeled = []
+    for episode in episodes:
+        batch, _ = batch_episodes([episode], scheme, groups, "cpu", include_good=False, include_old_q=True)
+        q = batch["old_q_values"]
+        if q.shape != batch["avail_actions"].shape:
+            raise ValueError("historical Q values do not align with avail_actions")
+        legal, decisions = decision_masks(batch)
+        ids = group_old_q(q[:, :-1], legal, decisions, group_count, q_scale_floor)[0]
+        final = th.full_like(q[0, -1:], -1, dtype=th.long)
+        labeled.append(dict(episode, group_ids=th.cat((ids, final), dim=0)))
+    return labeled
+
+
+def restore_group_shared_memory(history, parent, phases, scheme, groups, ranking, out):
+    history.restore_success(parent, phases, require_old_q=True)
+    for phase in phases:
+        pool = history[phase]
+        episodes = label_group_memory(pool["episodes"], scheme, groups,
+                                      ranking["group_count"], ranking["q_scale_floor"])
+        history[phase] = dict(pool, episodes=episodes)
+        path = history.phase_path(out, phase)
+        path.mkdir(parents=True, exist_ok=False)
+        history.save(path / "success.th", history[phase])
+        base.write(path / "summary.json", dict(task=pool["task"], phase=phase,
+                   source_pool=str(history.phase_path(parent, phase) / "success.th"),
+                   reference_checkpoint=pool["reference_checkpoint"], stored_wins=len(episodes),
+                   **group_diagnostics(episodes, scheme, groups, ranking["group_count"])))
+
+
+def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out,
+                   ranking=None):
     start = perf_counter()
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
@@ -253,6 +288,10 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     labels, diagnostics = {}, {}
     if label_action_sets:
         successful, labels, diagnostics = label_successful_memory(successful, settings, task)
+    if ranking is not None and "group_count" in ranking:
+        successful = label_group_memory(successful, augmented_scheme(spec), spec[1],
+                                        ranking["group_count"], ranking["q_scale_floor"])
+        diagnostics = group_diagnostics(successful, augmented_scheme(spec), spec[1], ranking["group_count"])
     path = PreferenceHistory.phase_path(out, phase)
     path.mkdir(parents=True, exist_ok=False)
     checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
@@ -297,7 +336,9 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
                         try:
                             episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
                             probe_records.append(reference_record(runner, batch, episode,
-                                                                   store_old_q=args.method == "aspr_preference"))
+                                                                   store_old_q=args.method in ("aspr_preference",
+                                                                                              "aspr_3g_preference",
+                                                                                              "aspr_4g_preference")))
                         except Exception:
                             log_probe_error(traceback.format_exc())
             if remaining is not None:
@@ -359,6 +400,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         settings = protocol["action_set"]
         method = protocol["method"]
         aspr = method == "aspr_preference"
+        aspr_group = method in ("aspr_3g_preference", "aspr_4g_preference")
         selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
         shared_history = PreferenceHistory()
@@ -376,17 +418,19 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     counts.update(historical["effective_k_histogram"])
                 row["effective_k_histogram"] = dict(counts)
             elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
-                            "full_rank_preference_raw", "full_rank_preference_raw_loss", "aspr_preference"):
+                            "full_rank_preference_raw", "full_rank_preference_raw_loss", "aspr_preference",
+                            "aspr_3g_preference", "aspr_4g_preference"):
                 row["pair_filter_stats"] = aggregate_pair_filter_statistics(row["historical_tasks"])
-            if aspr:
+            if aspr or aspr_group:
                 history = row["historical_tasks"]
                 totals = row["pair_filter_stats"]
                 violations = sum(item["pair_violations"] for item in history)
                 pairs = totals["valid_pairs"]
                 totals.update(pair_violations=violations, pair_violation_rate=violations / pairs if pairs else None)
-                for name in ("average_good_set_size", "singleton_ratio", "all_action_ratio"):
-                    weighted = sum(item[name] * item["decision_states"] for item in history if item["decision_states"])
-                    totals[name] = weighted / row["decision_states"] if row["decision_states"] else None
+                if aspr:
+                    for name in ("average_good_set_size", "singleton_ratio", "all_action_ratio"):
+                        weighted = sum(item[name] * item["decision_states"] for item in history if item["decision_states"])
+                        totals[name] = weighted / row["decision_states"] if row["decision_states"] else None
             base.append(out / f"{update_log}_updates.jsonl", row)
             if method == "action_set_preference":
                 base.append(out / "action_set_updates.jsonl", row)
@@ -547,9 +591,13 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 elif aspr and role == "shared-branch":
                     restore_aspr_shared_memory(preference.history, parent, range(first_phase),
                                                settings, augmented, groups, out)
+                elif aspr_group and role == "shared-branch":
+                    restore_group_shared_memory(preference.history, parent, range(first_phase),
+                                                augmented, groups, protocol[method], out)
                 else:
                     preference.history.restore_success(parent, range(first_phase),
-                                                       require_old_q=method in HISTORY_RANK_METHODS, require_good=aspr)
+                                                       require_old_q=method in HISTORY_RANK_METHODS,
+                                                       require_good=aspr, require_group=aspr_group)
             restore_rng(state["rng"])
             parent_hash = dict(parent_model_hash=state["model_hash"])
             if getattr(mac.agent, "loaded_legacy_fc1", False):
@@ -634,7 +682,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             checkpoint = out / "models" / f"phase{phase:04d}_{runner.t_env}"
             save_models(learner, checkpoint)
             reference = agent_snapshot()
-            probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference") and preference is not None
+            probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference", "aspr_3g_preference",
+                                               "aspr_4g_preference") and preference is not None
                              and settings["probe_episodes_per_seed"] else None)
             row = {seen: evaluate(reference, seen, "stage_end", probe_records if seen == task else None)
                    for seen in dict.fromkeys(stage["task"] for stage in stages[:phase + 1])}
@@ -659,12 +708,20 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             elif preference is not None:
                 status("collecting_memory")
                 pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
-                                      task, phase, settings, out)
+                                      task, phase, settings, out, protocol[method] if aspr_group else None)
                 preference.history[phase] = pool
+                if aspr_group:
+                    export_group_results(out, preference.history, augmented, groups,
+                                         protocol[method]["group_count"], method)
                 if probe_records:
                     try:
-                        labeled, _ = label_records(probe_records, pool["delta"])
-                        probe = dict(task=task, source_phase=phase, delta=pool["delta"], episodes=labeled)
+                        if aspr_group:
+                            labeled = label_group_memory([item[0] for item in probe_records], augmented, groups,
+                                                         protocol[method]["group_count"],
+                                                         protocol[method]["q_scale_floor"])
+                        else:
+                            labeled, _ = label_records(probe_records, pool["delta"])
+                        probe = dict(task=task, source_phase=phase, delta=pool.get("delta"), episodes=labeled)
                         probes.save(PreferenceHistory.phase_path(out, phase) / "probe.th", probe)
                         probes[phase] = probe
                     except Exception:
@@ -672,7 +729,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 for probe in probes.values():
                     try:
                         with th.no_grad():
-                            if aspr:
+                            if aspr or aspr_group:
                                 _, _, stats = preference.task_loss(mac, probe, probe["episodes"])
                             else:
                                 probe_batch, good = batch_episodes(probe["episodes"], augmented, groups, args.device)
@@ -692,6 +749,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 save_fork_state()
         if role in ("prefix", "shared-prefix"):
             save_fork_state()
+        if aspr_group and preference is not None:
+            export_group_results(out, preference.history, augmented, groups,
+                                 protocol[method]["group_count"], method)
         status("completed")
     except BaseException:
         status("failed", error=traceback.format_exc())
