@@ -1,16 +1,19 @@
 """Focused MinAtar DQN/TKPR and short continual-flow checks."""
 
 import copy
+from contextlib import nullcontext
 import json
 from pathlib import Path
+import random
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
 
 from learners.ranking_preference import full_rank_preference, topk_preference_weighted
-from single_agent.dqn import DQNLearner, QNetwork
+from single_agent.dqn import DQNLearner, QNetwork, ReplayBuffer
 from single_agent.evaluate import evaluate_checkpoints, retention_metrics
 from single_agent.memory import PreferenceMemory, collect_reference
 from single_agent.minatar_env import GAMES, make_env
@@ -56,6 +59,49 @@ class MinAtarTKPRTest(unittest.TestCase):
                             for k, value in learner.online.state_dict().items()))
         self.assertTrue(all(torch.isfinite(p.grad).all() for p in learner.online.parameters()))
 
+    def test_independent_rng_streams_and_same_seed_actions(self):
+        config = dict(self.config, epsilon=1.0)
+        state = np.zeros((7, 10, 10), dtype=np.float32)
+        learners = [DQNLearner(config, method, seed=37, device="cpu")
+                    for method in DQNLearner.METHODS]
+        initial_action_state = learners[0].action_rng.getstate()
+        self.assertTrue(all(learner.action_rng.getstate() == initial_action_state
+                            for learner in learners))
+        for index, learner in enumerate(learners):
+            for _ in range(index + 1):
+                learner.replay_rng.random()
+                learner.memory_rng.random()
+        auxiliary_states = [(learner.replay_rng.getstate(), learner.memory_rng.getstate())
+                            for learner in learners]
+        actions = [[learner.act(state) for _ in range(20)] for learner in learners]
+        self.assertTrue(all(sequence == actions[0] for sequence in actions))
+        self.assertTrue(all((learner.replay_rng.getstate(), learner.memory_rng.getstate()) == states
+                            for learner, states in zip(learners, auxiliary_states)))
+        fresh = DQNLearner(config, "DQN-FT", seed=37, device="cpu")
+        fresh.replay_rng.random()
+        self.assertEqual(fresh.memory_rng.getstate(), random.Random(37 + 2_000_003).getstate())
+        self.assertEqual(fresh.action_rng.getstate(), initial_action_state)
+        replay_state = fresh.replay_rng.getstate()
+        fresh.memory_rng.random()
+        self.assertEqual(fresh.replay_rng.getstate(), replay_state)
+        self.assertEqual(fresh.action_rng.getstate(), initial_action_state)
+
+    def test_uint8_replay_restores_float32_batches(self):
+        buffer = ReplayBuffer(2)
+        zeros = np.zeros((7, 10, 10), dtype=np.float32)
+        ones = np.ones((7, 10, 10), dtype=np.float32)
+        buffer.add(zeros, 0, 1., ones, False)
+        buffer.add(ones, 1, 2., zeros, True)
+        self.assertEqual(buffer.data[0][0].dtype, np.uint8)
+        self.assertEqual(buffer.data[0][3].dtype, np.uint8)
+        states, actions, _, next_states, _ = buffer.sample(2, random.Random(3))
+        self.assertEqual(states.dtype, np.float32)
+        self.assertEqual(next_states.dtype, np.float32)
+        self.assertEqual(states.shape, (2, 7, 10, 10))
+        for state, action, next_state in zip(states, actions, next_states):
+            np.testing.assert_array_equal(state, zeros if action == 0 else ones)
+            np.testing.assert_array_equal(next_state, ones if action == 0 else zeros)
+
     def test_k1_k2_pair_counts_and_weighted_original(self):
         settings = self.config["preference"]
         old = torch.tensor([[6., 5., 4., 3., 2., 1.],
@@ -94,6 +140,8 @@ class MinAtarTKPRTest(unittest.TestCase):
         torch.testing.assert_close(memory.tasks["Breakout"]["old_q_values"], old_q)
         self.assertEqual(memory.tasks["Breakout"]["collection_seed"], 73)
         self.assertEqual(memory.tasks["Breakout"]["model_stage"], 0)
+        self.assertEqual(memory.tasks["Breakout"]["unique_state_ratio"],
+                         memory.tasks["Breakout"]["unique_state_count"] / 5)
 
     def test_balanced_history_excludes_current_game(self):
         memory = PreferenceMemory()
@@ -101,6 +149,8 @@ class MinAtarTKPRTest(unittest.TestCase):
             states = np.full((2, 7, 10, 10), index, dtype=np.float32)
             old_q = np.full((2, 6), index, dtype=np.float32)
             memory.add_reference(game, states, old_q, collection_seed=index, model_stage=index)
+            self.assertEqual(memory.tasks[game]["unique_state_count"], 1)
+            self.assertEqual(memory.tasks[game]["unique_state_ratio"], .5)
         states, old_q, sources = memory.sample(8, "SpaceInvaders")
         self.assertEqual(states.shape, (8, 7, 10, 10))
         self.assertEqual(old_q.shape, (8, 6))
@@ -153,7 +203,9 @@ class MinAtarTKPRTest(unittest.TestCase):
                 state = next_state
         finally:
             env.close()
+        action_state = learner.action_rng.getstate()
         metrics = learner.update(memory, diagnostics=True)
+        self.assertEqual(learner.action_rng.getstate(), action_state)
         for key in ("preference_loss", "constrained_states", "valid_pairs",
                     "pair_violation_rate", "top1_flip_rate", "preference_grad_norm",
                     "td_grad_norm", "preference_td_grad_ratio",
@@ -177,19 +229,29 @@ class MinAtarTKPRTest(unittest.TestCase):
             observed = []
             for method in DQNLearner.METHODS:
                 output = Path(temporary) / method
-                summary = run(config, method, 17, output, schedule=schedule, device="cpu")
+                no_reference = (patch("single_agent.train.collect_reference",
+                                      side_effect=AssertionError("FT/ER must skip reference collection"))
+                                if method in ("DQN-FT", "DQN-ER") else nullcontext())
+                with no_reference:
+                    summary = run(config, method, 17, output, schedule=schedule, device="cpu")
                 self.assertEqual([entry["game"] for entry in summary], schedule)
                 self.assertEqual(summary[-1]["environment_steps"], 300)
                 self.assertEqual(json.loads((output / "task_schedule.json").read_text())["games"], schedule)
                 self.assertTrue(all((output / f"stage_{i}_checkpoint.pt").exists() for i in range(3)))
                 self.assertEqual(len((output / "evaluations.jsonl").read_text().splitlines()), 12)
                 self.assertEqual(len(json.loads((output / "retention.json").read_text())), 3)
-                self.assertEqual(len(summary[0]["memory_states"]), 1)
-                saved = torch.load(output / "memory_Breakout.pt", map_location="cpu")
-                self.assertEqual(saved["model_stage"], 0)
-                self.assertEqual(saved["collection_seed"], 17 + config["collection_seed_base"])
-                self.assertEqual(len(saved["states"]), 100)
-                self.assertEqual(saved["old_q_values"].shape, (100, 6))
+                if method.startswith("DQN-TKPR"):
+                    self.assertEqual(len(summary[0]["memory_states"]), 1)
+                    saved = torch.load(output / "memory_Breakout.pt", map_location="cpu")
+                    self.assertEqual(saved["model_stage"], 0)
+                    self.assertEqual(saved["collection_seed"], 17 + config["collection_seed_base"])
+                    self.assertEqual(len(saved["states"]), 100)
+                    self.assertEqual(saved["old_q_values"].shape, (100, 6))
+                    self.assertEqual(summary[0]["memory_unique_states"]["Breakout"],
+                                     saved["unique_state_count"])
+                else:
+                    self.assertEqual(summary[0]["memory_states"], {})
+                    self.assertFalse(list(output.glob("memory_*.pt")))
                 if method == "DQN-FT":
                     rows, retention = evaluate_checkpoints(output)
                     self.assertEqual(len(rows), 12)

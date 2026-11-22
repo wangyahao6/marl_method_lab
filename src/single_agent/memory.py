@@ -22,8 +22,12 @@ class PreferenceMemory:
             raise ValueError("Reference states must have shape [N, 7, 10, 10]")
         if old_q_values.shape != (len(states), 6):
             raise ValueError("Reference Q must have shape [N, 6]")
+        packed_states = np.packbits(states.numpy().astype(np.uint8).reshape(len(states), -1), axis=1)
+        unique_state_count = int(np.unique(packed_states, axis=0).shape[0])
         self.tasks[game] = dict(states=states, old_q_values=old_q_values,
-                                collection_seed=collection_seed, model_stage=model_stage)
+                                collection_seed=collection_seed, model_stage=model_stage,
+                                unique_state_count=unique_state_count,
+                                unique_state_ratio=unique_state_count / len(states) if len(states) else 0.0)
         return len(states)
 
     def sample(self, batch_size, current_game, rng=random):

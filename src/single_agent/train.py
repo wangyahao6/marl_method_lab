@@ -128,7 +128,7 @@ def run(config, method, seed, output, *, schedule=None, device=None):
             evaluations.extend(final_rows)
             for row in final_rows:
                 append_json(output / "evaluations.jsonl", row)
-        if game not in memory.tasks:
+        if method.startswith("DQN-TKPR") and game not in memory.tasks:
             collection_seed = seed + config["collection_seed_base"] + GAMES.index(game) * 100000
             reference = collect_reference(game, learner.online, config["reference_steps"],
                                           collection_seed, stage)
@@ -138,7 +138,11 @@ def run(config, method, seed, output, *, schedule=None, device=None):
                             environment_steps=learner.steps, trained_steps=config["interval_steps"],
                             completed_episodes=completed, preference_updates=preference_updates,
                             memory_states={name: len(record["states"])
-                                           for name, record in memory.tasks.items()}))
+                                           for name, record in memory.tasks.items()},
+                            memory_unique_states={name: record["unique_state_count"]
+                                                  for name, record in memory.tasks.items()},
+                            memory_unique_ratios={name: record["unique_state_ratio"]
+                                                  for name, record in memory.tasks.items()}))
         (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     retention = retention_metrics(schedule, evaluations)
     (output / "retention.json").write_text(json.dumps(retention, indent=2) + "\n")

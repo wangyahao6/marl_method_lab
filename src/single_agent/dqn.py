@@ -36,11 +36,13 @@ class ReplayBuffer:
         self.data.clear()
 
     def add(self, state, action, reward, next_state, done):
-        self.data.append((np.array(state, dtype=np.float32, copy=True), int(action),
-                          float(reward), np.array(next_state, dtype=np.float32, copy=True), bool(done)))
+        self.data.append((np.array(state, dtype=np.uint8, copy=True), int(action),
+                          float(reward), np.array(next_state, dtype=np.uint8, copy=True), bool(done)))
 
     def sample(self, batch_size, rng):
-        return tuple(zip(*rng.sample(self.data, batch_size)))
+        states, actions, rewards, next_states, done = zip(*rng.sample(self.data, batch_size))
+        return (np.stack(states).astype(np.float32), actions, rewards,
+                np.stack(next_states).astype(np.float32), done)
 
 
 def gradient_geometry(td_loss, preference_loss, parameters):
@@ -77,7 +79,9 @@ class DQNLearner:
         self.target = copy.deepcopy(self.online)
         self.optimizer = torch.optim.Adam(self.online.parameters(), lr=config["learning_rate"])
         self.replay = ReplayBuffer(config["replay_capacity"])
-        self.rng = random.Random(seed)
+        self.action_rng = random.Random(seed)
+        self.replay_rng = random.Random(seed + 1_000_003)
+        self.memory_rng = random.Random(seed + 2_000_003)
         self.steps = 0
         self.current_game = None
 
@@ -89,8 +93,8 @@ class DQNLearner:
         return changed
 
     def act(self, state, explore=True):
-        if explore and self.rng.random() < self.config["epsilon"]:
-            return self.rng.randrange(6)
+        if explore and self.action_rng.random() < self.config["epsilon"]:
+            return self.action_rng.randrange(6)
         with torch.no_grad():
             values = self.online(torch.as_tensor(state, dtype=torch.float32,
                                                   device=self.device).unsqueeze(0))
@@ -106,9 +110,9 @@ class DQNLearner:
         if len(self.replay) < self.config["batch_size"]:
             return None
         states, actions, rewards, next_states, done = self.replay.sample(
-            self.config["batch_size"], self.rng)
-        states = torch.as_tensor(np.stack(states), dtype=torch.float32, device=self.device)
-        next_states = torch.as_tensor(np.stack(next_states), dtype=torch.float32, device=self.device)
+            self.config["batch_size"], self.replay_rng)
+        states = torch.as_tensor(states, device=self.device)
+        next_states = torch.as_tensor(next_states, device=self.device)
         actions = torch.as_tensor(actions, dtype=torch.long, device=self.device)
         rewards = torch.as_tensor(rewards, dtype=torch.float32, device=self.device)
         done = torch.as_tensor(done, dtype=torch.float32, device=self.device)
@@ -116,7 +120,7 @@ class DQNLearner:
         with torch.no_grad():
             targets = rewards + (1 - done) * self.config["gamma"] * self.target(next_states).max(1).values
         td_loss = F.mse_loss(selected_q, targets)
-        historical = (memory.sample(self.config["batch_size"], self.current_game, self.rng)
+        historical = (memory.sample(self.config["batch_size"], self.current_game, self.memory_rng)
                       if memory is not None and self.method.startswith("DQN-TKPR") else None)
         pref_loss = td_loss.new_zeros(())
         summary = None
