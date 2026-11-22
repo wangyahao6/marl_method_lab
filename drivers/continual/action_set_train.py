@@ -22,8 +22,10 @@ from components.task_replay import log_first_replay_batch, make_replay_buffer, s
 from learners.ranking_preference import RankPositionPreference, RankingPreference, aggregate_pair_filter_statistics
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
+from learners.pair_distance import PairDistancePreference
 from action_set_protocol import (
-    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
+    ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PAIR_DISTANCE, PAIR_GAP_FAR_MID,
+    PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
     RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
@@ -407,8 +409,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             update_log = method
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             if pair_ablation:
-                preference = PairAblationPreference(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
-                                                    augmented, groups, record_preference)
+                preference_type = (PairDistancePreference if method in (*PAIR_DISTANCE, *PAIR_GAP_FAR_MID)
+                                   else PairAblationPreference)
+                preference = preference_type(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
+                                             augmented, groups, record_preference)
             elif anchor_rank is not None:
                 preference = RankPositionPreference(anchor_rank, ranking, np.random.default_rng(seed),
                                                     augmented, groups, record_preference)

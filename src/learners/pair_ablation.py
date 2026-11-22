@@ -123,7 +123,7 @@ def aggregate_ablation_statistics(rows):
         "decision_states", "valid_states", "valid_pairs", "candidate_pairs", "eligible_pairs", "top1_pairs")))
 
 
-def ablation_loss(current_q, old_q, legal, decisions, settings, selected, counts):
+def ablation_loss(current_q, old_q, legal, decisions, settings, selected, counts, *, pair_audit=False):
     _, scale, best, confidence = reference_order(old_q, legal, settings["q_scale_floor"])
     left, right = th.triu_indices(legal.size(-1), legal.size(-1), offset=1, device=legal.device)
     current_gap = (current_q[..., left] - current_q[..., right]) / scale
@@ -143,27 +143,35 @@ def ablation_loss(current_q, old_q, legal, decisions, settings, selected, counts
         diagnostics = th.stack((tau.masked_fill(~active, 0).sum() / active_count,
                                 regret.masked_fill(~active, 0).sum() / active_count,
                                 ((greedy == best.squeeze(-1)) & active).sum() / active_count))
-    return loss, count, th.cat((summary, counts.sum(dim=tuple(range(counts.ndim - 1))), diagnostics))
+    summary = th.cat((summary, counts.sum(dim=tuple(range(counts.ndim - 1))), diagnostics))
+    if pair_audit:
+        violations = (selected & (-direction * current_gap.detach() >= 0)).sum()
+        summary = th.cat((summary, violations.reshape(1)))
+    return loss, count, summary
 
 
 class PairAblationPreference(ActionSetPreference):
     statistics = staticmethod(ablation_statistics)
 
-    def __init__(self, selection, settings, rng, scheme, groups, log):
+    def __init__(self, selection, settings, rng, scheme, groups, log, *, selector=None,
+                 pair_audit=False):
         super().__init__(settings, rng, scheme, groups, log)
         self.selection = selection
+        self.selector = selector
+        self.pair_audit = pair_audit
 
     def prepare_pool(self, pool, *, prior_budget):
         episodes = pool["episodes"]
         if not episodes:
-            audit_key = "complete_order_states" if self.selection in STRUCTURES else "budget_mismatch_states"
+            audit_key = "complete_order_states" if self.selection in STRUCTURES or self.selector is not None else "budget_mismatch_states"
             empty_hash = hashlib.sha256().hexdigest()
             return [], dict(pair_statistics(0, 0, 0, 0, 0, 0), **{audit_key: 0}, episodes=0,
                             valid_state_sha256=empty_hash, pair_mask_sha256=empty_hash)
         batch, _ = batch_episodes(episodes, self.scheme, self.groups, "cpu",
                                   include_good=False, include_old_q=True)
         legal, decisions = decision_masks(batch)
-        selected, valid, counts, audit = select_pairs(
+        selector = self.selector if self.selector is not None else select_pairs
+        selected, valid, counts, audit = selector(
             batch["old_q_values"][:, :-1], legal, decisions, self.selection, self.settings["pair_seed"],
             prior_budget=prior_budget, min_gap=self.settings["min_gap"],
             q_scale_floor=self.settings["q_scale_floor"])
@@ -178,7 +186,7 @@ class PairAblationPreference(ActionSetPreference):
             prepared.append(dict(episode, pair_mask=mask, pair_counts=pair_counts[:length].clone()))
         stats = pair_statistics(int(decisions.sum()), int(valid.sum()), int(selected.sum()),
                                 *counts.flatten(0, -2).sum(dim=0).tolist())
-        if self.selection in STRUCTURES:
+        if self.selection in STRUCTURES or self.selector is not None:
             audit["ordering_edge_coverage"] = (audit["selected_ordering_edges"] / audit["ordering_edges"]
                                                 if audit["ordering_edges"] else None)
             audit["complete_order_coverage"] = (audit["complete_order_states"] / stats["valid_states"]
@@ -198,4 +206,4 @@ class PairAblationPreference(ActionSetPreference):
         counts = pad_sequence([ep["pair_counts"] for ep in episodes], batch_first=True).to(mac.args.device)
         current_q = unroll(mac, batch, batch.max_seq_length - 1)
         return ablation_loss(current_q, batch["old_q_values"][:, :-1], legal, decisions,
-                             self.settings, selected, counts)
+                             self.settings, selected, counts, pair_audit=self.pair_audit)

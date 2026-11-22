@@ -16,11 +16,18 @@ RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_
 PAIR_STRUCTURES = {f"pair_structure_{selection}": selection for selection in (
     "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3", "random_2n_minus_3_matched")}
 PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 80, 100)}
+PAIR_DISTANCE = {f"pair_distance_{selection}": selection for selection in (
+    "k1", "near", "mid", "far", "far_mid", "random_matched", "maxgap")}
+PAIR_GAP_FAR_MID = {f"pair_gap_far_mid_{selection}": f"far_mid_{selection}"
+                    for selection in ("unfiltered", "filtered")}
 PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS,
-                  "pair_structure_gap05": PAIR_STRUCTURES}
-PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS}
+                  "pair_structure_gap05": PAIR_STRUCTURES, "pair_distance": PAIR_DISTANCE,
+                  "pair_gap_far_mid": PAIR_GAP_FAR_MID}
+PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS, **PAIR_DISTANCE, **PAIR_GAP_FAR_MID}
 PAIR_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0, q_scale_floor=0.1, pair_seed=3535)
 PAIR_GAP05_DEFAULTS = dict(PAIR_DEFAULTS, min_gap=0.5)
+PAIR_DISTANCE_DEFAULTS = dict(PAIR_DEFAULTS, extra_min_gap=0)
+PAIR_EXTRA_GAP_DEFAULTS = dict(PAIR_DEFAULTS, extra_min_gap=0.5)
 RANK_POSITION_METHODS = {"tkpr_r2": 2, "tkpr_r3": 3}
 HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS, *RANK_POSITION_METHODS)
 PREFERENCE_RANK_METHODS = (*HISTORY_RANK_METHODS, *PAIR_METHODS)
@@ -203,7 +210,13 @@ def validate(protocol, algorithm, method):
         for name in methods:
             if name != method and name not in protocol:
                 continue
-            expected = PAIR_GAP05_DEFAULTS if experiment == "pair_structure_gap05" else PAIR_DEFAULTS
+            if experiment == "pair_structure_gap05":
+                expected = PAIR_GAP05_DEFAULTS
+            elif experiment in ("pair_distance", "pair_gap_far_mid"):
+                expected = (PAIR_EXTRA_GAP_DEFAULTS if name == "pair_gap_far_mid_filtered"
+                            else PAIR_DISTANCE_DEFAULTS)
+            else:
+                expected = PAIR_DEFAULTS
             options = settings_with_defaults(protocol.get(name, {}), expected)
             if (any(not nonnegative(value) for value in options.values())
                     or any(options[key] != value for key, value in expected.items() if key != "pair_seed")
