@@ -12,7 +12,7 @@ SELECTED_METHODS = ("shapley_selected_frpr", "random_selected_frpr")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
-                "aspr_preference")
+                "aspr_preference", "aspr_3g_preference", "aspr_4g_preference")
 PAIR_STRUCTURES = {f"pair_structure_{selection}": selection for selection in (
     "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3", "random_2n_minus_3_matched")}
 PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 80, 100)}
@@ -32,6 +32,8 @@ RANK_POSITION_METHODS = {"tkpr_r2": 2, "tkpr_r3": 3}
 HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS, *RANK_POSITION_METHODS)
 PREFERENCE_RANK_METHODS = (*HISTORY_RANK_METHODS, *PAIR_METHODS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
+ASPR_GROUP_DEFAULTS = {"aspr_3g_preference": dict(RANK_DEFAULTS, group_count=3),
+                       "aspr_4g_preference": dict(RANK_DEFAULTS, group_count=4)}
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
 TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
@@ -142,6 +144,7 @@ def validate(protocol, algorithm, method):
                 or (name == "full_rank_preference" and method in SELECTED_METHODS)
                 or (name == "topk_preference" and method in RANK_POSITION_METHODS)):
             defaults = {
+                **ASPR_GROUP_DEFAULTS,
                 "full_rank_preference_relu": RANK_RELU_DEFAULTS,
                 "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
                 "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
@@ -188,6 +191,10 @@ def validate(protocol, algorithm, method):
                         raise ValueError(f"{name}.k must be a positive integer")
                     if name in TOPK_VARIANTS and value != 1:
                         raise ValueError(f"{name}.k must be 1")
+                    continue
+                if key == "group_count":
+                    if value != ASPR_GROUP_DEFAULTS[name]["group_count"]:
+                        raise ValueError(f"{name}.group_count must match its method")
                     continue
                 positive = key in ("temperature", "q_scale_floor", "hr_temperature")
                 if not nonnegative(value) or (positive and value == 0):

@@ -16,6 +16,7 @@ from torch.nn.functional import softplus
 
 from test_action_set_preference import PROTOCOL_PATH, ScriptedProtoss, driver, jsonlines
 from action_set_protocol import (
+    ASPR_GROUP_DEFAULTS,
     FRPR_RAW_DEFAULTS, FRPR_RAW_LOSS_DEFAULTS, FRPR_UNFILTERED_DEFAULTS,
     RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
     TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
@@ -27,6 +28,7 @@ from drivers.continual.memory import PreferenceHistory
 from learners.q_learner import agent_gradient_metrics
 from learners.ranking_preference import (
     RankingPreference, aggregate_pair_filter_statistics, aspr_preference, aspr_statistics,
+    aspr_group_preference, aspr_group_statistics, group_old_q,
     full_rank_preference, full_rank_preference_raw,
     full_rank_preference_raw_loss, full_rank_preference_relu,
     full_rank_preference_unfiltered, full_rank_statistics, pair_filter_statistics, top1_max_preference,
@@ -36,6 +38,7 @@ from learners.ranking_preference import (
 
 
 METHOD_DEFAULTS = {
+    **ASPR_GROUP_DEFAULTS,
     "full_rank_preference_relu": RANK_RELU_DEFAULTS,
     "full_rank_preference_unfiltered": FRPR_UNFILTERED_DEFAULTS,
     "full_rank_preference_raw": FRPR_RAW_DEFAULTS,
@@ -49,6 +52,48 @@ METHOD_DEFAULTS = {
 
 
 class RankingTest(unittest.TestCase):
+    def test_aspr_grouping_exact_ties_and_cross_group_loss(self):
+        old = th.tensor([[10., 10., 9.9, 5., 5., 0., -100.]])
+        legal = th.tensor([[True] * 6 + [False]])
+        decision = th.tensor([True])
+        groups = group_old_q(old, legal, decision, 4, .1)
+        self.assertEqual(groups.tolist(), [[0, 0, 1, 2, 2, 3, -1]])
+        th.testing.assert_close(groups, group_old_q(old, legal, decision, 4, .1))
+        self.assertEqual(group_old_q(old, legal, decision, 3, .1)[0, 0].item(), 0)
+        self.assertEqual(group_old_q(old, legal, decision, 3, .1)[0, 1].item(), 0)
+        for k in (3, 4):
+            ids = group_old_q(old, legal, decision, k, .1)
+            current = th.tensor([[1., 2., 3., 4., 5., 6., 100.]], requires_grad=True)
+            settings = dict(RANK_DEFAULTS, group_count=k, min_gap=0)
+            loss, count, summary = aspr_group_preference(current, old, legal, decision,
+                                                         settings, group_ids=ids)
+            scale = old[0, :6].std(unbiased=False).clamp_min(.1)
+            pairs = [(a, b) for a in range(6) for b in range(a + 1, 6)
+                     if ids[0, a] != ids[0, b] and old[0, a] != old[0, b]]
+            expected = th.stack([softplus((current[0, b] - current[0, a]) / scale)
+                                 for a, b in pairs]).mean()
+            th.testing.assert_close(loss, expected)
+            th.testing.assert_close(th.autograd.grad(loss, current)[0],
+                                    th.autograd.grad(expected, current)[0])
+            self.assertEqual(count.item(), 1)
+            stats = aspr_group_statistics(summary.tolist())
+            self.assertEqual(stats["candidate_pairs"], len(pairs))
+            self.assertEqual(stats["valid_pairs"], len(pairs))
+            self.assertFalse(current.grad)
+
+    def test_aspr_grouping_small_and_invalid_states(self):
+        old = th.tensor([[3., 3., 3., 99.], [1., 0., 0., 0.], [3., 2., 1., 0.]])
+        legal = th.tensor([[True, True, True, False], [True, False, False, False], [True] * 4])
+        decisions = th.tensor([True, True, False])
+        ids = group_old_q(old, legal, decisions, 4, .1)
+        self.assertEqual(ids.tolist(), [[0, 0, 0, -1], [0, -1, -1, -1], [-1] * 4])
+        current = old.clone().requires_grad_()
+        loss, count, summary = aspr_group_preference(current, old, legal, decisions,
+                                                     dict(RANK_DEFAULTS, group_count=4), group_ids=ids)
+        self.assertEqual(count.item(), 0)
+        self.assertEqual(loss.item(), 0)
+        self.assertEqual(aspr_group_statistics(summary.tolist())["candidate_pairs"], 0)
+
     def test_aspr_cross_group_softplus_and_filtering(self):
         # Interleave Good and Bad indices so both index orientations are exercised.
         old = th.tensor([[5., 0., 4., 1., 3., 100.]]).repeat(3, 1)
@@ -696,11 +741,24 @@ class RankingTest(unittest.TestCase):
                     if method == "aspr_preference":
                         self.assertTrue(th.equal(old["good_mask"], new["good_mask"]))
                         self.assertEqual(pool["delta"], original["delta"])
+                    elif method in ASPR_GROUP_DEFAULTS:
+                        self.assertEqual(new["group_ids"].shape, new["data"]["avail_actions"].shape)
+                        self.assertTrue((new["group_ids"][-1] == -1).all())
                     else:
                         self.assertNotIn("good_mask", new)
                     self.assertNotIn("old_q_values", old["data"])
                     self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
                 samples = jsonlines(run / f"{method}_updates.jsonl")
+                if method in ASPR_GROUP_DEFAULTS:
+                    restored = PreferenceHistory()
+                    restored.restore_success(run, [0], require_old_q=True, require_group=True)
+                    th.testing.assert_close(restored[0]["episodes"][0]["group_ids"],
+                                            pool["episodes"][0]["group_ids"])
+                    for name in ("aspr_group_summary.csv", "aspr_group_distribution.csv",
+                                 "aspr_group_training_sampled.csv"):
+                        self.assertTrue((run / name).is_file())
+                    self.assertTrue(all("group_size_distribution" in historical
+                                        for row in samples for historical in row["historical_tasks"]))
                 if method == "aspr_preference":
                     fields = {"candidate_pairs", "valid_pairs", "pair_keep_rate", "pair_violation_rate",
                               "average_good_set_size", "singleton_ratio", "all_action_ratio"}
@@ -877,6 +935,8 @@ class RankingTest(unittest.TestCase):
             good, _ = make_good_mask(batch, batch["old_q_values"][:, :-1], 0)
             for ep, mask in zip(episodes, good):
                 ep["good_mask"] = mask[:ep["length"] + 1]
+            for ep in episodes:
+                ep["group_ids"] = driver.label_group_memory([ep], scheme, groups, 4, .1)[0]["group_ids"]
             for method in RANK_METHODS:
                 defaults = METHOD_DEFAULTS.get(method, RANK_DEFAULTS)
                 settings = dict(defaults)

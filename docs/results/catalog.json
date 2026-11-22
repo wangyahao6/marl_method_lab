@@ -793,6 +793,48 @@
         "跨独立历史轨迹迁移 Discovery 的有向关系分数。环境种子在建局时使用。",
         "胜率是同一目标决策上对实际动作分支的加权期望。"
       ]
+    },
+    {
+      "id": "szc-vdn64-aspr-groups",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64-aspr-groups/README.md",
+      "files": {
+        "runs": "comparisons/szc-vdn64-aspr-groups/runs.csv",
+        "evaluations": "comparisons/szc-vdn64-aspr-groups/evaluations.csv",
+        "learning_curves": "comparisons/szc-vdn64-aspr-groups/learning_curves.csv",
+        "stage_metrics": "comparisons/szc-vdn64-aspr-groups/stage_metrics.csv",
+        "paired_metrics": "comparisons/szc-vdn64-aspr-groups/paired_metrics.csv",
+        "aspr_group_summary": "comparisons/szc-vdn64-aspr-groups/aspr_group_summary.csv",
+        "aspr_group_distribution": "comparisons/szc-vdn64-aspr-groups/aspr_group_distribution.csv",
+        "aspr_group_training_sampled": "comparisons/szc-vdn64-aspr-groups/aspr_group_training_sampled.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "treatments": [
+          "ASPR-3G",
+          "ASPR-4G"
+        ],
+        "primary_control": "ASPR-2G"
+      },
+      "interpretation_limits": [
+        "只有两个训练种子。",
+        "每个种子的 S 检查点相同，Z/C 训练和历史采集独立。",
+        "训练采样分布按抽取次数计数，组大小行重复携带动作对总计。"
+      ]
     }
   ]
 }

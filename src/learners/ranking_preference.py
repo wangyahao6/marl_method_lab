@@ -41,6 +41,66 @@ def aspr_preference(current_q, reference_q, legal, decisions, settings, *, good)
                            pair_audit=True, good=good & legal)
 
 
+@th.no_grad()
+def group_old_q(reference_q, legal, decisions, group_count, q_scale_floor):
+    """Exact contiguous 1-D k-means on distinct, normalized Q values."""
+    _, centered, scale = reference_scale(reference_q, legal, q_scale_floor)
+    values = centered / scale
+    labels = th.full_like(reference_q, -1, dtype=th.long)
+    flat_q = values.reshape(-1, values.size(-1))
+    flat_legal = legal.reshape_as(flat_q)
+    flat_decisions = decisions.reshape(-1)
+    flat_labels = labels.reshape_as(flat_q)
+    for row in range(flat_q.size(0)):
+        if not flat_decisions[row]:
+            continue
+        indices = flat_legal[row].nonzero().flatten()
+        if not indices.numel():
+            continue
+        ordered, order = th.sort(flat_q[row, indices], descending=True, stable=True)
+        distinct, inverse, counts = th.unique_consecutive(ordered, return_inverse=True, return_counts=True)
+        n = distinct.numel()
+        k = min(group_count, indices.numel(), n)
+        weights = counts.tolist()
+        x = distinct.double().tolist()
+        prefix_n, prefix_x, prefix_x2 = [0], [0.], [0.]
+        for weight, value in zip(weights, x):
+            prefix_n.append(prefix_n[-1] + weight)
+            prefix_x.append(prefix_x[-1] + weight * value)
+            prefix_x2.append(prefix_x2[-1] + weight * value * value)
+
+        def error(start, stop):
+            count = prefix_n[stop] - prefix_n[start]
+            total = prefix_x[stop] - prefix_x[start]
+            return max(0., prefix_x2[stop] - prefix_x2[start] - total * total / count)
+
+        costs = [[float("inf")] * (n + 1) for _ in range(k + 1)]
+        splits = [[0] * (n + 1) for _ in range(k + 1)]
+        costs[0][0] = 0.
+        for groups in range(1, k + 1):
+            for stop in range(groups, n + 1):
+                for start in range(groups - 1, stop):
+                    candidate = costs[groups - 1][start] + error(start, stop)
+                    if candidate < costs[groups][stop]:
+                        costs[groups][stop], splits[groups][stop] = candidate, start
+        boundaries = []
+        stop = n
+        for groups in range(k, 0, -1):
+            start = splits[groups][stop]
+            boundaries.append((start, stop, groups - 1))
+            stop = start
+        bin_labels = th.empty(n, dtype=th.long, device=reference_q.device)
+        for start, stop, group in boundaries:
+            bin_labels[start:stop] = group
+        flat_labels[row, indices[order]] = bin_labels[inverse]
+    return labels
+
+
+def aspr_group_preference(current_q, reference_q, legal, decisions, settings, *, group_ids):
+    return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
+                           pair_audit=True, group_ids=group_ids)
+
+
 def full_rank_preference_raw(current_q, reference_q, legal, decisions, settings):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
                            raw_reference=True, pair_audit=True)
@@ -93,7 +153,8 @@ def pair_state_loss(inverted_gap, pairs, temperature, pair_dims, penalty=None):
     return state_loss, pair_counts
 
 
-def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unfiltered=False, good=None):
+def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unfiltered=False, good=None,
+                    group_ids=None):
     """Pair mask shared by FRPR training and offline analysis; old is already standardized."""
     old_gap = old.unsqueeze(-1) - old.unsqueeze(-2)
     action_count = legal.size(-1)
@@ -101,6 +162,9 @@ def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unf
     candidates = unique_pairs & legal.unsqueeze(-1) & legal.unsqueeze(-2) & decisions[..., None, None]
     if good is not None:
         candidates = candidates & (good.unsqueeze(-1) ^ good.unsqueeze(-2))
+    if group_ids is not None:
+        candidates = candidates & (group_ids.unsqueeze(-1) >= 0) & (group_ids.unsqueeze(-2) >= 0)
+        candidates = candidates & (group_ids.unsqueeze(-1) != group_ids.unsqueeze(-2))
     eligible = candidates & (old_gap != 0)
     gap_key = "min_gap_raw" if raw_reference else "min_gap"
     pairs = eligible if unfiltered else eligible & (old_gap.abs() >= settings[gap_key])
@@ -109,7 +173,8 @@ def full_rank_pairs(old, legal, decisions, settings, *, raw_reference=False, unf
 
 def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=None, *,
                     k=None, unfiltered=False, pair_audit=False, raw_reference=False, raw_loss=False,
-                    confidence_weighted=False, high_regret=False, good=None, pair_selection=None, anchor=None):
+                    confidence_weighted=False, high_regret=False, good=None, group_ids=None,
+                    pair_selection=None, anchor=None):
     current_gap = current_q.unsqueeze(-1) - current_q.unsqueeze(-2)
     if raw_reference:
         old = reference_q.detach()
@@ -122,7 +187,8 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
         if not raw_loss:
             current_gap = current_gap / scale.unsqueeze(-1)
     old_gap, candidates, eligible, pairs = full_rank_pairs(
-        old, legal, decisions, settings, raw_reference=raw_reference, unfiltered=unfiltered, good=good)
+        old, legal, decisions, settings, raw_reference=raw_reference, unfiltered=unfiltered,
+        good=good, group_ids=group_ids)
     action_count = legal.size(-1)
     if pair_selection is not None:
         pairs = pairs & pair_selection
@@ -151,6 +217,9 @@ def _full_rank_loss(current_q, reference_q, legal, decisions, settings, penalty=
     if good is not None:
         violations = (pairs & (inverted_gap.detach() >= 0)).sum()
         summary = th.cat((summary, violations.reshape(1), set_counts(legal, decisions, good)))
+    if group_ids is not None:
+        violations = (pairs & (inverted_gap.detach() >= 0)).sum()
+        summary = th.cat((summary, violations.reshape(1)))
     if k is not None:
         violations = (pairs & (inverted_gap.detach() >= 0)).sum()
         effective_k_sum = effective_k.masked_fill(~decisions, 0).sum()
@@ -363,6 +432,49 @@ def aspr_statistics(summary):
     return stats
 
 
+def aspr_group_statistics(summary):
+    stats = full_rank_statistics(summary[:9])
+    violations = int(summary[9])
+    stats.update(pair_violations=violations,
+                 pair_violation_rate=violations / stats["valid_pairs"] if stats["valid_pairs"] else None)
+    return stats
+
+
+@th.no_grad()
+def group_diagnostics(episodes, scheme, groups, group_count):
+    if not episodes:
+        names = [f"G{i + 1}" for i in range(group_count)]
+        return dict(group_decision_states=0, group_legal_actions=0,
+                    group_mean_sizes={name: None for name in names},
+                    group_action_ratios={name: None for name in names},
+                    group_empty_ratios={name: None for name in names},
+                    group_size_distribution={name: {} for name in names})
+    batch, _ = batch_episodes(episodes, scheme, groups, "cpu", include_good=False)
+    legal, decisions = decision_masks(batch)
+    ids = th.nn.utils.rnn.pad_sequence([ep["group_ids"] for ep in episodes],
+                                         batch_first=True, padding_value=-1)[:, :-1]
+    if ids.shape != legal.shape:
+        raise ValueError("group_ids do not align with avail_actions")
+    if ((ids[~(legal & decisions.unsqueeze(-1))] != -1).any()
+            or (ids[legal & decisions.unsqueeze(-1)] < 0).any()):
+        raise ValueError("group_ids include invalid or unlabeled actions")
+    count = int(decisions.sum())
+    total_legal = int((legal & decisions.unsqueeze(-1)).sum())
+    distribution = {}
+    mean_sizes, mean_ratios, empty_ratios = {}, {}, {}
+    for group in range(group_count):
+        sizes = (ids == group).sum(dim=-1)[decisions]
+        histogram = th.bincount(sizes, minlength=legal.size(-1) + 1).tolist()
+        name = f"G{group + 1}"
+        distribution[name] = {str(size): int(n) for size, n in enumerate(histogram)}
+        mean_sizes[name] = sum(size * n for size, n in enumerate(histogram)) / count if count else None
+        mean_ratios[name] = int(sizes.sum()) / total_legal if total_legal else None
+        empty_ratios[name] = histogram[0] / count if count else None
+    return dict(group_decision_states=count, group_legal_actions=total_legal,
+                group_mean_sizes=mean_sizes, group_action_ratios=mean_ratios,
+                group_empty_ratios=empty_ratios, group_size_distribution=distribution)
+
+
 def topk_statistics(summary):
     stats = ranking_statistics(summary[:7])
     violations, effective_k_sum, clipped = summary[7:10]
@@ -431,8 +543,11 @@ class RankingPreference(ActionSetPreference):
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
         self.use_good_mask = method == "aspr_preference"
+        self.use_group_ids = method in ("aspr_3g_preference", "aspr_4g_preference")
         self.loss = {
             "aspr_preference": aspr_preference,
+            "aspr_3g_preference": aspr_group_preference,
+            "aspr_4g_preference": aspr_group_preference,
             "full_rank_preference": partial(full_rank_preference, pair_audit=True),
             "full_rank_preference_unfiltered": full_rank_preference_unfiltered,
             "full_rank_preference_raw": full_rank_preference_raw,
@@ -447,6 +562,8 @@ class RankingPreference(ActionSetPreference):
         }[method]
         if self.use_good_mask:
             self.statistics = aspr_statistics
+        elif self.use_group_ids:
+            self.statistics = aspr_group_statistics
         elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
                       "full_rank_preference_raw", "full_rank_preference_raw_loss"):
             self.statistics = full_rank_statistics
@@ -466,8 +583,18 @@ class RankingPreference(ActionSetPreference):
                                      include_good=self.use_good_mask, include_old_q=True)
         legal, decisions = decision_masks(batch)
         current_q = unroll(mac, batch, batch.max_seq_length - 1)
+        if self.use_group_ids:
+            group_ids = th.nn.utils.rnn.pad_sequence([ep["group_ids"] for ep in episodes],
+                                                       batch_first=True, padding_value=-1).to(mac.args.device)
+            return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions,
+                             self.settings, group_ids=group_ids[:, :-1])
         if self.use_good_mask:
             return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions,
                              self.settings, good=good[:, :-1])
         decisions = decisions & (legal.sum(dim=-1) >= 2)
         return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions, self.settings)
+
+    def sample_diagnostics(self, episodes):
+        if self.use_group_ids:
+            return group_diagnostics(episodes, self.scheme, self.groups, self.settings["group_count"])
+        return {}

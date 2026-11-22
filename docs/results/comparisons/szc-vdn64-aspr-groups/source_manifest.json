@@ -1,0 +1,65 @@
+{
+  "source": "rl-navigation-ubuntu:/home/wyh/marl_method_lab/runs",
+  "runs": {
+    "szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+      "model_hash_match": true,
+      "source_sha256": {
+        "status.json": "3c7afc15ef9fe382b0572d63a7770724a987f418cb5963be1a340f4f093438bd",
+        "launcher_status.json": "8316c9a602d22bdd420b34f2c14e0355a7a4486418dfdbc748c551268bbc2a95",
+        "protocol.json": "6bfdb909243c98e4969169addbde817c90307277d054e76efc30f9ca62ba4fae",
+        "branch_restore.json": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648",
+        "retention.json": "825f97230e2967ece4c2ac2833461567962e4ad0da15031c8427aea6ba5a0e1a",
+        "evaluations.jsonl": "68f46954fd7fb5477fcc2cd97e8f25f454cb1d6adac9ec8af48042369e487a58",
+        "aspr_group_summary.csv": "f95b9c5bb94fcb2b42ef710b0e14ff8836edd034e7d0336a59750cfe6f40c32e",
+        "aspr_group_distribution.csv": "b5ccf1d1e0e5b9f0f072aca7b79f8096e0d02e696c854484083d1b22c3232bb6",
+        "aspr_group_training_sampled.csv": "33b7342a332afe88968c7678f91d92879b3930d0a482ede7184b0f4bc57220bc"
+      }
+    },
+    "szc_vdn64_aspr_4g_shared_20261121_seed2222_attempt001": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+      "model_hash_match": true,
+      "source_sha256": {
+        "status.json": "3687e94f09f7efc61abd7c71343566853576e42db471ced60e1c73123da630a6",
+        "launcher_status.json": "1c5892c619a71684d4574ae797e18cfb58d290861e6d85dbcb9ce634e7b75163",
+        "protocol.json": "8da890bd30ac3dcb40c2a6a25d501427492b56a4349518d1247c5caac15ee54d",
+        "branch_restore.json": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648",
+        "retention.json": "929a872cb64337b6c4ccfe8bf389366ad41c5d3562a1f7a21b5ae16615db8eda",
+        "evaluations.jsonl": "480f79f8d1d8ab74f71d85b69ac7650b76de29ba57fa460e1fbeb8daffff59ac",
+        "aspr_group_summary.csv": "ad6f365563ca5ed41e5a8458ec664c24dc2e81ebdf16934c8f4927c0b06da2df",
+        "aspr_group_distribution.csv": "580f8f48f77cbf3e56492c5a32ce52bfc47b05914d06bb5630ea7f8fce7aadb7",
+        "aspr_group_training_sampled.csv": "1aa4eaa504d917fef76b2b22d2c507d9a263c7b74957d0429ae3f94f9ff1ec5b"
+      }
+    },
+    "szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+      "model_hash_match": true,
+      "source_sha256": {
+        "status.json": "81a7606b3191f429c3271a74537f2ab8282ea91debd4878427c6add8440b7b81",
+        "launcher_status.json": "163b93f97674c20b8ae7c17dd0c6a271c543923f89a36ab7ab1c8bc2a89ebbaf",
+        "protocol.json": "6bfdb909243c98e4969169addbde817c90307277d054e76efc30f9ca62ba4fae",
+        "branch_restore.json": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa",
+        "retention.json": "7d0682855e555651593a24537462cc14d8df0ca1943432f3b3f776ecbb14247f",
+        "evaluations.jsonl": "dc9146f60fe8d38ee306c668cb895006035363eef277c9802819d10a3699b8cc",
+        "aspr_group_summary.csv": "8fdc0d5f1e04d868319765d4bf48b1fc95710a454a294e0597682f04175112cf",
+        "aspr_group_distribution.csv": "ea8e6e434ae649e51e6fb3318a6236346870725b5d62d921213867220bd08da8",
+        "aspr_group_training_sampled.csv": "4f07ea83d9d94f7c5911db4f0c9bfa1c227749ab5cf739c39963b4e6f15450e5"
+      }
+    },
+    "szc_vdn64_aspr_4g_shared_20261121_seed3535_attempt001": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+      "model_hash_match": true,
+      "source_sha256": {
+        "status.json": "049da2d87dc7d5fe2ff51abd7c2367a6ec169a1dbf5137dc52309f3bc8885bb8",
+        "launcher_status.json": "7fe586dd7bccbac651d8809db4e79537daad1a549605dba261755924994ed8fe",
+        "protocol.json": "8da890bd30ac3dcb40c2a6a25d501427492b56a4349518d1247c5caac15ee54d",
+        "branch_restore.json": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa",
+        "retention.json": "af9dd3e3ba842f5e235894466ef9a1c1959fbfb34afbe3ad2ba81fb1f40d65e0",
+        "evaluations.jsonl": "56d43158ee4a24dad18a0f434f754f3da7d1bbbc875c5c69c565089b8b0f9b1e",
+        "aspr_group_summary.csv": "6932cf09a209df999d893dc74bcb225d1fbeb0c10cf9c6d8f23e2b6c0ccd75cd",
+        "aspr_group_distribution.csv": "3dc10d6a058a0788dda0582a8dd61fe3017cbd3b6f0820684dee86965d5039bd",
+        "aspr_group_training_sampled.csv": "e9d80105b871d9f8973ba837e4522ed533845fc1c666cc24cbb39b9beaf6cc81"
+      }
+    }
+  }
+}

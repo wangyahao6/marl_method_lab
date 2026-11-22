@@ -35,7 +35,8 @@ class PreferenceHistory(History):
     def phase_path(root, phase):
         return Path(root) / 'action_set_memory' / f'phase{phase:04d}'
 
-    def restore_success(self, parent, phases, *, require_old_q=False, require_good=False):
+    def restore_success(self, parent, phases, *, require_old_q=False, require_good=False,
+                        require_group=False):
         for phase in phases:
             path = self.phase_path(parent, phase) / 'success.th'
             pool = self.load(path)
@@ -48,6 +49,13 @@ class PreferenceHistory(History):
                         raise ValueError(f'{path} requires a good_mask aligned with avail_actions for ASPR')
                     if require_old_q and ep['data']['old_q_values'].shape != shape:
                         raise ValueError(f'{path} requires old_q_values aligned with avail_actions for ASPR')
+            if require_group:
+                for ep in pool['episodes']:
+                    shape = ep['data']['avail_actions'].shape
+                    if 'group_ids' not in ep or ep['group_ids'].shape != shape:
+                        raise ValueError(f'{path} requires group_ids aligned with avail_actions')
+                    if ep['data']['old_q_values'].shape != shape:
+                        raise ValueError(f'{path} requires old_q_values aligned with avail_actions')
             pool['reference_checkpoint'] = str(parent / pool['reference_checkpoint'])
             self[phase] = pool
 
