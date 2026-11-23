@@ -835,6 +835,100 @@
         "每个种子的 S 检查点相同，Z/C 训练和历史采集独立。",
         "训练采样分布按抽取次数计数，组大小行重复携带动作对总计。"
       ]
+    },
+    {
+      "id": "szc-vdn64-pair-distance",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-pair-distance/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-pair-distance/runs.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-pair-distance/stage_metrics.csv",
+        "learning_curves": "parameter-ablations/szc-vdn64-pair-distance/learning_curves.csv",
+        "summary": "parameter-ablations/szc-vdn64-pair-distance/summary.csv",
+        "paired_metrics": "parameter-ablations/szc-vdn64-pair-distance/paired_metrics.csv",
+        "pair_diagnostics": "parameter-ablations/szc-vdn64-pair-distance/pair_diagnostics.csv",
+        "pair_rank_gap_distribution": "parameter-ablations/szc-vdn64-pair-distance/pair_rank_gap_distribution.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-distance/preference_diagnostics.csv",
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-distance/gradient_diagnostics.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-pair-distance/evaluations.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "same_seed_shared_s_prefix",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "treatments": [
+          "K1",
+          "K1+Near",
+          "K1+Mid",
+          "K1+Far",
+          "K1+Far/Mid",
+          "K1+Random-Matched",
+          "K1+MaxGap"
+        ],
+        "primary_control": "K1"
+      },
+      "interpretation_limits": [
+        "仅两个训练种子；ACC 与 BWT 分别报告，不合并评分。",
+        "批次运行期间 Git 提交变化，已核对本方法选对与损失文件哈希和实际共享协议；详见报告。",
+        "动作对 Q-gap 与排名距离相关，不能由本批相关性断言因果作用。"
+      ]
+    },
+    {
+      "id": "szc-vdn64-pair-far-mid-gap",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-pair-far-mid-gap/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-pair-far-mid-gap/runs.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-pair-far-mid-gap/stage_metrics.csv",
+        "learning_curves": "parameter-ablations/szc-vdn64-pair-far-mid-gap/learning_curves.csv",
+        "summary": "parameter-ablations/szc-vdn64-pair-far-mid-gap/summary.csv",
+        "paired_metrics": "parameter-ablations/szc-vdn64-pair-far-mid-gap/paired_metrics.csv",
+        "pair_diagnostics": "parameter-ablations/szc-vdn64-pair-far-mid-gap/pair_diagnostics.csv",
+        "pair_rank_gap_distribution": "parameter-ablations/szc-vdn64-pair-far-mid-gap/pair_rank_gap_distribution.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-far-mid-gap/preference_diagnostics.csv",
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-far-mid-gap/gradient_diagnostics.csv",
+        "paired_gap": "parameter-ablations/szc-vdn64-pair-far-mid-gap/paired_gap.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-pair-far-mid-gap/evaluations.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "same_seed_shared_s_prefix",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "treatments": [
+          "K1+Far/Mid gap=0",
+          "K1+Far/Mid extra gap>=0.5"
+        ],
+        "primary_control": "K1+Far/Mid gap=0"
+      },
+      "interpretation_limits": [
+        "仅两个训练种子；ACC 与 BWT 分别报告，不合并评分。",
+        "批次运行期间 Git 提交变化，已核对本方法选对与损失文件哈希和实际共享协议；详见报告。",
+        "动作对 Q-gap 与排名距离相关，不能由本批相关性断言因果作用。"
+      ]
     }
   ]
 }

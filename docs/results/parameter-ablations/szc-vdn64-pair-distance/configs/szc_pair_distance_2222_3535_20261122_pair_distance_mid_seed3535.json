@@ -1,0 +1,201 @@
+{
+  "protocol": {
+    "id": "szc_vdn64_pair_distance_1m",
+    "tasks": {
+      "stalker": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "zealot": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "colossus": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      }
+    },
+    "stages": [
+      {
+        "task": "stalker",
+        "steps": 1000000
+      },
+      {
+        "task": "zealot",
+        "steps": 1000000
+      },
+      {
+        "task": "colossus",
+        "steps": 1000000
+      }
+    ],
+    "phase_boundary": "cumulative",
+    "epsilon_on_switch": "per_task",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {
+        "stalker": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "zealot": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "colossus": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ]
+      },
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "evaluation": {
+      "seeds": [
+        91001,
+        91002
+      ],
+      "episodes_per_seed": 16,
+      "interval": 25000,
+      "focus_seeds": [
+        91101,
+        91102,
+        91103,
+        91104
+      ],
+      "focus_episodes_per_seed": 32,
+      "task_seed_stride": 100
+    },
+    "sc2_game_version": "4.10",
+    "full_rank_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1
+    },
+    "replay_on_switch": "ft",
+    "gradient_monitor_interval": 100,
+    "pair_ablation_experiment": "pair_distance",
+    "pair_distance_k1": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_near": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_mid": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_far": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_far_mid": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_random_matched": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "pair_distance_maxgap": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535,
+      "extra_min_gap": 0
+    },
+    "algorithm": "vdn",
+    "method": "pair_distance_mid"
+  },
+  "launch_git_commit": "d4f425543fde230c6ea3f069b335f4f6ef5ec2a7",
+  "source_sha256": {
+    "src/learners/pair_ablation.py": "87e587e797220e31ac64f43935a8b3d8f29656f38b5aebc71362345af2d0960f",
+    "src/learners/pair_distance.py": "fa5772ece8447306fa1a34624008f8684c3b511a651ee11ae91eb1c2fe6ae81f",
+    "src/learners/ranking_preference.py": "0e2b5c94a721455f40a749f298509fca148eb9b1c1bd85820c98755d9fc59254",
+    "src/learners/action_set_preference.py": "19e3c9650be6e269759a0fe7bc3bad7e5e4c56b03df58041501e458c23a3316b",
+    "drivers/continual/action_set_train.py": "06dc26c8dfc207ce6a5bc7dd49930f9d57d7b6310bbc3453c4d2a68ceec5e069",
+    "drivers/continual/action_set_protocol.py": "936ea2bb0eba32718895d6aceb747c5c2d95c424a151308b2daf9166d67fe3a2"
+  },
+  "branch_restore": {
+    "parent": "/home/wyh/marl_method_lab/runs/pair_distance/szc_pair_distance_2222_3535_20261122_reference_seed3535",
+    "checkpoint": "/home/wyh/marl_method_lab/runs/pair_distance/szc_pair_distance_2222_3535_20261122_reference_seed3535/models/phase0000_1000035",
+    "role": "shared-branch",
+    "preference_weight": 1.0,
+    "t_env": 1000035,
+    "episode": 19110,
+    "updates": 19079,
+    "last_target_update_episode": 19000,
+    "model_hash": "54c9f68d05a423e84bcea663d1d8102dee62382f4e7792bbce0d39bc2d37af0f",
+    "parent_model_hash": "54c9f68d05a423e84bcea663d1d8102dee62382f4e7792bbce0d39bc2d37af0f",
+    "engine": "new SC2 process, distribution RNG restored"
+  }
+}

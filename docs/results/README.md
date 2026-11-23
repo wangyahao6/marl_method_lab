@@ -26,6 +26,8 @@
 | [SZC · TKPR 排名位置消融](parameter-ablations/szc-vdn64-tkpr-rank-position/README.md) | 双层 VDN64，seed 2222、3535，R2/R3 四条完成，本批 K1 两条失败 | 同前缀逐种子结果、旧 K1 历史对照、锚点排名与失败记录。 |
 | [SZC-1M · 动作对结构与 Top-1 比例](parameter-ablations/szc-vdn64-pair-structure-ratio/README.md) | 双层 VDN64，seed 3535，共用 S/Z 历史池，7 个结构组与 6 个比例组 | 逐任务胜率、等预算对照、实际比例、传递闭包和偏好梯度诊断。 |
 | [SZC-1M · 动作对结构恢复间隔筛选](parameter-ablations/szc-vdn64-pair-structure-gap05/README.md) | 双层 VDN64，seed 3535，`min_gap=0.5`，7 个结构分支 | 实际筛选与共同状态覆盖、闭包、阶段表现及与旧批次的描述性差值。 |
+| [SZC-1M · Top-1 加额外动作对距离](parameter-ablations/szc-vdn64-pair-distance/README.md) | 双层 VDN64，seed 2222、3535，7 个结构分支 | 同预算 Near/Mid/Far/随机/MaxGap 的 ACC–BWT Pareto、Q-gap、闭包和梯度。 |
+| [SZC-1M · Far/Mid 额外对 Q-gap 筛选](parameter-ablations/szc-vdn64-pair-far-mid-gap/README.md) | 双层 VDN64，seed 2222、3535，2 个筛选分支 | 只筛额外对的共同状态配对、性能与优化诊断。 |
 
 ## 机制诊断
 
