@@ -101,6 +101,43 @@ def aspr_group_preference(current_q, reference_q, legal, decisions, settings, *,
                            pair_audit=True, group_ids=group_ids)
 
 
+def aspr_adjacent_preference(current_q, reference_q, legal, decisions, settings, *, group_ids):
+    adjacent = (group_ids.unsqueeze(-1) - group_ids.unsqueeze(-2)).abs() == 1
+    loss, count, summary = _full_rank_loss(
+        current_q, reference_q, legal, decisions, settings,
+        pair_audit=True, group_ids=group_ids, pair_selection=adjacent)
+    # Diagnostics use all cross-group pairs; G1-G3 never enters the loss.
+    with th.no_grad():
+        normalized, _, _, _ = reference_order(reference_q, legal, settings["q_scale_floor"])
+        gap, candidates, eligible, pairs = full_rank_pairs(normalized, legal, decisions, settings,
+                                                         group_ids=group_ids)
+        current_gap = current_q.detach().unsqueeze(-1) - current_q.detach().unsqueeze(-2)
+        violation = -gap.sign() * current_gap >= 0
+        diagnostics = []
+        for high, low in ((0, 1), (1, 2), (0, 2)):
+            a, b = group_ids.unsqueeze(-1), group_ids.unsqueeze(-2)
+            selected = ((a == high) & (b == low)) | ((a == low) & (b == high))
+            diagnostics.extend(((candidates & selected).sum(), (eligible & selected).sum(),
+                                (pairs & selected).sum(), (pairs & selected & violation).sum()))
+    return loss, count, th.cat((summary, th.stack(diagnostics)))
+
+
+def aspr_adjacent_statistics(summary):
+    stats = aspr_group_statistics(summary[:10])
+    stats["group_pairs"] = {}
+    for index, name in enumerate(("G1-G2", "G2-G3", "G1-G3")):
+        candidate, eligible, valid, violations = map(int, summary[10 + index * 4:14 + index * 4])
+        stats["group_pairs"][name] = dict(candidate_pairs=candidate, eligible_pairs=eligible,
+            valid_pairs=valid, pair_violations=violations,
+            pair_violation_rate=violations / valid if valid else None,
+            participates_in_loss=name != "G1-G3")
+    # Overall candidates and eligible counts describe the selected adjacent pairs.
+    adjacent = [stats["group_pairs"][key] for key in ("G1-G2", "G2-G3")]
+    stats.update(pair_filter_statistics(sum(x["candidate_pairs"] for x in adjacent),
+        sum(x["eligible_pairs"] for x in adjacent), stats["valid_pairs"]))
+    return stats
+
+
 def full_rank_preference_raw(current_q, reference_q, legal, decisions, settings):
     return _full_rank_loss(current_q, reference_q, legal, decisions, settings,
                            raw_reference=True, pair_audit=True)
@@ -543,10 +580,11 @@ class RankingPreference(ActionSetPreference):
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
         self.use_good_mask = method == "aspr_preference"
-        self.use_group_ids = method in ("aspr_3g_preference", "aspr_4g_preference")
+        self.use_group_ids = method in ("aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
         self.loss = {
             "aspr_preference": aspr_preference,
             "aspr_3g_preference": aspr_group_preference,
+            "aspr_3g_adjacent_preference": aspr_adjacent_preference,
             "aspr_4g_preference": aspr_group_preference,
             "full_rank_preference": partial(full_rank_preference, pair_audit=True),
             "full_rank_preference_unfiltered": full_rank_preference_unfiltered,
@@ -555,6 +593,7 @@ class RankingPreference(ActionSetPreference):
             "full_rank_preference_relu": full_rank_preference_relu,
             "topk_preference": topk_preference,
             "tkpr_refresh": topk_preference,
+            "tkpr_k1_gap0": topk_preference,
             "topk_preference_weighted": topk_preference_weighted,
             "topk_preference_high_regret": topk_preference_high_regret,
             "top1_preference": top1_preference,
@@ -564,7 +603,8 @@ class RankingPreference(ActionSetPreference):
         if self.use_good_mask:
             self.statistics = aspr_statistics
         elif self.use_group_ids:
-            self.statistics = aspr_group_statistics
+            self.statistics = (aspr_adjacent_statistics if method == "aspr_3g_adjacent_preference"
+                               else aspr_group_statistics)
         elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
                       "full_rank_preference_raw", "full_rank_preference_raw_loss"):
             self.statistics = full_rank_statistics
@@ -572,7 +612,7 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_max_statistics
         elif method == "top1_unfiltered_preference":
             self.statistics = top1_unfiltered_statistics
-        elif method in ("topk_preference", "tkpr_refresh"):
+        elif method in ("topk_preference", "tkpr_refresh", "tkpr_k1_gap0"):
             self.statistics = topk_statistics
         elif method == "topk_preference_weighted":
             self.statistics = topk_weighted_statistics

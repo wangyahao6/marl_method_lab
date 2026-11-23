@@ -14,6 +14,8 @@ def write_csv(path, rows, fields):
 
 
 def export_group_results(out, history, scheme, groups, group_count, method):
+    if method == "aspr_3g_adjacent_preference":
+        export_adjacent_pairs(out, method)
     summary, distribution = [], []
     for phase, pool in sorted(history.items()):
         stats = group_diagnostics(pool["episodes"], scheme, groups, group_count)
@@ -77,3 +79,41 @@ def export_group_results(out, history, scheme, groups, group_count, method):
               "group_size", "state_count", "candidate_pairs", "eligible_pairs", "valid_pairs", "pair_keep_rate",
               "pair_violation_rate")
     write_csv(out / "aspr_group_training_sampled.csv", rows, fields)
+
+
+def export_adjacent_pairs(out, method):
+    """Counts include repeated sampled episode IDs; rates use pooled pair counts."""
+    totals = defaultdict(lambda: defaultdict(int))
+    path = out / f"{method}_updates.jsonl"
+    if path.exists():
+        with path.open() as stream:
+            for line in stream:
+                update = json.loads(line)
+                for task in update["historical_tasks"]:
+                    for pair, values in task["group_pairs"].items():
+                        key = (update["phase"], update["task"], task["source_phase"], task["task"], pair)
+                        target = totals[key]
+                        target["sampled_episodes"] += task["sampled_episodes"]
+                        for name in ("candidate_pairs", "eligible_pairs", "valid_pairs", "pair_violations"):
+                            target[name] += values[name]
+    rows = []
+    for key, counts in sorted(totals.items()):
+        phase, task, source, historical, pair = key
+        rows.append(dict(training_phase=phase, training_task=task, source_phase=source,
+            historical_task=historical, pair=pair, participates_in_loss=pair != "G1-G3", **counts,
+            pair_violation_rate=counts["pair_violations"] / counts["valid_pairs"] if counts["valid_pairs"] else None))
+    fields = ("training_phase", "training_task", "source_phase", "historical_task", "pair",
+              "participates_in_loss", "sampled_episodes", "candidate_pairs", "eligible_pairs", "valid_pairs",
+              "pair_violations", "pair_violation_rate")
+    write_csv(out / "aspr_adjacent_training_pairs.csv", rows, fields)
+    probes = []
+    path = out / f"{method}_probes.jsonl"
+    if path.exists():
+        for line in path.read_text().splitlines():
+            row = json.loads(line)
+            for pair, values in row["group_pairs"].items():
+                probes.append(dict(phase=row["phase"], t_env=row["t_env"], task=row["task"],
+                    source_phase=row["source_phase"], episodes=row["episodes"], pair=pair, **values))
+    write_csv(out / "aspr_adjacent_offline_pairs.csv", probes,
+        ("phase", "t_env", "task", "source_phase", "episodes", "pair", "candidate_pairs", "eligible_pairs",
+         "valid_pairs", "pair_violations", "pair_violation_rate", "participates_in_loss"))

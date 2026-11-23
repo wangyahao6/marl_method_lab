@@ -3,7 +3,7 @@ from math import isfinite
 
 from common.exploration import epsilon_on_switch
 
-TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh")
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
@@ -12,7 +12,7 @@ SELECTED_METHODS = ("shapley_selected_frpr", "random_selected_frpr")
 RANK_METHODS = ("full_rank_preference", "full_rank_preference_relu", "full_rank_preference_unfiltered",
                 "full_rank_preference_raw", "full_rank_preference_raw_loss", "top1_preference",
                 "top1_max_preference", "top1_unfiltered_preference", "topk_preference", *TOPK_VARIANTS,
-                "aspr_preference", "aspr_3g_preference", "aspr_4g_preference")
+                "aspr_preference", "aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
 PAIR_STRUCTURES = {f"pair_structure_{selection}": selection for selection in (
     "k1", "adjacent", "k1_adjacent", "frpr", "random_n_minus_1", "random_2n_minus_3", "random_2n_minus_3_matched")}
 PAIR_RATIOS = {f"pair_ratio_{percent}": percent for percent in (0, 20, 40, 60, 80, 100)}
@@ -34,7 +34,8 @@ RANK_POSITION_METHODS = {"tkpr_r2": 2, "tkpr_r3": 3}
 HISTORY_RANK_METHODS = (*RANK_METHODS, *SELECTED_METHODS, *RANK_POSITION_METHODS)
 PREFERENCE_RANK_METHODS = (*HISTORY_RANK_METHODS, *PAIR_METHODS)
 RANK_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0.5, q_scale_floor=0.1)
-ASPR_GROUP_DEFAULTS = {"aspr_3g_preference": dict(RANK_DEFAULTS, group_count=3),
+ASPR_GROUP_DEFAULTS = {"aspr_3g_adjacent_preference": dict(RANK_DEFAULTS, group_count=3, min_gap=0.0),
+                       "aspr_3g_preference": dict(RANK_DEFAULTS, group_count=3),
                        "aspr_4g_preference": dict(RANK_DEFAULTS, group_count=4)}
 FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
@@ -163,6 +164,7 @@ def validate(protocol, algorithm, method):
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
                 "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
+                "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
                 "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
                 "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
                 "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,

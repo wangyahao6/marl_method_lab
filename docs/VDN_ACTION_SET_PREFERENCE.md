@@ -303,3 +303,22 @@ SZC 双层 VDN64 采用 2M/2M/2M 累计预算、逐任务 ε 和 FT，seed 2222�
 
 本批 R2/R3 四条分支完成，重跑的两条 K1 在 Z 阶段遭遇 SC2 连接故障；
 逐种子结果与历史 K1 参照见[排名位置消融报告](results/parameter-ablations/szc-vdn64-tkpr-rank-position/README.md)。
+
+### ASPR-3G-Adjacent 与 gap0 K1 对照
+
+`aspr_3g_adjacent_preference` 复用 ASPR-3G 的 `group_old_q()`，不改变确定性一维 K-means。
+只选择 `abs(group_ids_i - group_ids_j) == 1` 的合法无序动作对；组内与 G1-G3 不进入损失。
+独立配置 `szc/szc_vdn64_aspr_3g_adjacent_gap0.json` 使用 `min_gap=0.0`，保留旧 Q 完全相等对的排除。
+Softplus、Q 值标准化、温度 1、权重 1、状态内动作对均值及历史任务间聚合均沿用原实现。
+
+`tkpr_k1_gap0` 调用原 `topk_preference()`，使用独立 K=1、min_gap=0 配置
+`szc/szc_vdn64_tkpr_k1_gap0.json`。该入口允许复用原 gap0.5 的无偏好训练 S 前缀，
+不修改既有 TKPR 配置、损失或共享前缀匹配规则。配置保留父协议 ID 以满足既有完整协议匹配，方法与配置路径区分本实验。
+
+逐更新记录组大小分布、占比，以及三类跨组对各自候选、非平局、有效对与违反数。
+G1-G3 的诊断有效对指可统计的非平局对，`participates_in_loss=false`，不计入训练有效对总数。
+违反定义为当前 Q 与旧 Q 方向相反或当前 Q 平局，与原 ASPR 一致。
+`aspr_adjacent_training_pairs.csv` 按实际采样累计，重复轨迹按抽取次数计数；
+`aspr_adjacent_offline_pairs.csv` 保存已有固定贪心探测轨迹的阶段末诊断。
+
+`scripts/plan_aspr_3g_adjacent.py <唯一批次ID>` 只生成包含全部四条分支的预览计划；通过统一调度提交后执行。

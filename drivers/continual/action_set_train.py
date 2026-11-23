@@ -347,7 +347,7 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
                             episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
                             probe_records.append(reference_record(runner, batch, episode,
                                                                    store_old_q=args.method in ("aspr_preference",
-                                                                                              "aspr_3g_preference",
+                                                                                              "aspr_3g_preference", "aspr_3g_adjacent_preference",
                                                                                               "aspr_4g_preference")))
                         except Exception:
                             log_probe_error(traceback.format_exc())
@@ -410,7 +410,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         settings = protocol["action_set"]
         method = protocol["method"]
         aspr = method == "aspr_preference"
-        aspr_group = method in ("aspr_3g_preference", "aspr_4g_preference")
+        aspr_group = method in ("aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
         selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
         shared_history = PreferenceHistory()
@@ -429,7 +429,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 row["effective_k_histogram"] = dict(counts)
             elif method in ("full_rank_preference", "full_rank_preference_unfiltered",
                             "full_rank_preference_raw", "full_rank_preference_raw_loss", "aspr_preference",
-                            "aspr_3g_preference", "aspr_4g_preference"):
+                            "aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference"):
                 row["pair_filter_stats"] = aggregate_pair_filter_statistics(row["historical_tasks"])
             if aspr or aspr_group:
                 history = row["historical_tasks"]
@@ -698,7 +698,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             checkpoint = out / "models" / f"phase{phase:04d}_{runner.t_env}"
             save_models(learner, checkpoint)
             reference = agent_snapshot()
-            probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference", "aspr_3g_preference",
+            probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference", "aspr_3g_preference", "aspr_3g_adjacent_preference",
                                                "aspr_4g_preference") and preference is not None
                              and settings["probe_episodes_per_seed"] else None)
             row = {seen: evaluate(reference, seen, "stage_end", probe_records if seen == task else None)
