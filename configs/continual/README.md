@@ -40,3 +40,11 @@
 复用 seed 3535 旧参考线的 Gap-Matched-NonTop1 单分支见 [SZC-1M 非 Top-1 Q-gap 匹配实验](../../docs/SZC_PAIR_GAP_MATCHED.md)。
 
 双层 VDN64 的 TKPR-K1／R2／R3 单排名消融使用 `action_preference/szc/szc_vdn64_tkpr_rank_position.json`，沿用 2M × 3 的共同前缀协议。
+
+## TS5-1M
+
+2026-11-23 新增 TS5 每阶段 1M 变体。双方依次使用 5S、5Z、5C、2S3Z、2Z3C，累计阈值 1/2/3/4/5M，完整路径名义 5M。阶段边界沿用达到阈值后的完整回合结束处理。
+
+基础配置为 `task_transfer/ts5_1m.json`，其 `id` 按统一入口的 suite 匹配要求使用 `ts5`，阶段阈值和协议路径标识此预算变体。该入口支持单前馈层 VDN 基线。
+
+`action_preference/ts5/` 下的 `vdn_ft_1m.json`、`vdn_er_1m.json`、`tkpr_k1_1m.json`、`tkpr_refresh_1m.json` 分别从同名 2M 母版派生，沿用各自的方法、回放、模型、探索和评价设置。使用 `scripts/run.py --protocol` 显式选择所需预算和方法版本。此次配置实现的训练方法、种子及运行编号由后续实验指令指定。
