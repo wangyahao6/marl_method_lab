@@ -156,6 +156,9 @@ def inspect_phase(phase):
                 target = np.sort(gap[episode_index, time, agent, k1[episode_index, time, agent]].numpy())
                 chosen = np.sort(gap[episode_index, time, agent, matched[episode_index, time, agent]].numpy())
                 random = np.sort(gap[episode_index, time, agent, ratio0[episode_index, time, agent]].numpy())
+                all_candidates = gap[episode_index, time, agent,
+                                     eligible[episode_index, time, agent]
+                                     & ~top_pairs[episode_index, time, agent]].numpy()
                 budget = len(target)
                 w1 = float(np.abs(target - chosen).mean())
                 random_w1 = float(np.abs(target - random).mean())
@@ -164,6 +167,9 @@ def inspect_phase(phase):
                                    timestep=time, agent_id=agent, legal_actions=budget + 1,
                                    target_mean_gap=target_mean, matched_mean_gap=float(chosen.mean()),
                                    ratio0_mean_gap=float(random.mean()), matched_w1=w1, ratio0_w1=random_w1,
+                                   target_max_gap=float(target.max()),
+                                   non_top_candidate_max_gap=float(all_candidates.max()),
+                                   max_gap_shortfall=max(0., float(target.max() - all_candidates.max())),
                                    matched_relative_error=w1 / target_mean,
                                    ratio0_relative_error=random_w1 / target_mean))
     if len(states) != int(valid.sum()):
@@ -178,6 +184,8 @@ def inspect_phase(phase):
                    matched_w1=distribution([row["matched_w1"] for row in states]),
                    ratio0_w1=distribution([row["ratio0_w1"] for row in states]),
                    matched_relative_error=distribution([row["matched_relative_error"] for row in states]),
+                   max_gap_shortfall=distribution([row["max_gap_shortfall"] for row in states]),
+                   states_target_exceeds_candidate_max=sum(row["max_gap_shortfall"] > 0 for row in states),
                    exact_match_states=sum(row["matched_w1"] < 1e-8 for row in states),
                    optimizer_audit=matching)
     return gaps, rank_rows, states, summary
