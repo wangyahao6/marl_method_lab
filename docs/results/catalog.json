@@ -820,6 +820,51 @@
         "四种方法实际训练路径一致，不能检验 TKPR 保护收益；BWT 为零成功率之差，不代表成功保持。",
         "未见任务阶段末探测另存 unseen_evaluations.csv；FWT 缺少初始模型参考，留空。"
       ]
+    },
+    {
+      "id": "minatar-single-agent-tkpr-3535",
+      "category": "comparisons",
+      "report": "comparisons/minatar-single-agent-tkpr-3535/README.md",
+      "files": {
+        "runs": "comparisons/minatar-single-agent-tkpr-3535/runs.csv",
+        "training_summary": "comparisons/minatar-single-agent-tkpr-3535/training_summary.csv",
+        "evaluations": "comparisons/minatar-single-agent-tkpr-3535/evaluations.csv",
+        "stage_metrics": "comparisons/minatar-single-agent-tkpr-3535/stage_metrics.csv",
+        "retention": "comparisons/minatar-single-agent-tkpr-3535/retention.csv",
+        "learning_curves": "comparisons/minatar-single-agent-tkpr-3535/learning_curves.csv",
+        "preference_diagnostics": "comparisons/minatar-single-agent-tkpr-3535/preference_diagnostics.csv",
+        "reference_memory": "comparisons/minatar-single-agent-tkpr-3535/reference_memory.csv",
+        "verification": "comparisons/minatar-single-agent-tkpr-3535/verification.json"
+      },
+      "task_order": [
+        "SpaceInvaders",
+        "Freeway",
+        "Breakout",
+        "Freeway",
+        "Freeway",
+        "Breakout",
+        "Breakout"
+      ],
+      "training_seeds": [
+        3535
+      ],
+      "final_phase": 6,
+      "comparison": {
+        "kind": "independent_runs_matched_by_seed",
+        "match_on": [
+          "seed"
+        ],
+        "primary_control": {
+          "method": "DQN-FT",
+          "role": "independent"
+        }
+      },
+      "interpretation_limits": [
+        "MinAtar 使用原始每局回报，游戏之间不合并 ACC；stage_metrics 的三个游戏包含尚未训练过的游戏。",
+        "仅一个训练种子；相同种子和任务序列不表示两种方法共享训练轨迹。",
+        "首次学完后评价为每游戏 20 局，最终评价为每游戏 100 局；均值差异仅作描述。",
+        "learning_curves 为探索策略最近 100 局平均回报；偏好诊断每 1000 环境步抽样一次。"
+      ]
     }
   ]
 }

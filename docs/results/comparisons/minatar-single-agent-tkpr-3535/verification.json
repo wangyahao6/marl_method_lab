@@ -1,0 +1,35 @@
+{
+  "training_host": "rl-navigation-ubuntu",
+  "runtime": {
+    "python": "3.8.10",
+    "torch": "1.12.1+cu113",
+    "cuda": "11.3",
+    "gymnasium": "0.29.1",
+    "minatar": "1.0.15"
+  },
+  "independent_evaluation_command": "PYTHONPATH=src:/home/wyh/venvs/minatar_tkpr_deps:/home/wyh/venvs/mountaincar_tkpr_deps /home/wyh/marl_method_lab/.venv/bin/python -m single_agent.evaluate --run-dir RUN_DIR",
+  "runs": [
+    {
+      "run_id": "minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001",
+      "scheduler_state": "completed",
+      "exit_code": 0,
+      "source_commit": "80d7ad68abf7b9069e54721d668a233a9de0f7f6",
+      "trained_environment_steps": 3500000,
+      "checkpoints_on_host": 7,
+      "recorded_evaluations": 24,
+      "independent_evaluation_match": true,
+      "independent_retention_match": true
+    },
+    {
+      "run_id": "minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001",
+      "scheduler_state": "completed",
+      "exit_code": 0,
+      "source_commit": "80d7ad68abf7b9069e54721d668a233a9de0f7f6",
+      "trained_environment_steps": 3500000,
+      "checkpoints_on_host": 7,
+      "recorded_evaluations": 24,
+      "independent_evaluation_match": true,
+      "independent_retention_match": true
+    }
+  ]
+}

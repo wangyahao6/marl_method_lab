@@ -11,6 +11,7 @@
 | [SZC-1M · RMSprop 共享前缀](comparisons/szc-vdn64-rmsprop-1m/README.md) | 双层 VDN64，seed 3535，每阶段 1M 步 | TKPR-K1、TKPR-K1-W、FRPR 的贪心学习曲线、阶段端点和同前缀配对差。 |
 | [SZC · ASPR 与 Adam 优化器对照](comparisons/szc-vdn64-aspr-adam/README.md) | 双层 VDN64，seed 2222、3535，每阶段 2M 步 | 新版 ASPR、Adam TKPR-K1/K1-W/FRPR、RMSprop 与 VDN-FT 的训练及贪心曲线、端点和配对差。 |
 | [MountainCar · 单智能体 DQN/TKPR](comparisons/mountaincar-single-agent-tkpr/README.md) | T1→T2→T3，seed 3535，四种方法各 900k 步 | 参考采集均无成功轨迹，TKPR 未实际激活；查看逐运行摘要、阶段评估和训练曲线。 |
+| [MinAtar · 单智能体 DQN-FT 与 TKPR-K1](comparisons/minatar-single-agent-tkpr-3535/README.md) | 三个游戏、七区间，seed 3535，两种方法各 3.5M 步 | 最终逐游戏回报、历史记忆与偏好诊断，以及检查点独立复评结果。 |
 
 ## 回访与阶段干预消融
 

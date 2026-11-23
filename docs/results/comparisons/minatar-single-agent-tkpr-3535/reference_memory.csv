@@ -1,0 +1,4 @@
+run_id,method,seed,game,collected_after_stage,states,unique_state_count,unique_state_ratio
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,SpaceInvaders,0,10000,8757,0.8757
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,Freeway,1,10000,6148,0.6148
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,Breakout,2,10000,1558,0.1558

@@ -1,0 +1,15 @@
+run_id,method,seed,stage,trained_game,t_env,breakout_return,freeway_return,space_invaders_return,evaluation_episodes_per_game
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,0,SpaceInvaders,500000,0.0,0.0,46.85,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,1,Freeway,1000000,0.35,26.3,0.0,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,2,Breakout,1500000,7.35,0.15,0.0,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,3,Freeway,2000000,1.95,39.15,0.05,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,4,Freeway,2500000,0.65,45.75,0.0,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,5,Breakout,3000000,11.45,0.0,0.0,20
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,6,Breakout,3500000,17.9,0.1,2.0,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,0,SpaceInvaders,500000,0.0,0.0,46.85,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,1,Freeway,1000000,0.2,12.3,37.35,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,2,Breakout,1500000,16.35,17.8,34.7,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,3,Freeway,2000000,14.45,17.15,32.75,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,4,Freeway,2500000,14.2,42.5,35.55,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,5,Breakout,3000000,15.95,15.8,34.6,20
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,6,Breakout,3500000,18.2,13.25,38.6,20

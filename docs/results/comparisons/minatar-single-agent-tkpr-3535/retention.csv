@@ -1,0 +1,7 @@
+run_id,method,seed,game,first_learned_stage,first_mean_return,final_mean_return,bwt_return,forgetting_return
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,Breakout,2,7.35,14.65,7.300000000000001,0.0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,Freeway,1,26.3,0.04,-26.26,26.26
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,SpaceInvaders,0,46.85,2.0,-44.85,44.85
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,Breakout,2,16.35,16.24,-0.11000000000000298,0.11000000000000298
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,Freeway,1,12.3,12.33,0.02999999999999936,0.0
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,SpaceInvaders,0,46.85,34.13,-12.719999999999999,12.719999999999999

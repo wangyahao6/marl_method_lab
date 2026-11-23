@@ -1,0 +1,3 @@
+run_id,method,seed,role,parent_run_id,commit,status,exit_code,replay_on_switch,epsilon,completed_global_steps,trained_steps,config,reference_states,preference_updates
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,independent,,80d7ad68abf7b9069e54721d668a233a9de0f7f6,completed,0,clear,fixed_0.1,3500000,3500000,configs/minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001.json,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,independent,,80d7ad68abf7b9069e54721d668a233a9de0f7f6,completed,0,clear,fixed_0.1,3500000,3500000,configs/minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001.json,30000,2999748

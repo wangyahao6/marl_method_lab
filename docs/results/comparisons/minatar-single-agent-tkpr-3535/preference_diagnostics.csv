@@ -1,0 +1,15 @@
+run_id,method,seed,stage,game,sampled_updates,sampled_positive_preference_loss,mean_preference_loss,mean_constrained_states,mean_valid_pairs,defined_pair_violation_points,mean_pair_violation_rate,defined_preference_grad_points,mean_preference_grad_norm
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,0,SpaceInvaders,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,1,Freeway,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,2,Breakout,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,3,Freeway,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,4,Freeway,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,5,Breakout,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,6,Breakout,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,0,SpaceInvaders,500,0,0.0,0,0,0,,0,
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,1,Freeway,500,500,0.005218033287179424,64,241.458,500,0.00024689581392442944,500,0.19185294991743285
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,2,Breakout,500,500,0.0030133794058347122,60.542,207.094,500,0.0002528026242534319,500,0.3106075112763792
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,3,Freeway,500,500,0.0029761304885141727,64,246.782,500,0.0001540570973300287,500,0.1782219084489625
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,4,Freeway,500,500,7.37647257055869e-05,64,246.656,500,7.692307692307692e-06,500,0.030923463025595992
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,5,Breakout,500,500,0.014212277375976554,60.618,207.552,500,0.0035274879181146153,500,1.3825774165317417
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,6,Breakout,500,500,0.0008071414565056329,60.616,207.002,500,0.0,500,0.1865402593277395

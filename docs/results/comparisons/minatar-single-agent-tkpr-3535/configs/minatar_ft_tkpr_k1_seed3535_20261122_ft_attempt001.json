@@ -1,0 +1,36 @@
+{
+  "intervals": 7,
+  "interval_steps": 500000,
+  "learning_rate": 1e-05,
+  "gamma": 0.99,
+  "batch_size": 64,
+  "replay_capacity": 100000,
+  "target_update_steps": 1000,
+  "epsilon": 0.1,
+  "reference_steps": 10000,
+  "collection_seed_base": 301000,
+  "evaluation_episodes": 20,
+  "evaluation_seed_base": 91000,
+  "final_evaluation_episodes": 100,
+  "final_evaluation_seed_base": 191000,
+  "progress_interval": 10000,
+  "diagnostics_interval": 1000,
+  "preference": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1
+  },
+  "method": "DQN-FT",
+  "seed": 3535,
+  "task_schedule": [
+    "SpaceInvaders",
+    "Freeway",
+    "Breakout",
+    "Freeway",
+    "Freeway",
+    "Breakout",
+    "Breakout"
+  ],
+  "launch_git_commit": "80d7ad68abf7b9069e54721d668a233a9de0f7f6"
+}

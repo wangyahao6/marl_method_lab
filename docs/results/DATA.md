@@ -22,6 +22,8 @@
 
 SZC 的 `runs.csv` 中 `cohort` 标识原始提交批次。`preference_diagnostics.csv` 的筛选率和 Top-1 翻转率由累计计数相除。`mean_task_loss` 是有定义的历史任务损失在各更新间的平均，分母为 `task_loss_updates`。旧日志缺少的细项留空。Raw 与归一化变体的损失尺度不同，比较时同时查看覆盖率、动作对与梯度。
 
+MinAtar 单智能体结果使用原始每局回报：其 `evaluations.csv` 的 `mean_return`、`stage_metrics.csv` 的逐游戏回报及 `learning_curves.csv` 的探索策略最近 100 局回报均不是胜率。三个游戏的奖励尺度不同，不计算跨游戏 ACC。`retention.csv` 的 BWT 为最终 100 局平均回报减首次学完后 20 局平均回报。`preference_diagnostics.csv` 每 1,000 环境步抽样一次；完整逐更新和逐局日志保留在实验主机。
+
 评估标签中，`initial_reference` 是初始模型在将来任务上的表现，`next_unseen` 是首次训练该任务前的评估，`phase_start` 和 `periodic` 描述本阶段当前任务的学习过程，`stage_end` 用于比较该阶段末各已见任务。曲线的圆点为阶段末评估。定期与阶段末评估的局数与种子块可不同，见各实验的协议。
 
 ## 重算阶段指标

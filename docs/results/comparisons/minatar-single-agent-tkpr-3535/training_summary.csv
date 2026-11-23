@@ -1,0 +1,15 @@
+run_id,method,seed,stage,game,t_env,trained_steps,completed_episodes,switched_game,preference_updates,memory_games,memory_states,unique_states
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,0,SpaceInvaders,500000,500000,2557,False,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,1,Freeway,1000000,500000,199,True,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,2,Breakout,1500000,500000,9666,True,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,3,Freeway,2000000,500000,199,True,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,4,Freeway,2500000,500000,199,False,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,5,Breakout,3000000,500000,7295,True,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001,DQN-FT,3535,6,Breakout,3500000,500000,4802,False,0,0,0,0
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,0,SpaceInvaders,500000,500000,2557,False,0,1,10000,8757
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,1,Freeway,1000000,500000,199,True,499937,2,20000,14905
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,2,Breakout,1500000,500000,9066,True,499937,3,30000,16463
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,3,Freeway,2000000,500000,199,True,499937,3,30000,16463
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,4,Freeway,2500000,500000,199,False,500000,3,30000,16463
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,5,Breakout,3000000,500000,6102,True,499937,3,30000,16463
+minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001,DQN-TKPR-K1,3535,6,Breakout,3500000,500000,4802,False,500000,3,30000,16463
