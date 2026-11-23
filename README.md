@@ -13,6 +13,8 @@ MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本�
 - 新持续学习实验统一使用 `epsilon_on_switch: per_task`，每次任务切换从 `epsilon_start` 重新退火。 [配置与历史复现说明](configs/continual/README.md)
 - [来源与修改](docs/PROVENANCE.md)：上游、导入的方法、许可证差异、运行时依赖。
 
+- [TS5-1M 传递闭包覆盖率控制实验](docs/protocols/TS5_TC_COVERAGE.md)：全新 FT 参考数据、离线掩码验证与三种子九分支依赖计划；排队不代表实验完成。
+
 ## 目录职责
 
 | 路径 | 内容 |
