@@ -152,6 +152,15 @@ def export(plan_file):
         "不计入训练约束总数。违反率分母为对应有效对数，当前 Q 平局也计为违反。"
         "[固定探测轨迹](aspr_adjacent_offline_pairs.csv)是独立统计口径，沿用已有探测机制，不与训练采样混合。",
         "[偏好诊断](preference_diagnostics.csv)提供两方法实际有效对数和按对数加权的违反率。", ""]
+    if tables["preference_diagnostics"]:
+        lines += ["", "| 方法 | Seed | 训练阶段 | 历史任务 | 实际有效对总数 | 每有效状态对数 | 违反率 % |",
+                  "| --- | --- | --- | --- | ---: | ---: | ---: |"]
+        for row in tables["preference_diagnostics"]:
+            pairs, states = row["valid_pairs"], row["valid_states"]
+            rate = row["pair_violation_rate"]
+            lines.append(f'| {row["method"]} | {row["seed"]} | {row["training_task"]} | '
+                         f'{row["historical_task"]} | {pairs} | {show(pairs/states if states else None)} | '
+                         f'{show(100*rate if rate is not None else None)} |')
     if tables["aspr_cross_group_offline"]:
         lines += ["[全量历史胜局离线对照](aspr_cross_group_offline.csv)对两方法阶段末模型重放各自全部历史池；"
                   "S 池两方法相同，Z 池来自各自分支。该表不进行更新，也不进入损失。", "",
