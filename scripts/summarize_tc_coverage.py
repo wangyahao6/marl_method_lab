@@ -111,6 +111,30 @@ def summarize(plan_path):
             paired.append(dict(run_id=row['run_id'],control_run_id=control['run_id'],seed=row['seed'],method=row['method'],
                    **{metric+'_delta':row[metric]-control[metric] if row[metric] is not None and control[metric] is not None else None for metric in ('acc_pct','bwt_pp','fwt_pp','learning_auc_pct')}))
     write(out/'seed_summary.csv',aggregate);write(out/'paired_final.csv',paired)
+    tc_rows=[];trends=[]
+    offline=list(csv.DictReader((out/'offline_statistics.csv').open())) if (out/'offline_statistics.csv').exists() else []
+    for result in metrics:
+        if result['method']=='VDN-FT-reference' or result['phase']==0:continue
+        level=result['method'].replace('-TC','')
+        pools=[r for r in offline if int(r['seed'])==result['seed'] and r['level']==level and int(r['phase'])<result['phase']]
+        if not pools:continue
+        states=sum(int(r['states']) for r in pools);possible=sum(int(r['possible_pairs']) for r in pools)
+        selected=sum(int(r['direct_pairs']) for r in pools)
+        tc_rows.append(dict(result,micro_tc=sum(int(r['closure_pairs']) for r in pools)/possible,
+                            macro_tc=sum(float(r['macro_tc'])*int(r['states']) for r in pools)/states,
+                            qgap_mean=sum(float(r['qgap_mean'])*int(r['direct_pairs']) for r in pools)/selected))
+    for seed in plan['seeds']:
+        for phase in range(1,5):
+            arms={r['method']:r for r in tc_rows if r['seed']==seed and r['phase']==phase}
+            if set(arms)!=set(('low-TC','medium-TC','high-TC')):continue
+            for metric in ('acc_pct','bwt_pp','fwt_pp','learning_auc_pct'):
+                values=[arms[level+'-TC'][metric] for level in ('low','medium','high')]
+                if any(v is None for v in values):continue
+                increasing=all(a<=b for a,b in zip(values,values[1:]));decreasing=all(a>=b for a,b in zip(values,values[1:]))
+                trends.append(dict(seed=seed,phase=phase,metric=metric,low=values[0],medium=values[1],high=values[2],
+                   high_minus_low=values[2]-values[0],monotonic='flat' if increasing and decreasing else 'increasing' if increasing else 'decreasing' if decreasing else 'nonmonotonic',
+                   high_minus_low_qgap=arms['high-TC']['qgap_mean']-arms['low-TC']['qgap_mean']))
+    write(out/'tc_performance.csv',tc_rows);write(out/'within_seed_trends.csv',trends)
     completed=sum(r['status']=='completed' for r in manifests)
     lines=['# TS5-1M Transitive Closure Coverage Ablation','',
            'S → Z → C → 2S3Z → 2Z3C, five 1M stages, seeds 2222/3535/4646. VDN single-FF64, FT replay, per-task epsilon, RMSprop. Three fresh full VDN-FT references and nine branches sharing their seed-specific S boundary and four fixed FT historical success pools.',
@@ -121,7 +145,14 @@ def summarize(plan_path):
            '', '| Method | Seed | ACC % | BWT pp | FWT pp | E AUC % |','|---|---:|---:|---:|---:|---:|']
     def fmt(x):return 'N/A' if x is None else '%.3f'%x
     lines += ['| %s | %s | %s | %s | %s | %s |'%(r['method'],r['seed'],fmt(r['acc_pct']),fmt(r['bwt_pp']),fmt(r['fwt_pp']),fmt(r['learning_auc_pct'])) for r in final]
-    lines += ['', 'Interpretation limits: three training seeds are the independent replicates; states/pairs are not extra replicates. The arms preserve K1, edge budgets and per-state distance quotas, while graph topology and TC change together. TC-performance correlation alone does not isolate a causal role for the scalar TC score. Residual Q-gap differences remain possible competing explanations. The experiment contains no separately budgeted full-order training arm; if complete-order coverage is zero throughout, it cannot determine full versus partial ordering superiority. A best observed three-arm setting is not an estimated general optimum.',
+    for metric in ('acc_pct','bwt_pp','fwt_pp','learning_auc_pct'):
+        rows=[r for r in trends if r['phase']==4 and r['metric']==metric]
+        if rows:
+            lines += ['', '%s final-stage High−Low: %s; mean %.3f. Monotonic patterns: %s.'%(metric, ', '.join('seed%d %+.3f'%(r['seed'],r['high_minus_low']) for r in rows),mean(r['high_minus_low'] for r in rows), ', '.join('seed%d %s'%(r['seed'],r['monotonic']) for r in rows))]
+    candidates=[r for r in aggregate if r['metric']=='acc_pct' and r['method']!='VDN-FT-reference' and r['n']==3]
+    if candidates:
+        best=max(candidates,key=lambda r:r['mean']);lines += ['', 'Highest observed three-seed final ACC: %s (%.3f%%). This identifies an observed arm, not a general optimal TC interval.'%(best['method'],best['mean'])]
+    lines += ['', 'tc_performance.csv joins performance to the cumulative unique-state fixed-pool TC and Q-gap statistics available at each stage; these are not exposure-weighted training TC. within_seed_trends.csv retains per-stage paired trends and residual gap differences.', '', 'Interpretation limits: three training seeds are the independent replicates; states/pairs are not extra replicates. The arms preserve K1, edge budgets and per-state distance quotas, while graph topology and TC change together. TC-performance correlation alone does not isolate a causal role for the scalar TC score. Residual Q-gap differences remain possible competing explanations. The experiment contains no separately budgeted full-order training arm; if complete-order coverage is zero throughout, it cannot determine full versus partial ordering superiority. A best observed three-arm setting is not an estimated general optimum.',
               '', 'Shared-prefix AUC and stage-S metrics reuse the reference S trajectory once. References continue FT through all five stages; formal methods replay masks selected on FT reference states, including C/D reference states rather than each branch\'s own history. This is an intentional fixed-reference intervention.']
     (out/'REPORT.md').write_text('\n'.join(lines)+'\n')
     (out/'summary.json').write_text(json.dumps(dict(training_completed=completed,training_total=12,
