@@ -171,6 +171,38 @@ def export(plan_file):
             f'{k}={show(mean(r[f"{k}_delta"] for r in final_deltas))}' for k in END_METRICS) + "。",
             "新任务学习需结合 Z/C 当前任务 AUC 与端点，旧任务保持需结合 S/Z 终点与 BWT；"
             "不能仅由动作对数量或违反率推断保护效果。仅两个训练种子，不作一般性优劣或显著性结论。"]
+        lines += ["", "逐种子观察（方法减对照）："]
+        for seed in (2222, 3535):
+            z = next(r for r in tables["paired_metrics"] if r["seed"] == seed and r["phase"] == 1)
+            c = next(r for r in final_deltas if r["seed"] == seed)
+            lines.append(f'Seed {seed}：Z 当前任务 AUC {show(z["learning_auc_pct_delta"])} pp、'
+                         f'Z 末胜率 {show(z["zealot_win_pct_delta"])} pp；'
+                         f'C 当前任务 AUC {show(c["learning_auc_pct_delta"])} pp、'
+                         f'C 末胜率 {show(c["colossus_win_pct_delta"])} pp；'
+                         f'C 末 S 保持 {show(c["stalker_win_pct_delta"])} pp、'
+                         f'Z 保持 {show(c["zealot_win_pct_delta"])} pp、BWT {show(c["bwt_pp_delta"])} pp。')
+        for phase in (1, 2):
+            deltas = [r["learning_auc_pct_delta"] for r in tables["paired_metrics"] if r["phase"] == phase]
+            direction = ("两种子均更高" if all(v > 0 for v in deltas) else
+                         "两种子均更低" if all(v < 0 for v in deltas) else "两种子未显示同方向改善")
+            lines.append(f'{TASKS[phase]} 新任务学习 AUC：{direction}。')
+        offline = {(r["method"], int(r["seed"]), int(r["phase"]), int(r["source_phase"])): r
+                   for r in tables["aspr_cross_group_offline"] if r["pair"] == "G1-G3"}
+        lines += ["", "G1-G3 的阶段末离线违反情况："]
+        for key, row in sorted(offline.items()):
+            method, seed, phase, source = key
+            if method != "ASPR-3G-Adjacent":
+                continue
+            control = offline.get(("TKPR-K1", seed, phase, source))
+            if control and row["pair_violation_rate"] and control["pair_violation_rate"]:
+                a, b = float(row["pair_violation_rate"]), float(control["pair_violation_rate"])
+                lines.append(f'Seed {seed}、{TASKS[phase]} 末、历史 {TASKS[source]}：'
+                             f'Adjacent {100*a:.2f}%（{row["pair_violations"]}/{row["valid_pairs"]}），'
+                             f'K1 {100*b:.2f}%（{control["pair_violations"]}/{control["valid_pairs"]}），'
+                             f'差 {100*(a-b):+.2f} pp。')
+        lines.append("若同一状态的两类相邻组排序全部严格成立，G1-G3 顺序可由传递性成立；"
+                     "Softplus 训练并不保证每个相邻对都满足，因此应以实际离线违反数判断跨层级问题，"
+                     "不能仅根据掩码排除了 G1-G3 就断言其排序必然失效。S 池可直接按同样本比较，Z 池还包含分支采集差异。")
     else:
         lines.append("实验尚未全部完成；当前表只包含已有评价，不能据此宣称方法优劣。")
     lines += ["", "## 数据与计算口径", "",
