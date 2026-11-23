@@ -25,6 +25,7 @@ from learners.ranking_preference import (
 )
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
+from learners.pair_tc import TCPPreference
 from learners.pair_distance import PairDistancePreference
 from learners.pair_gap_matched import PairGapMatchedPreference
 from drivers.continual.aspr_group_export import export_group_results
@@ -464,7 +465,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if method == "tkpr_refresh":
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
             if pair_ablation:
-                preference_type = (PairGapMatchedPreference if method == "pair_gap_matched_non_top1"
+                preference_type = (TCPPreference if protocol.get("pair_ablation_experiment") == "tc_coverage"
+                                   else PairGapMatchedPreference if method == "pair_gap_matched_non_top1"
                                    else PairDistancePreference if method in (*PAIR_DISTANCE, *PAIR_GAP_FAR_MID)
                                    else PairAblationPreference)
                 preference = preference_type(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
@@ -515,6 +517,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         def prepare_shared_pair_pool(source_phase):
             pool = shared_history[source_phase]
             prior_budget = sum(item["pair_budget"] for item in preference.history.values())
+            if isinstance(preference, TCPPreference):
+                preference.mask_root = parent / "offline_tc"
             episodes, audit = preference.prepare_pool(pool, prior_budget=prior_budget)
             preference.history[source_phase] = dict(pool, episodes=episodes, pair_budget=audit["valid_pairs"])
             path = out / "pair_ablation_memory" / f"phase{source_phase:04d}"
@@ -640,6 +644,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
 
         stop_phase = {"prefix": len(stages) - 1, "shared-prefix": 1,
                       "pair-reference": len(stages) - 1}.get(role, len(stages))
+        if role == "pair-reference" and protocol.get("pair_ablation_experiment") == "tc_coverage":
+            stop_phase = len(stages)
         training_preference = None if role in ("shared-prefix", "pair-reference") else preference
         monitor_interval = args.gradient_monitor_interval
         for phase in range(first_phase, stop_phase):
@@ -744,7 +750,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                          preference.history[update["phase"]])
                     base.append(out / "tkpr_refresh_memory_updates.jsonl",
                                 dict(task=memory_task, update_phase=phase, **update))
-            elif preference is not None:
+            elif preference is not None and (protocol.get("pair_ablation_experiment") != "tc_coverage" or phase + 1 < stop_phase):
                 status("collecting_memory")
                 pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
                                       task, phase, settings, out, protocol[method] if aspr_group else None)

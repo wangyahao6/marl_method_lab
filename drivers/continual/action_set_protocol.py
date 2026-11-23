@@ -21,11 +21,12 @@ PAIR_DISTANCE = {f"pair_distance_{selection}": selection for selection in (
 PAIR_GAP_FAR_MID = {f"pair_gap_far_mid_{selection}": f"far_mid_{selection}"
                     for selection in ("unfiltered", "filtered")}
 PAIR_GAP_MATCHED = {"pair_gap_matched_non_top1": "gap_matched_non_top1"}
-PAIR_ABLATIONS = {"pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS,
+PAIR_TC = {f"pair_tc_{level}": level for level in ("low", "medium", "high")}
+PAIR_ABLATIONS = {"tc_coverage": PAIR_TC, "pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS,
                   "pair_structure_gap05": PAIR_STRUCTURES, "pair_distance": PAIR_DISTANCE,
                   "pair_gap_far_mid": PAIR_GAP_FAR_MID, "pair_gap_matched": PAIR_GAP_MATCHED}
 PAIR_METHODS = {**PAIR_STRUCTURES, **PAIR_RATIOS, **PAIR_DISTANCE, **PAIR_GAP_FAR_MID,
-                **PAIR_GAP_MATCHED}
+                **PAIR_GAP_MATCHED, **PAIR_TC}
 PAIR_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap=0, q_scale_floor=0.1, pair_seed=3535)
 PAIR_GAP05_DEFAULTS = dict(PAIR_DEFAULTS, min_gap=0.5)
 PAIR_DISTANCE_DEFAULTS = dict(PAIR_DEFAULTS, extra_min_gap=0)
@@ -226,7 +227,7 @@ def validate(protocol, algorithm, method):
         methods = PAIR_ABLATIONS[experiment]
         if method not in ("full_rank_preference", *methods):
             raise ValueError("pair ablation requires its own experiment protocol and method")
-        if algorithm != "vdn" or len(stages) != 3 or len({stage["task"] for stage in stages}) != 3:
+        if experiment != "tc_coverage" and (algorithm != "vdn" or len(stages) != 3 or len({stage["task"] for stage in stages}) != 3):
             raise ValueError("pair ablation requires three distinct stages with shared VDN")
         for name in methods:
             if name != method and name not in protocol:

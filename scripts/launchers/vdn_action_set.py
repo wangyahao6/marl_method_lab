@@ -23,7 +23,7 @@ def build(a, p, out, env):
         command += ['--preference-role', a.preference_role]
         stages = {'prefix': stages[:-1], 'keep': stages[-1:], 'release': stages[-1:],
                   'shared-prefix': stages[:1], 'shared-branch': stages[1:],
-                  'pair-reference': stages[:-1]}[a.preference_role]
+                  'pair-reference': (stages if protocol.get('pair_ablation_experiment') == 'tc_coverage' else stages[:-1])}[a.preference_role]
     if a.capture_timing:
         if protocol[a.method]['k'] != 1:
             p.error('--capture-timing requires TKPR-K1')
