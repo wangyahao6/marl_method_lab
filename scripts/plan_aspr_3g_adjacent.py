@@ -27,6 +27,21 @@ def build_plan(batch):
                 metadata=dict(experiment_group_id=batch, experiment_group_title="SZC ASPR-3G-Adjacent vs K1 gap0",
                     branch_id=method, branch_title=label, seed=seed, method=label, attempt=1,
                     parent_run_id=parent_id, results=str(ROOT / "results" / batch))))
+    training = list(tasks)
+    for task in training:
+        for suffix, argv, resources in (
+            ("independent_final", [sys.executable, "scripts/evaluate.py", "--run", task["run_dir"],
+                                    "--episodes", "128"], dict(gpu=0, gpu_mib=800, ram_mib=2500)),
+            ("offline_audit", [sys.executable, "scripts/audit_aspr_adjacent_offline.py", task["run_dir"]],
+                               dict(gpu_mib=0, ram_mib=2000)),
+        ):
+            tasks.append(dict(id=task["id"] + "_" + suffix, argv=argv, cwd=str(ROOT), type="evaluation",
+                dependencies=[task["id"]], queue=batch, queue_limit=4,
+                resources=resources, metadata=task["metadata"]))
+    tasks.append(dict(id=batch + "_final_summary", argv=[sys.executable,
+        "scripts/summarize_aspr_3g_adjacent.py", str(ROOT / "results" / batch / "plan.json")],
+        cwd=str(ROOT), type="summary", dependencies=[task["id"] for task in tasks],
+        dependency_mode="terminal", queue=batch, resources=dict(gpu_mib=0, ram_mib=1000)))
     return dict(id=batch, tasks=tasks)
 
 
