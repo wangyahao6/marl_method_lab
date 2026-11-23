@@ -1,0 +1,181 @@
+{
+  "protocol": {
+    "id": "szc_vdn64_pair_structure_1m",
+    "tasks": {
+      "stalker": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "zealot": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "colossus": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      }
+    },
+    "stages": [
+      {
+        "task": "stalker",
+        "steps": 1000000
+      },
+      {
+        "task": "zealot",
+        "steps": 1000000
+      },
+      {
+        "task": "colossus",
+        "steps": 1000000
+      }
+    ],
+    "phase_boundary": "cumulative",
+    "epsilon_on_switch": "per_task",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {
+        "stalker": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "zealot": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "colossus": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ]
+      },
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "evaluation": {
+      "seeds": [
+        91001,
+        91002
+      ],
+      "episodes_per_seed": 16,
+      "interval": 25000,
+      "focus_seeds": [
+        91101,
+        91102,
+        91103,
+        91104
+      ],
+      "focus_episodes_per_seed": 32,
+      "task_seed_stride": 100
+    },
+    "sc2_game_version": "4.10",
+    "full_rank_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1
+    },
+    "replay_on_switch": "ft",
+    "gradient_monitor_interval": 100,
+    "pair_ablation_experiment": "pair_structure",
+    "pair_structure_k1": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_adjacent": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_k1_adjacent": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_frpr": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_random_n_minus_1": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_random_2n_minus_3": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "pair_structure_random_2n_minus_3_matched": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "algorithm": "vdn",
+    "method": "full_rank_preference"
+  },
+  "launch_git_commit": "c6b7002560c9827061e2f543be318f32cafb5622",
+  "source_sha256": {
+    "src/learners/pair_ablation.py": "fa1eeaabffd6872abe9b8c19377f499b258f68917d2711e2f33785938f4e4ff5",
+    "src/learners/pair_gap_matched.py": null,
+    "src/learners/ranking_preference.py": "8f4813bbbbb8e84eb51926d9c782db3b5da7b3f15017c33dae0e6ee3f7ec9b28",
+    "src/learners/action_set_preference.py": "97bad74f3ae1542a232b2a1cd63dac3291ac3c2e4ce436f9171abf5d8b5f88e6",
+    "drivers/continual/action_set_protocol.py": "ce811f9936dc8d365fe6c644e52fc8832f0f238df75f9e5e6d4bf2e8ed8999fe",
+    "drivers/continual/action_set_train.py": "551f96e281930344038c1076b3fd85307e3c8ded3c6ea319ab2da04ccd9973b3"
+  }
+}

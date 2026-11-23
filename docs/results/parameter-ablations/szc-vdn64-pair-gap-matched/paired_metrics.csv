@@ -1,0 +1,7 @@
+treatment,control,phase,treatment_run_id,control_run_id,acc_pct_delta,bwt_pp_delta,fwt_pp_delta,stalker_win_pct_delta,zealot_win_pct_delta,colossus_win_pct_delta,learning_auc_pct_delta
+Gap-Matched-NonTop1,TKPR-K1,1,szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,szc_pair_matched_3535_20261119_pair_structure_k1,-13.671875,-4.6875,0.0,-4.6875,-22.65625,,-10.830828555641986
+Gap-Matched-NonTop1,TKPR-K1,2,szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,szc_pair_matched_3535_20261119_pair_structure_k1,-17.1875,-4.6875,-3.515625,-5.46875,-26.5625,-19.53125,-2.038184178149713
+Gap-Matched-NonTop1,Ratio-0,1,szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,szc_pair_matched_3535_20261119_pair_ratio_0,-8.984375,1.5625,0.0,1.5625,-19.53125,,0.6917660162224024
+Gap-Matched-NonTop1,Ratio-0,2,szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,szc_pair_matched_3535_20261119_pair_ratio_0,2.8645833333333357,15.625,0.390625,-1.5625,13.28125,-3.125,-1.8715565489596848
+Ratio-0,TKPR-K1,1,szc_pair_matched_3535_20261119_pair_ratio_0,szc_pair_matched_3535_20261119_pair_structure_k1,-4.6875,-6.25,0.0,-6.25,-3.125,,-11.522594571864389
+Ratio-0,TKPR-K1,2,szc_pair_matched_3535_20261119_pair_ratio_0,szc_pair_matched_3535_20261119_pair_structure_k1,-20.052083333333336,-20.3125,-3.90625,-3.90625,-39.84375,-16.40625,-0.16662762919002816

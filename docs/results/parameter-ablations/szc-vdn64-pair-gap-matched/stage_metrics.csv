@@ -1,0 +1,8 @@
+run_id,method,seed,role,parent_run_id,phase,training_task,start,t_env,stalker_win_pct,acc_pct,bwt_pp,fwt_pp,learning_auc_pct,zealot_win_pct,colossus_win_pct
+szc_pair_matched_3535_20261119_reference,TD reference,3535,pair-reference,,0,stalker,0,1000035,25.0,25.0,,,24.60901212207573,,
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,1000035,2000004,26.5625,47.265625,1.5625,18.75,46.433967968632025,67.96875,
+szc_pair_matched_3535_20261119_pair_structure_k1,TKPR-K1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,2000004,3000018,21.09375,51.302083333333336,1.5625,23.046875,30.486870840058238,75.0,57.8125
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,1000035,2000046,20.3125,42.578125,-4.6875,18.75,34.91137339676764,64.84375,
+szc_pair_matched_3535_20261119_pair_ratio_0,Ratio-0,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,2000046,3000045,17.1875,31.25,-18.75,19.140625,30.32024321086821,35.15625,41.40625
+szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,Gap-Matched-NonTop1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,1,zealot,1000035,2000001,21.875,33.59375,-3.125,18.75,35.60313941299004,45.3125,
+szc_pair_gapmatched_3535_20261123_pair_gap_matched_non_top1,Gap-Matched-NonTop1,3535,shared-branch,szc_pair_matched_3535_20261119_reference,2,colossus,2000001,3000041,15.625,34.114583333333336,-3.125,19.53125,28.448686661908525,48.4375,38.28125

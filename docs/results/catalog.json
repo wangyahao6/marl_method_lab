@@ -929,6 +929,54 @@
         "批次运行期间 Git 提交变化，已核对本方法选对与损失文件哈希和实际共享协议；详见报告。",
         "动作对 Q-gap 与排名距离相关，不能由本批相关性断言因果作用。"
       ]
+    },
+    {
+      "id": "szc-vdn64-pair-gap-matched",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/szc-vdn64-pair-gap-matched/README.md",
+      "files": {
+        "runs": "parameter-ablations/szc-vdn64-pair-gap-matched/runs.csv",
+        "evaluations": "parameter-ablations/szc-vdn64-pair-gap-matched/evaluations.csv",
+        "stage_metrics": "parameter-ablations/szc-vdn64-pair-gap-matched/stage_metrics.csv",
+        "learning_curves": "parameter-ablations/szc-vdn64-pair-gap-matched/learning_curves.csv",
+        "paired_metrics": "parameter-ablations/szc-vdn64-pair-gap-matched/paired_metrics.csv",
+        "pair_diagnostics": "parameter-ablations/szc-vdn64-pair-gap-matched/pair_diagnostics.csv",
+        "gap_distribution": "parameter-ablations/szc-vdn64-pair-gap-matched/gap_distribution.csv",
+        "rank_distance_distribution": "parameter-ablations/szc-vdn64-pair-gap-matched/rank_distance_distribution.csv",
+        "update_diagnostics": "parameter-ablations/szc-vdn64-pair-gap-matched/update_diagnostics.csv",
+        "preference_diagnostics": "parameter-ablations/szc-vdn64-pair-gap-matched/preference_diagnostics.csv",
+        "gradient_diagnostics": "parameter-ablations/szc-vdn64-pair-gap-matched/gradient_diagnostics.csv",
+        "final_policy_diagnostics": "parameter-ablations/szc-vdn64-pair-gap-matched/final_policy_diagnostics.csv",
+        "state_matching": "parameter-ablations/szc-vdn64-pair-gap-matched/state_matching.csv.gz",
+        "source_manifest": "parameter-ablations/szc-vdn64-pair-gap-matched/source_manifest.json"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_archived_prefix_cross_version_exploratory",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "treatments": [
+          "TKPR-K1",
+          "Ratio-0",
+          "Gap-Matched-NonTop1"
+        ],
+        "primary_control": "TKPR-K1"
+      },
+      "interpretation_limits": [
+        "只有 seed 3535；不可作统计显著性推断。",
+        "非 Top-1 候选的最大 Q-gap 在每个有效状态都低于 K1 最大 Q-gap，残余分布差异显著。",
+        "Gap 匹配也改变了排名距离分布；新旧分支源码提交不同，已核对核心损失与旧掩码行为。"
+      ]
     }
   ]
 }

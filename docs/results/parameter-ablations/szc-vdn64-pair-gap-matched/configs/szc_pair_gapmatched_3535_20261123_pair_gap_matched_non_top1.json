@@ -1,0 +1,152 @@
+{
+  "protocol": {
+    "id": "szc_vdn64_pair_gap_matched_1m",
+    "tasks": {
+      "stalker": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "zealot": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "colossus": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      }
+    },
+    "stages": [
+      {
+        "task": "stalker",
+        "steps": 1000000
+      },
+      {
+        "task": "zealot",
+        "steps": 1000000
+      },
+      {
+        "task": "colossus",
+        "steps": 1000000
+      }
+    ],
+    "phase_boundary": "cumulative",
+    "epsilon_on_switch": "per_task",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {
+        "stalker": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "zealot": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ],
+        "colossus": [
+          0,
+          0.01,
+          0.05,
+          0.1
+        ]
+      },
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "evaluation": {
+      "seeds": [
+        91001,
+        91002
+      ],
+      "episodes_per_seed": 16,
+      "interval": 25000,
+      "focus_seeds": [
+        91101,
+        91102,
+        91103,
+        91104
+      ],
+      "focus_episodes_per_seed": 32,
+      "task_seed_stride": 100
+    },
+    "sc2_game_version": "4.10",
+    "full_rank_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1
+    },
+    "replay_on_switch": "ft",
+    "gradient_monitor_interval": 100,
+    "pair_ablation_experiment": "pair_gap_matched",
+    "pair_gap_matched_non_top1": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0,
+      "q_scale_floor": 0.1,
+      "pair_seed": 3535
+    },
+    "algorithm": "vdn",
+    "method": "pair_gap_matched_non_top1"
+  },
+  "launch_git_commit": "3d3d6f312e864f288a734e38f07d2f1f52d86b68",
+  "source_sha256": {
+    "src/learners/pair_ablation.py": "87e587e797220e31ac64f43935a8b3d8f29656f38b5aebc71362345af2d0960f",
+    "src/learners/pair_gap_matched.py": "62726f5f43b216af25fc4d75eee768b54f9ca1c5ccb7c067ddfaac7ac27ee833",
+    "src/learners/ranking_preference.py": "0f5651597bf0c696c24f0203905e768404a1d9b89ca2347aeadd2b09b4344cd2",
+    "src/learners/action_set_preference.py": "2210c01b3a8e986c95e30c059bfe6196da4eb85e21f22af03c997adbfdbdc906",
+    "drivers/continual/action_set_protocol.py": "4b31fe229e993a302a133c5c6917262cf4b7d3eecb5b873fa2383f3374ebc950",
+    "drivers/continual/action_set_train.py": "2357338803cc2163e4ecc7811024f555122faf8f04cb0423e96cb06dfe9bedf9"
+  },
+  "branch_restore": {
+    "parent": "/home/wyh/marl_method_lab/runs/pair_structure/szc_pair_matched_3535_20261119_reference",
+    "checkpoint": "/home/wyh/marl_method_lab/runs/pair_structure/szc_pair_matched_3535_20261119_reference/models/phase0000_1000035",
+    "role": "shared-branch",
+    "preference_weight": 1.0,
+    "t_env": 1000035,
+    "episode": 19110,
+    "updates": 19079,
+    "last_target_update_episode": 19000,
+    "model_hash": "54c9f68d05a423e84bcea663d1d8102dee62382f4e7792bbce0d39bc2d37af0f",
+    "parent_model_hash": "54c9f68d05a423e84bcea663d1d8102dee62382f4e7792bbce0d39bc2d37af0f",
+    "engine": "new SC2 process, distribution RNG restored"
+  }
+}
