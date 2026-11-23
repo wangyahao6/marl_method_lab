@@ -1,0 +1,72 @@
+[
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed2222_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed3535_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed2222_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed3535_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_summary",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001_offline_audit",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed2222_attempt001_offline_audit",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001_offline_audit",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed3535_attempt001_offline_audit",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_final_summary",
+    "state": "completed",
+    "reason": "exit code 0"
+  }
+]
