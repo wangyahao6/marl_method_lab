@@ -26,6 +26,7 @@ from learners.ranking_preference import (
 from learners.selected_frpr import SelectedFRPR
 from learners.pair_ablation import PairAblationPreference, aggregate_ablation_statistics
 from learners.pair_distance import PairDistancePreference
+from learners.pair_gap_matched import PairGapMatchedPreference
 from drivers.continual.aspr_group_export import export_group_results
 from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PAIR_DISTANCE, PAIR_GAP_FAR_MID,
@@ -463,7 +464,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if method == "tkpr_refresh":
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
             if pair_ablation:
-                preference_type = (PairDistancePreference if method in (*PAIR_DISTANCE, *PAIR_GAP_FAR_MID)
+                preference_type = (PairGapMatchedPreference if method == "pair_gap_matched_non_top1"
+                                   else PairDistancePreference if method in (*PAIR_DISTANCE, *PAIR_GAP_FAR_MID)
                                    else PairAblationPreference)
                 preference = preference_type(PAIR_METHODS[method], ranking, np.random.default_rng(seed),
                                              augmented, groups, record_preference)

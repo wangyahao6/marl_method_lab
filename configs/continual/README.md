@@ -8,6 +8,7 @@
 | [action_preference/pair_ratio](action_preference/pair_ratio) | SZC-1M Top-1 约束比例消融。 |
 | [action_preference/pair_distance](action_preference/pair_distance) | SZC-1M Top-1 加 Near、Mid、Far、随机和 MaxGap 额外对结构比较。 |
 | [action_preference/pair_gap_far_mid](action_preference/pair_gap_far_mid) | SZC-1M Far/Mid 额外动作对的 Q-gap 0／0.5 筛选比较。 |
+| [action_preference/pair_gap_matched](action_preference/pair_gap_matched) | SZC-1M K1 与归一化 Q-gap 最优匹配的非 Top-1 对比较。 |
 | [action_preference/examples](action_preference/examples) | 动作集合协议示例。 |
 | [action_preference/historical](action_preference/historical) | 历史首跑和回访协议，包括累计 ε 的早期 SZC T1PR 与 ASPR-Max。 |
 | [neuron_protection/softprotect](neuron_protection/softprotect) | A/W/V、异质 Agent、TS3/TS4 软保护与历史对照。Windows 128 单元软保护协议仍可定位。 |
@@ -35,5 +36,7 @@
 两组 seed 3535 动作对消融的设置、诊断及启动命令见 [SZC-1M 动作对消融](../../docs/SZC_PAIR_ABLATIONS.md)。
 
 双种子 Top-1 加额外对结构与 Far/Mid Q-gap 消融见 [SZC-1M 动作对距离实验](../../docs/SZC_PAIR_DISTANCE.md)。
+
+复用 seed 3535 旧参考线的 Gap-Matched-NonTop1 单分支见 [SZC-1M 非 Top-1 Q-gap 匹配实验](../../docs/SZC_PAIR_GAP_MATCHED.md)。
 
 双层 VDN64 的 TKPR-K1／R2／R3 单排名消融使用 `action_preference/szc/szc_vdn64_tkpr_rank_position.json`，沿用 2M × 3 的共同前缀协议。
