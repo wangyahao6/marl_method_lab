@@ -1040,7 +1040,18 @@
         "timing_analysis": "comparisons/ts5-tkpr-refresh/analysis/timing_metrics_by_phase.csv",
         "aux_update_analysis": "comparisons/ts5-tkpr-refresh/analysis/aux_updates_by_phase.csv",
         "analysis_notes": "comparisons/ts5-tkpr-refresh/analysis/analysis_notes.md",
-        "analysis_script": "comparisons/ts5-tkpr-refresh/analysis/analyze_logs.py"
+        "analysis_script": "comparisons/ts5-tkpr-refresh/analysis/analyze_logs.py",
+        "source_drift_report": "comparisons/ts5-tkpr-refresh/analysis/source_drift/analysis_report.md",
+        "source_data_audit": "comparisons/ts5-tkpr-refresh/analysis/source_drift/data_audit.md",
+        "reference_rank_drift": "comparisons/ts5-tkpr-refresh/analysis/source_drift/reference_rank_drift.csv",
+        "trajectory_source_stats": "comparisons/ts5-tkpr-refresh/analysis/source_drift/trajectory_source_stats.csv",
+        "source_gradient_metrics": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_gradient_metrics.csv",
+        "source_gradient_cosine": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_gradient_cosine.csv",
+        "source_td_gradient": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_td_gradient.csv",
+        "td_loss_by_phase": "comparisons/ts5-tkpr-refresh/analysis/source_drift/td_loss_by_phase.csv",
+        "source_gradient_summary": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_gradient_summary.csv",
+        "source_cosine_summary": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_cosine_summary.csv",
+        "gradient_reconstruction": "comparisons/ts5-tkpr-refresh/analysis/source_drift/gradient_reconstruction.csv"
       },
       "task_order": [
         "A",
@@ -1070,7 +1081,8 @@
       "interpretation_limits": [
         "单训练种子、单任务顺序；不作显著性推断。",
         "Refresh 同时改变逐任务采样预算与记忆刷新，不能分离两项贡献。",
-        "无共享前缀，实际训练版本见 runs.csv。"
+        "无共享前缀，实际训练版本见 runs.csv。",
+        "来源漂移分析仅有最终池留存样本，无法还原D/E真实训练池；无同次TD minibatch，不能验证来源与TD方向或性能下降因果。"
       ]
     }
   ]

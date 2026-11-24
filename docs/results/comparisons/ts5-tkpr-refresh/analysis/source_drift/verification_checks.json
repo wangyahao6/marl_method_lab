@@ -1,0 +1,7 @@
+{
+  "original_remote_hashes_verified": 28,
+  "refresh_reference_paths_verified": 500,
+  "unchanged_training_functions": 13,
+  "original_inputs_modified": false,
+  "execution": "local CPU, remote analysis task withdrawn before start"
+}

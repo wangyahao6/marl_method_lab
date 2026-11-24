@@ -1,0 +1,192 @@
+{
+  "analysis_commit": "38b7d32e092441fbbcc84dbbec294a5adc9be754",
+  "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]",
+  "torch": "2.6.0",
+  "numpy": "1.26.4",
+  "device": "cpu",
+  "threads": 2,
+  "seed": 68121,
+  "repeats": 10,
+  "files": [
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0000/success.th",
+      "bytes": 20351417,
+      "sha256": "cfdef9ff5a59fef3b43bc0ccc3fe54278e6becfb7010f26398f51bcedd88a817"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0001/success.th",
+      "bytes": 19459513,
+      "sha256": "5cdbbed0713f7e12f023d5bef80201c9a755a3d86b7ace9597a3036add7d92f1"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0002/success.th",
+      "bytes": 28023801,
+      "sha256": "62ae45a74d3f859450d7043d86de978db77f40f60879c4a0f49d080a5961062b"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0003/success.th",
+      "bytes": 22628921,
+      "sha256": "30d7577885c38093487d9839918394648cefb6e4ee7655e72ea223a165904c67"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0004/success.th",
+      "bytes": 23468473,
+      "sha256": "e4a8e7eaed1999a303297fb1d0c31ab10c2488404c78062e589f8b700aea2857"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0000_2000011/agent.th",
+      "bytes": 133387,
+      "sha256": "405e2396842948ed837d591b8fabc3e80fe3330a02173935f85d214378a829f6"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0002_6000067/agent.th",
+      "bytes": 133387,
+      "sha256": "d757bcb2ac26162c0511f70aa863498854824716bbe43d60d3274cba47b0e5e3"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0001_4000000/agent.th",
+      "bytes": 133387,
+      "sha256": "bd705fa1a8d01be5f5bc23bfc210a33d1ac8a94eaf30f418f8aa17097acf61a1"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0003_8000011/agent.th",
+      "bytes": 133387,
+      "sha256": "d42e6e025c5a36108bb98ae690a009f0e1b511dc4fb35c4a1c090bef2825a298"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0004_10000031/agent.th",
+      "bytes": 133387,
+      "sha256": "55454458ce33e1885c9dfcb677dc82adfa7864d8352c7eaf027cfd0a3ba7e051"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/config.json",
+      "bytes": 4377,
+      "sha256": "a88e74d489a7dca0edd2a6b59766bacd03f00578fa4a0e1d5545d181eb70e98f"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/protocol.json",
+      "bytes": 1980,
+      "sha256": "ea8db0aa4d49552344edbedeac305d88555084667e11fd5f2d0f56e13095c5b2"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/retention.json",
+      "bytes": 1850,
+      "sha256": "85a5d488d0f51a85bae87080f10fa0ad8b586dbee046102c2ec3acb58f3ebcd9"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/action_set_memory/phase0000/success.th",
+      "bytes": 20042169,
+      "sha256": "c27bcead1d9cfc44548bc11cc2cd7c6cf7855c42233aaaef77dea97d6b522c11"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/action_set_memory/phase0001/success.th",
+      "bytes": 19004217,
+      "sha256": "2d67897bdb3662586c29156b604b6d5cb048e509aaa41c40d6fd4a45a9fe6678"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/action_set_memory/phase0002/success.th",
+      "bytes": 27870329,
+      "sha256": "fc5cc9260341b4dc6fa82ae20e2c97d9293d4ac96d4d00e17b289c6a3107ac8e"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/action_set_memory/phase0003/success.th",
+      "bytes": 23839609,
+      "sha256": "4f080f62e7019b457206c60cc8fdcdecb4e679324856198643269d3e2fea8905"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/action_set_memory/phase0004/success.th",
+      "bytes": 24162361,
+      "sha256": "1d8447803fd1b427ed3360ec7d28d028acb9bb266c44911c0253b69dc0cb7297"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/models/phase0000_2000011/agent.th",
+      "bytes": 133387,
+      "sha256": "405e2396842948ed837d591b8fabc3e80fe3330a02173935f85d214378a829f6"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/models/phase0002_6000002/agent.th",
+      "bytes": 133387,
+      "sha256": "9a0db29cdff1decd4ad43ef294cecc5a87aad961c02bcd3238cfe3acfad51627"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/models/phase0001_4000000/agent.th",
+      "bytes": 133387,
+      "sha256": "bd705fa1a8d01be5f5bc23bfc210a33d1ac8a94eaf30f418f8aa17097acf61a1"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/models/phase0003_8000057/agent.th",
+      "bytes": 133387,
+      "sha256": "097920a50dd6d45b22925cfb8107cb0637e10ec9dbf3fcd7c0a0c1de727b0410"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/models/phase0004_10000055/agent.th",
+      "bytes": 133387,
+      "sha256": "35ce91345a36ecbf34ad4b6610a47d10c27034b18b06c96450a1837e851ccfea"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/config.json",
+      "bytes": 4446,
+      "sha256": "3cb596940759d050e63a421a3515591aa92070dd07f399beba7020bfa6a02c16"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/protocol.json",
+      "bytes": 2049,
+      "sha256": "d66b2bf54689e636f6f96c2d40302e56f15cd05dee61281cf6c4daec33c5e5fb"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/retention.json",
+      "bytes": 1854,
+      "sha256": "03518fa8913e7516372daae17aae2727309a2bc33ea1984fb59cc5174a209e20"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/topk_preference_updates.jsonl",
+      "sha256": "2ef3cfeba4ceb6e187c1609f0e1fcc3dbc9ee2d4b5ece85b29eec7098b17898a",
+      "bytes": 225976874
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/tkpr_refresh_updates.jsonl",
+      "sha256": "e54f95640758d9d47eb618345562efc8e5b94b35a923c897eea1388d4435a7cb",
+      "bytes": 232669363
+    }
+  ],
+  "audit": [
+    {
+      "method": "tkpr_k1",
+      "checkpoints": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "pools": {
+        "A": 100,
+        "B": 100,
+        "C": 100,
+        "D": 100,
+        "E": 100
+      },
+      "intermediate_checkpoints": [],
+      "td_replay_snapshots": []
+    },
+    {
+      "method": "tkpr_refresh",
+      "checkpoints": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "pools": {
+        "A": 100,
+        "B": 100,
+        "C": 100,
+        "D": 100,
+        "E": 100
+      },
+      "intermediate_checkpoints": [],
+      "td_replay_snapshots": []
+    }
+  ]
+}
