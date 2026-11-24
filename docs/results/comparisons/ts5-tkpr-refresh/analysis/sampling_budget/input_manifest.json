@@ -1,0 +1,125 @@
+{
+  "run_id": "ts5_3535_tkpr_k1_20261122_attempt001",
+  "training_commit": "9db0ed1951ded62c00eb1ff27a80c71ae5465dc5",
+  "analysis_base_commit": "9a9b9faa4750c8731b9a09d0a7cc773daf3df2bf",
+  "seed": 86431,
+  "repeats": 30,
+  "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]",
+  "torch": "2.6.0",
+  "numpy": "1.26.4",
+  "device": "cpu",
+  "threads": 2,
+  "settings": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "k": 1
+  },
+  "gradient_parameters": [
+    {
+      "name": "net.0.weight",
+      "shape": [
+        64,
+        108
+      ]
+    },
+    {
+      "name": "net.0.bias",
+      "shape": [
+        64
+      ]
+    },
+    {
+      "name": "rnn.weight_ih",
+      "shape": [
+        192,
+        64
+      ]
+    },
+    {
+      "name": "rnn.weight_hh",
+      "shape": [
+        192,
+        64
+      ]
+    },
+    {
+      "name": "rnn.bias_ih",
+      "shape": [
+        192
+      ]
+    },
+    {
+      "name": "rnn.bias_hh",
+      "shape": [
+        192
+      ]
+    },
+    {
+      "name": "fc2.weight",
+      "shape": [
+        11,
+        64
+      ]
+    },
+    {
+      "name": "fc2.bias",
+      "shape": [
+        11
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/config.json",
+      "bytes": 4377,
+      "sha256": "a88e74d489a7dca0edd2a6b59766bacd03f00578fa4a0e1d5545d181eb70e98f"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/protocol.json",
+      "bytes": 1980,
+      "sha256": "ea8db0aa4d49552344edbedeac305d88555084667e11fd5f2d0f56e13095c5b2"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/env_info.json",
+      "bytes": 598,
+      "sha256": "d26d88ea4817f55e25bef8e9f70696962b29907bf895a146c8b348cc785c2e87"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0000/success.th",
+      "bytes": 20351417,
+      "sha256": "cfdef9ff5a59fef3b43bc0ccc3fe54278e6becfb7010f26398f51bcedd88a817"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0001/success.th",
+      "bytes": 19459513,
+      "sha256": "5cdbbed0713f7e12f023d5bef80201c9a755a3d86b7ace9597a3036add7d92f1"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0002/success.th",
+      "bytes": 28023801,
+      "sha256": "62ae45a74d3f859450d7043d86de978db77f40f60879c4a0f49d080a5961062b"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/action_set_memory/phase0003/success.th",
+      "bytes": 22628921,
+      "sha256": "30d7577885c38093487d9839918394648cefb6e4ee7655e72ea223a165904c67"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0002_6000067/agent.th",
+      "bytes": 133387,
+      "sha256": "d757bcb2ac26162c0511f70aa863498854824716bbe43d60d3274cba47b0e5e3"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0003_8000011/agent.th",
+      "bytes": 133387,
+      "sha256": "d42e6e025c5a36108bb98ae690a009f0e1b511dc4fb35c4a1c090bef2825a298"
+    },
+    {
+      "path": "runs/ts5_3535_tkpr_k1_20261122_attempt001/models/phase0004_10000031/agent.th",
+      "bytes": 133387,
+      "sha256": "55454458ce33e1885c9dfcb677dc82adfa7864d8352c7eaf027cfd0a3ba7e051"
+    }
+  ]
+}

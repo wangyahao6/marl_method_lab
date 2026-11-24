@@ -41,3 +41,7 @@ TKPR-K1 使用静态成功轨迹池，每次辅助更新跨历史任务总共采
 ## 历史来源与参考漂移离线分析
 
 [机制分析报告](analysis/source_drift/analysis_report.md)与[数据审计](analysis/source_drift/data_audit.md)：固定状态排序、C/D/E末留存来源梯度（每设置10次）、数值重构检查、TD Loss分阶段/进度段统计。Refresh真实历史池快照和同次TD数据缺失，结果不能还原实际D/E训练更新或证明下降原因。
+
+## 固定历史池的采样预算离线验证
+
+[采样预算分析](analysis/sampling_budget/analysis_report.md)：固定原始TKPR-K1的C/D/E末模型与静态池，K1总8条对比每任务2/4/8条，各30次；包含全池参考梯度、任务级统计、嵌套方向变化与覆盖。该对照隔离采样量，不包含Refresh轨迹刷新，不是在线性能实验。

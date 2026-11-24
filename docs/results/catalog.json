@@ -1051,7 +1051,12 @@
         "td_loss_by_phase": "comparisons/ts5-tkpr-refresh/analysis/source_drift/td_loss_by_phase.csv",
         "source_gradient_summary": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_gradient_summary.csv",
         "source_cosine_summary": "comparisons/ts5-tkpr-refresh/analysis/source_drift/source_cosine_summary.csv",
-        "gradient_reconstruction": "comparisons/ts5-tkpr-refresh/analysis/source_drift/gradient_reconstruction.csv"
+        "gradient_reconstruction": "comparisons/ts5-tkpr-refresh/analysis/source_drift/gradient_reconstruction.csv",
+        "sampling_budget_report": "comparisons/ts5-tkpr-refresh/analysis/sampling_budget/analysis_report.md",
+        "sampling_budget": "comparisons/ts5-tkpr-refresh/analysis/sampling_budget/sampling_budget.csv",
+        "sampling_budget_summary": "comparisons/ts5-tkpr-refresh/analysis/sampling_budget/sampling_budget_summary.csv",
+        "sampling_full_pool_reference": "comparisons/ts5-tkpr-refresh/analysis/sampling_budget/full_pool_reference.csv",
+        "sampling_paired_directions": "comparisons/ts5-tkpr-refresh/analysis/sampling_budget/paired_directions.csv"
       },
       "task_order": [
         "A",
@@ -1082,7 +1087,8 @@
         "单训练种子、单任务顺序；不作显著性推断。",
         "Refresh 同时改变逐任务采样预算与记忆刷新，不能分离两项贡献。",
         "无共享前缀，实际训练版本见 runs.csv。",
-        "来源漂移分析仅有最终池留存样本，无法还原D/E真实训练池；无同次TD minibatch，不能验证来源与TD方向或性能下降因果。"
+        "来源漂移分析仅有最终池留存样本，无法还原D/E真实训练池；无同次TD minibatch，不能验证来源与TD方向或性能下降因果。",
+        "采样预算分析固定原始K1静态池及C/D/E末模型；每预算30次仅反映采样波动，不等于训练种子或Refresh在线效果。"
       ]
     }
   ]
