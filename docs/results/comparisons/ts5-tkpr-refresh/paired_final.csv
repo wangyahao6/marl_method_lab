@@ -1,0 +1,4 @@
+run_id,control_run_id,seed,acc_pct_difference,bwt_pp_difference,fwt_pp_difference
+ts5_3535_tkpr_k1_20261122_attempt001,ts5_3535_vdn_ft_20261122_attempt001,3535,33.59375,51.171875,-2.34375
+ts5_3535_tkpr_refresh_20261122_attempt001,ts5_3535_vdn_ft_20261122_attempt001,3535,27.65625,50.9765625,-2.5390625
+ts5_3535_vdn_er_20261122_attempt001,ts5_3535_vdn_ft_20261122_attempt001,3535,8.28125,17.7734375,-1.5625

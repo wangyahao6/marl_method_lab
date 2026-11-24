@@ -1024,6 +1024,49 @@
         "G1-G3 仅诊断，不进入相邻组损失；实际采样包含重复轨迹。",
         "全量历史池离线统计与实际训练采样统计不可混合；组大小分布行重复携带动作对总数。"
       ]
+    },
+    {
+      "id": "ts5-tkpr-refresh",
+      "category": "comparisons",
+      "report": "comparisons/ts5-tkpr-refresh/README.md",
+      "files": {
+        "runs": "comparisons/ts5-tkpr-refresh/runs.csv",
+        "stage_metrics": "comparisons/ts5-tkpr-refresh/stage_metrics.csv",
+        "evaluations": "comparisons/ts5-tkpr-refresh/evaluations.csv",
+        "paired_final": "comparisons/ts5-tkpr-refresh/paired_final.csv",
+        "sampling_diagnostics": "comparisons/ts5-tkpr-refresh/sampling_diagnostics.csv",
+        "memory_updates": "comparisons/ts5-tkpr-refresh/memory_updates.csv"
+      },
+      "task_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "training_seeds": [
+        3535
+      ],
+      "final_phase": 4,
+      "comparison": {
+        "kind": "independent_runs_matched_by_seed",
+        "match_on": [
+          "seed"
+        ],
+        "primary_control": {
+          "method": "VDN-FT",
+          "role": "independent"
+        },
+        "additional_control": {
+          "method": "VDN-ER",
+          "role": "independent"
+        }
+      },
+      "interpretation_limits": [
+        "单训练种子、单任务顺序；不作显著性推断。",
+        "Refresh 同时改变逐任务采样预算与记忆刷新，不能分离两项贡献。",
+        "无共享前缀，实际训练版本见 runs.csv。"
+      ]
     }
   ]
 }

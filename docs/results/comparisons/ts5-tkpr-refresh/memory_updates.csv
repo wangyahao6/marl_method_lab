@@ -1,0 +1,16 @@
+run_id,task,update_phase,old_count,new_count,replaced,final_size,phase
+ts5_3535_tkpr_refresh_20261122_attempt001,A,0,0,100,0,100,0
+ts5_3535_tkpr_refresh_20261122_attempt001,A,1,100,50,50,100,0
+ts5_3535_tkpr_refresh_20261122_attempt001,B,1,0,100,0,100,1
+ts5_3535_tkpr_refresh_20261122_attempt001,A,2,100,50,50,100,0
+ts5_3535_tkpr_refresh_20261122_attempt001,B,2,100,50,50,100,1
+ts5_3535_tkpr_refresh_20261122_attempt001,C,2,0,100,0,100,2
+ts5_3535_tkpr_refresh_20261122_attempt001,A,3,100,50,50,100,0
+ts5_3535_tkpr_refresh_20261122_attempt001,B,3,100,50,50,100,1
+ts5_3535_tkpr_refresh_20261122_attempt001,C,3,100,50,50,100,2
+ts5_3535_tkpr_refresh_20261122_attempt001,D,3,0,100,0,100,3
+ts5_3535_tkpr_refresh_20261122_attempt001,A,4,100,50,50,100,0
+ts5_3535_tkpr_refresh_20261122_attempt001,B,4,100,50,50,100,1
+ts5_3535_tkpr_refresh_20261122_attempt001,C,4,100,50,50,100,2
+ts5_3535_tkpr_refresh_20261122_attempt001,D,4,100,50,50,100,3
+ts5_3535_tkpr_refresh_20261122_attempt001,E,4,0,100,0,100,4
