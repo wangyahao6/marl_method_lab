@@ -26,13 +26,14 @@ TKPR-K1 使用静态成功轨迹池，每次辅助更新跨历史任务总共采
 - [历史任务实际采样汇总](sampling_diagnostics.csv)：含重复抽样，各任务每次样本数的最小/最大值。
 - [Refresh 更新记录](memory_updates.csv)：旧数量、新数量、替换数量与最终池大小。
 
-已从原始 evaluations.jsonl 的 outcomes 核对 wins/episodes，复算全部 20 个阶段的 ACC/BWT/FWT 并与 retention.json 对照一致。以下四份原始日志以无损 gzip 形式公开；模型、成功轨迹及逐轨迹 old_q_values 保留在 Ubuntu `runs/<run_id>/`。
+已从原始 evaluations.jsonl 的 outcomes 核对 wins/episodes，复算全部 20 个阶段的 ACC/BWT/FWT 并与 retention.json 对照一致。完整原始日志、模型、成功轨迹及逐轨迹 old_q_values 保留在 Ubuntu `runs/<run_id>/`。
 
-## 原始更新与指标日志
+## 分阶段日志分析
 
-- [tkpr-k1/topk_preference_updates.jsonl.gz](raw_logs/tkpr-k1/topk_preference_updates.jsonl.gz)
-- [tkpr-k1/experiment_metrics.jsonl.gz](raw_logs/tkpr-k1/experiment_metrics.jsonl.gz)
-- [tkpr-refresh/tkpr_refresh_updates.jsonl.gz](raw_logs/tkpr-refresh/tkpr_refresh_updates.jsonl.gz)
-- [tkpr-refresh/experiment_metrics.jsonl.gz](raw_logs/tkpr-refresh/experiment_metrics.jsonl.gz)
+四份 gzip 原始日志已从当前结果目录撤下，仅在实验主机保留分析输入；此前上传提交仍存在于 Git 历史。
 
-文件内容未删减。下载后用 `gzip -dk 文件名.jsonl.gz` 解压，得到原名 JSONL。两个方法的同名 `experiment_metrics.jsonl` 分别位于各自子目录。原文件大小、行数、SHA-256 与压缩包 SHA-256 见 [manifest.json](raw_logs/manifest.json)；已核对解压内容 SHA-256 与原文件一致。
+- [分析说明](analysis/analysis_notes.md)：字段、计算方式、记录频率、分段比较与解释边界。
+- [梯度统计](analysis/gradient_metrics_by_phase.csv)：A–E 全阶段及阶段内四等分的 mean/median/P10/P90，区分全部更新与每100次更新的梯度监控样本。
+- [计时统计](analysis/timing_metrics_by_phase.csv)：各阶段均值、P50/P95、实测记录耗时总和及 Refresh/K1 比值，区分是否包含梯度监控。
+- [辅助更新统计](analysis/aux_updates_by_phase.csv)：参与次数、每更新样本数、来源任务分布与池容量；记忆更新补充数据注明来自现有 memory_updates.csv。
+- [可复现脚本](analysis/analyze_logs.py)、[输入校验清单](analysis/input_manifest.json)与[实际字段清单](analysis/field_inventory.json)。
