@@ -1035,7 +1035,12 @@
         "evaluations": "comparisons/ts5-tkpr-refresh/evaluations.csv",
         "paired_final": "comparisons/ts5-tkpr-refresh/paired_final.csv",
         "sampling_diagnostics": "comparisons/ts5-tkpr-refresh/sampling_diagnostics.csv",
-        "memory_updates": "comparisons/ts5-tkpr-refresh/memory_updates.csv"
+        "memory_updates": "comparisons/ts5-tkpr-refresh/memory_updates.csv",
+        "raw_logs_manifest": "comparisons/ts5-tkpr-refresh/raw_logs/manifest.json",
+        "raw_log_1": "comparisons/ts5-tkpr-refresh/raw_logs/tkpr-k1/topk_preference_updates.jsonl.gz",
+        "raw_log_2": "comparisons/ts5-tkpr-refresh/raw_logs/tkpr-k1/experiment_metrics.jsonl.gz",
+        "raw_log_3": "comparisons/ts5-tkpr-refresh/raw_logs/tkpr-refresh/tkpr_refresh_updates.jsonl.gz",
+        "raw_log_4": "comparisons/ts5-tkpr-refresh/raw_logs/tkpr-refresh/experiment_metrics.jsonl.gz"
       },
       "task_order": [
         "A",

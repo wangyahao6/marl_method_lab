@@ -1,0 +1,42 @@
+[
+  {
+    "run_id": "ts5_3535_tkpr_k1_20261122_attempt001",
+    "source": "runs/ts5_3535_tkpr_k1_20261122_attempt001/topk_preference_updates.jsonl",
+    "file": "tkpr-k1/topk_preference_updates.jsonl.gz",
+    "original_bytes": 225976874,
+    "gzip_bytes": 33789996,
+    "lines": 145297,
+    "original_sha256": "2ef3cfeba4ceb6e187c1609f0e1fcc3dbc9ee2d4b5ece85b29eec7098b17898a",
+    "gzip_sha256": "89ba838314258d0b8e57e80a9242432f53b3012d9a60bf0ac621c0e01254843e"
+  },
+  {
+    "run_id": "ts5_3535_tkpr_k1_20261122_attempt001",
+    "source": "runs/ts5_3535_tkpr_k1_20261122_attempt001/experiment_metrics.jsonl",
+    "file": "tkpr-k1/experiment_metrics.jsonl.gz",
+    "original_bytes": 1707087560,
+    "gzip_bytes": 43439175,
+    "lines": 4771539,
+    "original_sha256": "4a28eb321c2012619a23a691d0017ef670a9df1efb98c218769f529bf971d5a2",
+    "gzip_sha256": "f1400f11f7a4cf5c6681598b6cc18a2109a16aeb834b0f5dbf927f1e2c16c993"
+  },
+  {
+    "run_id": "ts5_3535_tkpr_refresh_20261122_attempt001",
+    "source": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/tkpr_refresh_updates.jsonl",
+    "file": "tkpr-refresh/tkpr_refresh_updates.jsonl.gz",
+    "original_bytes": 232669363,
+    "gzip_bytes": 36631875,
+    "lines": 145666,
+    "original_sha256": "e54f95640758d9d47eb618345562efc8e5b94b35a923c897eea1388d4435a7cb",
+    "gzip_sha256": "63e5eb4566d64faa6a68d01d6bb93b68fa9c08039319916bcead66ccdc4ab4fd"
+  },
+  {
+    "run_id": "ts5_3535_tkpr_refresh_20261122_attempt001",
+    "source": "runs/ts5_3535_tkpr_refresh_20261122_attempt001/experiment_metrics.jsonl",
+    "file": "tkpr-refresh/experiment_metrics.jsonl.gz",
+    "original_bytes": 1721361009,
+    "gzip_bytes": 43158240,
+    "lines": 4781450,
+    "original_sha256": "c3a2059a0212f132d05e17820633caddc862a0db5772819506d97602f3e29476",
+    "gzip_sha256": "bff7a8fabdcbb69dea11158ca0a6bdfc21c4de1b0611825d3a07eba3adbf3af1"
+  }
+]
