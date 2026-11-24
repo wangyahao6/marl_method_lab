@@ -35,7 +35,7 @@ def initialize_pool(pool):
 
 
 @th.no_grad()
-def select_reference(old_q, new_q, legal, decisions, valid, settings):
+def select_reference(old_q, new_q, legal, decisions, valid, settings, *, with_confidence=False):
     """Return disjoint update/keep/uncertain masks over real legal decisions."""
     eligible = decisions & (legal.sum(dim=-1) >= 2)
     _, _, old_top, old_conf = reference_order(old_q, legal, settings["q_scale_floor"])
@@ -47,7 +47,22 @@ def select_reference(old_q, new_q, legal, decisions, valid, settings):
     update = eligible & new_good & (~valid | (new_conf > old_conf + margin))
     keep = eligible & ~update & valid & ~both_low & (same | (old_conf > new_conf + margin))
     uncertain = eligible & ~update & ~keep
-    return update, keep, uncertain, eligible, ~same
+    result = (update, keep, uncertain, eligible, ~same)
+    return (*result, old_conf, new_conf) if with_confidence else result
+
+
+def confidence_summary(parts):
+    """Diagnostic only: quantiles cannot alter reference selection or halt a run."""
+    try:
+        values = th.cat(parts).double() if parts else th.empty(0, dtype=th.float64)
+        finite = values[th.isfinite(values)]
+        if not finite.numel():
+            return dict(n=0, nonfinite=int(values.numel()), mean=None, median=None, p10=None, p90=None)
+        quantiles = th.quantile(finite, th.tensor([.1, .5, .9], dtype=th.float64)).tolist()
+        return dict(n=int(finite.numel()), nonfinite=int(values.numel() - finite.numel()),
+                    mean=finite.mean().item(), median=quantiles[1], p10=quantiles[0], p90=quantiles[2])
+    except Exception as error:
+        return dict(error=str(error))
 
 
 @th.no_grad()
@@ -58,6 +73,7 @@ def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
     gate = current_win_rate >= historical_best_win_rate - settings["task_gate_tolerance"]
     totals = Counter()
     sources = Counter()
+    old_confidences, new_confidences = [], []
     for offset in range(0, len(pool["episodes"]), chunk_size):
         episodes = pool["episodes"][offset:offset + chunk_size]
         device = mac.args.device if gate else "cpu"
@@ -72,9 +88,11 @@ def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
             totals["decision_states"] += int(real.sum())
             old_valid = ep["reference_valid_mask"][:steps].to(device)
             if gate:
-                update, keep, uncertain, eligible, changed = select_reference(
+                update, keep, uncertain, eligible, changed, old_conf, new_conf = select_reference(
                     batch["old_q_values"][index, :steps], current[index, :steps],
-                    legal[index, :steps], real, old_valid, settings)
+                    legal[index, :steps], real, old_valid, settings, with_confidence=True)
+                old_confidences.append(old_conf[real].cpu())
+                new_confidences.append(new_conf[real].cpu())
                 update, keep, uncertain = (mask.cpu() for mask in (update, keep, uncertain))
                 ep["data"]["old_q_values"][:steps][update] = current[index, :steps].cpu()[update]
                 ep["reference_valid_mask"][:steps][update] = True
@@ -87,6 +105,9 @@ def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
                 totals["reference_top1_changed_states"] += int((update.to(device) & changed).sum())
             else:
                 # Gate failure leaves Q, mask and provenance entirely untouched.
+                _, _, _, old_conf = reference_order(batch["old_q_values"][index, :steps],
+                                                    legal[index, :steps], settings["q_scale_floor"])
+                old_confidences.append(old_conf[real].cpu())
                 totals["retained_states"] += int((real & old_valid).sum())
                 totals["uncertain_states"] += int((real & ~old_valid).sum())
             active = ep["reference_valid_mask"][:steps] & real.cpu()
@@ -104,7 +125,10 @@ def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
                 reference_top1_change_rate=totals["reference_top1_changed_states"] / count if count else None,
                 valid_reference_states=totals["valid_reference_states"],
                 valid_preference_coverage=totals["valid_reference_states"] / count if count else None,
-                reference_source_counts=dict(sources), reevaluation_seconds=perf_counter() - start)
+                reference_source_counts=dict(sources),
+                old_reference_confidence=confidence_summary(old_confidences),
+                new_reference_confidence=confidence_summary(new_confidences) if gate else None,
+                reevaluation_seconds=perf_counter() - start)
 
 
 def restore_history(history, parent, phases, out):

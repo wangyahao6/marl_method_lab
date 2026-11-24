@@ -48,3 +48,5 @@
 基础配置为 `task_transfer/ts5_1m.json`，其 `id` 按统一入口的 suite 匹配要求使用 `ts5`，阶段阈值和协议路径标识此预算变体。该入口支持单前馈层 VDN 基线。
 
 `action_preference/ts5/` 下的 `vdn_ft_1m.json`、`vdn_er_1m.json`、`tkpr_k1_1m.json`、`tkpr_refresh_1m.json` 分别从同名 2M 母版派生，沿用各自的方法、回放、模型、探索和评价设置。使用 `scripts/run.py --protocol` 显式选择所需预算和方法版本。此次配置实现的训练方法、种子及运行编号由后续实验指令指定。
+
+TS5-1M CPR四组共同前缀协议见[执行与数据审计说明](../../docs/TS5_CPR_1M_PROTOCOL.md)，入口配置为 `action_preference/ts5/cpr_shared_1m/`。CPR独立1M配置为 `action_preference/ts5/tkpr_cpr_1m.json`。

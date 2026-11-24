@@ -273,8 +273,13 @@ def validate_fork(protocol, role, parent):
     if protocol.get("pair_ablation_experiment"):
         raise ValueError("pair ablation FRPR is used with --preference-role pair-reference")
     if role in ("shared-prefix", "shared-branch"):
-        if protocol.get("replay_on_switch", "ft") != "ft" or len(protocol["stages"]) < 2:
+        full = protocol.get("full_shared_prefix", False)
+        er_branch = full and role == "shared-branch" and method == "baseline"
+        if ((protocol.get("replay_on_switch", "ft") != "ft" and not er_branch)
+                or len(protocol["stages"]) < 2):
             raise ValueError("a shared S prefix requires FT and at least two stages")
+        if full and method not in ("baseline", "topk_preference", "tkpr_refresh", "tkpr_cpr"):
+            raise ValueError("full shared prefix supports baseline, TKPR-K1, Refresh and CPR")
         if role == "shared-prefix" and (method not in RANK_METHODS or not protocol[method]["weight"]):
             raise ValueError("a shared prefix needs an enabled ranking method to collect old Q")
         if role == "shared-branch" and method not in ("baseline", *HISTORY_RANK_METHODS):
@@ -289,6 +294,17 @@ def validate_fork(protocol, role, parent):
 
 
 def matching_shared_protocol(parent, branch):
+    if parent.get("full_shared_prefix") or branch.get("full_shared_prefix"):
+        if not (parent.get("full_shared_prefix") and branch.get("full_shared_prefix")):
+            return False
+        def common(values):
+            ignored = {"id", "method", "rank_position_diagnostics", "replay_on_switch", *HISTORY_RANK_METHODS}
+            result = {key: value for key, value in values.items() if key not in ignored}
+            result["action_set"] = {key: value for key, value in result["action_set"].items()
+                                    if key not in ("batch_episodes_per_task", "refresh_success_episodes")}
+            return {"optimizer": "rmsprop", **result}
+        return common(parent) == common(branch)
+
     def shared_settings(protocol):
         return {"optimizer": "rmsprop", **{key: value for key, value in protocol.items() if key not in ("method", "rank_position_diagnostics")}}
 

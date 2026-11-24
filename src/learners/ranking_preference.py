@@ -642,6 +642,18 @@ class RankingPreference(ActionSetPreference):
         return self.loss(current_q, batch["old_q_values"][:, :-1], legal, decisions, self.settings)
 
     def sample_diagnostics(self, episodes):
+        if self.use_reference_valid_mask:
+            raw_count = active_count = 0
+            for ep in episodes:
+                fields = {key: ep["data"][key].unsqueeze(0)
+                          for key in ("filled", "terminated", "avail_actions")}
+                legal, raw = decision_masks(fields)
+                raw = raw & (legal.sum(dim=-1) >= 2)
+                active = raw & ep["reference_valid_mask"][None, :-1]
+                raw_count += int(raw.sum())
+                active_count += int(active.sum())
+            return dict(raw_decision_states=raw_count, reference_mask_valid_states=active_count,
+                        reference_mask_coverage=active_count / raw_count if raw_count else None)
         if self.use_group_ids:
             return group_diagnostics(episodes, self.scheme, self.groups, self.settings["group_count"])
         return {}
