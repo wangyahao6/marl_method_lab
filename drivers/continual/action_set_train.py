@@ -42,6 +42,10 @@ from common.exploration import epsilon_on_switch
 from common.runtime import episode_spec, restore_rng, rng_state, td_sample
 from drivers.continual.memory import History, PreferenceHistory
 from drivers.continual.memory.episodes import pack_episode, preference_episode_id
+from drivers.continual.memory.cpr import (
+    initialize_pool as initialize_cpr_pool, update_pool as update_cpr_pool,
+    restore_history as restore_cpr_history,
+)
 import numpy as np
 import torch as th
 import yaml
@@ -305,6 +309,8 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     else:
         pool = dict(task=task, phase=phase, layout=expected_layout,
                     reference_checkpoint=checkpoint_path, episodes=successful, **labels)
+    if args.method == "tkpr_cpr":
+        initialize_cpr_pool(pool)
     if persist:
         path = PreferenceHistory.phase_path(out, phase)
         path.mkdir(parents=True, exist_ok=False)
@@ -461,6 +467,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                              record_preference)
         elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role != "release":
             update_log = method
+            if method == "tkpr_cpr":
+                update_log = "tkpr_cpr_preference"
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             if method == "tkpr_refresh":
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
@@ -614,6 +622,11 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 elif aspr_group and role == "shared-branch":
                     restore_group_shared_memory(preference.history, parent, range(first_phase),
                                                 augmented, groups, protocol[method], out)
+                elif method == "tkpr_cpr":
+                    creation_phases = {}
+                    for i, stage in enumerate(stages[:first_phase]):
+                        creation_phases.setdefault(stage["task"], i)
+                    restore_cpr_history(preference.history, parent, creation_phases.values(), out)
                 else:
                     preference.history.restore_success(parent, range(first_phase),
                                                        require_old_q=method in HISTORY_RANK_METHODS,
@@ -727,6 +740,24 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 if phase + 1 < stop_phase:
                     prepare_shared_pair_pool(phase)
+            elif preference is not None and method == "tkpr_cpr":
+                status("updating_references")
+                if not any(pool["task"] == task for pool in preference.history.values()):
+                    preference.history[phase] = collect_memory(
+                        args, spec, expected_layout, reference, checkpoint, task, phase, settings, out)
+                for pool_phase, pool in preference.history.items():
+                    if pool["task"] == task:
+                        continue
+                    historical_task = pool["task"]
+                    historical_best = max(result["win_rates"][historical_task] for result in results[:-1]
+                                          if historical_task in result["win_rates"])
+                    update = update_cpr_pool(mac, pool, augmented, groups, protocol[method], phase,
+                                             row[historical_task], historical_best,
+                                             str(checkpoint.relative_to(out) / "agent.th"),
+                                             chunk_size=settings["batch_episodes"])
+                    if update["task_gate_passed"]:
+                        History.save(PreferenceHistory.phase_path(out, pool_phase) / "success.th", pool)
+                    base.append(out / "tkpr_cpr_updates.jsonl", update)
             elif preference is not None and method == "tkpr_refresh":
                 status("collecting_memory")
                 seen_tasks = dict.fromkeys(stage["task"] for stage in stages[:phase + 1])

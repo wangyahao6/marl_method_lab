@@ -21,6 +21,7 @@ from action_set_protocol import (
     RANK_DEFAULTS, RANK_METHODS, RANK_RELU_DEFAULTS,
     TOP1_MAX_DEFAULTS, TOP1_UNFILTERED_DEFAULTS, TOPK_DEFAULTS,
     TOPK_HIGH_REGRET_DEFAULTS, TOPK_WEIGHTED_DEFAULTS,
+    CPR_DEFAULTS,
 )
 from protection import digest
 from learners.action_set_preference import batch_episodes, decision_masks, make_good_mask
@@ -47,6 +48,8 @@ METHOD_DEFAULTS = {
     "top1_unfiltered_preference": TOP1_UNFILTERED_DEFAULTS,
     "topk_preference": TOPK_DEFAULTS,
     "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
+    "tkpr_cpr": CPR_DEFAULTS,
+    "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
     "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
     "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
 }
@@ -757,7 +760,8 @@ class RankingTest(unittest.TestCase):
                         self.assertNotIn("good_mask", new)
                     self.assertNotIn("old_q_values", old["data"])
                     self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
-                samples = jsonlines(run / f"{method}_updates.jsonl")
+                log_name = "tkpr_cpr_preference" if method == "tkpr_cpr" else method
+                samples = jsonlines(run / f"{log_name}_updates.jsonl")
                 if method in ASPR_GROUP_DEFAULTS:
                     restored = PreferenceHistory()
                     restored.restore_success(run, [0], require_old_q=True, require_group=True)
@@ -969,9 +973,14 @@ class RankingTest(unittest.TestCase):
                 for gap_key in {"min_gap", "min_gap_raw"} & settings.keys():
                     settings[gap_key] = 0
                 preference = RankingPreference(method, settings, None, scheme, groups, None)
+                used_episodes = episodes
+                if method == "tkpr_cpr":
+                    from drivers.continual.memory.cpr import initialize_pool
+                    used_episodes = copy.deepcopy(episodes)
+                    initialize_pool(dict(pool, episodes=used_episodes))
                 mac.agent.zero_grad()
                 with patch.object(th, "load", side_effect=AssertionError("preference loaded a checkpoint")):
-                    loss, count, _ = preference.task_loss(mac, pool, episodes)
+                    loss, count, _ = preference.task_loss(mac, pool, used_episodes)
                     self.assertTrue(th.isfinite(loss))
                     self.assertGreater(count.item(), 0)
                     self.assertIsNone(mac.hidden_states)

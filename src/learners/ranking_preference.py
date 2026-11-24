@@ -580,6 +580,7 @@ class RankingPreference(ActionSetPreference):
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
         self.use_good_mask = method == "aspr_preference"
+        self.use_reference_valid_mask = method == "tkpr_cpr"
         self.use_group_ids = method in ("aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
         self.loss = {
             "aspr_preference": aspr_preference,
@@ -593,6 +594,7 @@ class RankingPreference(ActionSetPreference):
             "full_rank_preference_relu": full_rank_preference_relu,
             "topk_preference": topk_preference,
             "tkpr_refresh": topk_preference,
+            "tkpr_cpr": topk_preference,
             "tkpr_k1_gap0": topk_preference,
             "topk_preference_weighted": topk_preference_weighted,
             "topk_preference_high_regret": topk_preference_high_regret,
@@ -612,7 +614,7 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_max_statistics
         elif method == "top1_unfiltered_preference":
             self.statistics = top1_unfiltered_statistics
-        elif method in ("topk_preference", "tkpr_refresh", "tkpr_k1_gap0"):
+        elif method in ("topk_preference", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr"):
             self.statistics = topk_statistics
         elif method == "topk_preference_weighted":
             self.statistics = topk_weighted_statistics
@@ -623,6 +625,10 @@ class RankingPreference(ActionSetPreference):
         batch, good = batch_episodes(episodes, self.scheme, self.groups, mac.args.device,
                                      include_good=self.use_good_mask, include_old_q=True)
         legal, decisions = decision_masks(batch)
+        if self.use_reference_valid_mask:
+            valid = th.nn.utils.rnn.pad_sequence([ep["reference_valid_mask"] for ep in episodes],
+                                                 batch_first=True, padding_value=False).to(mac.args.device)
+            decisions = decisions & valid[:, :-1]
         current_q = unroll(mac, batch, batch.max_seq_length - 1)
         if self.use_group_ids:
             group_ids = th.nn.utils.rnn.pad_sequence([ep["group_ids"] for ep in episodes],

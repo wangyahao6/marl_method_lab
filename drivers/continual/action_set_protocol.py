@@ -3,7 +3,7 @@ from math import isfinite
 
 from common.exploration import epsilon_on_switch
 
-TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0")
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
@@ -42,6 +42,8 @@ FRPR_RAW_DEFAULTS = dict(weight=1.0, temperature=1.0, min_gap_raw=0.1)
 FRPR_RAW_LOSS_DEFAULTS = dict(RANK_DEFAULTS)
 TOPK_DEFAULTS = dict(RANK_DEFAULTS, k=2)
 TOPK_WEIGHTED_DEFAULTS = dict(RANK_DEFAULTS, k=1)
+CPR_DEFAULTS = dict(TOPK_WEIGHTED_DEFAULTS, reference_confidence_threshold=0.5,
+                    reference_switch_margin=0.1, task_gate_tolerance=0.05)
 TOPK_HIGH_REGRET_DEFAULTS = dict(TOPK_WEIGHTED_DEFAULTS, hr_threshold=0.5,
                                hr_weight=1.0, hr_temperature=1.0)
 RANK_RELU_DEFAULTS = {key: value for key, value in RANK_DEFAULTS.items() if key != "temperature"}
@@ -165,6 +167,7 @@ def validate(protocol, algorithm, method):
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
                 "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
+                "tkpr_cpr": CPR_DEFAULTS,
                 "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
                 "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
                 "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,

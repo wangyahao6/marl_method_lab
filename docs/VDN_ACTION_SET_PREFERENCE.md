@@ -181,6 +181,7 @@ cd /home/wyh/marl_method_lab
 
 ## Top-K 偏好回放（TKPR）
 
+
 `tkpr_refresh` 独立使用 TKPR-K1 损失。每次更新从每个非当前任务的非空历史池各采 8 条轨迹；池内优先无放回，不足 8 条时有放回，各任务损失仍等权平均。原 `topk_preference` 保持跨任务总共 8 条。每阶段末评价后，当前策略为首次出现的任务采集最多 100 条成功轨迹，并为所有已有池的任务各采集最多 50 条。满池时随机保留 50 条旧轨迹，采到的新成功轨迹替换等量旧轨迹；不足 50 条则只替换实际采到的数量，零成功时保持原池。每个任务只有一个生效池，最多 100 条。新轨迹的 `old_q_values` 由采集它的当前策略生成，并与轨迹一起保存 `reference_phase`、`reference_checkpoint`；保留轨迹的 Q 值不变。更新摘要见 `tkpr_refresh_memory_updates.jsonl`。[独立配置](../configs/continual/action_preference/szc/szc_vdn64_tkpr_refresh.json)。
 
 `topk_preference` 按旧模型 Q 值对每个有效智能体决策的合法动作降序排列。同值时动作索引较小者在前。设合法动作数为 N，实际取 `K_eff = min(K, N - 1)`，少于两个合法动作的决策跳过。从 FRPR 的无序合法动作对中保留至少一个端点属于旧模型 Top-K 的对。K=2 时，旧模型排名第一与第二之间的关系以及这两个动作各自与低位动作的关系都受约束。
@@ -209,6 +210,18 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 `configs/continual/action_preference/szc/szc_vdn64_tkpr_k{1,2,3,5}.json` 使用 `topk_preference`，`szc_vdn64_frpr.json` 使用 `full_rank_preference`。五组均采用 seed 1111、双层 VDN64、镜像 5v5 SZC、每阶段名义 2M、逐任务 ε 和 FT。公共排序参数为权重 1.0、温度 1.0、最小归一化间隔 0.5、Q 尺度下限 0.1。
 
 这些配置启用 `gradient_monitor_interval: 100`。每 100 次 learner 更新，从同一训练计算图分别获取 TD 与加权偏好损失对可训练 Agent 参数的梯度。梯度诊断写入 `experiment_metrics.jsonl`，通过 `context.learner_update` 定位更新，未定义值记为 null，有限诊断值同时写入 `metrics.jsonl`。范数和余弦使用裁剪前的梯度，训练继续使用原有联合反传和优化器步骤。
+
+## 当前策略重评估偏好回放（TKPR-CPR）
+
+`--method tkpr_cpr` 使用 TKPR-K1 的原排序损失及**跨历史任务合计 8 条**采样预算；独立配置为 [TS5 CPR](../configs/continual/action_preference/ts5/tkpr_cpr.json)。配置继承 `ts5/tkpr_k1.json` 的网络、任务顺序、预算、评价、FT 回放与损失权重，只将方法配置块替换为 `tkpr_cpr`，增加 `reference_confidence_threshold=0.5`、`reference_switch_margin=0.1`、`task_gate_tolerance=0.05`。不使用 Refresh 的逐任务采样或轨迹替换。
+
+阶段末沿用已有 `row` 评价结果。当前任务仅在首次建立池时采集成功轨迹；回访不重复采集或替换。对其他已建立的任务，取此前全部阶段末评价（不含本阶段）的最佳胜率，当前胜率达到 `best - task_gate_tolerance` 才重评；失败时保留已经接受的 Q、有效掩码和来源，不回退到原始参考。通过时用当前在线 MAC 在 `torch.no_grad()` 下按 `action_set.batch_episodes`（默认 8）分块完整展开历史 Episode，复用 `batch_episodes()`、`unroll()` 和 `reference_order()`；不额外评价环境，不使用 target MAC。
+
+每个真实、存活且至少有两个合法动作的决策按以下优先级选择：新置信度达阈值，并且（旧掩码无效或新置信度严格超过旧置信度加 margin），则采用新 Q；否则，旧掩码有效、双方并非都低于阈值，且 Top-1 相同或旧置信度严格超过新置信度加 margin，则保留旧参考；其余标为不确定。不确定状态将有效掩码置 false，来源置 -1，但轨迹与已有 Q 保留，可在后续新置信度达标时重新激活。异 Top-1 且置信度差距不足/等于 margin 的状态不强制选择任一方；同 Top-1 优先保留旧参考。填充、bootstrap 与其他非决策位置不参与选择或损失。
+
+每条轨迹顶层保存 `original_q_values[T, n_agents, n_actions]`（采集时 Q 的独立副本，永久保留）、`reference_valid_mask[T, n_agents]`（bool）和 `reference_source_phase[T, n_agents]`（long）。时间轴含末尾 bootstrap，与 `data["old_q_values"]` 对齐。首次有效掩码全部初始化为 true，来源为采集阶段；后续仅修改所选决策的 `data["old_q_values"]`、掩码与来源。训练时仅 CPR 在原 `decisions` 上叠加该有效掩码，其余损失和任务等权归约相同。池级 `reference_checkpoint` 只指向最初采集模型（`reference_checkpoint_role=original_collection_only`）；逐状态来源通过 `reference_checkpoints` 阶段→checkpoint 映射追溯。恢复保留已接受的参考及全部元数据，并将池复制到分支目录后更新；兼容具有存储旧 Q 的静态池初始化，部分或错位元数据视为输入结构错误。
+
+`tkpr_cpr_updates.jsonl` 每阶段/历史任务记录当前与历史最佳胜率、门控、重评轨迹数、决策/更新/保留/不确定数量、已采用参考的 Top-1 变化率、有效参考覆盖率、来源阶段计数（含 -1）与重评耗时。变化率分母是全部真实合法决策；覆盖率是这些决策中的有效参考掩码比例，不等同于经过 min-gap 后的有效 Pair 覆盖。门控失败时更新数与重评轨迹数为零，保留/不确定数描述未改变的已有掩码。逐训练辅助损失日志另写 `tkpr_cpr_preference_updates.jsonl`，避免与阶段更新日志混用。上述仅为实现，不代表已完成正式训练或验证性能收益。
 
 ## FRPR-Raw 与 FRPR-RawLoss
 
