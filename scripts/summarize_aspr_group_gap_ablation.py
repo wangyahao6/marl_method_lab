@@ -128,6 +128,18 @@ def summarize(plan_file):
         for g in (0.,.5):
             rows=[r for r in tables["stage_metrics"] if r["method"]==m and r["min_gap"]==g and r["phase"]==2]
             if len(rows)==2:lines.append(f'| {m} | {g} | '+" | ".join(show(mean(r[k] for r in rows)) for k in END_METRICS)+" |")
+    final_contrasts=[r for r in tables["paired_metrics"] if r["phase"]==2]
+    if final_contrasts:
+        lines += ["", "| 对照方向 | 方法 | gap | seed | ΔACC pp | ΔBWT pp | ΔFWT pp | ΔC AUC pp |",
+                  "| --- | --- | --- | --- | ---: | ---: | ---: | ---: |"]
+        for r in final_contrasts:
+            lines.append(f'| {r["contrast"]} | {r["method"]} | {r["min_gap"]} | {r["seed"]} | '+
+                " | ".join(show(r[k+"_delta"]) for k in END_METRICS)+" |")
+        for method in ("ASPR-3G","ASPR-3G-Adjacent"):
+            rows=[r for r in final_contrasts if r["contrast"]=="gap0-minus-gap05" and r["method"]==method]
+            if len(rows)==2:
+                lines.append(method+"：gap0 相对 gap0.5 的两种子最终均值差为 "+
+                    "、".join(k+" "+show(mean(r[k+"_delta"] for r in rows))+" pp" for k in END_METRICS)+"。")
     lines += ["", "[逐种子配对差](paired_metrics.csv)同时报告同方法 gap0−gap0.5 与同 gap 的 Adjacent−3G；"
         "[交互差值](interaction_metrics.csv)定义为 (Adjacent0.5−Adjacent0)−(3G0.5−3G0)。"
         "ACC 与任务端点衡量结果，Z/C AUC 衡量当前任务学习过程，BWT 结合各旧任务端点判断保持。只有两个种子，不作显著性或普遍优劣断言。", "",
@@ -149,6 +161,30 @@ def summarize(plan_file):
         "已有前缀、方法结果和原始日志只读引用；本批次诊断另存 results/本批次/diagnostics/<run-id>/，不覆盖旧诊断。",
         "[已有 ASPR-3G gap0.5](../szc-vdn64-aspr-groups/README.md)；[已有 Adjacent gap0](../szc-vdn64-aspr-3g-adjacent/README.md)。"
         "完整原始产物留在 rl-navigation-ubuntu:/home/wyh/marl_method_lab/runs/。", ""]
+    if tables["cross_group_offline"]:
+        lines += ["", "## C 阶段末三类跨组违反率", "",
+            "以下均为全部非平局对的离线违反率，避免 min_gap 改变分母掩盖排序变化。", "",
+            "| 方法 | gap | seed | 历史任务 | G1-G2 % | G2-G3 % | G1-G3 % |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: |"]
+        grouped={}
+        for r in tables["cross_group_offline"]:
+            if int(r["phase"])==2:grouped.setdefault((r["method"],r["min_gap"],r["seed"],r["historical_task"]),{})[r["pair"]]=r
+        for key,values in sorted(grouped.items()):
+            m,g,seed,historical=key
+            lines.append(f'| {m} | {g} | {seed} | {historical} | '+" | ".join(
+                show(100*float(values[p]["non_tie_violation_rate"])) if p in values and values[p]["non_tie_violation_rate"] else "N/A"
+                for p in ("G1-G2","G2-G3","G1-G3"))+" |")
+    if tables["sampled_pairs"]:
+        lines += ["", "## 实际训练采样约束量", "",
+            "G1-G3 对 Adjacent 的入损失数量始终为 0，其候选与间隔通过计数仍保留在 CSV 供诊断。", "",
+            "| 方法 | gap | seed | 训练阶段 | 历史任务 | G1-G2 入损失 | G2-G3 入损失 | G1-G3 入损失 |",
+            "| --- | --- | --- | --- | --- | ---: | ---: | ---: |"]
+        grouped={}
+        for r in tables["sampled_pairs"]:grouped.setdefault((r["method"],r["min_gap"],r["seed"],r["phase"],r["historical_task"]),{})[r["pair"]]=r
+        for key,values in sorted(grouped.items()):
+            m,g,seed,phase,historical=key
+            lines.append(f'| {m} | {g} | {seed} | {phase} | {historical} | '+
+                " | ".join(values[p]["loss_pairs"] if p in values else "N/A" for p in ("G1-G2","G2-G3","G1-G3"))+" |")
     complete=[r for r in tables["run_audit"] if r["newly_trained"] and r["completed"] and r["launcher_success"]]
     if len(complete)<4:lines.insert(2,"**新增实验尚未全部完成；当前已有单元不构成完整 2×2 结果。**\n")
     (out/"README.md").write_text("\n".join(lines),encoding="utf-8")
