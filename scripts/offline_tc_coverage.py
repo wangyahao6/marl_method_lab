@@ -12,7 +12,7 @@ import numpy as np
 import torch as th
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path[:0] = [str(ROOT/'src'), str(ROOT/'drivers/continual')]
+sys.path[:0] = [str(ROOT), str(ROOT/'src'), str(ROOT/'drivers/continual')]
 from learners.pair_tc import TCPPreference, LEVELS, quotas, digest_masks
 from learners.action_set_preference import batch_episodes, decision_masks
 from learners.ranking_preference import reference_order

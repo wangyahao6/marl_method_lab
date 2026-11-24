@@ -89,3 +89,7 @@ full ordering is better than partial ordering. Do not add a fourth training meth
 After actual training/evaluation and results verification, publish the lightweight evidence under
 `docs/results/parameter-ablations/ts5-vdn64-tc-coverage/`, update result indices, and synchronize
 GitHub main using the existing repository workflow. Raw masks, pools, models and full logs remain remote.
+
+## 2026-11-24 offline-entry recovery
+
+The three fresh FT reference runs and their independent final evaluations completed. All three initial offline attempts failed during import (`No module named drivers`), before creating masks. Added the repository root to the offline entry point import path; direct launch without PYTHONPATH and the existing three TC CPU tests pass. Recovery plan: `results/ts5_tc_coverage_20261123/recovery_plan_20261124.json`. Completed references/evaluations are reused; original failed/blocked task records remain. New task IDs restore offline generation, the unchanged all-seed gate, and the nine not-yet-started formal runs with the original run IDs, protocols, seeds and queue limit 5. No reference retraining or additional budget is authorized by this recovery.
