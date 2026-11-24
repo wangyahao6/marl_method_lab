@@ -67,10 +67,14 @@ G1-G3 只做离线排序诊断，不参与损失；其 `valid_pairs` 是可统�
 | ASPR-3G-Adjacent | 2222 | zealot | stalker | 95210 | 0.00 |
 | ASPR-3G-Adjacent | 2222 | colossus | stalker | 95210 | 0.00 |
 | ASPR-3G-Adjacent | 2222 | colossus | zealot | 71930 | 0.04 |
+| TKPR-K1 | 2222 | zealot | stalker | 95210 | 1.77 |
+| TKPR-K1 | 2222 | colossus | stalker | 95210 | 2.08 |
 | TKPR-K1 | 2222 | colossus | zealot | 74575 | 1.21 |
 | ASPR-3G-Adjacent | 3535 | zealot | stalker | 87318 | 0.00 |
 | ASPR-3G-Adjacent | 3535 | colossus | stalker | 87318 | 0.00 |
 | ASPR-3G-Adjacent | 3535 | colossus | zealot | 77914 | 0.04 |
+| TKPR-K1 | 3535 | zealot | stalker | 87318 | 1.66 |
+| TKPR-K1 | 3535 | colossus | stalker | 87318 | 2.58 |
 | TKPR-K1 | 3535 | colossus | zealot | 79876 | 2.45 |
 ASPR-3G-Adjacent 两种子均值：acc_pct=56.25、bwt_pp=-5.86、fwt_pp=24.41、learning_auc_pct=34.09。
 TKPR-K1 两种子均值：acc_pct=54.56、bwt_pp=-3.91、fwt_pp=24.80、learning_auc_pct=40.00。
@@ -85,7 +89,11 @@ zealot 新任务学习 AUC：两种子未显示同方向改善。
 colossus 新任务学习 AUC：两种子均更低。
 
 G1-G3 的阶段末离线违反情况：
+Seed 2222、zealot 末、历史 stalker：Adjacent 0.00%（0/95210），K1 1.77%（1689/95210），差 -1.77 pp。
+Seed 2222、colossus 末、历史 stalker：Adjacent 0.00%（0/95210），K1 2.08%（1984/95210），差 -2.08 pp。
 Seed 2222、colossus 末、历史 zealot：Adjacent 0.04%（27/71930），K1 1.21%（905/74575），差 -1.18 pp。
+Seed 3535、zealot 末、历史 stalker：Adjacent 0.00%（0/87318），K1 1.66%（1452/87318），差 -1.66 pp。
+Seed 3535、colossus 末、历史 stalker：Adjacent 0.00%（0/87318），K1 2.58%（2254/87318），差 -2.58 pp。
 Seed 3535、colossus 末、历史 zealot：Adjacent 0.04%（30/77914），K1 2.45%（1958/79876），差 -2.41 pp。
 若同一状态的两类相邻组排序全部严格成立，G1-G3 顺序可由传递性成立；Softplus 训练并不保证每个相邻对都满足，因此应以实际离线违反数判断跨层级问题，不能仅根据掩码排除了 G1-G3 就断言其排序必然失效。S 池可直接按同样本比较，Z 池还包含分支采集差异。
 
@@ -97,4 +105,6 @@ ACC 为已见任务等权胜率；BWT 为旧任务相对学完时的变化；FWT
 实现校验完成：必要 Python 语法检查、四条分支配置 dry-run、两种子父协议匹配，以及合成合法/非法/无效决策上的显式相邻组 Softplus 损失与梯度核对。另用一条已有 S 胜局核对了离线循环状态重建与跨组统计入口；没有运行额外验证训练。
 原始日志、检查点和历史池留在 rl-navigation-ubuntu:/home/wyh/marl_method_lab/runs/；本批次新增四条 Z/C 分支，名义新增训练16M步，S前缀仅引用一次。
 
-调度执行状态见 [执行汇总](execution_summary.json)。失败与缺项按原样保留，不自动重跑。
+离线诊断于 2026-11-24 补正：K1 子分支未复制父 S 池，现从分支恢复记录读取父池，补齐 Z/C 末在共同 S 轨迹上的三类跨组统计。原离线 CSV 已按原始 SHA-256 归档；训练、胜率及学习指标未改变。
+
+调度执行状态见 [执行汇总](execution_summary.json)。

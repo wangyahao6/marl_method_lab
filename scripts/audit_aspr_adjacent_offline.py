@@ -28,7 +28,15 @@ def audit(run):
     retention = json.loads((run / "retention.json").read_text())
     settings = dict(weight=1., temperature=1., min_gap=0., q_scale_floor=.1, group_count=3)
     pools = {}
-    for path in sorted((run / "action_set_memory").glob("phase*/success.th")):
+    # K1 restores the parent pool in memory without copying it to the child directory.
+    # Read parent pools first, then prefer a child's own pool for the same source phase.
+    restore = json.loads((run / "branch_restore.json").read_text())
+    roots = [Path(restore["parent"]), run] if restore.get("parent") else [run]
+    paths = {}
+    for root in roots:
+        for path in sorted((root / "action_set_memory").glob("phase*/success.th")):
+            paths[path.parent.name] = path
+    for path in paths.values():
         pool = th.load(path, map_location="cpu")
         labeled = []
         for ep in pool["episodes"]:

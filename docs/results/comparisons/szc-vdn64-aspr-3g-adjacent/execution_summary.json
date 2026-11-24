@@ -68,5 +68,15 @@
     "id": "szc_aspr_3g_adjacent_20261123_final_summary",
     "state": "completed",
     "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed2222_attempt001_offline_parent_pool_audit_v2",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_adjacent_20261123_tkpr_k1_gap0_seed3535_attempt001_offline_parent_pool_audit_v2",
+    "state": "completed",
+    "reason": "exit code 0"
   }
 ]
