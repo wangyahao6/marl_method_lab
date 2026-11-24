@@ -14,6 +14,9 @@ DATASET="szc-vdn64-aspr-3g-gap-ablation"
 
 def publish(plan_file):
     plan=json.loads(plan_file.read_text());out=plan_file.parent
+    for index in ("docs/results/catalog.json","docs/results/README.md"):
+        if subprocess.call(["git","diff","--quiet","HEAD","--",index],cwd=str(ROOT)):
+            raise RuntimeError("Preserve pending result-index edits before publishing: "+index)
     conn=sqlite3.connect(str(ROOT/"runtime/scheduler/state.sqlite3"))
     states=[dict(zip(("id","state","reason"),row)) for row in conn.execute(
         "select id,state,reason from tasks where id like ?",(plan["id"]+"%",))];conn.close()
