@@ -93,3 +93,7 @@ GitHub main using the existing repository workflow. Raw masks, pools, models and
 ## 2026-11-24 offline-entry recovery
 
 The three fresh FT reference runs and their independent final evaluations completed. All three initial offline attempts failed during import (`No module named drivers`), before creating masks. Added the repository root to the offline entry point import path; direct launch without PYTHONPATH and the existing three TC CPU tests pass. Recovery plan: `results/ts5_tc_coverage_20261123/recovery_plan_20261124.json`. Completed references/evaluations are reused; original failed/blocked task records remain. New task IDs restore offline generation, the unchanged all-seed gate, and the nine not-yet-started formal runs with the original run IDs, protocols, seeds and queue limit 5. No reference retraining or additional budget is authorized by this recovery.
+
+## 2026-11-25 terminal results
+
+All three FT references and nine formal branches completed. The offline gate preceded all formal starts; all 36 trained historical masks match the saved offline hashes. There are 60 stage-metric rows and 60 independent final task evaluations (128 episodes each). See [published results](../results/parameter-ablations/ts5-vdn64-tc-coverage/README.md) for per-seed ACC/BWT/FWT/AUC, TC and Q-gap distributions, version differences and recovery records. TC separation passed, but performance did not improve consistently with increasing TC across the three seeds.

@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "strict_controls_passed": true,
+  "criterion": "For each seed, pooled across four history pools: adjacent arms >=1 percentage point and High-Low >=5 points in both Micro and Macro TC. No Q-gap gate.",
+  "seed_summary": [
+    {
+      "seed": 2222,
+      "level": "low",
+      "states": 102502,
+      "micro_tc": 0.5514955675219136,
+      "macro_tc": 0.5946643240100928
+    },
+    {
+      "seed": 2222,
+      "level": "medium",
+      "states": 102502,
+      "micro_tc": 0.6091592386684104,
+      "macro_tc": 0.6376761134819514
+    },
+    {
+      "seed": 2222,
+      "level": "high",
+      "states": 102502,
+      "micro_tc": 0.752307995042965,
+      "macro_tc": 0.7491308415817205
+    },
+    {
+      "seed": 3535,
+      "level": "low",
+      "states": 104336,
+      "micro_tc": 0.5517302041605507,
+      "macro_tc": 0.5955727284012822
+    },
+    {
+      "seed": 3535,
+      "level": "medium",
+      "states": 104336,
+      "micro_tc": 0.6098504674424241,
+      "macro_tc": 0.6388412938783855
+    },
+    {
+      "seed": 3535,
+      "level": "high",
+      "states": 104336,
+      "micro_tc": 0.7526179771303148,
+      "macro_tc": 0.749861581204071
+    },
+    {
+      "seed": 4646,
+      "level": "low",
+      "states": 106405,
+      "micro_tc": 0.5572956074313649,
+      "macro_tc": 0.6045264685765602
+    },
+    {
+      "seed": 4646,
+      "level": "medium",
+      "states": 106405,
+      "micro_tc": 0.61357089835796,
+      "macro_tc": 0.6449465541585271
+    },
+    {
+      "seed": 4646,
+      "level": "high",
+      "states": 106405,
+      "micro_tc": 0.751440649431593,
+      "macro_tc": 0.7486305169750496
+    }
+  ]
+}

@@ -1090,6 +1090,62 @@
         "来源漂移分析仅有最终池留存样本，无法还原D/E真实训练池；无同次TD minibatch，不能验证来源与TD方向或性能下降因果。",
         "采样预算分析固定原始K1静态池及C/D/E末模型；每预算30次仅反映采样波动，不等于训练种子或Refresh在线效果。"
       ]
+    },
+    {
+      "id": "ts5-vdn64-tc-coverage",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/ts5-vdn64-tc-coverage/README.md",
+      "files": {
+        "stage_metrics": "parameter-ablations/ts5-vdn64-tc-coverage/stage_metrics.csv",
+        "runs": "parameter-ablations/ts5-vdn64-tc-coverage/runs.csv",
+        "qgap_histogram": "parameter-ablations/ts5-vdn64-tc-coverage/qgap_histogram.csv",
+        "control_audit": "parameter-ablations/ts5-vdn64-tc-coverage/control_audit.csv",
+        "offline_seed_summary": "parameter-ablations/ts5-vdn64-tc-coverage/offline_seed_summary.csv",
+        "seed_summary": "parameter-ablations/ts5-vdn64-tc-coverage/seed_summary.csv",
+        "preference_diagnostics": "parameter-ablations/ts5-vdn64-tc-coverage/preference_diagnostics.csv",
+        "independent_final": "parameter-ablations/ts5-vdn64-tc-coverage/independent_final.csv",
+        "tc_performance": "parameter-ablations/ts5-vdn64-tc-coverage/tc_performance.csv",
+        "tc_state_histogram": "parameter-ablations/ts5-vdn64-tc-coverage/tc_state_histogram.csv",
+        "offline_statistics": "parameter-ablations/ts5-vdn64-tc-coverage/offline_statistics.csv",
+        "paired_final": "parameter-ablations/ts5-vdn64-tc-coverage/paired_final.csv",
+        "within_seed_trends": "parameter-ablations/ts5-vdn64-tc-coverage/within_seed_trends.csv",
+        "evaluations": "parameter-ablations/ts5-vdn64-tc-coverage/evaluations.csv"
+      },
+      "task_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "training_seeds": [
+        2222,
+        3535,
+        4646
+      ],
+      "final_phase": 4,
+      "comparison": {
+        "kind": "within_seed_shared_S_prefix_fixed_FT_history_pools",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "primary_control": {
+          "method": "VDN-FT-reference",
+          "role": "fresh_reference"
+        },
+        "arms": [
+          "low-TC",
+          "medium-TC",
+          "high-TC"
+        ]
+      },
+      "interpretation_limits": [
+        "三种子，固定 Top-1、每状态动作对预算与距离配额，Q-gap 仅近似匹配。",
+        "有效决策至少四合法动作、严格 old-Q 排序；全部组 Complete Order Coverage 为零。",
+        "参考训练 cd31d7a；正式分支 13a6d9b/470c22c，逐运行保留启动版本与源码哈希。",
+        "High-Low ACC 跨种子方向不一致；图拓扑与 TC 同时变化，相关性不等于标量 TC 的因果效应。"
+      ]
     }
   ]
 }
