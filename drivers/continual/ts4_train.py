@@ -61,8 +61,7 @@ def main():
         buffer = make_replay_buffer(args, P['order'], scheme, groups,
                                     info['episode_limit'] + 1, preprocess)
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
-        for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
-            for module in network.modules():module._forward_hooks.clear()
+        learner.remove_activation_hooks()
         learner.cuda();selection={}
         layer,mode=(None,'baseline') if o.group=='N' else o.group.split('_')
         protector=TS3Protection(learner,layer,mode,lambda x:append(out/'update_audit.jsonl',x))

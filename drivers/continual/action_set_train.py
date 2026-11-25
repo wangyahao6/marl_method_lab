@@ -388,6 +388,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
     np.random.seed(seed)
     th.manual_seed(seed)
     args = SimpleNamespace(**config(protocol, seed, out))
+    manifest = None
+    if parent and role == "shared-branch" and protocol["method"] not in PAIR_METHODS:
+        # Direct driver launches use the same check as run.py, before creating any environment.
+        manifest = verify_manifest(parent, prefix_spec(protocol, seed, vars(args)))
     if role:
         args.preference_role = role
         args.parent = str(parent) if parent else None
@@ -426,9 +430,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         mac = base.controllers[args.mac](augmented, groups, args)
         runner.setup(*spec, mac)
         learner = base.learners[args.learner](mac, augmented, logger, args)
-        for network in (mac.agent, learner.target_mac.agent):
-            for module in network.modules():
-                module._forward_hooks.clear()  # No activation instrumentation in this driver.
+        learner.remove_activation_hooks()
         if args.use_cuda:
             learner.cuda()
         settings = protocol["action_set"]
@@ -609,12 +611,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                  "see shapley_coverage.jsonl")
 
         first_phase = 0
-        manifest = None
         prefix_buffer = None
         full_restore = {}
         if parent:
-            if role == "shared-branch" and not pair_ablation:
-                manifest = verify_manifest(parent, prefix_spec(protocol, seed, vars(args)))
             state = th.load(parent / "return_state.th", map_location="cpu")
             if full_shared or manifest is not None:
                 if state.get("full_state_version") != 1:
@@ -623,7 +622,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 prefix_checkpoint = json.loads((parent / "retention.json").read_text())["stages"][0]["checkpoint"]
                 full_restore = dict(prefix_id=manifest["prefix_id"] if manifest else parent.name, branch_id=out.name, seed=seed,
                                     prefix_checkpoint_sha256=file_sha256(parent / prefix_checkpoint / "agent.th"),
-                                    restored_replay_episodes=prefix_buffer.episodes_in_buffer,
+                                    prefix_replay_snapshot_episodes=prefix_buffer.episodes_in_buffer,
                                     restored_replay_index=prefix_buffer.buffer_index,
                                     replay_on_switch=args.replay_on_switch)
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
@@ -730,14 +729,6 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 # VDN mixers are parameter-free. Only the two Agent states enter the hash.
                 online = th.load(Path(results[-1]["checkpoint"]) / "agent.th", map_location="cpu")
                 parent_hash = parent_hash_fields(state, (online, state["target_agent"]))
-            base.write(out / "branch_restore.json", dict(
-                parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
-                preference_weight=args.preference_weight,
-                t_env=runner.t_env, episode=episode, updates=updates,
-                last_target_update_episode=learner.last_target_update_episode,
-                model_hash=base.parameter_hash(learner), **parent_hash,
-                **full_restore,
-                engine="new SC2 process, distribution RNG restored"))
         status("running")
         if not parent:
             reference = agent_snapshot()
@@ -753,8 +744,23 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                            scheme, groups, info["episode_limit"] + 1, preprocess)
             if prefix_buffer is not None:
                 er_buffer = restore_replay_buffer(er_buffer, prefix_buffer, [stages[0]["task"]])
-        # FT has restored the A buffer; the existing B switch discards it and starts empty.
+        # Only record an import after restore_replay_buffer has actually returned.
+        if prefix_buffer is not None:
+            count = prefix_buffer.episodes_in_buffer
+            imported = er_buffer.episodes_in_buffer if args.replay_on_switch == "er" else 0
+            full_restore.update(restored_replay_episodes=imported,
+                                discarded_prefix_replay_episodes=count if args.replay_on_switch == "ft" else 0,
+                                replay_restore_mode=args.replay_on_switch)
         prefix_buffer = None
+        if parent:
+            base.write(out / "branch_restore.json", dict(
+                parent=str(parent), checkpoint=results[-1]["checkpoint"], role=role,
+                preference_weight=args.preference_weight,
+                t_env=runner.t_env, episode=episode, updates=updates,
+                last_target_update_episode=learner.last_target_update_episode,
+                model_hash=base.parameter_hash(learner), **parent_hash,
+                **full_restore,
+                engine="new SC2 process, distribution RNG restored"))
 
         stop_phase = {"prefix": len(stages) - 1, "shared-prefix": 1,
                       "pair-reference": len(stages) - 1}.get(role, len(stages))

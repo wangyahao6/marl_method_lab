@@ -118,10 +118,7 @@ def main():
         learner = learners[args.learner](mac, buffer.scheme, logger, args)
         # Native statistics hooks retain graphs and are irrelevant to Figure 2.
         # Remove observers only; network operations and all-one frozen gates stay.
-        for network in (mac.agent, learner.target_mac.agent, learner.mixer, learner.target_mixer):
-            for module in network.modules():
-                if isinstance(module, ActivateLayer):
-                    module._forward_hooks.clear()
+        learner.remove_activation_hooks()
         learner.cuda()
         protection = SoftProtection(learner, PROTOCOL['method'], out, append, write, metrics=metrics) if o.condition=='softprotect' else NullProtection()
         episode = 0

@@ -55,7 +55,7 @@ class TS3DriverTest(unittest.TestCase):
 
         def make_learner(mac, scheme, logger, args):
             result = SimpleNamespace(mac=mac, mixer=th.nn.Linear(1, 1), target_mixer=th.nn.Linear(1, 1),
-                                     target_mac=make_controller(scheme, {}, args), cuda=Mock(),
+                                     target_mac=make_controller(scheme, {}, args), cuda=Mock(), remove_activation_hooks=Mock(),
                                      log_stats_t=-1, last_target_update_episode=0)
             result.optimiser = th.optim.RMSprop(mac.agent.parameters(), lr=.1)
             result.save_models = lambda dest: th.save(mac.agent.state_dict(), Path(dest) / 'agent.th')

@@ -22,8 +22,7 @@ def main():
     def learner():
         th.manual_seed(321);log=Log();mac=t.base.controllers[args.mac](batch.scheme,batch.groups,args)
         result=t.base.learners[args.learner](mac,batch.scheme,log,args)
-        for network in [mac.agent,result.target_mac.agent,result.mixer,result.target_mixer]:
-            for module in network.modules():module._forward_hooks.clear()
+        result.remove_activation_hooks()
         result.mac.agent.load_state_dict(payload['agent']);result.target_mac.agent.load_state_dict(payload['agent'])
         return result,log
     checks={};rng=np.random.RandomState(492)

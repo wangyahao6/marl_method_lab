@@ -145,169 +145,172 @@ def run_sequential(args, logger):
     # Learner
     learner = le_REGISTRY[args.learner](mac, buffer.scheme, logger, args)
 
-    if args.use_cuda:
-        learner.cuda()
+    try:
+        if args.use_cuda:
+            learner.cuda()
 
-    if args.checkpoint_path != "":
+        if args.checkpoint_path != "":
 
-        timesteps = []
-        timestep_to_load = 0
+            timesteps = []
+            timestep_to_load = 0
 
-        if not os.path.isdir(args.checkpoint_path):
-            logger.console_logger.info("Checkpoint directiory {} doesn't exist".format(args.checkpoint_path))
-            return
+            if not os.path.isdir(args.checkpoint_path):
+                logger.console_logger.info("Checkpoint directiory {} doesn't exist".format(args.checkpoint_path))
+                return
 
-        # Go through all files in args.checkpoint_path
-        for name in os.listdir(args.checkpoint_path):
-            full_name = os.path.join(args.checkpoint_path, name)
-            # Check if they are dirs the names of which are numbers
-            if os.path.isdir(full_name) and name.isdigit():
-                timesteps.append(int(name))
+            # Go through all files in args.checkpoint_path
+            for name in os.listdir(args.checkpoint_path):
+                full_name = os.path.join(args.checkpoint_path, name)
+                # Check if they are dirs the names of which are numbers
+                if os.path.isdir(full_name) and name.isdigit():
+                    timesteps.append(int(name))
 
-        if args.load_step == 0:
-            # choose the max timestep
-            timestep_to_load = max(timesteps)
-        else:
-            # choose the timestep closest to load_step
-            timestep_to_load = min(timesteps, key=lambda x: abs(x - args.load_step))
+            if args.load_step == 0:
+                # choose the max timestep
+                timestep_to_load = max(timesteps)
+            else:
+                # choose the timestep closest to load_step
+                timestep_to_load = min(timesteps, key=lambda x: abs(x - args.load_step))
 
-        model_path = os.path.join(args.checkpoint_path, str(timestep_to_load))
+            model_path = os.path.join(args.checkpoint_path, str(timestep_to_load))
 
-        logger.console_logger.info("Loading model from {}".format(model_path))
-        learner.load_models(model_path)
-        runner.t_env = timestep_to_load
+            logger.console_logger.info("Loading model from {}".format(model_path))
+            learner.load_models(model_path)
+            runner.t_env = timestep_to_load
 
-        if args.evaluate or args.save_replay:
-            evaluate_sequential(args, runner)
-            return
+            if args.evaluate or args.save_replay:
+                evaluate_sequential(args, runner)
+                return
 
-    detector = None
-    if getattr(args, "pure_detection", False):
-        import sys
-        sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "drivers/continual"))
-        from static_detection import Detector
-        detector = Detector(learner, args)
+        detector = None
+        if getattr(args, "pure_detection", False):
+            import sys
+            sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "drivers/continual"))
+            from static_detection import Detector
+            detector = Detector(learner, args)
 
-    # start training
-    episode = 0
-    last_test_T = -args.test_interval - 1
-    last_log_T = 0
-    model_save_time = 0
+        # start training
+        episode = 0
+        last_test_T = -args.test_interval - 1
+        last_log_T = 0
+        model_save_time = 0
 
-    start_time = time.time()
-    last_time = start_time
+        start_time = time.time()
+        last_time = start_time
 
-    logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
-    reborn_time = 0
-    reset_time = 0
-    recycle_time = 0
-    T = 2
-    if hasattr(args, 'T'):
-        T = args.T
-    trace = getattr(learner, "a2_trace", None)
-    limit = args.t_max if trace is not None else args.t_max + 1
-    while runner.t_env < limit:
+        logger.console_logger.info("Beginning training for {} timesteps".format(args.t_max))
+        reborn_time = 0
+        reset_time = 0
+        recycle_time = 0
+        T = 2
+        if hasattr(args, 'T'):
+            T = args.T
+        trace = getattr(learner, "a2_trace", None)
+        limit = args.t_max if trace is not None else args.t_max + 1
+        while runner.t_env < limit:
 
-        # Run for a whole episode at a time
-        if trace is not None:
-            episode_batch = runner.run(test_mode=False, max_steps=args.t_max - runner.t_env)
-        else:
-            episode_batch = runner.run(test_mode=False)
-        buffer.insert_episode_batch(episode_batch)
-        radio = 1
-        if hasattr(args, 'radio'):
-            radio = args.radio
-
-        if buffer.can_sample(args.batch_size):
-            for _ in range(radio):
-                episode_sample = buffer.sample(args.batch_size)
-
-                # Truncate batch to only filled timesteps
-                max_ep_t = episode_sample.max_t_filled()
-                episode_sample = episode_sample[:, :max_ep_t]
-
-                if episode_sample.device != args.device:
-                    episode_sample.to(args.device)
-
-                learner.train(episode_sample, runner.t_env, episode)
-
-        if detector is not None:
-            detector.observe(episode_batch, runner.env, runner.t_env)
-
-        # Execute test runs once in a while
-        n_test_runs = max(1, args.test_nepisode // runner.batch_size)
-        if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
-
-            logger.console_logger.info("t_env: {} / {}".format(runner.t_env, args.t_max))
-            logger.console_logger.info("Estimated time left: {}. Time passed: {}".format(
-                time_left(last_time, last_test_T, runner.t_env, args.t_max), time_str(time.time() - start_time)))
-            last_time = time.time()
-
-            print('time ',time.time(),runner.t_env)
-
-            last_test_T = runner.t_env
-            for _ in range(n_test_runs):
-                runner.run(test_mode=True)
-
+            # Run for a whole episode at a time
+            if trace is not None:
+                episode_batch = runner.run(test_mode=False, max_steps=args.t_max - runner.t_env)
+            else:
+                episode_batch = runner.run(test_mode=False)
+            buffer.insert_episode_batch(episode_batch)
+            radio = 1
+            if hasattr(args, 'radio'):
+                radio = args.radio
 
             if buffer.can_sample(args.batch_size):
-                episode_sample = buffer.sample_latest(args.batch_size)
-                max_ep_t = episode_sample.max_t_filled()
-                episode_sample = episode_sample[:, :max_ep_t]
+                for _ in range(radio):
+                    episode_sample = buffer.sample(args.batch_size)
 
-                if episode_sample.device != args.device:
-                    episode_sample.to(args.device)
+                    # Truncate batch to only filled timesteps
+                    max_ep_t = episode_sample.max_t_filled()
+                    episode_sample = episode_sample[:, :max_ep_t]
 
-                learner.train(episode_sample, runner.t_env, episode, check=True)
-                del episode_sample
+                    if episode_sample.device != args.device:
+                        episode_sample.to(args.device)
 
-            if "_r" in args.name:
-                recycle_time = recycle_time + 1
-                if recycle_time == T:
-                    learner.recycle()
-                    recycle_time = 0
+                    learner.train(episode_sample, runner.t_env, episode)
 
-            if "_s" in args.name:
-                reset_time = reset_time + 1
-                if reset_time == T:
-                    learner.reset()
-                    reset_time = 0
+            if detector is not None:
+                detector.observe(episode_batch, runner.env, runner.t_env)
 
-            if "_b" in args.name:
-                reborn_time = reborn_time + 1
-                if reborn_time == T:
-                    learner.reborn()
-                    reborn_time = 0
+            # Execute test runs once in a while
+            n_test_runs = max(1, args.test_nepisode // runner.batch_size)
+            if (runner.t_env - last_test_T) / args.test_interval >= 1.0:
 
-        if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
-            model_save_time = runner.t_env
-            save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
-            # "results/models/{}".format(unique_token)
-            os.makedirs(save_path, exist_ok=True)
-            logger.console_logger.info("Saving models to {}".format(save_path))
+                logger.console_logger.info("t_env: {} / {}".format(runner.t_env, args.t_max))
+                logger.console_logger.info("Estimated time left: {}. Time passed: {}".format(
+                    time_left(last_time, last_test_T, runner.t_env, args.t_max), time_str(time.time() - start_time)))
+                last_time = time.time()
 
-            # learner should handle saving/loading -- delegate actor save/load to mac,
-            # use appropriate filenames to do critics, optimizer states
-            learner.save_models(save_path)
+                print('time ',time.time(),runner.t_env)
 
-        episode += args.batch_size_run
+                last_test_T = runner.t_env
+                for _ in range(n_test_runs):
+                    runner.run(test_mode=True)
 
-        if (runner.t_env - last_log_T) >= args.log_interval:
-            logger.log_stat("episode", episode, runner.t_env)
-            logger.print_recent_stats()
-            last_log_T = runner.t_env
 
-    if trace is not None:
-        trace.flush(runner.t_env)
-    if detector is not None or trace is not None:
-        final = Path(args.local_results_path, "final_model")
-        final.mkdir(exist_ok=True)
-        learner.save_models(str(final))
-        (final.parent / "training_complete.json").write_text(
-            json.dumps(dict(t_env=runner.t_env, episodes=episode))
-        )
-    runner.close_env()
-    logger.console_logger.info("Finished Training")
+                if buffer.can_sample(args.batch_size):
+                    episode_sample = buffer.sample_latest(args.batch_size)
+                    max_ep_t = episode_sample.max_t_filled()
+                    episode_sample = episode_sample[:, :max_ep_t]
+
+                    if episode_sample.device != args.device:
+                        episode_sample.to(args.device)
+
+                    learner.train(episode_sample, runner.t_env, episode, check=True)
+                    del episode_sample
+
+                if "_r" in args.name:
+                    recycle_time = recycle_time + 1
+                    if recycle_time == T:
+                        learner.recycle()
+                        recycle_time = 0
+
+                if "_s" in args.name:
+                    reset_time = reset_time + 1
+                    if reset_time == T:
+                        learner.reset()
+                        reset_time = 0
+
+                if "_b" in args.name:
+                    reborn_time = reborn_time + 1
+                    if reborn_time == T:
+                        learner.reborn()
+                        reborn_time = 0
+
+            if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
+                model_save_time = runner.t_env
+                save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
+                # "results/models/{}".format(unique_token)
+                os.makedirs(save_path, exist_ok=True)
+                logger.console_logger.info("Saving models to {}".format(save_path))
+
+                # learner should handle saving/loading -- delegate actor save/load to mac,
+                # use appropriate filenames to do critics, optimizer states
+                learner.save_models(save_path)
+
+            episode += args.batch_size_run
+
+            if (runner.t_env - last_log_T) >= args.log_interval:
+                logger.log_stat("episode", episode, runner.t_env)
+                logger.print_recent_stats()
+                last_log_T = runner.t_env
+
+        if trace is not None:
+            trace.flush(runner.t_env)
+        if detector is not None or trace is not None:
+            final = Path(args.local_results_path, "final_model")
+            final.mkdir(exist_ok=True)
+            learner.save_models(str(final))
+            (final.parent / "training_complete.json").write_text(
+                json.dumps(dict(t_env=runner.t_env, episodes=episode))
+            )
+        runner.close_env()
+        logger.console_logger.info("Finished Training")
+    finally:
+        learner.remove_activation_hooks()
 
 
 def args_sanity_check(config, _log):

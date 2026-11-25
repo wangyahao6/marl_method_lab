@@ -19,9 +19,6 @@ def main():
     batch=package['batch'];batch.to('cpu')
     mac=t.controllers[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(package['agent'])
     mixer=QMixer(args);mixer.load_state_dict(package['mixer'])
-    for network in [mac.agent,mixer]:
-        for module in network.modules():
-            if isinstance(module,t.ActivateLayer):module._forward_hooks.clear()
     config=t.PROTOCOL['method']
     before=p.digest([mac.agent.state_dict(),mixer.state_dict(),p.rng_state()])
     hidden=mac.hidden_states
@@ -31,10 +28,12 @@ def main():
     # Recompute shared-agent activity explicitly over state-agent pairs.
     captured=[]
     h=mac.agent.net[2].register_forward_hook(lambda m,i,o:captured.append(o.detach()))
-    with th.no_grad():
-        mac.init_hidden(batch.batch_size)
-        qs=th.stack([mac.forward(batch,t=k) for k in range(batch.max_seq_length)],1)
-    h.remove();mac.hidden_states=hidden
+    try:
+        with th.no_grad():
+            mac.init_hidden(batch.batch_size)
+            qs=th.stack([mac.forward(batch,t=k) for k in range(batch.max_seq_length)],1)
+    finally:
+        h.remove();mac.hidden_states=hidden
     mask=batch['filled'][:,:-1].float().clone()
     mask[:,1:]*=1-batch['terminated'][:,:-2].float()
     lengths=batch['filled'].squeeze(-1).sum(1)-1

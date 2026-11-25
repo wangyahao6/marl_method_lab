@@ -49,11 +49,13 @@ def analyze(path):
     before=parameter_hash(mac,mixer)
     captures={k:[] for k in ['A1','A2','H']}
     handles=[]
-    for key,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4]),('H',mac.agent.rnn)]:
-        handles.append(module.register_forward_hook(lambda m,i,o,k=key: captures[k].append(o.detach().clone())))
-    mac.init_hidden(batch.batch_size)
-    qs=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
-    for handle in handles:handle.remove()
+    try:
+        for key,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4]),('H',mac.agent.rnn)]:
+            handles.append(module.register_forward_hook(lambda m,i,o,k=key: captures[k].append(o.detach().clone())))
+        mac.init_hidden(batch.batch_size)
+        qs=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
+    finally:
+        for handle in handles:handle.remove()
     mask=batch['filled'][:,:-1].float().clone()
     mask[:,1:]*=1-batch['terminated'][:,:-2].float()
     lengths=batch['filled'].squeeze(-1).sum(1)-1

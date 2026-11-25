@@ -34,9 +34,13 @@ def forward(cfg,state,batch):
     args=SimpleNamespace(**dict(cfg,device='cpu',use_cuda=False))
     mac=REGISTRY[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(state);mac.agent.eval();mac.init_hidden(batch.batch_size)
     captured={'A1':[],'A2':[]}
-    handles=[module.register_forward_hook(lambda m,i,o,k=k:captured[k].append(o.detach().clone())) for k,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]]
-    qs=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length-1)],1)
-    for h in handles:h.remove()
+    handles=[]
+    try:
+        for k,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]:
+            handles.append(module.register_forward_hook(lambda m,i,o,k=k:captured[k].append(o.detach().clone())))
+        qs=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length-1)],1)
+    finally:
+        for h in handles:h.remove()
     lengths=batch['filled'].squeeze(-1).sum(1)-1
     valid=th.arange(batch.max_seq_length-1)[None,:]<lengths[:,None]
     avail=batch['avail_actions'][:,:-1].bool()

@@ -40,8 +40,7 @@ def main():
  clean={k:v for k,v in batch.scheme.items() if k not in ['filled','actions_onehot']}
  buffer=h.base.ReplayBuffer(clean,batch.groups,64,batch.max_seq_length,preprocess={'actions':('actions_onehot',[h.base.OneHot(a.n_actions)])});buffer.insert_episode_batch(batch)
  learner=h.base.learners[a.learner](mac,buffer.scheme,h.base.Logger(__import__('logging').getLogger('offline')),a)
- for net in [mac.agent,learner.mixer,learner.target_mac.agent,learner.target_mixer]:
-  for module in net.modules():module._forward_hooks.clear()
+ learner.remove_activation_hooks()
  learner.train(batch,100,0)
  state=dict(agent=mac.agent.state_dict(),target=learner.target_mac.agent.state_dict(),mixer=learner.mixer.state_dict(),target_mixer=learner.target_mixer.state_dict(),optimizer=learner.optimiser.state_dict(),buffer=buffer,rng=rng_state(),target_counter=learner.last_target_update_episode,episode=32,updates=1,t_env=100)
  with tempfile.TemporaryDirectory() as d:

@@ -44,8 +44,7 @@ def main():
         scheme, groups, preprocess = spec = episode_spec(info)
         buffer=base.ReplayBuffer(scheme,groups,args.buffer_size,info['episode_limit']+1,preprocess=preprocess,device='cpu')
         mac=base.controllers[args.mac](buffer.scheme,groups,args);runner.setup(scheme,groups,preprocess,mac);learner=base.learners[args.learner](mac,buffer.scheme,logger,args)
-        for network in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
-            for module in network.modules():module._forward_hooks.clear()
+        learner.remove_activation_hooks()
         learner.cuda();fifo=deque(maxlen=32);selection={}
         if o.role=='branch':
             parent=Path(o.parent);state=th.load(parent/'prefix_state.th',map_location='cpu')

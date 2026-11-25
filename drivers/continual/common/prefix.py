@@ -2,6 +2,9 @@
 import copy
 import hashlib
 import json
+import os
+import platform
+from importlib.metadata import PackageNotFoundError, version as package_version
 from pathlib import Path
 import subprocess
 from uuid import uuid4
@@ -10,6 +13,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 STATE_VERSION = 1
+MANIFEST_VERSION = 2
 
 
 def base_config(algorithm):
@@ -48,14 +52,34 @@ def prefix_spec(protocol, seed, effective_config=None):
     env = copy.deepcopy(cfg['env_args'])
     env.pop('rosters', None)
     env.update(seed=seed, game_version=protocol.get('sc2_game_version', '4.10'))
+    from common.prefix_implementation import training_implementation
+    implementation = training_implementation(ROOT, cfg)
+    cuda = None
+    if training['use_cuda']:
+        cuda = dict(torch_cuda_build=th.version.cuda, cudnn=th.backends.cudnn.version(),
+                    device=th.cuda.get_device_name(0), capability=list(th.cuda.get_device_capability(0)),
+                    cudnn_deterministic=th.backends.cudnn.deterministic,
+                    cudnn_benchmark=th.backends.cudnn.benchmark,
+                    cudnn_tf32=th.backends.cudnn.allow_tf32,
+                    matmul_tf32=th.backends.cuda.matmul.allow_tf32,
+                    cublas_workspace_config=os.environ.get('CUBLAS_WORKSPACE_CONFIG'),
+                    cuda_visible_devices=os.environ.get('CUDA_VISIBLE_DEVICES'))
+    dependencies = {}
+    for package in ('pysc2', 's2clientprotocol', 'protobuf', 'absl-py'):
+        try:
+            dependencies[package] = package_version(package)
+        except PackageNotFoundError:
+            dependencies[package] = None
     stage = copy.deepcopy(protocol['stages'][0])
     return dict(version=STATE_VERSION, environment='action_set_protoss', env_args=env,
-                environment_sources={name: file_hash(ROOT / name) for name in (
-                    'drivers/continual/hetero_environment.py', 'drivers/continual/environment.py',
-                    'vendor/smacv2/smacv2/env/starcraft2/wrapper.py',
-                    'vendor/smacv2/smacv2/env/starcraft2/starcraft2.py')},
-                runtime=dict(torch=str(th.__version__), numpy=np.__version__,
+                runtime=dict(environment_packages=dependencies, python=platform.python_version(), python_implementation=platform.python_implementation(),
+                             cuda=cuda, torch_cuda_build=th.version.cuda,
+                             default_dtype=str(th.get_default_dtype()),
+                             float32_matmul_precision=th.get_float32_matmul_precision(),
+                             torch_num_threads=th.get_num_threads() if effective_config is not None else 1,
+                             torch=str(th.__version__), numpy=np.__version__,
                              deterministic=th.are_deterministic_algorithms_enabled()),
+                implementation=implementation,
                 algorithm=protocol['algorithm'], seed=seed, stage=stage,
                 roster=copy.deepcopy(protocol['tasks'][stage['task']]), training=training)
 
@@ -105,7 +129,7 @@ def write_manifest(out, spec, checkpoint, collection):
     files = [out / 'retention.json', out / 'config.json', out / 'env_info.json', out / 'return_state.th', out / 'prefix_replay.th', out / 'initial_agent.th',
              *sorted(checkpoint.glob('*.th')),
              *sorted((out / 'action_set_memory').rglob('*.th'))]
-    manifest = dict(prefix_id='prefix-' + uuid4().hex, state_version=STATE_VERSION,
+    manifest = dict(manifest_version=MANIFEST_VERSION, prefix_id='prefix-' + uuid4().hex, state_version=STATE_VERSION,
                     prefix_spec=spec, prefix_spec_sha256=spec_hash(spec), code_version=code,
                     history_collection=collection,
                     files={str(path.relative_to(out)): file_hash(path) for path in files})
@@ -117,8 +141,14 @@ def write_manifest(out, spec, checkpoint, collection):
 def verify_manifest(parent, requested):
     path = Path(parent) / 'prefix_manifest.json'
     if not path.exists():
-        return None  # Legacy parents retain their existing restoration path.
+        raise ValueError('Legacy Prefix without prefix_manifest.json has no verified training implementation; '
+                         'regenerate the Prefix with manifest version 2. Historical artifacts are not modified.')
     manifest = json.loads(path.read_text())
+    if manifest.get('manifest_version', 1) != MANIFEST_VERSION:
+        raise ValueError('Legacy/unsupported Prefix Manifest version: training implementation provenance cannot '
+                         'be inferred from source_sha256; regenerate a version-2 Prefix. No automatic upgrade.')
+    if 'implementation' not in manifest['prefix_spec']:
+        raise ValueError('Prefix Manifest lacks its baseline training implementation fingerprint')
     if manifest['state_version'] != STATE_VERSION:
         raise ValueError(f"Unsupported prefix state version: {manifest['state_version']}")
     if spec_hash(manifest['prefix_spec']) != manifest['prefix_spec_sha256']:

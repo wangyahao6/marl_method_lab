@@ -19,16 +19,16 @@ def valid(batch):
 @th.no_grad()
 def replay(mac,batch,layer=None,ids=(),recipient=None,types=None,capture=False):
  values={k:[] for k in LAYERS};handles=[]
- for k,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]:
-  if k==layer and len(ids):
-   affected=th.tensor(types==recipient)
-   def mask(m,i,o):
-    z=o.reshape(batch.batch_size,mac.n_agents,-1).clone()
-    selector=th.zeros_like(z,dtype=th.bool);selector[:,:,list(ids)]=affected[:,:,None]
-    return z.masked_fill(selector,0).reshape_as(o)
-   handles.append(module.register_forward_hook(mask))
-  if capture:handles.append(module.register_forward_hook(lambda m,i,o,k=k:values[k].append(o.detach().clone())))
  try:
+  for k,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]:
+   if k==layer and len(ids):
+    affected=th.tensor(types==recipient)
+    def mask(m,i,o):
+     z=o.reshape(batch.batch_size,mac.n_agents,-1).clone()
+     selector=th.zeros_like(z,dtype=th.bool);selector[:,:,list(ids)]=affected[:,:,None]
+     return z.masked_fill(selector,0).reshape_as(o)
+    handles.append(module.register_forward_hook(mask))
+   if capture:handles.append(module.register_forward_hook(lambda m,i,o,k=k:values[k].append(o.detach().clone())))
   mac.init_hidden(batch.batch_size)
   qs=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
  finally:

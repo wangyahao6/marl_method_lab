@@ -44,14 +44,14 @@ def evaluate(task,package,output):
  before=hashlib.sha256(b''.join(v.numpy().tobytes() for v in mac.agent.state_dict().values())).hexdigest()
  args=dict(a.env_args);args['map_name']='2s3z'
  schema={k:v for k,v in batch.scheme.items() if k not in ['filled','actions_onehot']};groups=batch.groups;records=[];handles=[];current_types=[]
- if task['ids']:
-  module=mac.agent.net[2 if task['layer']=='A1' else 4]
-  def mask(m,i,o):
-   z=o.reshape(1,a.n_agents,-1).clone();affected=th.tensor([x==task['recipient'] for x in current_types])
-   selected=th.zeros_like(z,dtype=th.bool);selected[:,:,task['ids']]=affected[None,:,None]
-   return z.masked_fill(selected,0).reshape_as(o)
-  handles.append(module.register_forward_hook(mask))
  try:
+  if task['ids']:
+   module=mac.agent.net[2 if task['layer']=='A1' else 4]
+   def mask(m,i,o):
+    z=o.reshape(1,a.n_agents,-1).clone();affected=th.tensor([x==task['recipient'] for x in current_types])
+    selected=th.zeros_like(z,dtype=th.bool);selected[:,:,task['ids']]=affected[None,:,None]
+    return z.masked_fill(selected,0).reshape_as(o)
+   handles.append(module.register_forward_hook(mask))
   for block,env_seed in enumerate(ENV_SEEDS):
    random.seed(env_seed);np.random.seed(env_seed);th.manual_seed(env_seed)
    args['seed']=env_seed;env=None

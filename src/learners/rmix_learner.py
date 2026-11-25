@@ -1,3 +1,4 @@
+from utils.hook_lifecycle import install_activation_observers
 from components.optimizer_checkpoint import load_optimizer_state
 import copy
 import numpy as np
@@ -41,6 +42,7 @@ class RMIXLearner:
             else:
                 self.target_mixer = copy.deepcopy(self.mixer)
 
+        activation_observers = []
         self.neu_data = {}
         self.neu_avg = {}
         self.mask = {}
@@ -53,7 +55,7 @@ class RMIXLearner:
                     fea_out = fea_out.reshape(-1, args.n_agents, fea_out.shape[1]) # t(batch*agent, dim)  avg of each time
                     self.neu_data[module.name] = self.neu_data[module.name] + th.mean(fea_out, dim=0)
                     return None
-                module.register_forward_hook(hook=hook)
+                activation_observers.append((module, hook))
 
         for (name, module) in self.mixer.named_modules():
             if isinstance(module, ActivateLayer):
@@ -62,7 +64,7 @@ class RMIXLearner:
                 def hook(module, fea_in, fea_out):
                     self.neu_data[module.name] = self.neu_data[module.name] + th.mean(fea_out, dim=0) # 1(batch, dim)
                     return None
-                module.register_forward_hook(hook=hook)
+                activation_observers.append((module, hook))
 
         self.cvar_optimiser = Adam(params=self.params, lr=args.lr)
         # a little wasteful to deepcopy (e.g. duplicates action selector), but should work for any MAC
@@ -80,6 +82,12 @@ class RMIXLearner:
         # not all params need to be updated
         self.last_qr_update_t = 0
         self.dist_optimiser = Adam(params=self.params, lr=args.qr_lr, eps=0.01/32)
+
+        self.activation_hooks = install_activation_observers(self, activation_observers)
+
+    def remove_activation_hooks(self):
+        """Remove only the instrumentation owned by this learner."""
+        self.activation_hooks.remove()
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, check=False):
         # Get the relevant quantities

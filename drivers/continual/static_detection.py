@@ -58,14 +58,14 @@ class Detector:
         mix=QMixer(self.args)
         mac.agent.load_state_dict(agent_state);mix.load_state_dict(mixer_state)
         mac.agent.to(self.args.device);mix.to(self.args.device)
-        for network in [mac.agent,mix]:
-            for module in network.modules():module._forward_hooks.clear()
         mac.agent.eval();mix.eval();capt={k:[] for k in ['A1','A2','H']};handles=[]
-        for k,m in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4]),('H',mac.agent.rnn)]:
-            handles.append(m.register_forward_hook(lambda m,i,o,k=k:capt[k].append(o.detach().clone())))
-        mac.init_hidden(batch.batch_size)
-        q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
-        for h in handles:h.remove()
+        try:
+            for k,m in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4]),('H',mac.agent.rnn)]:
+                handles.append(m.register_forward_hook(lambda m,i,o,k=k:capt[k].append(o.detach().clone())))
+            mac.init_hidden(batch.batch_size)
+            q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
+        finally:
+            for h in handles:h.remove()
         mask=batch['filled'][:,:-1].squeeze(-1).bool()
         lengths=batch['filled'].squeeze(-1).sum(1)-1
         good=mask & (th.arange(batch.max_seq_length-1,device=mask.device)[None,:]<lengths[:,None])

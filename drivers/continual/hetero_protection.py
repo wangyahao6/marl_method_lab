@@ -20,10 +20,12 @@ def select(learner,args,fifo,out):
         mac=controllers[args.mac](batch.scheme,batch.groups,args);mix=QMixer(args)
         mac.agent.load_state_dict(learner.mac.agent.state_dict());mix.load_state_dict(learner.mixer.state_dict());mac.agent.to(args.device);mix.to(args.device)
         captured={'A1':[],'A2':[]};handles=[]
-        for key,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]:handles.append(module.register_forward_hook(lambda m,i,o,key=key:captured[key].append(o.detach().clone())))
-        mac.init_hidden(batch.batch_size)
-        q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
-        for h in handles:h.remove()
+        try:
+            for key,module in [('A1',mac.agent.net[2]),('A2',mac.agent.net[4])]:handles.append(module.register_forward_hook(lambda m,i,o,key=key:captured[key].append(o.detach().clone())))
+            mac.init_hidden(batch.batch_size)
+            q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)
+        finally:
+            for h in handles:h.remove()
         lengths=batch['filled'].squeeze(-1).sum(1)-1
         good=batch['filled'][:,:-1].squeeze(-1).bool() & (th.arange(batch.max_seq_length-1,device=args.device)[None,:]<lengths[:,None])
         c,_=sensitivity(mix,q[:,:-1][good],batch['actions'][:,:-1].squeeze(-1)[good],batch['avail_actions'][:,:-1][good],batch['state'][:,:-1][good])

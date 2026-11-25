@@ -49,9 +49,7 @@ def main():
         mac = driver.base.controllers[runtime.mac](scheme, groups, runtime)
         logger = driver.base.Logger(logging.getLogger("tkpr_timing"))
         learner = driver.base.learners[runtime.learner](mac, scheme, logger, runtime)
-        for network in (mac.agent, learner.target_mac.agent):
-            for module in network.modules():
-                module._forward_hooks.clear()
+        learner.remove_activation_hooks()
         learner.cuda()
         settings = dict(protocol["topk_preference"], batch_episodes=protocol["action_set"]["batch_episodes"])
         preference = RankingPreference("topk_preference", settings, np.random.default_rng(cfg["seed"]),

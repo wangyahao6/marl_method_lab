@@ -27,3 +27,5 @@ Continuous SMACv2 runs use runtime/SMACv2StarCraftII -> /home/wyh/stagnant_figur
 ## RNNAgent 结构整理
 
 移除未参与前向的 `RNNAgent.fc1` 参数，隐藏状态从 `net[0].weight` 继承 dtype 和设备。保留原种子初始化的随机数消耗，实际网络、GRU、Q head 与 TRHR 接入沿用原实现。模型读取仅兼容成对且尺寸匹配的历史 fc1 键。旧优化器在确认 Agent 格式和原参数组顺序后去除 fc1 的两个槽位，保留其余状态。归档哈希可验证时，恢复日志保存原哈希并以实际网络参数重新计算可比较的父模型哈希。
+
+第三方许可证、版权声明、NOTICE 材料及待确认授权关系集中记录于 [第三方许可证清单](THIRD_PARTY_LICENSES.md)；保留根 LICENSE 与第三方原文。

@@ -60,7 +60,7 @@ Spec 来自与训练共用的默认配置合并函数及实际生效配置，不
 
 原有 `full_shared_prefix: true` 继续使用完整恢复、独立分支记忆、副产物清单和 final replay 保存；新 `shared-prefix` 即使不带该开关也会生成完整通用前缀。`prefix_state_manifest.json` / `final_state_manifest.json` 原有用途保留，新统一身份及校验使用 `prefix_manifest.json`。
 
-旧 `--parent` 产物仍按原有严格协议匹配恢复；没有新 Manifest 的产物不声称已通过新哈希校验，也不能凭空恢复缺失的 TD 池或 hidden。旧数据缺少旧 Q 时仍明确拒绝需要它的方法，不修改历史产物补写元数据。旧 full_shared_prefix 的 FT Prefix → ER 分支路径保留。新 Prefix 的训练边界状态与旧版在采集/方法处理之后保存的状态有区别，版本和文件哈希分别记录，不将旧实验结果改归为新实现。
+兼容策略更新：Generic shared-branch 现在要求 Manifest schema 2。缺少 Manifest、schema 1 或未知 schema 均明确拒绝，不自动推断旧代码依赖，也不改写旧产物。旧 `--parent` 命令接口保留，需指向经过新版本生成的通用 Prefix。`keep/release` 和专用 pair-reference 恢复路径不因此改成 Generic Prefix。旧 full_shared_prefix 的 FT Prefix → ER 行为在新版本生成的 Prefix 上保持，原实验结果不改归为新实现。
 
 ## CPU 验证
 
@@ -73,3 +73,41 @@ python -m unittest discover -s tests -p test_generic_prefix.py
 python -m unittest discover -s tests -p test_full_preference_prefix.py
 python -m unittest discover -s tests -p test_shared_tkpr_k1.py
 ```
+
+
+## 可靠性修复（2026-11-25）
+
+Manifest schema 更新为 2；状态保存格式仍为 `state_version: 1`，两者分开。Spec 现在记录 Python 版本/实现、PyTorch/NumPy、PySC2/SC2 protocol/Protobuf/absl 包版本、CUDA 构建版本、cuDNN 运行库版本、GPU 名称/计算能力、cuDNN deterministic/benchmark、TF32 和 CUBLAS_WORKSPACE_CONFIG。CPU Prefix 的 CUDA 设备段为空，同时记录默认 dtype、float32 matmul precision 和训练线程数。启动器按现有驱动固定 1 线程的执行约定预检，驱动核验实际线程数。没有探测 NVIDIA 驱动版本，也不声称系统/SC2 的跨进程确定性。
+
+`code_version.source_sha256` 仍是启动时完整源码的溯源记录，不能与分支整个仓库逐文件比较：那会把新增方法、文档或结果变成不兼容。真正执行兼容校验的是 Spec 内独立的 `implementation`，含组件 SHA-256 与汇总哈希。组件边界在 `common/prefix_implementation.py` 明列；配置值继续由 resolved Prefix Spec 校验，配置文件的注释和其他算法 YAML 不进入训练代码指纹。
+
+混合驱动按已核查的 shared-prefix baseline 路径作 AST 提取：保留初始化、工厂绑定、阶段预算、TD while 循环，结束于第一阶段训练边界；静态排除 parent 恢复、偏好消费者定义/分支和训练结束后的 CPR/Refresh 历史处理。Learner 仅提取 baseline 实际使用的构造、TD train、target 更新及设备/observer 方法；具体偏好损失文件不纳入。实际 Agent/MAC、ε、Runner、Episode Replay、预处理、环境和 registry 的选中绑定参与指纹。源码注释/格式不影响 AST 指纹；共享定义内部尚有保守范围，修改这些核心定义须检查边界。无法识别阶段或 TD 循环结构时明确拒绝，不自动猜测依赖。新增环境、网络、动态 import 或运行时 monkeypatch 需要重新人工审核边界；此指纹不是任意 Python 程序的完备依赖分析，也不是对恶意源码的安全认证。
+
+run.py 在创建运行目录前校验；直接训练驱动在创建 Runner/环境前使用同一 `prefix_spec` / `verify_manifest` 校验。schema 1 没有第一阶段实现指纹，无法安全地由整仓库 source_sha256 自动补出；必须重新生成 schema 2，旧文件不修改。
+
+`branch_restore.json` 在实际回放导入操作之后写入：
+
+| 字段 | 含义 |
+| --- | --- |
+| `prefix_replay_snapshot_episodes` | Prefix 文件里的样本数 |
+| `restored_replay_episodes` | 实际导入数量；FT 固定为 0，ER 在导入返回后读取 |
+| `discarded_prefix_replay_episodes` | FT 主动丢弃的快照样本数；ER 为 0 |
+| `replay_restore_mode` | 实际选择的 ft / er |
+
+TaskReplay 切换记录另含 `replay_episodes_before_switch`、`replay_episodes_after_switch` 和 `replay_switch_evicted_episodes`；ER 配额淘汰不会回写初始导入数。恢复失败时不会提前生成成功记录。FT/ER 的数据导入、配额、抽样和训练顺序不变。
+
+所有本仓库直接清空 PyTorch 私有 Hook 字典的代码已去除。Learner 为自身 online/target 观察器保存独立 handle，需要关闭诊断时只移除这些 handle；target 拷贝仍保留外部观察器及原有原生采集行为。临时分析 unroll 使用 finally，原生训练入口在 finally 移除长期观察器。其他模块注册的 Hook 保留。
+
+### 本次验证与修改范围
+
+78 项相关 CPU 测试通过（Prefix、TKPR、ASPR、CPR、Replay、Hook、来源指纹及 TS3 回归）；源码语法与 `git diff --check` 通过。额外 AST 对比确认四个 Learner 的 train 函数、TaskReplayBuffer 及其 restore/make 实现未改，原生 run_sequential 的训练语句顺序保持不变。CLI dry-run 及旧 schema 拒绝测试未创建运行目录。未启动 SMAC/SC2 或正式训练。
+
+先合并 origin/main `20ac440`，合并提交为 `d0b2966`，无冲突，新增结果完整保留。根与第三方 LICENSE 原文未改。第三方授权待确认项见 [许可证清单](THIRD_PARTY_LICENSES.md)。
+
+实际修改文件（按目录）：
+
+- `docs/PREFIX_REUSE.md`, `docs/PROVENANCE.md`, `docs/THIRD_PARTY_LICENSES.md`
+- `drivers/continual/action_set_train.py`, `drivers/continual/common/prefix.py`, `drivers/continual/common/prefix_implementation.py`, `drivers/continual/detection_common.py`, `drivers/continual/hetero_protection.py`, `drivers/continual/hetero_train.py`, `drivers/continual/history_train.py`, `drivers/continual/static_detection.py`, `drivers/continual/train.py`, `drivers/continual/ts3_train.py`, `drivers/continual/ts3_vdn_detection.py`, `drivers/continual/ts3_vdn_type_detection.py`, `drivers/continual/ts4_diagnostics.py`, `drivers/continual/ts4_train.py`
+- `scripts/benchmark_szc_tkpr_k1.py`, `scripts/check_a2_local_gem.py`, `scripts/diagnose_all_locations.py`, `scripts/network_similarity.py`, `scripts/type_ablation_winrate.py`, `scripts/type_matched_ablation.py`, `scripts/validate_hetero_agent.py`, `scripts/validate_protection_locations.py`, `scripts/validate_ts4_vdn.py`
+- `src/components/task_replay.py`, `src/learners/dmaq_qatten_learner.py`, `src/learners/iqn_learner.py`, `src/learners/q_learner.py`, `src/learners/rmix_learner.py`, `src/run.py`, `src/utils/hook_lifecycle.py`
+- `tests/test_full_preference_prefix.py`, `tests/test_generic_prefix.py`, `tests/test_prefix_reliability.py`, `tests/test_ts3_driver_regression.py`

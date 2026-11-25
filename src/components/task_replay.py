@@ -166,8 +166,12 @@ def restore_replay_buffer(buffer, saved, previous_tasks):
 
 def start_replay_task(buffer, task):
     if isinstance(buffer, TaskReplayBuffer):
+        before = buffer.episodes_in_buffer
         buffer.start_task(task)
-        return {'replay_mode': buffer.mode, 'replay_task_episodes': buffer.counts()}
+        after = buffer.episodes_in_buffer
+        return {'replay_mode': buffer.mode, 'replay_task_episodes': buffer.counts(),
+                'replay_episodes_before_switch': before, 'replay_episodes_after_switch': after,
+                'replay_switch_evicted_episodes': before - after}
     return {}
 
 

@@ -1,3 +1,4 @@
+from utils.hook_lifecycle import install_activation_observers
 from components.optimizer_checkpoint import load_optimizer_state
 # From https://github.com/wjh720/QPLEX/, added here for convenience.
 import copy
@@ -31,6 +32,7 @@ class DMAQ_qattenLearner:
             self.params += list(self.mixer.parameters())
         self.target_mixer = copy.deepcopy(self.mixer)
 
+        activation_observers = []
         self.neu_data = {}
         self.neu_avg = {}
         self.mask = {}
@@ -43,7 +45,7 @@ class DMAQ_qattenLearner:
                     fea_out = fea_out.reshape(-1, args.n_agents, fea_out.shape[1]) # t(batch*agent, dim)  avg of each time
                     self.neu_data[module.name] = self.neu_data[module.name] + th.mean(fea_out, dim=0)
                     return None
-                module.register_forward_hook(hook=hook)
+                activation_observers.append((module, hook))
 
         for (name, module) in self.mixer.named_modules():
             if isinstance(module, ActivateLayer):
@@ -52,7 +54,7 @@ class DMAQ_qattenLearner:
                 def hook(module, fea_in, fea_out):
                     self.neu_data[module.name] = self.neu_data[module.name] + th.mean(fea_out, dim=0) # 1(batch, dim)
                     return None
-                module.register_forward_hook(hook=hook)
+                activation_observers.append((module, hook))
 
         para = sum([np.prod(list(p.size())) for p in self.mixer.parameters()])
         print(para * 4 / 1000 / 1000)
@@ -65,6 +67,8 @@ class DMAQ_qattenLearner:
         self.log_stats_t = -self.args.learner_log_interval - 1
 
         self.n_actions = self.args.n_actions
+
+        self.activation_hooks = install_activation_observers(self, activation_observers)
 
     def sub_train(self, batch: EpisodeBatch, t_env: int, episode_num: int, mac, mixer, optimiser, params,
                   show_demo=False, save_data=None, check=False):
@@ -196,6 +200,10 @@ class DMAQ_qattenLearner:
             self.logger.log_stat("target_mean", (targets * mask).sum().item() / (mask_elems * self.args.n_agents),
                                  t_env)
             self.log_stats_t = t_env
+
+    def remove_activation_hooks(self):
+        """Remove only the instrumentation owned by this learner."""
+        self.activation_hooks.remove()
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int, show_demo=False, save_data=None, check=False):
         self.sub_train(batch, t_env, episode_num, self.mac, self.mixer, self.optimiser, self.params,

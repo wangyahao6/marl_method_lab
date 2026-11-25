@@ -88,7 +88,7 @@ class GenericPrefixTest(unittest.TestCase):
     def test_er_retains_prefix_replay_and_uses_child_order(self):
         self.check_restore('er', ('baseline',))
 
-    def test_legacy_parent_without_manifest_keeps_original_restore_path(self):
+    def test_legacy_parent_without_manifest_is_explicitly_rejected(self):
         raw = self.protocol()
         protocol = driver.validate(raw, 'vdn', 'topk_preference')
         original_config = driver.config
@@ -115,10 +115,8 @@ class GenericPrefixTest(unittest.TestCase):
             report['initial_reference'] = dict(zealot=0., colossus=0.)
             report['before_first_training'] = dict(zealot=0.)
             report_path.write_text(json.dumps(report))
-            driver.train_sequence(protocol, 8, child, role='shared-branch', parent=parent)
-            restored = json.loads((child / 'branch_restore.json').read_text())
-            self.assertIsNone(restored.get('prefix_id'))
-            self.assertEqual(restored['model_hash'], state['model_hash'])
+            with self.assertRaisesRegex(ValueError, 'Legacy Prefix without prefix_manifest'):
+                driver.train_sequence(protocol, 8, child, role='shared-branch', parent=parent)
 
     def check_restore(self, replay, methods):
         raw = self.protocol()
@@ -173,10 +171,11 @@ class GenericPrefixTest(unittest.TestCase):
                 child = driver.validate(child_raw, 'vdn', method)
                 run = out / method
                 run.mkdir()
-                learners, runners, seen = [], [], []
+                learners, runners, seen, imported = [], [], [], []
                 learner_factory = driver.base.learners['q_learner']
                 runner_factory = driver.base.EpisodeRunner
                 write = driver.base.write
+                restore_replay = driver.restore_replay_buffer
                 start_replay = driver.start_replay_task
                 buffers = []
 
@@ -190,9 +189,20 @@ class GenericPrefixTest(unittest.TestCase):
                     runners.append(value)
                     return value
 
+                def observe_import(*args, **kwargs):
+                    value = restore_replay(*args, **kwargs)
+                    imported.append(True)
+                    return value
+
                 def inspect_restore(path, value):
                     if path.name == 'branch_restore.json':
                         seen.append(True)
+                        count = saved_buffer.episodes_in_buffer
+                        self.assertEqual(value['prefix_replay_snapshot_episodes'], count)
+                        self.assertEqual(value['restored_replay_episodes'], count if replay == 'er' else 0)
+                        self.assertEqual(value['discarded_prefix_replay_episodes'], count if replay == 'ft' else 0)
+                        self.assertEqual(value['replay_restore_mode'], replay)
+                        self.assertEqual(bool(imported), replay == 'er')
                         model, live = learners[0], runners[0]
                         self.assertEqual(driver.base.parameter_hash(model), state['model_hash'])
                         self.assertEqual(digest(model.optimiser.state_dict()), digest(th.load(checkpoint / 'opt.th')))
@@ -218,7 +228,7 @@ class GenericPrefixTest(unittest.TestCase):
 
                 with patch.dict(driver.base.learners, {'q_learner': learner}), patch.object(
                         driver.base, 'EpisodeRunner', runner), patch.object(driver.base, 'write', inspect_restore), patch.object(
-                        driver, 'start_replay_task', inspect_buffer):
+                        driver, 'start_replay_task', inspect_buffer), patch.object(driver, 'restore_replay_buffer', observe_import):
                     driver.train_sequence(child, 8, run, role='shared-branch', parent=parent)
                 self.assertEqual(seen, [True])
                 if replay == 'ft':
@@ -226,11 +236,20 @@ class GenericPrefixTest(unittest.TestCase):
                 else:
                     self.assertEqual(buffers[0][0], saved_buffer.episodes_in_buffer)
                     self.assertGreater(buffers[0][1]['replay_task_episodes']['stalker'], 0)
+                    self.assertEqual(buffers[0][1]['replay_episodes_before_switch'], saved_buffer.episodes_in_buffer)
+                    self.assertGreater(buffers[0][1]['replay_switch_evicted_episodes'], 0)
                 self.assertEqual([row['task'] for row in jsonlines(run / 'transitions.jsonl')], ['colossus', 'zealot'])
                 if method != 'baseline':
                     log_name = 'tkpr_cpr_preference' if method == 'tkpr_cpr' else method
                     updates = jsonlines(run / f'{log_name}_updates.jsonl')
                     self.assertTrue(updates[0]['historical_tasks'])
+            if replay == 'er':
+                failed = out / 'failed_import'
+                failed.mkdir()
+                with patch.object(driver, 'restore_replay_buffer', side_effect=ValueError('failed import')):
+                    with self.assertRaisesRegex(ValueError, 'failed import'):
+                        driver.train_sequence(child, 8, failed, role='shared-branch', parent=parent)
+                self.assertFalse((failed / 'branch_restore.json').exists())
             (parent / 'initial_agent.th').write_bytes(b'corrupt')
             with self.assertRaisesRegex(ValueError, 'artifact hash mismatch'):
                 verify_manifest(parent, manifest['prefix_spec'])

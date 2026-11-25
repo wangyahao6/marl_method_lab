@@ -19,8 +19,8 @@ def select(learner,args,fifo,out=None,*,save_input=True,state_weighted=True):
         mac=controllers[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(learner.mac.agent.state_dict());mac.agent.to(args.device);mac.agent.eval()
         layer, index = ('A', 2) if args.agent == 'single_ff_rnn' else ('A2', 4)
         captured=[];handle=mac.agent.net[index].register_forward_hook(lambda m,i,o:captured.append(o.detach()))
-        mac.init_hidden(batch.batch_size)
         try:
+            mac.init_hidden(batch.batch_size)
             outputs = [mac.forward(batch, t=t) for t in range(batch.max_seq_length)]
         finally:
             handle.remove()

@@ -18,8 +18,9 @@ def select(learner,args,fifo,out):
         batch=copy.deepcopy(cpu);batch.to(args.device)
         mac=controllers[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(learner.mac.agent.state_dict());mac.agent.to(args.device);mac.agent.eval()
         captured=[];handle=mac.agent.net[4].register_forward_hook(lambda m,i,o:captured.append(o.detach().clone()))
-        mac.init_hidden(batch.batch_size)
-        try:q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)[:,:-1]
+        try:
+            mac.init_hidden(batch.batch_size)
+            q=th.stack([mac.forward(batch,t=t) for t in range(batch.max_seq_length)],1)[:,:-1]
         finally:handle.remove()
         lengths=batch['filled'].squeeze(-1).sum(1)-1
         good=batch['filled'][:,:-1].squeeze(-1).bool() & (th.arange(batch.max_seq_length-1,device=args.device)[None,:]<lengths[:,None])

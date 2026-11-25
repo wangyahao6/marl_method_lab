@@ -34,15 +34,31 @@ class Capture:
         self.handles = []
         modules = dict(A=mac.agent.net[2], A2=mac.agent.net[4],
                        W=mixer.hyper_w_final[2], V=mixer.V[2])
-        for name, module in modules.items():
-            def observe(module, inputs, output, name=name):
+        try:
+            for name, module in modules.items():
+                def observe(module, inputs, output, name=name):
+                    if self.active:
+                        self.values[name].append(output.detach())
+                self.handles.append(module.register_forward_hook(observe))
+            def agent_output(module, inputs, output):
                 if self.active:
-                    self.values[name].append(output.detach())
-            self.handles.append(module.register_forward_hook(observe))
-        def agent_output(module, inputs, output):
-            if self.active:
-                self.values['q'].append(output[0].detach())
-        self.handles.append(mac.agent.register_forward_hook(agent_output))
+                    self.values['q'].append(output[0].detach())
+            self.handles.append(mac.agent.register_forward_hook(agent_output))
+
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self):
+        for handle in self.handles:
+            handle.remove()
+        self.handles.clear()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
 
     def begin(self):
         self.values = {key: [] for key in ['A', 'A2', 'W', 'V', 'q']}

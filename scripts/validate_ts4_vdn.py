@@ -13,8 +13,7 @@ data=th.load(ROOT/'runs/ts3_Aprefix_seed3535_20261102_attempt001/detections/A_10
 args=SimpleNamespace(**data['args']);args.mixer='vdn';args.name='vdn';args.use_cuda=False;args.device='cpu';batch=data['batch']
 mac=t.base.controllers[args.mac](batch.scheme,batch.groups,args);mac.agent.load_state_dict(data['agent'])
 learner=t.base.learners[args.learner](mac,batch.scheme,t.base.Logger(logging.getLogger('offline')),args)
-for net in [mac.agent,learner.target_mac.agent,learner.mixer,learner.target_mixer]:
-    for module in net.modules():module._forward_hooks.clear()
+learner.remove_activation_hooks()
 before=digest([mac.agent.state_dict(),rng_state()]);result=score(learner,args,batch)
 unchanged=before==digest([mac.agent.state_dict(),rng_state()])
 q=th.randn(17,5,11);avail=th.rand(17,5,11)>.4;actions=th.randint(0,11,(17,5));avail.scatter_(2,actions[:,:,None],True)
