@@ -120,7 +120,8 @@ def validate(protocol, algorithm, method):
         raise ValueError("task_seed_stride must be a nonnegative integer")
 
     refresh_defaults = (dict(batch_episodes_per_task=8, refresh_success_episodes=50)
-                        if method == "tkpr_refresh" else {})
+                        if method == "tkpr_refresh" or any(key in protocol.get("action_set", {})
+                            for key in ("batch_episodes_per_task", "refresh_success_episodes")) else {})
     settings = settings_with_defaults(protocol.get("action_set", {}),
                                       dict(DEFAULTS, **refresh_defaults), ("delta_by_task",))
     for key in ("weight", "margin"):
@@ -273,17 +274,10 @@ def validate_fork(protocol, role, parent):
     if protocol.get("pair_ablation_experiment"):
         raise ValueError("pair ablation FRPR is used with --preference-role pair-reference")
     if role in ("shared-prefix", "shared-branch"):
-        full = protocol.get("full_shared_prefix", False)
-        er_branch = full and role == "shared-branch" and method == "baseline"
-        if ((protocol.get("replay_on_switch", "ft") != "ft" and not er_branch)
-                or len(protocol["stages"]) < 2):
-            raise ValueError("a shared S prefix requires FT and at least two stages")
-        if full and method not in ("baseline", "topk_preference", "tkpr_refresh", "tkpr_cpr"):
-            raise ValueError("full shared prefix supports baseline, TKPR-K1, Refresh and CPR")
-        if role == "shared-prefix" and (method not in RANK_METHODS or not protocol[method]["weight"]):
-            raise ValueError("a shared prefix needs an enabled ranking method to collect old Q")
-        if role == "shared-branch" and method not in ("baseline", *HISTORY_RANK_METHODS):
-            raise ValueError("a shared branch supports the baseline and ranking methods")
+        if role == "shared-branch" and len(protocol["stages"]) < 2:
+            raise ValueError("a shared branch requires at least two stages")
+        if role == "shared-branch" and method not in ("baseline", *ASPR_MAX_METHODS, *HISTORY_RANK_METHODS):
+            raise ValueError("a shared branch supports baseline and history preference methods")
         return
     if role:
         if method not in RANK_METHODS or not protocol[method]["weight"]:
@@ -294,6 +288,12 @@ def validate_fork(protocol, role, parent):
 
 
 def matching_shared_protocol(parent, branch):
+    from common.prefix import prefix_spec
+
+    return prefix_spec(parent, 0) == prefix_spec(branch, 0)
+
+
+def matching_legacy_shared_protocol(parent, branch):
     if parent.get("full_shared_prefix") or branch.get("full_shared_prefix"):
         if not (parent.get("full_shared_prefix") and branch.get("full_shared_prefix")):
             return False

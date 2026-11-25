@@ -32,7 +32,10 @@ class ExactProtoss:
     def set_task(self,task):self.task=task;self.wrapped.env_key_to_distribution_map['team_gen'].task=task
     def distribution_state(self):return copy.deepcopy(self.wrapped.env_key_to_distribution_map)
     def restore_distribution(self,state):
-        self.wrapped.env_key_to_distribution_map=copy.deepcopy(state);self.set_task(self.task)
+        rosters = self.wrapped.env_key_to_distribution_map['team_gen'].rosters
+        self.wrapped.env_key_to_distribution_map=copy.deepcopy(state)
+        self.wrapped.env_key_to_distribution_map['team_gen'].rosters = rosters
+        self.set_task(self.task)
     def reset(self):
         result=self.wrapped.reset();raw=self.wrapped.env
         # SMACv2 otherwise caches first-episode health/shield normalization.

@@ -335,3 +335,8 @@ G1-G3 的诊断有效对指可统计的非平局对，`participates_in_loss=fals
 `aspr_adjacent_offline_pairs.csv` 保存已有固定贪心探测轨迹的阶段末诊断。
 
 `scripts/plan_aspr_3g_adjacent.py <唯一批次ID>` 只生成包含全部四条分支的预览计划；通过统一调度提交后执行。
+
+
+## 通用 Prefix 复用
+
+baseline 可独立生成第一阶段产物；兼容时允许跨方法、后续序列及预算复用。详见 [Prefix 复用](PREFIX_REUSE.md)。原有实验协议与结果口径保留。

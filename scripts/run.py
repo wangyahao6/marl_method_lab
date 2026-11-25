@@ -28,7 +28,9 @@ def main():
                    help='Replay mode for VDN continual training (ER supports baseline and CHI)')
     p.add_argument('--set',action='append',default=[],metavar='KEY=YAML_VALUE')
     p.add_argument('--hetero-role',choices=['prefix','branch'])
-    p.add_argument('--parent')
+    parent_args = p.add_mutually_exclusive_group()
+    parent_args.add_argument('--parent')
+    parent_args.add_argument('--prefix-id', help='Shared Prefix ID under this repository runs/')
     p.add_argument('--preference-role', choices=FORK_ROLES)
     p.add_argument('--capture-timing', action='store_true')
     p.add_argument('--branch-task',choices=['R','M'],default='R')
@@ -40,6 +42,14 @@ def main():
     p.add_argument('--dry-run',action='store_true')
     p.add_argument('--experiment-metadata', help='JSON object with conversation and branch metadata')
     a=p.parse_args()
+    if a.prefix_id:
+        if a.suite != 'vdn_action_set' or a.preference_role != 'shared-branch':
+            p.error('--prefix-id requires vdn_action_set shared-branch')
+        from common.prefix import resolve_prefix
+        try:
+            a.parent = str(resolve_prefix(a.prefix_id))
+        except ValueError as exc:
+            p.error(str(exc))
     if a.ts3_group is None:
         if a.method == 'softprotect_chi' and a.ts3_role in ('full', 'branch'):
             a.ts3_group = 'A2_chi' if a.algorithm == 'vdn' else 'A_chi'
@@ -118,6 +128,12 @@ def main():
         if replay == 'er' and a.ts3_role == 'resume':
             p.error('VDN-ER requires historical replay; the TS6 weight-only resume has none')
         protocol['replay_on_switch'] = replay
+    if a.suite == 'vdn_action_set' and a.preference_role == 'shared-branch' and not protocol.get('pair_ablation_experiment'):
+        from common.prefix import prefix_spec, verify_manifest
+        try:
+            verify_manifest(Path(a.parent), prefix_spec(protocol, a.seed))
+        except (ValueError, OSError) as exc:
+            p.error(str(exc))
     plan={'request':vars(a),'command':command,'output':str(out),'details':details}
     if metadata:
         plan['metadata']=metadata

@@ -32,11 +32,12 @@ from drivers.continual.aspr_group_export import export_group_results
 from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PAIR_DISTANCE, PAIR_GAP_FAR_MID,
     PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
-    RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, validate, validate_fork,
+    RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, matching_legacy_shared_protocol, validate, validate_fork,
 )
+from common.prefix import base_config, prefix_spec, require_compatible, verify_manifest, write_manifest, STATE_VERSION
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models, restore_networks_and_optimizer
-from common.preference_prefix import copy_prefix_memory, file_sha256, full_state_extra
+from common.preference_prefix import copy_prefix_memory, file_sha256, full_state_extra, reference_input_hash
 from common.metrics import Metrics, record_evaluation
 from common.records import attach_legacy_metrics
 from common.exploration import epsilon_on_switch
@@ -49,7 +50,6 @@ from drivers.continual.memory.cpr import (
 )
 import numpy as np
 import torch as th
-import yaml
 
 
 base.environments["action_set_protoss"] = ExactProtoss
@@ -57,10 +57,7 @@ ROOT = base.ROOT
 
 
 def config(protocol, seed, out):
-    cfg = {}
-    for file in ("src/config/default.yaml", "vendor/smacv2/smacv2/examples/configs/sc2_gen_protoss.yaml",
-                 f"src/config/algs/{protocol['algorithm']}.yaml"):
-        base.merge(cfg, yaml.safe_load((ROOT / file).read_text()))
+    cfg = base_config(protocol["algorithm"])
     use_cuda = th.cuda.is_available()
     cfg.update(env="action_set_protoss", seed=seed, use_cuda=use_cuda,
                device="cuda:0" if use_cuda else "cpu", local_results_path=str(out),
@@ -260,13 +257,13 @@ def restore_group_shared_memory(history, parent, phases, scheme, groups, ranking
 
 
 def collect_memory(args, spec, expected_layout, reference, checkpoint, task, phase, settings, out,
-                   ranking=None, *, target=None, persist=True):
+                   ranking=None, *, target=None, persist=True, raw=False):
     start = perf_counter()
     successful, failed, blocks = [], [], []
     offsets = settings["seed_offsets"]
     target = settings["success_episodes"] if target is None else target
-    label_action_sets = args.method in (*ASPR_MAX_METHODS, "aspr_preference")
-    q_steps = [] if args.method in HISTORY_RANK_METHODS else None
+    label_action_sets = not raw and args.method in (*ASPR_MAX_METHODS, "aspr_preference")
+    q_steps = [] if raw or args.method in HISTORY_RANK_METHODS else None
     with isolated_rollouts():
         for block, offset in enumerate(offsets):
             seed = (args.seed + offset) % 2**31
@@ -285,7 +282,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     episode = pack_episode(batch, runner.t, seed=seed, index=index, won=won)
                     attempts += 1
                     if not won:
-                        failed.append(episode)
+                        failed.append(reference_record(runner, batch, episode, q_steps=q_steps) if raw else episode)
                         continue
                     wins += 1
                     if len(successful) >= target:
@@ -293,8 +290,8 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
                     successful.append(reference_record(runner, batch, episode, q_steps=q_steps,
                                                        label_action_sets=label_action_sets))
             blocks.append(dict(seed=seed, attempts=attempts, wins=wins))
-    if args.method in SELECTED_METHODS:
-        for episode in successful:
+    if raw or args.method in SELECTED_METHODS:
+        for episode in (successful + failed if raw else successful):
             episode["episode_id"] = preference_episode_id(task, episode)
     labels, diagnostics = {}, {}
     if label_action_sets:
@@ -318,7 +315,10 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
         path = PreferenceHistory.phase_path(out, phase)
         path.mkdir(parents=True, exist_ok=False)
         History.save(path / "success.th", pool)
-        History.save(path / "failure.th", dict(task=task, phase=phase, episodes=failed))
+        failure = dict(task=task, phase=phase, episodes=failed)
+        if raw:
+            failure.update(layout=expected_layout, reference_checkpoint=checkpoint_path)
+        History.save(path / "failure.th", failure)
         base.write(path / "summary.json", dict(
             task=task, phase=phase, reference_checkpoint=checkpoint_path,
             requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
@@ -374,6 +374,9 @@ def evaluate_task(args, spec, expected_layout, reference, task, evaluation, epis
 
 def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=False):
     validate_fork(protocol, role, parent)
+    if role == "shared-prefix":
+        protocol = dict(protocol, method="baseline", gradient_monitor_interval=0,
+                        rank_position_diagnostics=False)
     full_shared = bool(protocol.get("full_shared_prefix"))
     if full_shared and role not in ("shared-prefix", "shared-branch"):
         raise ValueError("full_shared_prefix requires shared-prefix or shared-branch")
@@ -480,11 +483,11 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
 
         preference = None
         refresh_rng = np.random.default_rng(seed + 170071) if method == "tkpr_refresh" else None
-        if method in ASPR_MAX_METHODS and settings["weight"]:
+        if role != "shared-prefix" and method in ASPR_MAX_METHODS and settings["weight"]:
             update_log = "aspr_max_preference"
             preference = ActionSetPreference(settings, np.random.default_rng(seed), augmented, groups,
                                              record_preference)
-        elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role != "release":
+        elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role not in ("release", "shared-prefix"):
             update_log = method
             if method == "tkpr_cpr":
                 update_log = "tkpr_cpr_preference"
@@ -529,22 +532,25 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             record_evaluation(out, metrics, dict(phase=phase, label=label, t_env=runner.t_env, **row))
             return row["win_rate"]
 
-        def save_fork_state():
+        def save_fork_state(*, write_state=True):
             replay_file = "prefix_replay.th" if role == "shared-prefix" else "final_replay.th"
-            extra = full_state_extra(learner, replay_file) if full_shared else {}
-            th.save(dict(
-                fork_role=role, protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
-                target_agent=learner.target_mac.agent.state_dict(),
-                last_target_update_episode=learner.last_target_update_episode,
-                learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
-                train_returns=runner.train_returns, train_stats=runner.train_stats,
-                epsilon=mac.action_selector.epsilon, exploration_start=mac.action_selector.exploration_start,
-                environment_distributions=runner.env.distribution_state(), rng=rng_state(),
-                preference_rng=preference.rng.bit_generator.state if preference is not None else None,
-                model_hash=base.parameter_hash(learner),
-                **extra,
-            ), out / "return_state.th")
-            if full_shared:
+            extra = full_state_extra(learner, replay_file) if full_shared or role == "shared-prefix" else {}
+            if write_state:
+                th.save(dict(
+                    state_version=STATE_VERSION, fork_role=role, protocol=protocol, seed=seed, t_env=runner.t_env, episode=episode, updates=updates,
+                    target_agent=learner.target_mac.agent.state_dict(),
+                    last_target_update_episode=learner.last_target_update_episode,
+                    learner_log_t=learner.log_stats_t, runner_log_t=runner.log_train_stats_t,
+                    train_returns=runner.train_returns, train_stats=runner.train_stats,
+                    epsilon=mac.action_selector.epsilon, exploration_start=mac.action_selector.exploration_start,
+                    environment_distributions=runner.env.distribution_state(), rng=rng_state(),
+                    preference_rng=preference.rng.bit_generator.state if preference is not None else None,
+                    model_hash=base.parameter_hash(learner),
+                    runner_t=runner.t, runner_test_returns=runner.test_returns, runner_test_stats=runner.test_stats,
+                    last_episode_info=runner.last_episode_info,
+                    **extra,
+                ), out / "return_state.th")
+            if full_shared and results and (PreferenceHistory.phase_path(out, 0) / "success.th").exists():
                 files = [out / "return_state.th", out / replay_file,
                          out / results[-1]["checkpoint"] / "agent.th",
                          PreferenceHistory.phase_path(out, 0) / "success.th"]
@@ -603,16 +609,19 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                  "see shapley_coverage.jsonl")
 
         first_phase = 0
+        manifest = None
         prefix_buffer = None
         full_restore = {}
         if parent:
+            if role == "shared-branch" and not pair_ablation:
+                manifest = verify_manifest(parent, prefix_spec(protocol, seed, vars(args)))
             state = th.load(parent / "return_state.th", map_location="cpu")
-            if full_shared:
+            if full_shared or manifest is not None:
                 if state.get("full_state_version") != 1:
                     raise ValueError("full shared branch requires a prefix with replay and complete state")
                 prefix_buffer = th.load(parent / state["replay_snapshot"], map_location="cpu")
                 prefix_checkpoint = json.loads((parent / "retention.json").read_text())["stages"][0]["checkpoint"]
-                full_restore = dict(prefix_id=parent.name, branch_id=out.name, seed=seed,
+                full_restore = dict(prefix_id=manifest["prefix_id"] if manifest else parent.name, branch_id=out.name, seed=seed,
                                     prefix_checkpoint_sha256=file_sha256(parent / prefix_checkpoint / "agent.th"),
                                     restored_replay_episodes=prefix_buffer.episodes_in_buffer,
                                     restored_replay_index=prefix_buffer.buffer_index,
@@ -624,8 +633,12 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 prefix_role = "pair-reference"
                 same_protocol = matching_pair_reference(parent_protocol, protocol)
             else:
-                same_protocol = (matching_shared_protocol(parent_protocol, protocol)
-                                 if role == "shared-branch" else parent_protocol == protocol)
+                if role == "shared-branch" and manifest is not None:
+                    same_protocol = True
+                elif role == "shared-branch":
+                    same_protocol = matching_legacy_shared_protocol(parent_protocol, protocol)
+                else:
+                    same_protocol = parent_protocol == protocol
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())
@@ -646,7 +659,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             phase = first_phase
             nominal_end = sum(stage["steps"] for stage in stages[:first_phase])
             learner.load_models(results[-1]["checkpoint"])
-            if full_shared:
+            if full_shared or manifest is not None:
                 restore_networks_and_optimizer(learner, state)
                 for controller, key in ((mac, "online_hidden"), (learner.target_mac, "target_hidden")):
                     value = state[key]
@@ -661,9 +674,26 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             mac.action_selector.exploration_start = state["exploration_start"]
             mac.action_selector.epsilon = state["epsilon"]
             runner.env.restore_distribution(state["environment_distributions"])
+            if "runner_t" in state:
+                runner.t = state["runner_t"]
+                runner.test_returns, runner.test_stats = state["runner_test_returns"], state["runner_test_stats"]
+                runner.last_episode_info = state["last_episode_info"]
             if preference is not None:
-                preference.rng.bit_generator.state = state["preference_rng"]
-                if full_shared:
+                if state.get("preference_rng") is not None:
+                    preference.rng.bit_generator.state = state["preference_rng"]
+                if manifest is not None:
+                    if aspr or method in ASPR_MAX_METHODS:
+                        restore_aspr_shared_memory(preference.history, parent, range(first_phase),
+                                                   settings, augmented, groups, out)
+                    elif aspr_group:
+                        restore_group_shared_memory(preference.history, parent, range(first_phase),
+                                                    augmented, groups, protocol[method], out)
+                    else:
+                        full_restore.update(copy_prefix_memory(parent, out, method, preference.history))
+                    source = History.load(PreferenceHistory.phase_path(parent, 0) / "success.th")
+                    full_restore.update(parent_memory_input_hash=reference_input_hash(source),
+                                        branch_memory_input_hash=reference_input_hash(preference.history[0]))
+                elif full_shared:
                     full_restore.update(copy_prefix_memory(parent, out, method, preference.history))
                 elif pair_ablation:
                     shared_history.restore_success(parent, range(len(stages) - 1), require_old_q=True)
@@ -683,8 +713,17 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     preference.history.restore_success(parent, range(first_phase),
                                                        require_old_q=method in HISTORY_RANK_METHODS,
                                                        require_good=aspr, require_group=aspr_group)
-            elif full_shared:
+            elif full_shared or manifest is not None:
                 full_restore.update(copy_prefix_memory(parent, out, method))
+            if manifest is not None:
+                initial, before = {}, {}
+                initial_reference = th.load(parent / "initial_agent.th", map_location="cpu")
+                for unseen in dict.fromkeys(item["task"] for item in stages[1:]):
+                    if unseen != stages[0]["task"]:
+                        initial[unseen] = evaluate(initial_reference, unseen, "initial_reference")
+                next_task = stages[1]["task"]
+                if next_task != stages[0]["task"]:
+                    before[next_task] = evaluate(agent_snapshot(), next_task, "next_unseen")
             restore_rng(state["rng"])
             parent_hash = dict(parent_model_hash=state["model_hash"])
             if getattr(mac.agent, "loaded_legacy_fc1", False):
@@ -702,11 +741,14 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         status("running")
         if not parent:
             reference = agent_snapshot()
-            for task in dict.fromkeys(stage["task"] for stage in stages if stage["task"] != stages[0]["task"]):
-                initial[task] = evaluate(reference, task, "initial_reference")
+            if role == "shared-prefix":
+                th.save(reference, out / "initial_agent.th")
+            else:
+                for task in dict.fromkeys(stage["task"] for stage in stages if stage["task"] != stages[0]["task"]):
+                    initial[task] = evaluate(reference, task, "initial_reference")
 
         er_buffer = None
-        if args.replay_on_switch == "er":
+        if args.replay_on_switch == "er" and role != "shared-prefix":
             er_buffer = make_replay_buffer(args, [stage["task"] for stage in stages],
                                            scheme, groups, info["episode_limit"] + 1, preprocess)
             if prefix_buffer is not None:
@@ -773,7 +815,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 if interval and next_eval <= runner.t_env < end:
                     evaluate(agent_snapshot(), task, "periodic")
                     next_eval = begin + ((runner.t_env - begin) // interval + 1) * interval
-            if full_shared and ((role == "shared-prefix" and phase == 0) or phase + 1 == stop_phase):
+            if role == "shared-prefix" or (full_shared and phase + 1 == stop_phase):
                 History.save(out / ("prefix_replay.th" if role == "shared-prefix" else "final_replay.th"), buffer)
             if full_shared:
                 replay_counts = (buffer.counts() if hasattr(buffer, "counts")
@@ -782,6 +824,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             base.log_task_epsilon(runner, out, phase, task, "end")
             checkpoint = out / "models" / f"phase{phase:04d}_{runner.t_env}"
             save_models(learner, checkpoint)
+            if role == "shared-prefix":
+                # Preserve the training boundary before evaluation, collection or method processing.
+                save_fork_state()
             reference = agent_snapshot()
             probe_records = ([] if method in (*ASPR_MAX_METHODS, "aspr_preference", "aspr_3g_preference", "aspr_3g_adjacent_preference",
                                                "aspr_4g_preference") and preference is not None
@@ -797,7 +842,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                 bwt_pp=100 * np.mean(bwt) if bwt else None,
                                 fwt_pp=100 * np.mean(fwt) if fwt else None))
             metrics.retention(phase, task, runner.t_env, results[-1])
-            if phase + 1 < len(stages):
+            if role != "shared-prefix" and phase + 1 < len(stages):
                 next_task = stages[phase + 1]["task"]
                 if next_task not in row:
                     before[next_task] = evaluate(reference, next_task, "next_unseen")
@@ -806,6 +851,13 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 if phase + 1 < stop_phase:
                     prepare_shared_pair_pool(phase)
+            elif role == "shared-prefix":
+                status("collecting_memory")
+                collect_memory(args, spec, expected_layout, reference, checkpoint,
+                               task, phase, settings, out, raw=True)
+                write_manifest(out, prefix_spec(protocol, seed, vars(args)), checkpoint,
+                               {key: settings[key] for key in ("seed_offsets", "success_episodes", "attempts_per_seed")})
+                restore_rng(th.load(out / "return_state.th", map_location="cpu")["rng"])
             elif preference is not None and method == "tkpr_cpr":
                 status("updating_references")
                 if not any(pool["task"] == task for pool in preference.history.values()):
@@ -900,7 +952,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     actual_steps=runner.t_env - begin, train_updates=updates - phase_initial_updates,
                     train_episodes=episode - phase_initial_episodes, replay_task_episodes=replay_counts,
                     elapsed_seconds=perf_counter() - phase_started))
-        if role in ("prefix", "shared-prefix"):
+        if role == "shared-prefix":
+            save_fork_state(write_state=False)
+        elif role == "prefix":
             save_fork_state()
         elif full_shared and role == "shared-branch":
             save_fork_state()
