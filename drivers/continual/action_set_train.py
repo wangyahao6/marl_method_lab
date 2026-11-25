@@ -559,7 +559,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             pool = shared_history[source_phase]
             prior_budget = sum(item["pair_budget"] for item in preference.history.values())
             if isinstance(preference, TCPPreference):
-                preference.mask_root = parent / "offline_tc"
+                preference.mask_root = Path(protocol["tc_mask_root"]) if protocol.get("tc_mask_root") else parent / "offline_tc"
             episodes, audit = preference.prepare_pool(pool, prior_budget=prior_budget)
             preference.history[source_phase] = dict(pool, episodes=episodes, pair_budget=audit["valid_pairs"])
             path = out / "pair_ablation_memory" / f"phase{source_phase:04d}"

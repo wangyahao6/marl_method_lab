@@ -21,7 +21,7 @@ PAIR_DISTANCE = {f"pair_distance_{selection}": selection for selection in (
 PAIR_GAP_FAR_MID = {f"pair_gap_far_mid_{selection}": f"far_mid_{selection}"
                     for selection in ("unfiltered", "filtered")}
 PAIR_GAP_MATCHED = {"pair_gap_matched_non_top1": "gap_matched_non_top1"}
-PAIR_TC = {f"pair_tc_{level}": level for level in ("low", "medium", "high")}
+PAIR_TC = {f"pair_tc_{level}": level for level in ("low", "medium", "high", "k1")}
 PAIR_ABLATIONS = {"tc_coverage": PAIR_TC, "pair_structure": PAIR_STRUCTURES, "pair_ratio": PAIR_RATIOS,
                   "pair_structure_gap05": PAIR_STRUCTURES, "pair_distance": PAIR_DISTANCE,
                   "pair_gap_far_mid": PAIR_GAP_FAR_MID, "pair_gap_matched": PAIR_GAP_MATCHED}
@@ -240,6 +240,11 @@ def validate(protocol, algorithm, method):
             elif experiment in ("pair_distance", "pair_gap_far_mid"):
                 expected = (PAIR_EXTRA_GAP_DEFAULTS if name == "pair_gap_far_mid_filtered"
                             else PAIR_DISTANCE_DEFAULTS)
+            elif experiment == "tc_coverage":
+                gap = protocol.get(name, {}).get("min_gap", 0)
+                if gap not in (0, .5):
+                    raise ValueError("TC coverage min_gap must be 0 or 0.5")
+                expected = dict(PAIR_DEFAULTS, min_gap=gap)
             else:
                 expected = PAIR_DEFAULTS
             options = settings_with_defaults(protocol.get(name, {}), expected)
@@ -326,6 +331,6 @@ def valid_seeds(seeds):
 
 def matching_pair_reference(parent, branch):
     """Compare the TD, environment and history settings across the two ablation protocols."""
-    ignored = {"id", "method", "pair_ablation_experiment", *PAIR_METHODS}
+    ignored = {"id", "method", "pair_ablation_experiment", "tc_mask_root", *PAIR_METHODS}
     return ({key: value for key, value in parent.items() if key not in ignored}
             == {key: value for key, value in branch.items() if key not in ignored})

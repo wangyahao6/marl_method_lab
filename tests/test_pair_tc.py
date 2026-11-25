@@ -77,3 +77,36 @@ class FrozenPoolAuditTests(unittest.TestCase):
                 loaded,loaded_audit=pref.prepare_pool(pool,prior_budget=0)
                 self.assertTrue(th.equal(loaded[0]['pair_mask'],prepared[0]['pair_mask']))
                 self.assertEqual(loaded_audit,audit)
+
+class GapExtensionTests(unittest.TestCase):
+    def test_standard_filter_and_common_state_budget(self):
+        from learners.ranking_preference import reference_order, full_rank_pairs
+        generator=th.Generator().manual_seed(633)
+        q=th.randn(2,600,5,11,generator=generator)
+        legal=th.ones_like(q,dtype=th.bool);decision=th.ones(q.shape[:-1],dtype=th.bool)
+        normalized,*_=reference_order(q,legal,.1)
+        _,_,_,standard=full_rank_pairs(normalized,legal,decision,dict(min_gap=.5))
+        left,right=th.triu_indices(11,11,1);standard=standard[...,left,right]
+        masks={};states={}
+        for level in ('k1','low','medium','high'):
+            mask,valid,counts,_=select_tc_pairs(q,legal,decision,level,3535,min_gap=.5)
+            self.assertTrue(valid.any())
+            self.assertFalse((mask&~standard).any())
+            self.assertTrue((mask.sum(-1)[valid]==counts[...,2][valid]+(0 if level=='k1' else 9)).all())
+            masks[level]=mask;states[level]=valid
+        order=th.sort(q,descending=True,stable=True).indices
+        top=(left==order[...,:1])|(right==order[...,:1])
+        for level in ('low','medium','high'):
+            self.assertTrue(th.equal(states[level],states['k1']))
+            self.assertTrue(th.equal(masks[level]&top,masks['k1']))
+
+    def test_gap_zero_k1_keeps_all_original_top1_edges(self):
+        q=th.tensor([[[4.,7.,1.,5.,9.,2.]]]);legal=th.ones_like(q,dtype=th.bool)
+        decisions=th.ones(q.shape[:-1],dtype=th.bool)
+        k1,valid,_,_=select_tc_pairs(q,legal,decisions,'k1',3535)
+        left,right=th.triu_indices(6,6,1)
+        self.assertEqual(int(k1.sum()),5)
+        self.assertTrue(th.equal(k1[0,0],(left==4)|(right==4)))
+        low,oldvalid,_,_=select_tc_pairs(q,legal,decisions,'low',3535)
+        self.assertTrue(th.equal(valid,oldvalid))
+        self.assertTrue(th.equal(k1,low&(((left==4)|(right==4))[None,None])))

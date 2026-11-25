@@ -90,7 +90,8 @@ def summarize(plan_path):
                 independent.append(dict(identity,task=row['task'],wins=row['wins'],episodes=row['episodes']))
         if not reference and state.get('status')=='completed':
             for phase in range(len(order)-1):
-                frozen=th.load(parent/'offline_tc'/task['metadata']['branch_id'].replace('-TC','')/('phase%04d.th'%phase),map_location='cpu')
+                mask_root=Path(protocol['tc_mask_root']) if protocol.get('tc_mask_root') else parent/'offline_tc'
+                frozen=th.load(mask_root/protocol['method'].replace('pair_tc_','')/('phase%04d.th'%phase),map_location='cpu')
                 archived=th.load(run/'pair_ablation_memory'/('phase%04d'%phase)/'selection.th',map_location='cpu')
                 if digest_masks(archived)!=frozen['audit']['pair_mask_sha256']:
                     raise ValueError('training mask differs from offline mask: '+run.name)
@@ -125,7 +126,7 @@ def summarize(plan_path):
                             qgap_mean=sum(float(r['qgap_mean'])*int(r['direct_pairs']) for r in pools)/selected))
     for seed in plan['seeds']:
         for phase in range(1,5):
-            arms={r['method']:r for r in tc_rows if r['seed']==seed and r['phase']==phase}
+            arms={r['method']:r for r in tc_rows if r['seed']==seed and r['phase']==phase and r['method'] in ('low-TC','medium-TC','high-TC')}
             if set(arms)!=set(('low-TC','medium-TC','high-TC')):continue
             for metric in ('acc_pct','bwt_pp','fwt_pp','learning_auc_pct'):
                 values=[arms[level+'-TC'][metric] for level in ('low','medium','high')]
@@ -155,7 +156,7 @@ def summarize(plan_path):
     lines += ['', 'tc_performance.csv joins performance to the cumulative unique-state fixed-pool TC and Q-gap statistics available at each stage; these are not exposure-weighted training TC. within_seed_trends.csv retains per-stage paired trends and residual gap differences.', '', 'Interpretation limits: three training seeds are the independent replicates; states/pairs are not extra replicates. The arms preserve K1, edge budgets and per-state distance quotas, while graph topology and TC change together. TC-performance correlation alone does not isolate a causal role for the scalar TC score. Residual Q-gap differences remain possible competing explanations. The experiment contains no separately budgeted full-order training arm; if complete-order coverage is zero throughout, it cannot determine full versus partial ordering superiority. A best observed three-arm setting is not an estimated general optimum.',
               '', 'Shared-prefix AUC and stage-S metrics reuse the reference S trajectory once. References continue FT through all five stages; formal methods replay masks selected on FT reference states, including C/D reference states rather than each branch\'s own history. This is an intentional fixed-reference intervention.']
     (out/'REPORT.md').write_text('\n'.join(lines)+'\n')
-    (out/'summary.json').write_text(json.dumps(dict(training_completed=completed,training_total=12,
+    (out/'summary.json').write_text(json.dumps(dict(training_completed=completed,training_total=len(manifests),
                formal_training_complete=sum(r['status']=='completed' and r['method']!='VDN-FT-reference' for r in manifests),
                final_stage_rows=len(final),independent_evaluation_rows=len(independent)),indent=2)+'\n')
     print((out/'summary.json').read_text())
