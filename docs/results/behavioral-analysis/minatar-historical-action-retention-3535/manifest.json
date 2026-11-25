@@ -1,0 +1,125 @@
+{
+  "training_commit": "80d7ad68abf7b9069e54721d668a233a9de0f7f6",
+  "training_seed": 3535,
+  "stages": [
+    {
+      "stage": 0,
+      "game": "SpaceInvaders",
+      "t_env": 500000
+    },
+    {
+      "stage": 1,
+      "game": "Freeway",
+      "t_env": 1000000
+    },
+    {
+      "stage": 2,
+      "game": "Breakout",
+      "t_env": 1500000
+    }
+  ],
+  "action_space": 6,
+  "observation_shape": [
+    7,
+    10,
+    10
+  ],
+  "state_source": "union of both methods' independent greedy stage-end evaluation episodes",
+  "source_method_codes": {
+    "0": "DQN-FT",
+    "1": "DQN-TKPR-K1"
+  },
+  "evaluation_episodes_per_method": 20,
+  "runs": {
+    "DQN-FT": {
+      "run_dir": "runs/minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001",
+      "checkpoints": {
+        "0": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001/stage_0_checkpoint.pt",
+          "sha256": "7cd1559d94972b052a00856fa7836fdaf98cfcaa9d85bcc3403d72cbe6d0a449",
+          "game": "SpaceInvaders",
+          "environment_steps": 500000
+        },
+        "1": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001/stage_1_checkpoint.pt",
+          "sha256": "473ca6d80f6d07a02560296d1edf5b37027e0bb6f742a627223dcc26b8f8ea50",
+          "game": "Freeway",
+          "environment_steps": 1000000
+        },
+        "2": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001/stage_2_checkpoint.pt",
+          "sha256": "4ee0f70b05c35ff3f621bc2146cd4b2fd7eb95ba6f5d254e3fdb61d01ab91754",
+          "game": "Breakout",
+          "environment_steps": 1500000
+        }
+      }
+    },
+    "DQN-TKPR-K1": {
+      "run_dir": "runs/minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001",
+      "checkpoints": {
+        "0": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001/stage_0_checkpoint.pt",
+          "sha256": "7cd1559d94972b052a00856fa7836fdaf98cfcaa9d85bcc3403d72cbe6d0a449",
+          "game": "SpaceInvaders",
+          "environment_steps": 500000
+        },
+        "1": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001/stage_1_checkpoint.pt",
+          "sha256": "3ef9ab9fdf6692ab8fb405d639b87058271fc1b24e857d827c636a317c91c630",
+          "game": "Freeway",
+          "environment_steps": 1000000
+        },
+        "2": {
+          "path": "runs/minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001/stage_2_checkpoint.pt",
+          "sha256": "b07d43ebb0c381ea6bf56b23cdda9b83487f02bd17cf4aba205cb0ff8c69aa58",
+          "game": "Breakout",
+          "environment_steps": 1500000
+        }
+      }
+    }
+  },
+  "states": [
+    {
+      "game": "SpaceInvaders",
+      "reference_stage": 0,
+      "path": "states/spaceinvaders.npz",
+      "sha256": "4dc56c29e537a9dc6e46f77dba78c1fd79699e79dee50a87fee693a5d8bbbe36",
+      "states": 15694,
+      "unique_states": 6906,
+      "source_states": {
+        "DQN-FT": 7847,
+        "DQN-TKPR-K1": 7847
+      },
+      "episodes_per_method": 20,
+      "seed_start": 291000
+    },
+    {
+      "game": "Freeway",
+      "reference_stage": 1,
+      "path": "states/freeway.npz",
+      "sha256": "cbb004cfb1fbc91d93599e50683b81eb8f482e585e2ef442d3f2ccd0e6a726a4",
+      "states": 100040,
+      "unique_states": 58611,
+      "source_states": {
+        "DQN-FT": 50020,
+        "DQN-TKPR-K1": 50020
+      },
+      "episodes_per_method": 20,
+      "seed_start": 191000
+    },
+    {
+      "game": "Breakout",
+      "reference_stage": 2,
+      "path": "states/breakout.npz",
+      "sha256": "3a16acb7363d81badf68fae9e097d96b9a5c044ceea47e84b6998a4d4fa1aee6",
+      "states": 4634,
+      "unique_states": 1270,
+      "source_states": {
+        "DQN-FT": 1754,
+        "DQN-TKPR-K1": 2880
+      },
+      "episodes_per_method": 20,
+      "seed_start": 91000
+    }
+  ]
+}

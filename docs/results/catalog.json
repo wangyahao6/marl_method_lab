@@ -865,6 +865,32 @@
         "首次学完后评价为每游戏 20 局，最终评价为每游戏 100 局；均值差异仅作描述。",
         "learning_curves 为探索策略最近 100 局平均回报；偏好诊断每 1000 环境步抽样一次。"
       ]
+    },
+    {
+      "id": "minatar-historical-action-retention-3535",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/minatar-historical-action-retention-3535/README.md",
+      "files": {
+        "action_retention": "behavioral-analysis/minatar-historical-action-retention-3535/action_retention.csv",
+        "historical_performance": "behavioral-analysis/minatar-historical-action-retention-3535/historical_performance.csv",
+        "method_comparison": "behavioral-analysis/minatar-historical-action-retention-3535/method_comparison.csv",
+        "manifest": "behavioral-analysis/minatar-historical-action-retention-3535/manifest.json",
+        "curves": "behavioral-analysis/minatar-historical-action-retention-3535/har_regret_curves.svg"
+      },
+      "task_order": ["SpaceInvaders", "Freeway", "Breakout"],
+      "training_seeds": [3535],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "independent_runs_common_fixed_states",
+        "match_on": ["game", "reference_stage", "current_stage"],
+        "primary_control": {"method": "DQN-FT", "role": "independent"}
+      },
+      "interpretation_limits": [
+        "只使用首次完成三个任务后的六个检查点；不涉及后续回访阶段。",
+        "状态来自每方法各 20 局的独立贪心评价轨迹，按访问次数加权；两方法在同一状态数组上比较。",
+        "Old-Q Regret 由各方法自己的历史模型估值，不跨游戏直接比较绝对值，也不等于真实环境回报损失。",
+        "仅一个训练种子；相同任务序列和固定状态集不等于共享训练轨迹或因果证明。"
+      ]
     }
   ]
 }

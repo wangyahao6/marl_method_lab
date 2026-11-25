@@ -24,6 +24,8 @@ SZC 的 `runs.csv` 中 `cohort` 标识原始提交批次。`preference_diagnosti
 
 MinAtar 单智能体结果使用原始每局回报：其 `evaluations.csv` 的 `mean_return`、`stage_metrics.csv` 的逐游戏回报及 `learning_curves.csv` 的探索策略最近 100 局回报均不是胜率。三个游戏的奖励尺度不同，不计算跨游戏 ACC。`retention.csv` 的 BWT 为最终 100 局平均回报减首次学完后 20 局平均回报。`preference_diagnostics.csv` 每 1,000 环境步抽样一次；完整逐更新和逐局日志保留在实验主机。
 
+MinAtar 历史动作保持分析的 `action_retention.csv` 以 `(method, game, reference_stage, current_stage)` 为键。`har` 是同一固定观测上两次贪心动作相同的比例，`adr=1-har`；`mean_old_q_regret` 等分布统计来自历史模型对两个动作的 Q 差。`states/*.npz` 为两方法共同使用的原评价种子贪心轨迹观测，`pointwise/*.npz` 保留每个对比的旧 Q 估值与损失。`historical_performance.csv` 复用原来的阶段末贪心回报。Q 差不跨游戏合并，动作保持也不等同于真实回报保持。
+
 评估标签中，`initial_reference` 是初始模型在将来任务上的表现，`next_unseen` 是首次训练该任务前的评估，`phase_start` 和 `periodic` 描述本阶段当前任务的学习过程，`stage_end` 用于比较该阶段末各已见任务。曲线的圆点为阶段末评估。定期与阶段末评估的局数与种子块可不同，见各实验的协议。
 
 ## 重算阶段指标
