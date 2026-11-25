@@ -1,0 +1,5 @@
+method,seed,only_min_gap_differs
+ASPR-3G,2222,True
+ASPR-3G-Adjacent,2222,True
+ASPR-3G,3535,True
+ASPR-3G-Adjacent,3535,True

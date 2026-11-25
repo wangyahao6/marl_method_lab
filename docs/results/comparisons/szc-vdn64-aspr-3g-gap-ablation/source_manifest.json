@@ -1,0 +1,514 @@
+[
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/status.json",
+    "sha256": "670930737ea72d886238e01dcf8481c55e942aafda3da928f4acea856730fdfa"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/launcher_status.json",
+    "sha256": "0f6cf685a57ff4b26e1b0c8870fb6bf718f8ec3910bd2804eade47611a370541"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/launch.json",
+    "sha256": "ccc8d4f9cdc5a2aef7c4649f21c4cb535bb4b68b51dd0f35337307545a444362"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/protocol.json",
+    "sha256": "0cd42148dfee6f06be120b2eb68d359f3e086dd467e8eeb8ef8e543f5ca2088c"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/retention.json",
+    "sha256": "a6d030422997ca6cc4dc12d4f50de5093642506a4ed8c41b21822e9d673b5957"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/evaluations.jsonl",
+    "sha256": "285589a5d8c72daf1815b72cc85de22590b432c4b497db60534a5ebd4ba25572"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/status.json",
+    "sha256": "ad29b43e3ce7ff494cf38b9b0ab160a8618889114968cac771680e8709831095"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/launcher_status.json",
+    "sha256": "f78a6a1885fcc3860eab03b96ed01bbe9b3c0802517f6c61e1443938aab217be"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/launch.json",
+    "sha256": "afc018e59d324898a1b98059115838f5fb07c43c9e35ce3c968ef27c2917504b"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/protocol.json",
+    "sha256": "faab2c28f3ee8927068d432ce2bb898b2ace5e7acdb7e1d12a5dce090b566f07"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/branch_restore.json",
+    "sha256": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/retention.json",
+    "sha256": "573b370c9fbe3432bceabde3e86546c602c8f914828ec6416e29eb09b7fd8076"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/evaluations.jsonl",
+    "sha256": "71b11d98d12896ca98dc1d89e6770de78cac88e01a83c5470ebb7d5c1772b1e5"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/evaluation/20261124T195730911515/results.json",
+    "sha256": "97dc9523c1d5c6915080c1b1baa0db1665d65ca8cefe6f9791e3875b819a4efd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/evaluation/20261124T195730911515/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/cross_group_offline.csv",
+    "sha256": "8100bdfeb4cf630780e66a5a061252411052e0cb50c43c5e600bddd0fc9c5551"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/sampled_pairs.csv",
+    "sha256": "0a1133264ee352d3d3fee9c7a6ea5b62139bc7947713461e1a69150961970641"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/q_gap_summary.csv",
+    "sha256": "220714aec6f47dac977a42010bf5447414fb74b1b8c26616f8bbf689a4d61757"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/q_gap_histogram.csv",
+    "sha256": "ce4e6efd714125b046796f43f3e43d06208b467e4946f15323c026da6535437a"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/sampling_audit.csv",
+    "sha256": "83e228eeee1deb0866b8430bdc0491472fdefd79a7861397d8a9132f77ae5f55"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001/source_manifest.json",
+    "sha256": "ba87e79072f902fb8b181bb682771f7ebfc3680758d67e6cf26325a800406c88"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/status.json",
+    "sha256": "3c7afc15ef9fe382b0572d63a7770724a987f418cb5963be1a340f4f093438bd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/launcher_status.json",
+    "sha256": "8316c9a602d22bdd420b34f2c14e0355a7a4486418dfdbc748c551268bbc2a95"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/launch.json",
+    "sha256": "ca8861dc924da39bc1c06766ba166f2c90a548db18d1416be97a69332a45df45"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/protocol.json",
+    "sha256": "6bfdb909243c98e4969169addbde817c90307277d054e76efc30f9ca62ba4fae"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/branch_restore.json",
+    "sha256": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/retention.json",
+    "sha256": "825f97230e2967ece4c2ac2833461567962e4ad0da15031c8427aea6ba5a0e1a"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/evaluations.jsonl",
+    "sha256": "68f46954fd7fb5477fcc2cd97e8f25f454cb1d6adac9ec8af48042369e487a58"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/cross_group_offline.csv",
+    "sha256": "40e620000845444751e6630a45678343e731f4eed9e0b799232d615244c78005"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/sampled_pairs.csv",
+    "sha256": "a784a417df589ea225648ee382677e3a667bbfc0576f10af37648ce32c9f1cb1"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/q_gap_summary.csv",
+    "sha256": "9841d08fc2827bce63052b343e2f45966e19a5cfc10b43f8516437079d4ff829"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/q_gap_histogram.csv",
+    "sha256": "b6a16f7a9ddde6960ead80353950218f0168e1c28a2246643a5d53cf4d432ddd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/sampling_audit.csv",
+    "sha256": "92b2a2369035bb709db025a6942fb0cbeb6cd14a9c89ebc349e70a80498d0489"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed2222_attempt001/source_manifest.json",
+    "sha256": "244261fd799ab22f7a83fd74e5a0c147276b1737089f4a4621bc72eb1f422fca"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/status.json",
+    "sha256": "73144bb6cfa0672a6d602a854d6caecaf6e2d8df6145907ffee9720c7dc07d3d"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/launcher_status.json",
+    "sha256": "dc4b4b6a8375c6d9f5255ca8857f4d86d5e6c9246776708bbb9f7b35d59a62a0"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/launch.json",
+    "sha256": "b70ac10210bcf9ac3fafe203468f29d1f1cf6520d12ba32b9fead1557019ab82"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/protocol.json",
+    "sha256": "5d74c4da4a85226411a3252aae64f73d5f976d380de92644df89f6e91875e4b6"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/branch_restore.json",
+    "sha256": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/retention.json",
+    "sha256": "2c7d1cd77a1745a723c53194153f9929a79b4d1a6c3f20dfdfeb7c89a583a9fc"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/evaluations.jsonl",
+    "sha256": "d2870f38ab694beee243104d809a011ced3376f538c9ce2c96be04e234f3c891"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/evaluation/20261124T024901156014/results.json",
+    "sha256": "947979821203a920bf8485210b3cfefb3604fe9804dd7e1abeb611a82e35a09d"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/evaluation/20261124T024901156014/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/cross_group_offline.csv",
+    "sha256": "dad9ac3df03938ac2b150780b8f8d21ee5a80c8f1ef96ba280a8b4d6ea872b06"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/sampled_pairs.csv",
+    "sha256": "bd332243d3b262d9071b1cbe9cccea859e7a6802d66b5d81a1bf9beb2c4499ae"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/q_gap_summary.csv",
+    "sha256": "41c0cf01b2289174a69c215ecf90cb3c2ee1781ae75027d62325cbd1f4a4ec13"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/q_gap_histogram.csv",
+    "sha256": "dee3ed4ffdee052b84a309e2e58e3a433fb79e63bc6da0f4cc5d9b920d7c5eac"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/sampling_audit.csv",
+    "sha256": "a1093346b14dae47ea5084430f4710f184e607726ccde71ddc1a4631e0c5571e"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed2222_attempt001/source_manifest.json",
+    "sha256": "caf81e2fb2b0d95378a9b7d2b0abcd6979e6ea0326175515dc7e8a97e921ac5f"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/status.json",
+    "sha256": "122411b51908e90bdf2bc41f1ed24709b83a466999172f7d24cc0ed63b4cb316"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/launcher_status.json",
+    "sha256": "dbed6014a3c184e1a79699a2b7f05e4cdd88e3ce1e9ce9ede8d3bd0cdcf47405"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/launch.json",
+    "sha256": "61b85e292c45a0f744ceda4dd228e3a15f6e0579858859508ef2d7cbc0a60f09"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/protocol.json",
+    "sha256": "da5a7f94ba28694bdf259365b7d2f8bbe2f800702488a96411df76ebe4790157"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/branch_restore.json",
+    "sha256": "a04c6ca4b58eb2a9e7e643ced5ed389009470afe7cdf39e82216f31787107648"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/retention.json",
+    "sha256": "9f8cff9d74458e56c4509eac69c8fd9e0cc41eee9d7e2433be4839d845a024c5"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/evaluations.jsonl",
+    "sha256": "4d343895052d70979e2b53189b5e3b156bb4f92777d76f7fec5758cb9adaf67e"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/evaluation/20261125T051801866142/results.json",
+    "sha256": "3e25f73b710bcee56b84c50f7fdf79474489045167522525323770d178f671ea"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/evaluation/20261125T051801866142/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/cross_group_offline.csv",
+    "sha256": "f3a73fb66330ea9f91bf87e80317e5f695d7b3638627e5a74f25277611cc30dd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/sampled_pairs.csv",
+    "sha256": "c368fd584990297fbe6621f72fd9dd50777328e80cf72ce788a6987df277f759"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/q_gap_summary.csv",
+    "sha256": "61575e4cef7fa296f9653d11b4fe950875f403d5ee16b9d49594234a4697162a"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/q_gap_histogram.csv",
+    "sha256": "e5bb2a17679e6f8d377fb0be048ba2f7e17c3e963aa101f5d17391eb22ad644c"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/sampling_audit.csv",
+    "sha256": "0b07aa950d49860e589882a2eb18d17268808afbd8cf3e7849a16ec785f54500"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001/source_manifest.json",
+    "sha256": "3ae876af463d99d54fba079fd58131b592d5a27e9e727e66d3d130ca8c8d9819"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/status.json",
+    "sha256": "96f2db44624eb98479a5e5438f5063b4e71c642246cbc0a742ccfda37864bc96"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/launcher_status.json",
+    "sha256": "0363f28b0a95434abfec40b5705b389564cd8db3cf739e8d57a226d876ca5d54"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/launch.json",
+    "sha256": "6bc34cb9b974bc8754d7e3a0d3ce57e7edeeba5fae2ed2b1075ff37a649ba198"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/protocol.json",
+    "sha256": "0cd42148dfee6f06be120b2eb68d359f3e086dd467e8eeb8ef8e543f5ca2088c"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/retention.json",
+    "sha256": "276407cdf0492011f60932251cb6a24c977abcb969fbfc5d9e7b869268a6c015"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/evaluations.jsonl",
+    "sha256": "4ebec1972cf7d587a6ce8fa262f767df8bb8771330f39a1ce884ac95ba858805"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/status.json",
+    "sha256": "8bd1bf4ed0a28abc437c91d03a275a440f574fa7b11b096e3d8acd8cbca4a443"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/launcher_status.json",
+    "sha256": "2c6b02cd94c3c8d488c4e87e6fe27ef1e6a2edfafe2ca9603f341e89ae48eca1"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/launch.json",
+    "sha256": "2d2690b61330aa0c9626bbb1ce8a9211cae58fbda6221541c929105fb5fd1d08"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/protocol.json",
+    "sha256": "faab2c28f3ee8927068d432ce2bb898b2ace5e7acdb7e1d12a5dce090b566f07"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/branch_restore.json",
+    "sha256": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/retention.json",
+    "sha256": "02a524b35d4ce3ba822942c6d571c7364f857247c2337c7c2f6ec310987b77f1"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/evaluations.jsonl",
+    "sha256": "171b02c39ba114f86f4c82a9426350a7c48e74f049e72491548c3e39b400a387"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/evaluation/20261125T052311165322/results.json",
+    "sha256": "3b82221434af9d5c48a7cbe3d413459855e8b4f7f5898165744179e8b4c99075"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/evaluation/20261125T052311165322/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/cross_group_offline.csv",
+    "sha256": "fc0b3ca51ac030a4d82224d90180b8485b537dd82579762b663fe9983fb0938b"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/sampled_pairs.csv",
+    "sha256": "d0e4e5e8974a78322a3db78994730ac8118ce94eff6e620bb511854db1b4a1ed"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/q_gap_summary.csv",
+    "sha256": "aefe1d59574b12018273b95816f47ff91aab155b14ff4b897c4bc67ad19c4839"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/q_gap_histogram.csv",
+    "sha256": "a2aec11be20cdb98b1a21a06eb657acd4cbb05a04b6db6738a32dc1b5b9459d9"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/sampling_audit.csv",
+    "sha256": "158910316248ddd818183d9b9739b7f3b2b5c0765f1f3348e4adc7805d1f5565"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001/source_manifest.json",
+    "sha256": "73d6e6d7baea95480f04cd9ddbe5a8af1dca88fd58c845d6bbee645789ac68b4"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/status.json",
+    "sha256": "81a7606b3191f429c3271a74537f2ab8282ea91debd4878427c6add8440b7b81"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/launcher_status.json",
+    "sha256": "163b93f97674c20b8ae7c17dd0c6a271c543923f89a36ab7ab1c8bc2a89ebbaf"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/launch.json",
+    "sha256": "c360b9b2c3af8816774d2eb28dcf93dab7a71c601d41d415b39fc8286abd86d2"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/protocol.json",
+    "sha256": "6bfdb909243c98e4969169addbde817c90307277d054e76efc30f9ca62ba4fae"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/branch_restore.json",
+    "sha256": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/retention.json",
+    "sha256": "7d0682855e555651593a24537462cc14d8df0ca1943432f3b3f776ecbb14247f"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/evaluations.jsonl",
+    "sha256": "dc9146f60fe8d38ee306c668cb895006035363eef277c9802819d10a3699b8cc"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/cross_group_offline.csv",
+    "sha256": "bc09afb724c3535962f7dc9b50eb31698d67f6c3059d782a87733531397939d4"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/sampled_pairs.csv",
+    "sha256": "8f38e16e6d3555c5491898b59392dee50605337499832a247524cd84a5dcaf3c"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/q_gap_summary.csv",
+    "sha256": "e2c13b4b6c8b7ec0cfa8f83a887c9a4f3ade60e23ba7565f4dfb9774c6e59154"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/q_gap_histogram.csv",
+    "sha256": "80b7c96ee14c0f2386e806cb1ad2797cc097b960c77d86309504da2f2258cdd8"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/sampling_audit.csv",
+    "sha256": "f0cc33cd70125eb72f27d7bb144bbd0076a2e60b079a0c0f267e0c1655a1271b"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_vdn64_aspr_3g_shared_20261121_seed3535_attempt001/source_manifest.json",
+    "sha256": "073af5d9200947aa59515e56e79f5ffa6f5aee23cd6526cf29f1ac4b06c790b7"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/status.json",
+    "sha256": "956bba29753b51d669f77a6a41b4ee97424096f38b272d686f7a95fc70dd071c"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/launcher_status.json",
+    "sha256": "0c21b4bff7acb6a58b7fada8a42177e99c690b9dbe440e3ff4db4c19c30a82d8"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/launch.json",
+    "sha256": "cb2221785b3bb6b7c851dee48a0e5068e836cbe9c3c27ad811197c9cb1fadb5e"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/protocol.json",
+    "sha256": "5d74c4da4a85226411a3252aae64f73d5f976d380de92644df89f6e91875e4b6"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/branch_restore.json",
+    "sha256": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/retention.json",
+    "sha256": "120e1335c68d00096497b9931a0b4b2dd5435f303c107f9c6d5033cdac983d22"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/evaluations.jsonl",
+    "sha256": "e5516708edcb50ef5d02cdbd100eae2f7ed0100f2285500ef4911bcfe80e8320"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/evaluation/20261124T031728874187/results.json",
+    "sha256": "60896015e76ef91c622babb928d27a9cb3ce9b17977e592fad3bc148d1af44e3"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/evaluation/20261124T031728874187/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/cross_group_offline.csv",
+    "sha256": "7e3b184aff82dd198e772666a45bd738116f9d90bb3a921eab229a1371aa5689"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/sampled_pairs.csv",
+    "sha256": "a15d787df8a0942b27a3e51cea226f41b18ac0ee537d2039df22012347a55ab9"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/q_gap_summary.csv",
+    "sha256": "2932ae60f31faf21f3aeeb94f0d1c8b6726e8faffe440dcce8997224072ea121"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/q_gap_histogram.csv",
+    "sha256": "64c6c508982bc4e522173b600c66b60ef7a1458564b7ba8a11d80aa294e52985"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/sampling_audit.csv",
+    "sha256": "9b2670d353a99ee229df55d6d67f06ef2a5d25e578b1ccbd23741195027ca896"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_adjacent_20261123_aspr_3g_adjacent_preference_seed3535_attempt001/source_manifest.json",
+    "sha256": "0a202e9ff98bb9dd052ad803d274caf2f5a550cd40a200b848366b65c40533b9"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/status.json",
+    "sha256": "9316eb92e6004ba982b3aaf8b8a16b8c467eb97694a161768fe0e75698f1621d"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/launcher_status.json",
+    "sha256": "a64088cd16a0af6a48b0efb5b3d02c3c694ed6028f1b2e5432de5a042d7b86fb"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/launch.json",
+    "sha256": "e3a726c43c6081ff800207ccac42fcc1189ac2dba47375f102f396cb72b1a224"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/protocol.json",
+    "sha256": "da5a7f94ba28694bdf259365b7d2f8bbe2f800702488a96411df76ebe4790157"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/branch_restore.json",
+    "sha256": "8f7c2e5d6545494c3d0ff035cf1eb072c733937af83ebc79542a082ed7c7d5aa"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/retention.json",
+    "sha256": "aeadd299110b784b750daff6c2deb66b6e710cdcc1059ad37d0cfc66decb1adb"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/evaluations.jsonl",
+    "sha256": "cfb8d1c0910a201eaf3b312530811d52693caf0618fead3746825f5aaa72c8d6"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/evaluation/20261125T114936007429/results.json",
+    "sha256": "c81905364fad2ffdd95adaa1727f0e7ca498e3a23d2caa3cff4460b86261a061"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/runs/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/evaluation/20261125T114936007429/launcher_status.json",
+    "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/cross_group_offline.csv",
+    "sha256": "6a54ce1e3fc7f161f177632ade75c269968da2cac85477932906396c7ef8ee8a"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/sampled_pairs.csv",
+    "sha256": "cc3b3f873c4717a8281463ba25cbbab2d244cc03fd007cd8bfe6471e93a91240"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/q_gap_summary.csv",
+    "sha256": "82b079df977a2fae812a0ba0397dae0605822f503a6edb9a1cb2372e833a235d"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/q_gap_histogram.csv",
+    "sha256": "72aadf7ffa845da3ded322772e297943face6f1f80cbc541db57a7a72d6299e0"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/sampling_audit.csv",
+    "sha256": "842eb9e287afb36c346d53faf421ac99e10ba2347aaa64849a0027507dd3cc4b"
+  },
+  {
+    "path": "/home/wyh/marl_method_lab/results/szc_aspr_3g_gap_ablation_20261124/diagnostics/szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001/source_manifest.json",
+    "sha256": "26375a9a77a34d5e934d7dd80592901c6d69cece1a4849fdb1cd43855d02a09f"
+  }
+]

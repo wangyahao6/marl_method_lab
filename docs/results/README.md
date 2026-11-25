@@ -11,6 +11,7 @@
 | [SZC · TKPR-K1 共同前缀对照](comparisons/szc-vdn64-tkpr-k1-shared/README.md) | 双层 VDN64，seed 2222、3535，各 1 个 S 前缀与 5 个 Z→C 分支 | 学习曲线、ACC/BWT/FWT/AUC、同前缀差值、偏好诊断和 Z/C 配对更新时间。 |
 | [SZC-1M · RMSprop 共享前缀](comparisons/szc-vdn64-rmsprop-1m/README.md) | 双层 VDN64，seed 3535，每阶段 1M 步 | TKPR-K1、TKPR-K1-W、FRPR 的贪心学习曲线、阶段端点和同前缀配对差。 |
 | [SZC · ASPR-3G-Adjacent vs TKPR-K1](comparisons/szc-vdn64-aspr-3g-adjacent/README.md) | 双层 VDN64，seed 2222、3535，共享 2M S，RMSprop，min_gap=0 | 逐阶段胜率、ACC/BWT/FWT/AUC、配对差、采样动作对与 G1-G3 离线违反率。 |
+| [SZC · ASPR-3G min_gap 2×2](comparisons/szc-vdn64-aspr-3g-gap-ablation/README.md) | 3G/Adjacent × gap0/0.5，seed 2222、3535，共同 S | 配对 ACC/BWT/FWT/AUC、三类对违反率、实际约束量与 Q-gap 分布。 |
 | [SZC · ASPR-3G / ASPR-4G](comparisons/szc-vdn64-aspr-groups/README.md) | 双层 VDN64，seed 2222、3535，共享 S，RMSprop，每阶段 2M 步 | 贪心曲线、ACC/BWT/FWT/AUC、分组完整分布及实际采样 CSV。 |
 | [SZC · ASPR 与 Adam 优化器对照](comparisons/szc-vdn64-aspr-adam/README.md) | 双层 VDN64，seed 2222、3535，每阶段 2M 步 | 新版 ASPR、Adam TKPR-K1/K1-W/FRPR、RMSprop 与 VDN-FT 的训练及贪心曲线、端点和配对差。 |
 

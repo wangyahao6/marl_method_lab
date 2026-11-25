@@ -1,0 +1,87 @@
+[
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed2222_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap05_seed2222_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap0_seed2222_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed2222_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap0_seed3535_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_3g_gap05_seed3535_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap0_seed3535_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_attempt001_independent_final",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_adjacent_gap05_seed3535_diagnostics",
+    "state": "completed",
+    "reason": "exit code 0"
+  },
+  {
+    "id": "szc_aspr_3g_gap_ablation_20261124_summary",
+    "state": "completed",
+    "reason": "exit code 0"
+  }
+]
