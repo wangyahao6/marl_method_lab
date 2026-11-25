@@ -7,6 +7,10 @@ at the first phase's training loop. Unknown source layouts fail closed.
 import ast
 import copy
 import hashlib
+from pathlib import Path
+
+# Bump whenever extraction boundaries or normalization rules change.
+IMPLEMENTATION_VERSION = 2
 
 
 class BaselinePath(ast.NodeTransformer):
@@ -19,6 +23,8 @@ class BaselinePath(ast.NodeTransformer):
                           PREFERENCE_RANK_METHODS=PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS=HISTORY_RANK_METHODS)
 
     def value(self, node):
+        if ast.unparse(node) == 'args.evaluate_run':
+            return False  # Shared-prefix uses --seed, not the final-evaluation entry.
         if ast.unparse(node) == 'isinstance(buffer, TaskReplayBuffer)':
             return False  # The shared prefix always uses ordinary Episode ReplayBuffer.
         if any(isinstance(n, (ast.Call, ast.Attribute, ast.NamedExpr, ast.Lambda)) for n in ast.walk(node)):
@@ -92,6 +98,55 @@ def driver_training(tree):
     return BaselinePath().visit(fn)
 
 
+def source_nodes_hash(nodes):
+    """Canonical executable AST; comments, formatting and docstrings are not code."""
+    class WithoutDocstrings(ast.NodeTransformer):
+        def visit_Expr(self, node):
+            if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                return None
+            return self.generic_visit(node)
+
+    tree = ast.Module(body=copy.deepcopy(nodes), type_ignores=[])
+    normalized = WithoutDocstrings().visit(tree)
+    return hashlib.sha256(ast.dump(normalized, include_attributes=False).encode()).hexdigest()
+
+
+def extraction_rules_hash():
+    """Identity of the executing extractor, independent of the tree being audited."""
+    return source_nodes_hash(ast.parse(Path(__file__).read_text()).body)
+
+
+def implementation_hash(components, rules_sha256, version=IMPLEMENTATION_VERSION):
+    payload = f'{version}:{rules_sha256}\n' + '\n'.join(f'{k}:{v}' for k, v in sorted(components.items()))
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def module_initialization(tree):
+    """Executable module setup, including statements after function declarations.
+
+    Function bodies are hashed separately when actually used. Main guards are
+    omitted for imports; action_set_train's training dispatch is covered by main.
+    """
+    nodes = []
+    for original in tree.body:
+        node = copy.deepcopy(original)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            # Defining a function evaluates defaults/decorators/annotations, but
+            # does not execute its standalone training body.
+            node.body = [ast.Pass()]
+        elif isinstance(node, ast.If) and ast.unparse(node.test) == "__name__ == '__main__'":
+            nodes.extend(node.orelse)  # Imported as train, never as __main__.
+            continue
+        nodes.append(node)
+    return nodes
+
+
+def base_initialization(tree):
+    if not {'merge', 'main'}.issubset({n.name for n in tree.body if isinstance(n, ast.FunctionDef)}):
+        raise ValueError('Unrecognized train.py module initialization boundary')
+    return module_initialization(tree)
+
+
 def training_implementation(root, cfg):
     """Named dependency components; configuration values are checked by Prefix Spec."""
     if (cfg['learner'], cfg['mac'], cfg['mixer'], cfg['action_selector']) != (
@@ -104,12 +159,12 @@ def training_implementation(root, cfg):
     agent_file, agent_class = agents[cfg['agent']]
     entries = {
         'drivers/continual/action_set_train.py': ['config', 'augmented_scheme', 'isolated_rollouts',
-                                                'greedy_runner', 'layout', 'evaluate_task', 'evaluation_settings'],
+                                                'greedy_runner', 'layout', 'evaluate_task', 'evaluation_settings', 'main'],
         'drivers/continual/common/prefix.py': ['base_config'],
         'drivers/continual/common/runtime.py': ['episode_spec', 'rng_state', 'restore_rng', 'td_sample', 'log_task_epsilon'],
         'drivers/continual/common/exploration.py': ['epsilon_on_switch'],
         'src/learners/q_learner.py': ['QLearner.__init__', 'QLearner.train', 'QLearner._update_targets',
-                                     'QLearner.cuda', 'QLearner.remove_activation_hooks'],
+                                     'QLearner.cuda', 'QLearner.remove_activation_hooks', 'QLearner.save_models'],
         'src/controllers/basic_controller.py': ['BasicMAC'],
         'src/modules/agents/' + agent_file: [agent_class],
         'src/modules/layers/act_layer.py': ['ActivateLayer'],
@@ -121,11 +176,28 @@ def training_implementation(root, cfg):
         'src/components/action_selectors.py': ['EpsilonGreedyActionSelector'],
         'src/components/epsilon_schedules.py': ['DecayThenFlatSchedule'],
         'src/utils/hook_lifecycle.py': None,
+        'src/utils/logging.py': ['Logger'],
+        'drivers/continual/common/records.py': ['write', 'append', 'attach_legacy_metrics'],
+        'drivers/continual/common/checkpoints.py': ['cpu_snapshot', 'parameter_hash', 'hash_model_states', 'save_models'],
+        'drivers/continual/common/preference_prefix.py': ['full_state_extra'],
+        'drivers/continual/common/metrics.py': ['Metrics.__init__', 'Metrics.record', 'Metrics._write',
+                                             'Metrics.evaluation', 'Metrics.retention', 'record_evaluation'],
         'drivers/continual/hetero_environment.py': ['ExactTeams', 'ExactProtoss.__init__',
             'ExactProtoss.__getattr__', 'ExactProtoss.set_task', 'ExactProtoss.reset',
             'ExactProtoss.step', 'ExactProtoss.distribution_state'],
         'drivers/continual/environment.py': ['seed_distributions'],
     }
+    # Agent constructors install TRHR only for a truthy cfg.trhr. QLearner
+    # creates A2Trace only when requested and not in evaluation mode. Even with
+    # TRHR off, A2Trace calls capture_activity and valid_a2_rows from trhr.py.
+    trhr = bool(cfg.get('trhr'))
+    trace = bool(cfg.get('a2_trace')) and not bool(cfg.get('evaluate', False))
+    if trhr or trace:
+        entries['src/modules/layers/trhr.py'] = ['capture_activity', 'valid_a2_rows']
+        if trhr:
+            entries['src/modules/layers/trhr.py'].append('TRHRReLU')
+    if trace:
+        entries['src/utils/a2_trace.py'] = ['A2Trace']
     # Capability/map/distribution definitions are environment dependencies, not methods.
     for path in (root / 'vendor/smacv2/smacv2/env').rglob('*.py'):
         if 'pettingzoo' not in path.parts:
@@ -147,23 +219,18 @@ def training_implementation(root, cfg):
             nodes = imports + constants + nodes
         if name.endswith('/action_set_train.py'):
             # Its method imports are provenance only; they do not execute baseline updates.
-            bindings = [n for n in tree.body if isinstance(n, ast.Import)
-                        or (isinstance(n, ast.ImportFrom) and n.module in (
-                            'hetero_environment', 'components.task_replay', 'common.checkpoints',
-                            'common.metrics', 'common.records', 'common.runtime', 'common.exploration',
-                            'common.prefix', 'types', 'contextlib'))
-                        or isinstance(n, (ast.Assign, ast.AnnAssign))]
-            nodes = bindings + definitions(tree, symbols) + [driver_training(tree)]
+            # Entry dispatch and all top-level initialization execute before the
+            # first phase. The __main__ guard is represented by the main body.
+            nodes = module_initialization(tree) + definitions(tree, symbols) + [driver_training(tree)]
+            nodes = [BaselinePath().visit(copy.deepcopy(n)) for n in nodes]
         if name in ('src/learners/q_learner.py', 'src/components/task_replay.py'):
             # Diagnostic and preference callbacks are inactive during baseline updates.
             nodes = [BaselinePath().visit(copy.deepcopy(n)) for n in nodes]
-        payload = ast.dump(ast.Module(body=nodes, type_ignores=[]), include_attributes=False)
-        components[name] = hashlib.sha256(payload.encode()).hexdigest()
+        components[name] = source_nodes_hash(nodes)
     base_tree = ast.parse((root / 'drivers/continual/train.py').read_text())
-    base_bindings = [n for n in base_tree.body if isinstance(n, ast.ImportFrom) and n.module in (
-        'components.episode_buffer', 'controllers', 'learners', 'runners.episode_runner', 'envs', 'utils.logging')]
-    components['drivers/continual/train.py:factories'] = hashlib.sha256(
-        ast.dump(ast.Module(body=base_bindings, type_ignores=[]), include_attributes=False).encode()).hexdigest()
+    # This includes ModuleType('envs'), its REGISTRY, sys.modules publication,
+    # sys.path setup, SC2PATH and the final envs/EpisodeRunner factory imports.
+    components['drivers/continual/train.py:initialization'] = source_nodes_hash(base_initialization(base_tree))
     # Registry wiring is checked separately: unrelated registry entries are irrelevant.
     for name, key in [('src/controllers/__init__.py', 'basic_mac'),
                       ('src/modules/agents/__init__.py', cfg['agent']),
@@ -183,7 +250,7 @@ def training_implementation(root, cfg):
         local_classes = [n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == symbol.id]
         if len(imports) + len(local_classes) != 1:
             raise ValueError(f'Unrecognized Prefix registry import: {name}:{key}')
-        payload = ast.dump(ast.Module(body=imports + nodes, type_ignores=[]), include_attributes=False)
-        components[name + ':' + key] = hashlib.sha256(payload.encode()).hexdigest()
-    payload = '\n'.join(f'{k}:{v}' for k, v in sorted(components.items()))
-    return dict(version=1, sha256=hashlib.sha256(payload.encode()).hexdigest(), components=components)
+        components[name + ':' + key] = source_nodes_hash(imports + nodes)
+    rules_sha256 = extraction_rules_hash()
+    return dict(version=IMPLEMENTATION_VERSION, rules_sha256=rules_sha256,
+                sha256=implementation_hash(components, rules_sha256), components=components)

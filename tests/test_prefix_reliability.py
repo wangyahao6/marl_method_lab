@@ -1,6 +1,7 @@
 """CPU-only provenance and hook ownership checks; no game process."""
 import copy
 import importlib.util
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -14,8 +15,8 @@ from unittest.mock import Mock, patch
 import torch as th
 
 from test_action_set_preference import driver, PROTOCOL_PATH
-from common.prefix import prefix_spec, require_compatible, verify_manifest
-from common.prefix_implementation import training_implementation
+from common.prefix import prefix_spec, require_compatible, verify_manifest, spec_hash, file_hash, REQUIRED_ARTIFACTS
+from common.prefix_implementation import training_implementation, IMPLEMENTATION_VERSION, extraction_rules_hash
 from utils.hook_lifecycle import HookHandles
 
 
@@ -29,6 +30,182 @@ class ReliabilityTest(unittest.TestCase):
         with patch.object(th.cuda, 'is_available', return_value=False):
             cfg = driver.config(protocol, 8, Path('/tmp/unused'))
         return protocol, cfg
+
+    def manifest_fixture(self, root, spec):
+        checkpoint = 'models/phase0000_20'
+        for name in [*REQUIRED_ARTIFACTS, *(checkpoint + '/' + item for item in ('agent.th', 'mixer.th', 'opt.th'))]:
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(name.encode())
+        report = dict(stages=[dict(phase=0, task=spec['stage']['task'], checkpoint=checkpoint, win_rates={spec['stage']['task']: 0.})],
+                      initial_reference={}, before_first_training={})
+        (root / 'retention.json').write_text(json.dumps(report))
+        manifest = dict(manifest_version=2, state_version=1, prefix_id='prefix-' + 'a' * 32,
+                        prefix_spec=spec, prefix_spec_sha256=spec_hash(spec),
+                        code_version=dict(git_commit='a' * 40, git_status='',
+                                          source_sha256={'src/source.py': hashlib.sha256(b'source').hexdigest()}),
+                        history_collection=dict(seed_offsets=[101, 102], success_episodes=2, attempts_per_seed=2),
+                        files={str(path.relative_to(root)): file_hash(path) for path in root.rglob('*') if path.is_file() and path.name != 'prefix_manifest.json'})
+        (root / 'prefix_manifest.json').write_text(json.dumps(manifest))
+        return manifest
+
+    def copy_dependencies(self, root, cfg):
+        coverage = dict(cfg, trhr={'window_updates': 1}, a2_trace=True, evaluate=False)
+        for name in {key.split(':')[0] for key in training_implementation(driver.ROOT, coverage)['components']}:
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(driver.ROOT / name, path)
+
+    def test_extraction_rules_release_is_pinned(self):
+        releases = {2: '922ec57601ee6fa42352b765dd514c14c4dacd6b5ba08592c7feb04e73df6a8e'}
+        self.assertIn(IMPLEMENTATION_VERSION, releases,
+                      'Audit the rule change and register a new extraction version')
+        self.assertEqual(extraction_rules_hash(), releases[IMPLEMENTATION_VERSION],
+                         'Boundary/algorithm changed: bump extraction version and register its new rules hash')
+
+    def test_environment_module_initialization_and_registration_are_covered(self):
+        _, cfg = self.configuration()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.copy_dependencies(root, cfg)
+            initial = training_implementation(root, cfg)
+            path = root / 'drivers/continual/train.py'
+            source = path.read_text()
+            for before, after in (
+                    ("ModuleType('envs')", "ModuleType('changed_envs')"),
+                    ("sys.modules['envs'] = environment_module", "sys.modules['other'] = environment_module"),
+                    ("environment_module.REGISTRY = {'sequential_protoss': SequentialProtoss}", 'environment_module.REGISTRY = {}'),
+                    ("from envs import REGISTRY as environments", "from another_envs import REGISTRY as environments"),
+                    ("sys.path.insert(0, str(ROOT / 'vendor/smacv2'))", "sys.path.insert(0, str(ROOT / 'other_env'))")):
+                with self.subTest(initializer=before):
+                    self.assertIn(before, source)
+                    path.write_text(source.replace(before, after))
+                    self.assertNotEqual(training_implementation(root, cfg), initial)
+            # Standalone QMIX training is not executed by the action-set driver.
+            path.write_text(source.replace("random.seed(o.seed)", "random.seed(o.seed + 1)"))
+            self.assertEqual(training_implementation(root, cfg), initial)
+            # Executable initialization added after function declarations is covered too.
+            path.write_text(source + "\nenvironment_module.REGISTRY.clear()\n")
+            self.assertNotEqual(training_implementation(root, cfg), initial)
+
+    def test_optional_trhr_and_trace_dependencies_follow_actual_configuration(self):
+        _, cfg = self.configuration()
+        variants = dict(off=cfg, trhr=dict(cfg, trhr={'window_updates': 1}),
+                        trace=dict(cfg, a2_trace=True),
+                        evaluated=dict(cfg, a2_trace=True, evaluate=True))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.copy_dependencies(root, cfg)
+            initial = {name: training_implementation(root, value) for name, value in variants.items()}
+            self.assertNotIn('src/modules/layers/trhr.py', initial['off']['components'])
+            self.assertNotIn('src/utils/a2_trace.py', initial['evaluated']['components'])
+            path = root / 'src/modules/layers/trhr.py'
+            source = path.read_text()
+            path.write_text(source.replace('inputs + self.offset', 'inputs + 2 * self.offset'))
+            self.assertEqual(training_implementation(root, variants['off']), initial['off'])
+            self.assertNotEqual(training_implementation(root, variants['trhr']), initial['trhr'])
+            # Trace-only uses helpers, not the inactive TRHR controller class.
+            self.assertEqual(training_implementation(root, variants['trace']), initial['trace'])
+            path.write_text(source.replace('signs.append(output.detach() > 0)', 'signs.append(output.detach() > 1)'))
+            self.assertNotEqual(training_implementation(root, variants['trace']), initial['trace'])
+            path.write_text(source.replace('available = batch["avail_actions"][:, :-1].bool()',
+                                           'available = ~batch["avail_actions"][:, :-1].bool()'))
+            self.assertNotEqual(training_implementation(root, variants['trace']), initial['trace'])
+            path.write_text(source)
+            path = root / 'src/utils/a2_trace.py'
+            path.write_text(path.read_text().replace('self.updates += 1', 'self.updates += 2'))
+            self.assertEqual(training_implementation(root, variants['off']), initial['off'])
+            self.assertEqual(training_implementation(root, variants['evaluated']), initial['evaluated'])
+            self.assertNotEqual(training_implementation(root, variants['trace']), initial['trace'])
+            # An actually called learner helper, not just its import statement.
+            path = root / 'src/utils/logging.py'
+            path.write_text(path.read_text().replace('self.stats[key].append((t, value))',
+                                                   'self.stats[key].append((t + 1, value))'))
+            self.assertNotEqual(training_implementation(root, variants['off']), initial['off'])
+
+    def test_manifest_requires_fields_hash_list_and_complete_checkpoint(self):
+        protocol, cfg = self.configuration()
+        spec = prefix_spec(protocol, 8, cfg)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline = self.manifest_fixture(root, spec)
+            manifest_path = root / 'prefix_manifest.json'
+            self.assertEqual(verify_manifest(root, spec), baseline)
+            for key in baseline:
+                with self.subTest(missing=key):
+                    changed = copy.deepcopy(baseline)
+                    changed.pop(key)
+                    manifest_path.write_text(json.dumps(changed))
+                    with self.assertRaises(ValueError):
+                        verify_manifest(root, spec)
+            for files in ({}, [], None):
+                changed = dict(baseline, files=files)
+                manifest_path.write_text(json.dumps(changed))
+                with self.assertRaisesRegex(ValueError, 'nonempty hash list'):
+                    verify_manifest(root, spec)
+            for name in baseline['files']:
+                with self.subTest(unlisted=name):
+                    changed = copy.deepcopy(baseline)
+                    changed['files'].pop(name)
+                    manifest_path.write_text(json.dumps(changed))
+                    with self.assertRaisesRegex(ValueError, 'missing from files'):
+                        verify_manifest(root, spec)
+            manifest_path.write_text(json.dumps(baseline).replace('"files": {', '"files": {}, "files": {', 1))
+            with self.assertRaisesRegex(ValueError, 'Duplicate Prefix JSON key'):
+                verify_manifest(root, spec)
+            manifest_path.write_text(json.dumps(baseline))
+            for name in baseline['files']:
+                with self.subTest(absent=name):
+                    path = root / name
+                    content = path.read_bytes()
+                    path.unlink()
+                    with self.assertRaisesRegex(ValueError, 'artifact hash mismatch'):
+                        verify_manifest(root, spec)
+                    path.write_bytes(content)
+            changed = copy.deepcopy(baseline)
+            changed['prefix_spec']['implementation']['version'] = 1
+            changed['prefix_spec_sha256'] = spec_hash(changed['prefix_spec'])
+            manifest_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(ValueError, 'Unsupported Prefix implementation version'):
+                verify_manifest(root, spec)
+
+    def test_manifest_paths_and_retention_checkpoint_are_confined(self):
+        protocol, cfg = self.configuration()
+        spec = prefix_spec(protocol, 8, cfg)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / 'parent'
+            root.mkdir()
+            baseline = self.manifest_fixture(root, spec)
+            manifest_path = root / 'prefix_manifest.json'
+            for name in ('/etc/passwd', '../outside', 'models/../outside', 'C:/outside',
+                         'C:\\outside', 'models\\outside', './config.json'):
+                for location in ('files', 'checkpoint', 'source_sha256'):
+                    with self.subTest(path=name, location=location):
+                        changed = copy.deepcopy(baseline)
+                        if location == 'files':
+                            changed['files'][name] = 'a' * 64
+                        elif location == 'source_sha256':
+                            changed['code_version']['source_sha256'][name] = 'a' * 64
+                        else:
+                            report = json.loads((root / 'retention.json').read_text())
+                            report['stages'][0]['checkpoint'] = name
+                            (root / 'retention.json').write_text(json.dumps(report))
+                            changed['files']['retention.json'] = file_hash(root / 'retention.json')
+                        manifest_path.write_text(json.dumps(changed))
+                        with self.assertRaisesRegex(ValueError, 'Unsafe Prefix Manifest path'):
+                            verify_manifest(root, spec)
+                        report = dict(stages=[dict(phase=0, task=spec['stage']['task'], checkpoint='models/phase0000_20', win_rates={spec['stage']['task']: 0.})],
+                                      initial_reference={}, before_first_training={})
+                        (root / 'retention.json').write_text(json.dumps(report))
+            external = Path(tmp) / 'external.th'
+            external.write_bytes(b'external')
+            (root / 'prefix_replay.th').unlink()
+            (root / 'prefix_replay.th').symlink_to(external)
+            changed = copy.deepcopy(baseline)
+            changed['files']['prefix_replay.th'] = file_hash(external)
+            manifest_path.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(ValueError, 'escapes parent'):
+                verify_manifest(root, spec)
 
     def test_runtime_python_and_cuda_metadata(self):
         protocol, cfg = self.configuration()
@@ -92,12 +269,10 @@ class ReliabilityTest(unittest.TestCase):
             path.write_text(json.dumps(dict(state_version=1, prefix_spec=spec)))
             with self.assertRaisesRegex(ValueError, 'No automatic upgrade'):
                 verify_manifest(root, spec)
-            from common.prefix import spec_hash
-            manifest = dict(manifest_version=2, state_version=1, prefix_spec=spec,
-                            prefix_spec_sha256=spec_hash(spec), files={})
-            path.write_text(json.dumps(manifest))
+            manifest = self.manifest_fixture(root, spec)
             changed = copy.deepcopy(spec)
-            changed['implementation']['sha256'] = 'different'
+            # The stored fingerprint is valid; a different live implementation is refused.
+            changed['implementation']['sha256'] = 'a' * 64
             with self.assertRaisesRegex(ValueError, 'implementation.sha256'):
                 verify_manifest(root, changed)
             manifest['manifest_version'] = 999

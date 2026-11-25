@@ -111,3 +111,47 @@ TaskReplay 切换记录另含 `replay_episodes_before_switch`、`replay_episodes
 - `scripts/benchmark_szc_tkpr_k1.py`, `scripts/check_a2_local_gem.py`, `scripts/diagnose_all_locations.py`, `scripts/network_similarity.py`, `scripts/type_ablation_winrate.py`, `scripts/type_matched_ablation.py`, `scripts/validate_hetero_agent.py`, `scripts/validate_protection_locations.py`, `scripts/validate_ts4_vdn.py`
 - `src/components/task_replay.py`, `src/learners/dmaq_qatten_learner.py`, `src/learners/iqn_learner.py`, `src/learners/q_learner.py`, `src/learners/rmix_learner.py`, `src/run.py`, `src/utils/hook_lifecycle.py`
 - `tests/test_full_preference_prefix.py`, `tests/test_generic_prefix.py`, `tests/test_prefix_reliability.py`, `tests/test_ts3_driver_regression.py`
+
+## 依赖审计与提取规则版本 2（2026-11-25）
+
+Manifest schema 仍为 2，状态格式仍为 1；第一阶段实现提取规则独立升级为 `implementation.version: 2`。本次扩充覆盖边界并将 AST 文档字符串排除，不能继续沿用规则版本 1 的语义。`rules_sha256` 记录实际执行的提取器规范化 AST，汇总哈希同时纳入版本、规则哈希及各组件哈希。测试固定已登记版本的规则哈希；未来调整提取边界或算法必须递增版本并登记新的规则哈希。规则版本 1 的旧 Manifest 不自动重算或升级，明确拒绝；缺失 Manifest、schema 1、未知 schema 的既有拒绝策略不变。
+
+### 实际调用链与维护清单
+
+| 执行位置 | 实际作用与依赖 | 校验范围 |
+| --- | --- | --- |
+| `scripts/run.py` → `scripts/launchers/vdn_action_set.py` | 读取/验证协议，生成命令、seed、角色及环境变量，保存启动源码/配置；启动新 Python 驱动进程 | 参数与训练输入由驱动实际生效的 Prefix Spec 校验，线程/库/CUDA 等由 runtime 段校验；完整启动源码保存在 code_version。没有把其他 suite 的启动代码整体纳入第一阶段指纹 |
+| `action_set_train.py` 模块初始化与 `main` | 导入 `train`，将 `action_set_protoss` 注册为 ExactProtoss；`main` 读启动协议、固定 Torch 线程数、分派训练 | 模块级可执行语句、函数声明时求值的默认值/装饰器/注解、训练模式 main 路径；最终评价分支不执行。第一阶段初始化、phase 预算及 TD while 路径继续单独提取 |
+| 导入 `train.py` | 建立 ROOT、sys.path、SC2PATH，读取启动协议；构造 `ModuleType('envs')` 和其 REGISTRY，发布到 `sys.modules['envs']`；之后导入 envs registry 与 EpisodeRunner 等工厂 | **新增完整模块初始化 AST**，包括定义之间/之后的顶层语句；不只记录 import。导入不会调用该文件的独立 QMIX main，故独立训练函数体不进入指纹 |
+| EpisodeRunner → env_REGISTRY → ExactProtoss | EpisodeRunner 构造/运行环境，调用 reset、step、get_obs/state/avail_actions；ExactProtoss 通过属性转发使用 SMACv2 wrapper | Runner、ExactTeams、ExactProtoss 构造/转发/任务选择/reset/step/分布快照，以及 seed_distributions；分支专用 restore_distribution 不属于前缀训练路径 |
+| SMACv2 wrapper → StarCraft2Env | 分布查找/采样、阵容与初始位置、地图注册与查找、游戏进程接口、观测/奖励/终止条件 | 仓库内 SMACv2 env 的 Python 环境实现、分布、地图和 MultiAgentEnv；不纳入未使用的 PettingZoo 适配层 |
+| BasicMAC → 选中 Agent | 根据 registry 构造实际 rnn / single_ff_rnn，拼接 observation/last-action/agent-id，更新 RNN hidden 与 Q 输出 | BasicMAC、实际 Agent、ActivateLayer，以及 controllers/agents 选中 registry 的赋值和定义来源；未选中的 Agent 实现不纳入 |
+| Action Selector / 探索 | ε-greedy 抽样，DecayThenFlatSchedule，切换时探索起点 | 选中 registry、EpsilonGreedyActionSelector、schedule、log_task_epsilon / epsilon_on_switch |
+| EpisodeBatch / ReplayBuffer → td_sample | 插入完整 episode，抽样、截断到 filled 长度、设备转移与 OneHot 预处理 | 普通 episode replay 与 transforms 实现；start_replay_task 提取普通 ReplayBuffer 路径，ER/FT 后续 task 配额/采样代码不进入第一阶段实现指纹 |
+| QLearner → VDNMixer / Optimizer | online/target unroll、TD 目标、损失、backward、clip_grad_norm、step、target 更新 | 实际 QLearner 构造/train/target 更新/cuda/observer 生命周期及模型保存，VDNMixer；RMSprop/Adam、Torch 运算由记录的库版本/运行配置约束。`check=False` 不调用 find，Prefix 无偏好消费者、无 gradient_monitor，故不纳入这些未执行方法/辅助诊断实现 |
+| QLearner / Runner 的已调用辅助代码 | 原生 observer 安装/移除，Logger.log_stat 及 metrics 包装；训练过程保存/散列模型及边界状态 | **补入** Logger、records、必要 metrics 方法、checkpoint 快照/哈希/保存及 full_state_extra 的实际实现；Metrics.preference 等方法专用处理仍不纳入 |
+| 可选 TRHR | Agent 构造时仅在 cfg.trhr 为真时替换 ReLU；Learner 实际调用 capture_activity、TRHRReLU.observe/_adjust 和 valid_a2_rows | **仅启用 TRHR 时**加入 TRHRReLU 类及实际辅助函数，不因无条件 import 就纳入其控制器实现 |
+| 可选 A2Trace | 仅在 cfg.a2_trace 为真且 cfg.evaluate 为假时构造；Learner 调用 before_step、observe，observe 可调用 flush、_norm | **仅实际启用时**加入 A2Trace 及其方法；即使 TRHR 关闭，Trace 仍使用 capture_activity、valid_a2_rows，故这两个辅助实现必须加入。仅 Trace 启用时不纳入未使用的 TRHR 控制器类 |
+
+这是一份沿当前调用路径人工核查、由测试维护的依赖边界，不是仅由 import 扫描得出的自动闭包。cfg 中可选开关的指纹覆盖不代表本次新增了相应 CLI 开关、训练干预或诊断状态恢复能力；默认参数与训练逻辑不变。生效配置继续进入 Prefix Spec；YAML 注释、其他算法配置及方法损失源码不因本次审计被整体纳入。
+
+### Manifest 完整性与路径
+
+校验现在要求顶层身份/版本/Spec/来源/采集配置/文件清单，检查字段类型、SHA-256 形状、Spec 自校验和实现汇总哈希，并拒绝重复 JSON key。必须有非空 `files`，且包含 retention、config、env_info、return_state、prefix_replay、initial_agent、第一阶段 success/failure 历史文件；缺文件或不在哈希清单中均拒绝。
+
+retention 必须只有第一阶段，phase/task 与 Spec 一致。其 checkpoint 必须为 Prefix 内的目录，且 `agent.th`、`mixer.th`、`opt.th` 全部存在并被哈希清单覆盖。所有列出的产物均重新校验文件哈希，不通过只检查存在性替代。Manifest 产物路径、retention checkpoint 路径与来源清单路径拒绝绝对路径、`..`、驱动器路径、反斜杠和非规范别名；产物 symlink 也不能指向 Prefix 目录之外。新写入路径统一使用相对 POSIX 形式。
+
+完整性检查不反序列化 Torch 文件，不宣称仅凭文件存在及哈希就证明张量/优化器在语义上正确；原有 CPU 恢复测试继续负责实际状态回读。历史产物不修改，不通过补写元数据“升级”成当前规则产物。
+
+### 明确局限
+
+- 不对任意 Python 程序自动证明依赖闭包。运行时 monkeypatch、用户插件/回调、预加载模块、动态 import 或 import 时新增副作用需要重新审计；不能把版本和哈希匹配解释为这些动态行为已被验证。
+- 第三方包由版本/构建信息约束，不逐字节审计其安装目录；同版本本地被修改的依赖、SC2 二进制/实际部署地图及 NVIDIA 驱动不在本次静态源码指纹的完整证明范围内。
+- 核心定义与环境模块按函数/类/模块粒度保守校验；并非任意语义等价修改都能保持指纹。文档、注释、格式以及规范化 AST 的文档字符串不影响指纹，但新增可执行初始化必须被视为代码变化。
+- Prefix 历史采集在训练边界之外隔离执行，原始历史文件受产物哈希保护；本指纹不把 TKPR/ASPR/CPR 的后续数据处理视作共同前缀训练依赖。
+
+### 本次验证
+
+83 项相关 CPU 回归通过；最终完整性与路径规范化修改后，42 项重点复核再次通过（包含 11 项可靠性测试及 Prefix、共享前缀、TKPR、ASPR、CPR、Replay 回归）。可靠性测试中，4 项验证规则版本/代码指纹，1 项验证运行信息，3 项验证 Manifest（循环覆盖缺字段、空清单、缺失/未列出的必要产物、checkpoint、危险路径与 symlink 等子案例），其余 3 项为 Hook 回归。`py_compile` 和 `git diff --check` 通过；没有启动 SMAC/SC2 或正式训练。
+
+修改仅在 `common/prefix.py`、`common/prefix_implementation.py`、`tests/test_prefix_reliability.py`、本说明，以及 `action_set_train.py` 的两处相对路径序列化（统一 POSIX 分隔符）。训练数学、优化器、超参数、采样及更新顺序未修改，已有结果与历史产物不改写。

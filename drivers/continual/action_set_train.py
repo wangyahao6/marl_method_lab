@@ -300,7 +300,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
         successful = label_group_memory(successful, augmented_scheme(spec), spec[1],
                                         ranking["group_count"], ranking["q_scale_floor"])
         diagnostics = group_diagnostics(successful, augmented_scheme(spec), spec[1], ranking["group_count"])
-    checkpoint_path = str(checkpoint.relative_to(out) / "agent.th")
+    checkpoint_path = (checkpoint.relative_to(out) / "agent.th").as_posix()
     if args.method == "tkpr_refresh":
         for episode in successful:
             episode["reference_phase"] = phase
@@ -843,7 +843,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             bwt = [value - latest[seen] for seen, value in row.items() if seen != task]
             fwt = [before[seen] - initial[seen] for seen in row if seen in before]
             results.append(dict(phase=phase, task=task, start=begin, t_env=runner.t_env,
-                                checkpoint=str(checkpoint.relative_to(out)), win_rates=row,
+                                checkpoint=checkpoint.relative_to(out).as_posix(), win_rates=row,
                                 acc_percent=100 * np.mean(list(row.values())),
                                 bwt_pp=100 * np.mean(bwt) if bwt else None,
                                 fwt_pp=100 * np.mean(fwt) if fwt else None))
