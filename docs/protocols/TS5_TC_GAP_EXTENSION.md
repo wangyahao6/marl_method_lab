@@ -32,7 +32,7 @@ Low/Medium are close after filtering; High−Low Macro TC is approximately 3.2 p
 ## Execution and artifacts
 
 1. `scripts/offline_tc_gap_extension.py` generated masks and the offline feasibility report without training.
-2. `scripts/plan_tc_gap_extension.py` constructs only ten new training tasks, ten independent final evaluations and a terminal summary, plus a frozen-input verification task.
+2. `scripts/plan_tc_gap_extension.py` constructs only ten new training tasks, ten independent final evaluations and a terminal summary/publication, plus a frozen-input verification task.
 3. Submit the complete plan through `scheduler/service.py submit`. Queue limit5 inherits the prior batch; the global resource scheduler governs actual concurrency. Every training task depends on the frozen-input verification, which checks the already passed feasibility verdict and source/mask hashes.
 4. `scripts/summarize_tc_gap_extension.py` reuses the common metric/mask verifier, forms separate two-seed gap0 and gap0.5 cohorts and exports same-seed TC−K1 and gap0.5−gap0 contrasts. A single failed branch is retained and does not cancel independent branches; no retries or extra budgets are implicit.
 
@@ -47,3 +47,7 @@ Report Direct Coverage, Micro/Macro TC, Closure Gain, complete-order fraction, v
 Strict controls hold **within** each gap cohort. Across gaps, the effective state population and number of surviving K1 base pairs change by design, so a cross-gap performance difference cannot be attributed to the scalar threshold alone. TC varies with graph topology; residual Q-gap differences remain possible explanations. Two seeds and a best observed arm do not establish a general optimal TC interval. Training diagnostic counts contain repeated samples, whereas offline statistics count fixed states once.
 
 Only after terminal artifact verification should the resulting report and lightweight data be committed as the extension result. The original three-seed result remains intact and should link to the extension rather than be overwritten.
+
+## Terminal packaging
+
+`scripts/publish_tc_gap_extension.py` is a scheduler task after the terminal summary. It requires all ten new training runs and their five-task independent final evaluations to be complete, rechecks the forty frozen masks, configurations and source pools, and packages the two-seed cohorts under `docs/results/parameter-ablations/ts5-vdn64-tc-gap-extension/`. It preserves the original dataset and appends only a link there. It commits the scoped report/data and result indices on the Ubuntu repository; GitHub synchronization uses the existing Mac deployment workflow after that commit exists. If other tasks have pending edits to shared indices, packaging stops for review without touching those edits or restarting training.

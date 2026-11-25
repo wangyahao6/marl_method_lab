@@ -44,8 +44,16 @@ def build():
     tasks.append(dict(id=BATCH+'_summary',argv=[str(ROOT/'.venv/bin/python'),'scripts/summarize_tc_gap_extension.py',str(out/'plan.json')],
         cwd=str(ROOT),type='summary',dependencies=evaluations,dependency_mode='terminal',queue=BATCH,queue_limit=5,
         resources=dict(gpu_mib=0,ram_mib=3500),metadata=dict(experiment_group_id=BATCH,experiment_group_title='TS5 TC K1 and min_gap 0.5 extension')))
+    tasks.append(publication_task(out))
     return dict(id=BATCH,tasks=tasks,seeds=[2222,3535],reused_original_plan=str(ROOT/'results'/OLD/'plan.json'),
                 offline_verdict=str(out/'feasibility.json'),new_training_branches=10)
+
+
+def publication_task(out):
+    return dict(id=BATCH+'_publication',argv=[str(ROOT/'.venv/bin/python'),'scripts/publish_tc_gap_extension.py',str(out/'plan.json')],
+        cwd=str(ROOT),type='summary',dependencies=[BATCH+'_summary'],queue=BATCH,queue_limit=5,
+        resources=dict(gpu_mib=0,ram_mib=3500),metadata=dict(experiment_group_id=BATCH,
+        experiment_group_title='TS5 TC K1 and min_gap 0.5 extension',branch_id='publication',results=str(out)))
 
 
 if __name__=='__main__':
