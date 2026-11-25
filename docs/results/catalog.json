@@ -1146,6 +1146,78 @@
         "参考训练 cd31d7a；正式分支 13a6d9b/470c22c，逐运行保留启动版本与源码哈希。",
         "High-Low ACC 跨种子方向不一致；图拓扑与 TC 同时变化，相关性不等于标量 TC 的因果效应。"
       ]
+    },
+    {
+      "id": "szc-vdn64-aspr-3g-gap-ablation",
+      "category": "comparisons",
+      "report": "comparisons/szc-vdn64-aspr-3g-gap-ablation/README.md",
+      "files": {
+        "stage_metrics": "comparisons/szc-vdn64-aspr-3g-gap-ablation/stage_metrics.csv",
+        "interaction_metrics": "comparisons/szc-vdn64-aspr-3g-gap-ablation/interaction_metrics.csv",
+        "runs": "comparisons/szc-vdn64-aspr-3g-gap-ablation/runs.csv",
+        "stage_steps": "comparisons/szc-vdn64-aspr-3g-gap-ablation/stage_steps.csv",
+        "sampled_pairs": "comparisons/szc-vdn64-aspr-3g-gap-ablation/sampled_pairs.csv",
+        "paired_metrics": "comparisons/szc-vdn64-aspr-3g-gap-ablation/paired_metrics.csv",
+        "q_gap_histogram": "comparisons/szc-vdn64-aspr-3g-gap-ablation/q_gap_histogram.csv",
+        "learning_curves": "comparisons/szc-vdn64-aspr-3g-gap-ablation/learning_curves.csv",
+        "q_gap_summary": "comparisons/szc-vdn64-aspr-3g-gap-ablation/q_gap_summary.csv",
+        "cross_group_offline": "comparisons/szc-vdn64-aspr-3g-gap-ablation/cross_group_offline.csv",
+        "config_audit": "comparisons/szc-vdn64-aspr-3g-gap-ablation/config_audit.csv",
+        "preference_diagnostics": "comparisons/szc-vdn64-aspr-3g-gap-ablation/preference_diagnostics.csv",
+        "independent_final": "comparisons/szc-vdn64-aspr-3g-gap-ablation/independent_final.csv",
+        "run_audit": "comparisons/szc-vdn64-aspr-3g-gap-ablation/run_audit.csv",
+        "sampling_audit": "comparisons/szc-vdn64-aspr-3g-gap-ablation/sampling_audit.csv",
+        "evaluations": "comparisons/szc-vdn64-aspr-3g-gap-ablation/evaluations.csv"
+      },
+      "task_order": [
+        "stalker",
+        "zealot",
+        "colossus"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_prefix_factorial_2x2",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "factors": {
+          "method": [
+            "ASPR-3G",
+            "ASPR-3G-Adjacent"
+          ],
+          "min_gap": [
+            0,
+            0.5
+          ]
+        },
+        "reused_cells": [
+          {
+            "method": "ASPR-3G",
+            "min_gap": 0.5
+          },
+          {
+            "method": "ASPR-3G-Adjacent",
+            "min_gap": 0
+          }
+        ],
+        "contrasts": [
+          "gap0-minus-gap05",
+          "adjacent-minus-3g",
+          "gap-by-method interaction"
+        ]
+      },
+      "interpretation_limits": [
+        "两个训练种子；只新增四条 Z/C 分支，S 与 TKPR-K1 不重跑。",
+        "同种子 S 模型与历史池相同，Z 池由各分支独立采集。",
+        "三类跨组违反率统一使用阶段末离线口径；旧 3G 日志不含训练时逐类违反数。",
+        "实际有效对数和 Q-gap 分布由训练采样编号重建，包含重复抽取。",
+        "gap_kept 是间隔筛选后的诊断总体，loss 进一步应用方法拓扑；Adjacent G1-G3 不进入损失。"
+      ]
     }
   ]
 }

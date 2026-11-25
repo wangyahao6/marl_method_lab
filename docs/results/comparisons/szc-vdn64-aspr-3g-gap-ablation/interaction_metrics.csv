@@ -1,0 +1,5 @@
+seed,phase,formula,acc_pct_interaction,bwt_pp_interaction,fwt_pp_interaction,learning_auc_pct_interaction
+2222,1,(Adjacent_gap05-Adjacent_gap0)-(3G_gap05-3G_gap0),-1.171875,-4.6875,0.0,-0.17852285180001815
+2222,2,(Adjacent_gap05-Adjacent_gap0)-(3G_gap05-3G_gap0),-4.427083333333329,-6.640625,-7.03125,-0.4625533759531635
+3535,1,(Adjacent_gap05-Adjacent_gap0)-(3G_gap05-3G_gap0),-11.328125,-6.25,0.0,-2.796226794290604
+3535,2,(Adjacent_gap05-Adjacent_gap0)-(3G_gap05-3G_gap0),0.5208333333333286,2.734375,1.953125,6.055813543969151
