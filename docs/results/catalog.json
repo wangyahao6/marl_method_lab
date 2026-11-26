@@ -1271,6 +1271,62 @@
         "无本批FT分支，不把旧2M FT作为同前缀配对对照。",
         "边界c的参考更新影响下一阶段；不能从局部梯度/掩码相关变化推断性能因果。"
       ]
+    },
+    {
+      "id": "ts5-vdn64-tc-gap-extension",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/ts5-vdn64-tc-gap-extension/README.md",
+      "files": {
+        "qgap_histogram": "parameter-ablations/ts5-vdn64-tc-gap-extension/qgap_histogram.csv",
+        "paired_gap05_minus_gap0": "parameter-ablations/ts5-vdn64-tc-gap-extension/paired_gap05_minus_gap0.csv",
+        "comparison_preference_diagnostics": "parameter-ablations/ts5-vdn64-tc-gap-extension/comparison_preference_diagnostics.csv",
+        "offline_seed_summary": "parameter-ablations/ts5-vdn64-tc-gap-extension/offline_seed_summary.csv",
+        "comparison_stage_metrics": "parameter-ablations/ts5-vdn64-tc-gap-extension/comparison_stage_metrics.csv",
+        "comparison_independent_final": "parameter-ablations/ts5-vdn64-tc-gap-extension/comparison_independent_final.csv",
+        "paired_vs_k1": "parameter-ablations/ts5-vdn64-tc-gap-extension/paired_vs_k1.csv",
+        "tc_state_histogram": "parameter-ablations/ts5-vdn64-tc-gap-extension/tc_state_histogram.csv",
+        "comparison_runs": "parameter-ablations/ts5-vdn64-tc-gap-extension/comparison_runs.csv",
+        "offline_statistics": "parameter-ablations/ts5-vdn64-tc-gap-extension/offline_statistics.csv",
+        "two_seed_summary": "parameter-ablations/ts5-vdn64-tc-gap-extension/two_seed_summary.csv"
+      },
+      "task_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 4,
+      "comparison": {
+        "kind": "shared_reference_two_gap_four_arm_extension",
+        "match_on": [
+          "seed",
+          "min_gap",
+          "parent_run_id"
+        ],
+        "arms": [
+          "K1-only",
+          "Low-TC",
+          "Medium-TC",
+          "High-TC"
+        ],
+        "min_gap": [
+          0,
+          0.5
+        ],
+        "reused_gap0_TC_branches": 6,
+        "new_training_branches": 10
+      },
+      "interpretation_limits": [
+        "Seed4646仅保留在原始实验，不进入主对比。",
+        "gap0.5四组共用配额可行状态，保留比例约15%–17%；跨gap不控制状态集合。",
+        "间隔筛选同样作用于K1基础对，TC额外N−2预算与距离配额不降低。",
+        "只有两个训练种子；图结构、TC及残余Q-gap差异不构成标量TC因果证明。"
+      ]
     }
   ]
 }

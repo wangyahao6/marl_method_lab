@@ -1,0 +1,9 @@
+run_id,control_run_id,seed,method,acc_pct_delta,bwt_pp_delta,fwt_pp_delta,learning_auc_pct_delta
+ts5_tc_gap_extension_20261125_gap05_k1_seed2222,ts5_tc_coverage_20261123_reference_seed2222,2222,k1-TC,20.15625,29.4921875,-1.953125,-15.133655153953782
+ts5_tc_gap_extension_20261125_gap05_low_seed2222,ts5_tc_coverage_20261123_reference_seed2222,2222,low-TC,23.4375,39.0625,2.5390625,-18.378746123771734
+ts5_tc_gap_extension_20261125_gap05_medium_seed2222,ts5_tc_coverage_20261123_reference_seed2222,2222,medium-TC,23.75,35.546875,3.125,-25.163364254487774
+ts5_tc_gap_extension_20261125_gap05_high_seed2222,ts5_tc_coverage_20261123_reference_seed2222,2222,high-TC,22.65625,32.03125,1.953125,-21.143709238217454
+ts5_tc_gap_extension_20261125_gap05_k1_seed3535,ts5_tc_coverage_20261123_reference_seed3535,3535,k1-TC,16.718750000000004,26.953125,-3.7109375,-18.358365660153225
+ts5_tc_gap_extension_20261125_gap05_low_seed3535,ts5_tc_coverage_20261123_reference_seed3535,3535,low-TC,18.906250000000004,31.4453125,-7.6171875,-20.070622400635266
+ts5_tc_gap_extension_20261125_gap05_medium_seed3535,ts5_tc_coverage_20261123_reference_seed3535,3535,medium-TC,16.718750000000004,31.640625,-7.6171875,-27.051189111017347
+ts5_tc_gap_extension_20261125_gap05_high_seed3535,ts5_tc_coverage_20261123_reference_seed3535,3535,high-TC,20.312500000000004,34.765625,-5.078125,-30.466481027014417

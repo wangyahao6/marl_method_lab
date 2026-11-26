@@ -43,3 +43,7 @@ Top-1 Flip Rate、Preference Loss 与 Pair Violation Rate 见 [preference_diagno
 - [逐种子运行与实际配置](runs.csv)、[逐次评估计数](evaluations.csv)、[独立终点评估](independent_final.csv)、[配对 FT 差值](paired_final.csv)。
 - [完整自动报告](REPORT.md)、[离线报告](OFFLINE_REPORT.md)、[实验方案](../../../protocols/TS5_TC_COVERAGE.md)。
 - 远端原始产物：`rl-navigation-ubuntu:/home/wyh/marl_method_lab/results/ts5_tc_coverage_20261123/` 与 `runs/tc_coverage/ts5_tc_coverage_20261123_*`。完整池、掩码、检查点及日志留远端；本目录保存可复核的轻量表、分布和配置。
+
+## 两种子 K1 / min_gap 扩展
+
+原始三种子结果保持不变。新增 seed2222/3535 的 K1-only gap0 与四方法 gap0.5、以及复用旧 TC gap0 的两种子主对比，见 [扩展报告](../ts5-vdn64-tc-gap-extension/README.md)。

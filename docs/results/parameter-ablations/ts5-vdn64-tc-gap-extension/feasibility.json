@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "strict_controls_passed": true,
+  "reason": "All eight historical pools have nonempty common gap05 states with unchanged N-2 extra budgets and original Near/Mid/Far quotas. Gap0 K1 uses exactly the old valid states. No threshold, quota or budget relaxation.",
+  "seed_summary": [
+    {
+      "seed": 2222,
+      "min_gap": 0,
+      "level": "k1",
+      "states": 102502,
+      "micro_tc": 0.30128414179950097,
+      "macro_tc": 0.329782492823214
+    },
+    {
+      "seed": 2222,
+      "min_gap": 0.5,
+      "level": "k1",
+      "states": 17039,
+      "micro_tc": 0.257138996106386,
+      "macro_tc": 0.26353859539785945
+    },
+    {
+      "seed": 2222,
+      "min_gap": 0.5,
+      "level": "low",
+      "states": 17039,
+      "micro_tc": 0.5403297325146327,
+      "macro_tc": 0.555593051235401
+    },
+    {
+      "seed": 2222,
+      "min_gap": 0.5,
+      "level": "medium",
+      "states": 17039,
+      "micro_tc": 0.5478762489548054,
+      "macro_tc": 0.5599788813152273
+    },
+    {
+      "seed": 2222,
+      "min_gap": 0.5,
+      "level": "high",
+      "states": 17039,
+      "micro_tc": 0.590870699921452,
+      "macro_tc": 0.5882042317484538
+    },
+    {
+      "seed": 3535,
+      "min_gap": 0,
+      "level": "k1",
+      "states": 104336,
+      "micro_tc": 0.3015873707486976,
+      "macro_tc": 0.33053219543453016
+    },
+    {
+      "seed": 3535,
+      "min_gap": 0.5,
+      "level": "k1",
+      "states": 15484,
+      "micro_tc": 0.2589086287300356,
+      "macro_tc": 0.2680804660622537
+    },
+    {
+      "seed": 3535,
+      "min_gap": 0.5,
+      "level": "low",
+      "states": 15484,
+      "micro_tc": 0.5426016093006738,
+      "macro_tc": 0.5601690224010037
+    },
+    {
+      "seed": 3535,
+      "min_gap": 0.5,
+      "level": "medium",
+      "states": 15484,
+      "micro_tc": 0.5496060858106782,
+      "macro_tc": 0.5642741816437244
+    },
+    {
+      "seed": 3535,
+      "min_gap": 0.5,
+      "level": "high",
+      "states": 15484,
+      "micro_tc": 0.5914600525218919,
+      "macro_tc": 0.5920304830793077
+    }
+  ]
+}

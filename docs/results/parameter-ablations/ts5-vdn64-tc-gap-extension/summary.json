@@ -1,0 +1,11 @@
+{
+  "new_training_completed": 10,
+  "new_training_total": 10,
+  "seeds": [
+    2222,
+    3535
+  ],
+  "reused_gap0_TC_branches": 6,
+  "reused_reference_runs": 2,
+  "formal_comparison_rows": 100
+}

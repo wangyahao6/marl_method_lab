@@ -26,6 +26,7 @@
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
+| [TS5-1M · K1 与 gap0/0.5 扩展](parameter-ablations/ts5-vdn64-tc-gap-extension/README.md) | Seed2222/3535；10 新分支、6 旧 TC 分支复用 | 两个同种子四方法对照组、筛后共同状态、固定配额和 Q-gap。 |
 | [TS5-1M · 传递闭包覆盖率](parameter-ablations/ts5-vdn64-tc-coverage/README.md) | 单层 VDN64，三个种子，3 个新 FT 参考与 9 个同 S 分支 | 相同 K1、预算、距离配额下的 Micro/Macro TC、ACC/BWT/FWT/AUC、Q-gap 与机制诊断。 |
 | [SZC · TKPR K 值消融](parameter-ablations/szc-vdn64-tkpr-k/README.md) | 双层 VDN64，seed 1111，K=1、2、3、5 与 FRPR | 阶段末胜率、当前任务曲线、有效 K 分布及梯度诊断。 |
 | [SZC · TKPR 排名位置消融](parameter-ablations/szc-vdn64-tkpr-rank-position/README.md) | 双层 VDN64，seed 2222、3535，R2/R3 四条完成，本批 K1 两条失败 | 同前缀逐种子结果、旧 K1 历史对照、锚点排名与失败记录。 |
