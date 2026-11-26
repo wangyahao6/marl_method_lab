@@ -155,3 +155,27 @@ retention 必须只有第一阶段，phase/task 与 Spec 一致。其 checkpoint
 83 项相关 CPU 回归通过；最终完整性与路径规范化修改后，42 项重点复核再次通过（包含 11 项可靠性测试及 Prefix、共享前缀、TKPR、ASPR、CPR、Replay 回归）。可靠性测试中，4 项验证规则版本/代码指纹，1 项验证运行信息，3 项验证 Manifest（循环覆盖缺字段、空清单、缺失/未列出的必要产物、checkpoint、危险路径与 symlink 等子案例），其余 3 项为 Hook 回归。`py_compile` 和 `git diff --check` 通过；没有启动 SMAC/SC2 或正式训练。
 
 修改仅在 `common/prefix.py`、`common/prefix_implementation.py`、`tests/test_prefix_reliability.py`、本说明，以及 `action_set_train.py` 的两处相对路径序列化（统一 POSIX 分隔符）。训练数学、优化器、超参数、采样及更新顺序未修改，已有结果与历史产物不改写。
+
+## 模型与优化器恢复依赖：提取规则版本 3（2026-11-26）
+
+`training_implementation` 保留原 API 名称，但其兼容性签名现在同时包含下列两类实现：
+
+| 类别 | 覆盖范围 |
+| --- | --- |
+| 第一阶段训练依赖 | 沿用版本 2 的环境初始化/注册、实际 Agent/MAC/Learner/Mixer、普通 ReplayBuffer、探索、条件启用的 TRHR/A2Trace、训练与保存辅助实现；训练路径的 baseline AST 提取规则不变 |
+| 本次补入的模型/优化器恢复依赖 | `QLearner.load_models`、`common/checkpoints.py:restore_networks_and_optimizer`、`components/optimizer_checkpoint.py:load_optimizer_state` 的实现；与第一阶段训练实现一起比较，不按后续方法区分 |
+
+实际调用关系：
+
+- `QLearner.load_models` 先调用 online/target `BasicMAC.load_models`，通过 `agent.load_state_dict` 加载网络；读取 Mixer 与 Optimizer 文件后调用 `load_optimizer_state`。
+- `restore_networks_and_optimizer` 对 Online Agent、Mixer、Target Agent、Target Mixer 调用 `load_state_dict`，再调用同一个 `load_optimizer_state`。
+- `BasicMAC`、实际选中的 Agent 与 VDNMixer 已在原依赖清单内，因此它们的加载实现已受保护。RNNAgent 的 `_load_from_state_dict` 及其引用的 `LEGACY_FC1_KEYS` 常量也已纳入；SingleFFRNNAgent 使用 Torch 继承的加载实现，不额外引入未选中的 RNNAgent。
+- `load_optimizer_state` 没有再调用其他项目辅助函数。完整保留其当前格式直载、旧 fc1 参数组转换、状态尺寸检查两条路径的指纹，不能只记录调用语句或仅按新格式剪除旧格式分支。`optimizer.load_state_dict`、继承的 `Module.load_state_dict` 等 Torch 实现继续由已记录的库版本/运行配置约束，而非哈希整个第三方安装目录。
+
+本次不把整个分支驱动或方法专用历史预处理纳入指纹，也不改变恢复流程、网络/优化器配置、状态转换、TD Loss、采样及更新顺序。既有 `restore_rng` 覆盖保持不变；环境分布与 Replay 的分支恢复编排不是本次新增的模型/优化器调用闭包，不将本次补充描述为任意状态恢复代码的完备自动依赖分析。
+
+因为依赖边界扩充，`IMPLEMENTATION_VERSION` 升为 **3**，并登记新的规则哈希；Manifest schema 仍为 2、状态格式仍为 1。旧提取版本 2 不静默重算或升级，按现有版本检查明确拒绝；历史产物不修改。版本锁定测试保留版本 2 的登记值并新增版本 3。
+
+针对性 CPU 测试逐项修改上述三个恢复函数，以及 BasicMAC 加载、RNNAgent 旧键适配和常量，确认指纹变化且 Manifest 校验拒绝不匹配；同时确认未调用的 `QLearner.find` 改动不会影响指纹。实际状态回读继续由已有 Prefix/完整前缀、Replay 与历史 RNN/Optimizer checkpoint 测试验证。运行时 monkeypatch、动态加载或同版本被修改的 Torch 安装仍属于已有静态校验局限。
+
+本次验证：27 项相关 CPU 测试全部通过（可靠性、Generic Prefix、完整前缀、RNN/Optimizer checkpoint、Replay）；`py_compile`、`git diff --check` 通过。未启动 SMAC/SC2 或正式训练，恢复实现和历史产物均未修改。

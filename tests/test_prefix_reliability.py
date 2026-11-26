@@ -57,7 +57,8 @@ class ReliabilityTest(unittest.TestCase):
             shutil.copy2(driver.ROOT / name, path)
 
     def test_extraction_rules_release_is_pinned(self):
-        releases = {2: '922ec57601ee6fa42352b765dd514c14c4dacd6b5ba08592c7feb04e73df6a8e'}
+        releases = {2: '922ec57601ee6fa42352b765dd514c14c4dacd6b5ba08592c7feb04e73df6a8e',
+                    3: 'acc9c8335d0f2011d992ad5d3fda0f4c3e73c1d638b1605fca4e875362691318'}
         self.assertIn(IMPLEMENTATION_VERSION, releases,
                       'Audit the rule change and register a new extraction version')
         self.assertEqual(extraction_rules_hash(), releases[IMPLEMENTATION_VERSION],
@@ -87,6 +88,61 @@ class ReliabilityTest(unittest.TestCase):
             # Executable initialization added after function declarations is covered too.
             path.write_text(source + "\nenvironment_module.REGISTRY.clear()\n")
             self.assertNotEqual(training_implementation(root, cfg), initial)
+
+    def test_restore_implementations_and_transitive_helpers_change_fingerprint(self):
+        protocol, cfg = self.configuration()
+        spec = prefix_spec(protocol, 8, cfg)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.copy_dependencies(root, cfg)
+            initial = training_implementation(root, cfg)
+            self.assertEqual(initial, spec['implementation'])
+            self.assertIn('src/components/optimizer_checkpoint.py', initial['components'])
+            artifacts = root / 'prefix'
+            artifacts.mkdir()
+            manifest = self.manifest_fixture(artifacts, spec)
+            cases = (
+                ('src/learners/q_learner.py', 'self.mac.load_models(path)',
+                 "self.mac.load_models(path + '/other')"),
+                ('drivers/continual/common/checkpoints.py', 'network.load_state_dict(state[key])',
+                 "network.load_state_dict(state['agent'])"),
+                ('src/components/optimizer_checkpoint.py', 'optimizer.load_state_dict(state)',
+                 "optimizer.load_state_dict(dict(state, state={}))"),
+                ('src/components/optimizer_checkpoint.py', 'ids = saved_ids[2:]', 'ids = saved_ids[1:]'),
+                # Already covered callees must remain covered, not only their call sites.
+                ('src/controllers/basic_controller.py', 'map_location=lambda storage, loc: storage',
+                 "map_location='cpu'"),
+                ('src/modules/agents/rnn_agent.py', 'state_dict.pop(key)', 'state_dict.pop(key, None)'),
+                ('src/modules/agents/rnn_agent.py', "LEGACY_FC1_KEYS = ('fc1.weight', 'fc1.bias')",
+                 "LEGACY_FC1_KEYS = ('old_fc1.weight', 'old_fc1.bias')"),
+            )
+            for name, before, after in cases:
+                with self.subTest(restore_dependency=name, changed=before):
+                    path = root / name
+                    source = path.read_text()
+                    self.assertIn(before, source)
+                    path.write_text(source.replace(before, after))
+                    try:
+                        current = training_implementation(root, cfg)
+                        self.assertNotEqual(current, initial)
+                        requested = copy.deepcopy(spec)
+                        requested['implementation'] = current
+                        with self.assertRaisesRegex(ValueError, 'implementation'):
+                            verify_manifest(artifacts, requested)
+                    finally:
+                        path.write_text(source)
+            # Adding restore dependencies does not pull unrelated learner algorithms in.
+            path = root / 'src/learners/q_learner.py'
+            source = path.read_text()
+            self.assertIn('tau = 0.1', source)
+            path.write_text(source.replace('tau = 0.1', 'tau = 0.2'))  # find() is not invoked.
+            self.assertEqual(training_implementation(root, cfg), initial)
+            path.write_text(source)
+            manifest['prefix_spec']['implementation']['version'] = 2
+            manifest['prefix_spec_sha256'] = spec_hash(manifest['prefix_spec'])
+            (artifacts / 'prefix_manifest.json').write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'Unsupported Prefix implementation version: 2'):
+                verify_manifest(artifacts, spec)
 
     def test_optional_trhr_and_trace_dependencies_follow_actual_configuration(self):
         _, cfg = self.configuration()

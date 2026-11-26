@@ -1,4 +1,4 @@
-"""Audited baseline source boundary, independent of preference implementations.
+"""Audited baseline and model/optimizer restore dependencies, independent of preferences.
 
 AST normalization ignores comments/formatting. Driver orchestration is specialized
 for the actual shared-prefix contract (baseline, no parent, no preferences), ending
@@ -10,7 +10,7 @@ import hashlib
 from pathlib import Path
 
 # Bump whenever extraction boundaries or normalization rules change.
-IMPLEMENTATION_VERSION = 2
+IMPLEMENTATION_VERSION = 3
 
 
 class BaselinePath(ast.NodeTransformer):
@@ -164,7 +164,8 @@ def training_implementation(root, cfg):
         'drivers/continual/common/runtime.py': ['episode_spec', 'rng_state', 'restore_rng', 'td_sample', 'log_task_epsilon'],
         'drivers/continual/common/exploration.py': ['epsilon_on_switch'],
         'src/learners/q_learner.py': ['QLearner.__init__', 'QLearner.train', 'QLearner._update_targets',
-                                     'QLearner.cuda', 'QLearner.remove_activation_hooks', 'QLearner.save_models'],
+                                     'QLearner.cuda', 'QLearner.remove_activation_hooks', 'QLearner.save_models',
+                                     'QLearner.load_models'],
         'src/controllers/basic_controller.py': ['BasicMAC'],
         'src/modules/agents/' + agent_file: [agent_class],
         'src/modules/layers/act_layer.py': ['ActivateLayer'],
@@ -173,12 +174,16 @@ def training_implementation(root, cfg):
         'src/components/episode_buffer.py': None,
         'src/components/transforms.py': ['OneHot'],
         'src/components/task_replay.py': ['start_replay_task'],
+        # Restore dependencies join the same compatibility signature. Preserve
+        # both current-format and legacy-fc1 conversion branches of the helper.
+        'src/components/optimizer_checkpoint.py': ['load_optimizer_state'],
         'src/components/action_selectors.py': ['EpsilonGreedyActionSelector'],
         'src/components/epsilon_schedules.py': ['DecayThenFlatSchedule'],
         'src/utils/hook_lifecycle.py': None,
         'src/utils/logging.py': ['Logger'],
         'drivers/continual/common/records.py': ['write', 'append', 'attach_legacy_metrics'],
-        'drivers/continual/common/checkpoints.py': ['cpu_snapshot', 'parameter_hash', 'hash_model_states', 'save_models'],
+        'drivers/continual/common/checkpoints.py': ['cpu_snapshot', 'parameter_hash', 'hash_model_states', 'save_models',
+                                                    'restore_networks_and_optimizer'],
         'drivers/continual/common/preference_prefix.py': ['full_state_extra'],
         'drivers/continual/common/metrics.py': ['Metrics.__init__', 'Metrics.record', 'Metrics._write',
                                              'Metrics.evaluation', 'Metrics.retention', 'record_evaluation'],
