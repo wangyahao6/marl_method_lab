@@ -67,7 +67,7 @@ def confidence_summary(parts):
 
 @th.no_grad()
 def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
-                historical_best_win_rate, checkpoint, *, chunk_size=8):
+                historical_best_win_rate, checkpoint, *, chunk_size=8, reference_selector=None):
     """Re-evaluate complete episodes using the online MAC, only after the task gate."""
     start = perf_counter()
     gate = current_win_rate >= historical_best_win_rate - settings["task_gate_tolerance"]
@@ -88,9 +88,12 @@ def update_pool(mac, pool, scheme, groups, settings, phase, current_win_rate,
             totals["decision_states"] += int(real.sum())
             old_valid = ep["reference_valid_mask"][:steps].to(device)
             if gate:
-                update, keep, uncertain, eligible, changed, old_conf, new_conf = select_reference(
+                selector = select_reference if reference_selector is None else reference_selector
+                selector_options = ({} if reference_selector is None else
+                                    dict(original_q=ep["original_q_values"][:steps].to(device)))
+                update, keep, uncertain, eligible, changed, old_conf, new_conf = selector(
                     batch["old_q_values"][index, :steps], current[index, :steps],
-                    legal[index, :steps], real, old_valid, settings, with_confidence=True)
+                    legal[index, :steps], real, old_valid, settings, with_confidence=True, **selector_options)
                 old_confidences.append(old_conf[real].cpu())
                 new_confidences.append(new_conf[real].cpu())
                 update, keep, uncertain = (mask.cpu() for mask in (update, keep, uncertain))

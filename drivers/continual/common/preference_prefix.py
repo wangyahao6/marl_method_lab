@@ -27,7 +27,7 @@ def copy_prefix_memory(parent, out, method, history=None):
     pool = History.load(PreferenceHistory.phase_path(parent, 0) / 'success.th')
     source_hash = reference_input_hash(pool)
     pool['reference_checkpoint'] = str(parent / pool['reference_checkpoint'])
-    if method == 'tkpr_cpr':
+    if method in ('tkpr_cpr', 'tkpr_cpr_anchor'):
         initialize_pool(pool)
     elif method == 'tkpr_refresh':
         pool['reference_checkpoint_role'] = 'original_collection_only'

@@ -47,6 +47,7 @@ from drivers.continual.memory.cpr import (
     initialize_pool as initialize_cpr_pool, update_pool as update_cpr_pool,
     restore_history as restore_cpr_history,
 )
+from drivers.continual.memory.cpr_anchor import update_pool as update_cpr_anchor_pool
 import numpy as np
 import torch as th
 import yaml
@@ -312,7 +313,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
     else:
         pool = dict(task=task, phase=phase, layout=expected_layout,
                     reference_checkpoint=checkpoint_path, episodes=successful, **labels)
-    if args.method == "tkpr_cpr":
+    if args.method in ("tkpr_cpr", "tkpr_cpr_anchor"):
         initialize_cpr_pool(pool)
     if persist:
         path = PreferenceHistory.phase_path(out, phase)
@@ -441,7 +442,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
 
         def record_preference(row):
             row["learner_update"] = updates + 1
-            if method == "tkpr_cpr":
+            if method in ("tkpr_cpr", "tkpr_cpr_anchor"):
                 for historical in row["historical_tasks"]:
                     count = historical["raw_decision_states"]
                     historical["effective_coverage_of_raw_decisions"] = (
@@ -486,8 +487,8 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                                              record_preference)
         elif method in PREFERENCE_RANK_METHODS and protocol[method]["weight"] and role != "release":
             update_log = method
-            if method == "tkpr_cpr":
-                update_log = "tkpr_cpr_preference"
+            if method in ("tkpr_cpr", "tkpr_cpr_anchor"):
+                update_log = f"{method}_preference"
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
             if method == "tkpr_refresh":
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
@@ -674,7 +675,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 elif aspr_group and role == "shared-branch":
                     restore_group_shared_memory(preference.history, parent, range(first_phase),
                                                 augmented, groups, protocol[method], out)
-                elif method == "tkpr_cpr":
+                elif method in ("tkpr_cpr", "tkpr_cpr_anchor"):
                     creation_phases = {}
                     for i, stage in enumerate(stages[:first_phase]):
                         creation_phases.setdefault(stage["task"], i)
@@ -806,7 +807,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 if phase + 1 < stop_phase:
                     prepare_shared_pair_pool(phase)
-            elif preference is not None and method == "tkpr_cpr":
+            elif preference is not None and method in ("tkpr_cpr", "tkpr_cpr_anchor"):
                 status("updating_references")
                 if not any(pool["task"] == task for pool in preference.history.values()):
                     preference.history[phase] = collect_memory(
@@ -817,13 +818,14 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     historical_task = pool["task"]
                     historical_best = max(result["win_rates"][historical_task] for result in results[:-1]
                                           if historical_task in result["win_rates"])
-                    update = update_cpr_pool(mac, pool, augmented, groups, protocol[method], phase,
+                    updater = update_cpr_anchor_pool if method == "tkpr_cpr_anchor" else update_cpr_pool
+                    update = updater(mac, pool, augmented, groups, protocol[method], phase,
                                              row[historical_task], historical_best,
                                              str(checkpoint.relative_to(out) / "agent.th"),
                                              chunk_size=settings["batch_episodes"])
                     if update["task_gate_passed"]:
                         History.save(PreferenceHistory.phase_path(out, pool_phase) / "success.th", pool)
-                    base.append(out / "tkpr_cpr_updates.jsonl", update)
+                    base.append(out / f"{method}_updates.jsonl", update)
             elif preference is not None and method == "tkpr_refresh":
                 status("collecting_memory")
                 seen_tasks = dict.fromkeys(stage["task"] for stage in stages[:phase + 1])

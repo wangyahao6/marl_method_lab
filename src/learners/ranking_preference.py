@@ -580,7 +580,7 @@ class RankingPreference(ActionSetPreference):
     def __init__(self, method, settings, rng, scheme, groups, log):
         super().__init__(settings, rng, scheme, groups, log)
         self.use_good_mask = method == "aspr_preference"
-        self.use_reference_valid_mask = method == "tkpr_cpr"
+        self.use_reference_valid_mask = method in ("tkpr_cpr", "tkpr_cpr_anchor")
         self.use_group_ids = method in ("aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
         self.loss = {
             "aspr_preference": aspr_preference,
@@ -595,6 +595,7 @@ class RankingPreference(ActionSetPreference):
             "topk_preference": topk_preference,
             "tkpr_refresh": topk_preference,
             "tkpr_cpr": topk_preference,
+            "tkpr_cpr_anchor": topk_preference,
             "tkpr_k1_gap0": topk_preference,
             "topk_preference_weighted": topk_preference_weighted,
             "topk_preference_high_regret": topk_preference_high_regret,
@@ -614,7 +615,7 @@ class RankingPreference(ActionSetPreference):
             self.statistics = top1_max_statistics
         elif method == "top1_unfiltered_preference":
             self.statistics = top1_unfiltered_statistics
-        elif method in ("topk_preference", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr"):
+        elif method in ("topk_preference", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr", "tkpr_cpr_anchor"):
             self.statistics = topk_statistics
         elif method == "topk_preference_weighted":
             self.statistics = topk_weighted_statistics

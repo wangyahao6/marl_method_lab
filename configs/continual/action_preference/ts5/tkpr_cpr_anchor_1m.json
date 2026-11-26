@@ -1,0 +1,134 @@
+{
+  "id": "ts5_vdn_1ff_tkpr_cpr_anchor_seed3535_1m",
+  "tasks": {
+    "A": {
+      "ally": [
+        5,
+        0,
+        0
+      ],
+      "enemy": [
+        5,
+        0,
+        0
+      ]
+    },
+    "B": {
+      "ally": [
+        0,
+        5,
+        0
+      ],
+      "enemy": [
+        0,
+        5,
+        0
+      ]
+    },
+    "C": {
+      "ally": [
+        0,
+        0,
+        5
+      ],
+      "enemy": [
+        0,
+        0,
+        5
+      ]
+    },
+    "D": {
+      "ally": [
+        2,
+        3,
+        0
+      ],
+      "enemy": [
+        2,
+        3,
+        0
+      ]
+    },
+    "E": {
+      "ally": [
+        0,
+        2,
+        3
+      ],
+      "enemy": [
+        0,
+        2,
+        3
+      ]
+    }
+  },
+  "stages": [
+    {
+      "task": "A",
+      "steps": 1000000
+    },
+    {
+      "task": "B",
+      "steps": 1000000
+    },
+    {
+      "task": "C",
+      "steps": 1000000
+    },
+    {
+      "task": "D",
+      "steps": 1000000
+    },
+    {
+      "task": "E",
+      "steps": 1000000
+    }
+  ],
+  "phase_boundary": "cumulative",
+  "epsilon_on_switch": "per_task",
+  "evaluation": {
+    "seeds": [
+      91001,
+      91002
+    ],
+    "episodes_per_seed": 16,
+    "focus_seeds": [
+      91101,
+      91102,
+      91103,
+      91104
+    ],
+    "focus_episodes_per_seed": 32,
+    "task_seed_stride": 100,
+    "interval": 25000
+  },
+  "replay_on_switch": "ft",
+  "sc2_game_version": "4.10",
+  "action_set": {
+    "weight": 1.0,
+    "margin": 0.0,
+    "batch_episodes": 8,
+    "success_episodes": 100,
+    "seed_offsets": [
+      301001,
+      302001,
+      303001,
+      304001
+    ],
+    "attempts_per_seed": 125,
+    "second_gap_quantile": 0.5,
+    "probe_episodes_per_seed": 4,
+    "delta_candidates_by_task": {}
+  },
+  "gradient_monitor_interval": 100,
+  "tkpr_cpr_anchor": {
+    "weight": 1.0,
+    "temperature": 1.0,
+    "min_gap": 0.5,
+    "q_scale_floor": 0.1,
+    "k": 1,
+    "reference_confidence_threshold": 0.5,
+    "reference_switch_margin": 0.1,
+    "task_gate_tolerance": 0.05
+  }
+}

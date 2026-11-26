@@ -335,3 +335,18 @@ G1-G3 的诊断有效对指可统计的非平局对，`participates_in_loss=fals
 `aspr_adjacent_offline_pairs.csv` 保存已有固定贪心探测轨迹的阶段末诊断。
 
 `scripts/plan_aspr_3g_adjacent.py <唯一批次ID>` 只生成包含全部四条分支的预览计划；通过统一调度提交后执行。
+
+
+## 原始 Top-1 锚定的重评估（TKPR-CPR-Anchor）
+
+独立方法 `--method tkpr_cpr_anchor` 使用 [TS5 配置](../configs/continual/action_preference/ts5/tkpr_cpr_anchor.json) 或 [TS5-1M 配置](../configs/continual/action_preference/ts5/tkpr_cpr_anchor_1m.json)。配置分别复制原 CPR 对应配置，仅改变 ID 和方法配置块名称。原 K1、CPR 配置及参考选择规则保持不变。
+
+沿用 CPR 任务胜率门控、完整 Episode 在线 MAC 分块重评估、永久原始 Q、K1 损失与任务等权归约，以及跨历史任务合计 8 条的采样预算。更新状态必须同时满足：当前合法动作 Top-1 等于 `original_q_values` 的合法动作 Top-1；当前归一化置信度不低于 `max(reference_confidence_threshold, min_gap)`；当前置信度严格高于已保存参考置信度加 `reference_switch_margin`。原掩码无效也不绕过置信度提升条件。
+
+接受更新时仅替换该状态 `old_q_values`、将有效掩码设为 true，并记录新的 `reference_source_phase`；不接受时原 Q、有效掩码与来源均保持，冲突或低置信度不会产生新的 uncertain 屏蔽。`original_q_values` 与环境交互数据永不修改。日志独立保存为 `tkpr_cpr_anchor_updates.jsonl` 和 `tkpr_cpr_anchor_preference_updates.jsonl`。通过门控时 `retained_states` 统计所有未更新的真实决策（其中可有原本无效的参考），`uncertain_states=0`；门控失败时沿用 CPR 对现有有效/无效掩码的计数，不修改参考。
+
+启动示例（正式训练需单独授权）：
+
+```bash
+python scripts/run.py --suite vdn_action_set --algorithm vdn_1ff --method tkpr_cpr_anchor --seed 3535 --run-id ts5_cpr_anchor_3535_1m --protocol configs/continual/action_preference/ts5/tkpr_cpr_anchor_1m.json
+```

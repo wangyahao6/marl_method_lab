@@ -49,6 +49,7 @@ METHOD_DEFAULTS = {
     "topk_preference": TOPK_DEFAULTS,
     "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
     "tkpr_cpr": CPR_DEFAULTS,
+    "tkpr_cpr_anchor": CPR_DEFAULTS,
     "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
     "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
     "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
@@ -760,7 +761,7 @@ class RankingTest(unittest.TestCase):
                         self.assertNotIn("good_mask", new)
                     self.assertNotIn("old_q_values", old["data"])
                     self.assertEqual(new["data"]["old_q_values"].shape, new["data"]["avail_actions"].shape)
-                log_name = "tkpr_cpr_preference" if method == "tkpr_cpr" else method
+                log_name = f"{method}_preference" if method in ("tkpr_cpr", "tkpr_cpr_anchor") else method
                 samples = jsonlines(run / f"{log_name}_updates.jsonl")
                 if method in ASPR_GROUP_DEFAULTS:
                     restored = PreferenceHistory()
@@ -974,7 +975,7 @@ class RankingTest(unittest.TestCase):
                     settings[gap_key] = 0
                 preference = RankingPreference(method, settings, None, scheme, groups, None)
                 used_episodes = episodes
-                if method == "tkpr_cpr":
+                if method in ("tkpr_cpr", "tkpr_cpr_anchor"):
                     from drivers.continual.memory.cpr import initialize_pool
                     used_episodes = copy.deepcopy(episodes)
                     initialize_pool(dict(pool, episodes=used_episodes))

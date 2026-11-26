@@ -3,7 +3,7 @@ from math import isfinite
 
 from common.exploration import epsilon_on_switch
 
-TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr")
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr", "tkpr_cpr_anchor")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
@@ -168,6 +168,7 @@ def validate(protocol, algorithm, method):
                 "topk_preference": TOPK_DEFAULTS,
                 "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
                 "tkpr_cpr": CPR_DEFAULTS,
+                "tkpr_cpr_anchor": CPR_DEFAULTS,
                 "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
                 "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
                 "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
@@ -283,8 +284,8 @@ def validate_fork(protocol, role, parent):
         if ((protocol.get("replay_on_switch", "ft") != "ft" and not er_branch)
                 or len(protocol["stages"]) < 2):
             raise ValueError("a shared S prefix requires FT and at least two stages")
-        if full and method not in ("baseline", "topk_preference", "tkpr_refresh", "tkpr_cpr"):
-            raise ValueError("full shared prefix supports baseline, TKPR-K1, Refresh and CPR")
+        if full and method not in ("baseline", "topk_preference", "tkpr_refresh", "tkpr_cpr", "tkpr_cpr_anchor"):
+            raise ValueError("full shared prefix supports baseline, TKPR-K1, Refresh, CPR and CPR-Anchor")
         if role == "shared-prefix" and (method not in RANK_METHODS or not protocol[method]["weight"]):
             raise ValueError("a shared prefix needs an enabled ranking method to collect old Q")
         if role == "shared-branch" and method not in ("baseline", *HISTORY_RANK_METHODS):
