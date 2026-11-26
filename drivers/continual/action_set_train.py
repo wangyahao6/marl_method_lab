@@ -32,7 +32,8 @@ from drivers.continual.aspr_group_export import export_group_results
 from action_set_protocol import (
     ASPR_MAX_METHODS, FORK_ROLES, PAIR_METHODS, PAIR_DISTANCE, PAIR_GAP_FAR_MID,
     PREFERENCE_RANK_METHODS, HISTORY_RANK_METHODS, SELECTED_METHODS, TOPK_VARIANTS,
-    RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol, validate, validate_fork,
+    RANK_POSITION_METHODS, matching_pair_reference, matching_shared_protocol,
+    matching_fixed_reference_protocol, validate, validate_fork,
 )
 from common.preference_timing import capture_update
 from common.checkpoints import cpu_snapshot, parent_hash_fields, save_models, restore_networks_and_optimizer
@@ -43,6 +44,7 @@ from common.exploration import epsilon_on_switch
 from common.runtime import episode_spec, restore_rng, rng_state, td_sample
 from drivers.continual.memory import History, PreferenceHistory
 from drivers.continual.memory.episodes import pack_episode, preference_episode_id
+from drivers.continual.memory.fixed_reference import attach_reference_pool
 from drivers.continual.memory.cpr import (
     initialize_pool as initialize_cpr_pool, update_pool as update_cpr_pool,
     restore_history as restore_cpr_history,
@@ -434,6 +436,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         aspr_group = method in ("aspr_3g_preference", "aspr_3g_adjacent_preference", "aspr_4g_preference")
         selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
+        fixed_reference = protocol.get("fixed_reference_history", False)
         shared_history = PreferenceHistory()
         anchor_rank = RANK_POSITION_METHODS.get(method)
         if method == "topk_preference" and protocol.get("rank_position_diagnostics"):
@@ -555,6 +558,12 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     checkpoint_sha256=file_sha256(files[2]),
                     files={str(path.relative_to(out)): file_sha256(path) for path in files}))
 
+        def attach_fixed_reference_pool(source_phase):
+            row = attach_reference_pool(preference.history, shared_history, parent, out, source_phase)
+            row.update(preference_class=type(preference).__name__,
+                       loss_function=preference.loss.__module__ + "." + preference.loss.__name__)
+            base.append(out / "fixed_reference_memory.jsonl", row)
+
         def prepare_shared_pair_pool(source_phase):
             pool = shared_history[source_phase]
             prior_budget = sum(item["pair_budget"] for item in preference.history.values())
@@ -620,7 +629,10 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
             # Older direct launches used per-task exploration when the field was absent.
             parent_protocol = {"epsilon_on_switch": "per_task", **state["protocol"]}
-            if pair_ablation:
+            if fixed_reference:
+                prefix_role = "pair-reference"
+                same_protocol = matching_fixed_reference_protocol(parent_protocol, protocol)
+            elif pair_ablation:
                 prefix_role = "pair-reference"
                 same_protocol = matching_pair_reference(parent_protocol, protocol)
             else:
@@ -629,7 +641,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())
-            if pair_ablation:
+            if pair_ablation or fixed_reference:
                 report["stages"] = report["stages"][:1]
                 # Z must be treated as unseen when restoring at the S boundary.
                 next_task = stages[1]["task"]
@@ -665,6 +677,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 preference.rng.bit_generator.state = state["preference_rng"]
                 if full_shared:
                     full_restore.update(copy_prefix_memory(parent, out, method, preference.history))
+                elif fixed_reference:
+                    shared_history.restore_success(parent, range(len(stages) - 1), require_old_q=True)
+                    attach_fixed_reference_pool(0)
                 elif pair_ablation:
                     shared_history.restore_success(parent, range(len(stages) - 1), require_old_q=True)
                     prepare_shared_pair_pool(0)
@@ -806,6 +821,9 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if pair_ablation:
                 if phase + 1 < stop_phase:
                     prepare_shared_pair_pool(phase)
+            elif fixed_reference:
+                if phase + 1 < stop_phase:
+                    attach_fixed_reference_pool(phase)
             elif preference is not None and method == "tkpr_cpr":
                 status("updating_references")
                 if not any(pool["task"] == task for pool in preference.history.values()):

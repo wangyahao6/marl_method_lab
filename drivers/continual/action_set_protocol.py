@@ -253,6 +253,11 @@ def validate(protocol, algorithm, method):
                     or not valid_seeds([options["pair_seed"]])):
                 raise ValueError(f"{name} requires the fixed ablation settings and a valid pair_seed")
             ranking[name] = options
+    fixed = protocol.get("fixed_reference_history", False)
+    if type(fixed) is not bool or (fixed and (
+            method != "topk_preference" or ranking[method]["k"] != 1
+            or protocol.get("pair_ablation_experiment") or protocol.get("full_shared_prefix"))):
+        raise ValueError("fixed_reference_history is supported for native TKPR-K1 only")
     uses_sets = ((method in ASPR_MAX_METHODS and settings["weight"])
                  or (method == "aspr_preference" and ranking[method]["weight"]))
     if uses_sets and quantile is None:
@@ -267,6 +272,8 @@ def validate_fork(protocol, role, parent):
     if bool(parent) != (role in ("keep", "release", "shared-branch")):
         raise ValueError("keep, release and shared-branch require --parent; other roles take no parent")
     method = protocol["method"]
+    if protocol.get("fixed_reference_history") and role != "shared-branch":
+        raise ValueError("fixed native K1 history requires a shared branch with its reference parent")
     if role == "pair-reference":
         if method != "full_rank_preference" or not protocol.get("pair_ablation_experiment") or not protocol[method]["weight"]:
             raise ValueError("pair-reference requires enabled FRPR on a pair ablation protocol")
@@ -334,3 +341,11 @@ def matching_pair_reference(parent, branch):
     ignored = {"id", "method", "pair_ablation_experiment", "tc_mask_root", *PAIR_METHODS}
     return ({key: value for key, value in parent.items() if key not in ignored}
             == {key: value for key, value in branch.items() if key not in ignored})
+
+
+def matching_fixed_reference_protocol(parent, branch):
+    """Keep original FT training/environment settings; only the native K1 intervention differs."""
+    ignored = {"id", "method", "pair_ablation_experiment", "fixed_reference_history", "topk_preference"}
+    def common(protocol):
+        return {"optimizer": "rmsprop", **{k: v for k, v in protocol.items() if k not in ignored}}
+    return common(parent) == common(branch)
