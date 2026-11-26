@@ -1,0 +1,409 @@
+{
+  "launch_git_commit": "8ba02fe065e89cce0044abee78999b4ad3b0a971",
+  "protocol": {
+    "id": "ts5_cpr_shared_1m_tkpr_k1",
+    "tasks": {
+      "A": {
+        "ally": [
+          5,
+          0,
+          0
+        ],
+        "enemy": [
+          5,
+          0,
+          0
+        ]
+      },
+      "B": {
+        "ally": [
+          0,
+          5,
+          0
+        ],
+        "enemy": [
+          0,
+          5,
+          0
+        ]
+      },
+      "C": {
+        "ally": [
+          0,
+          0,
+          5
+        ],
+        "enemy": [
+          0,
+          0,
+          5
+        ]
+      },
+      "D": {
+        "ally": [
+          2,
+          3,
+          0
+        ],
+        "enemy": [
+          2,
+          3,
+          0
+        ]
+      },
+      "E": {
+        "ally": [
+          0,
+          2,
+          3
+        ],
+        "enemy": [
+          0,
+          2,
+          3
+        ]
+      }
+    },
+    "stages": [
+      {
+        "task": "A",
+        "steps": 1000000
+      },
+      {
+        "task": "B",
+        "steps": 1000000
+      },
+      {
+        "task": "C",
+        "steps": 1000000
+      },
+      {
+        "task": "D",
+        "steps": 1000000
+      },
+      {
+        "task": "E",
+        "steps": 1000000
+      }
+    ],
+    "phase_boundary": "cumulative",
+    "epsilon_on_switch": "per_task",
+    "evaluation": {
+      "seeds": [
+        91001,
+        91002
+      ],
+      "episodes_per_seed": 16,
+      "interval": 25000,
+      "focus_seeds": [
+        91101,
+        91102,
+        91103,
+        91104
+      ],
+      "focus_episodes_per_seed": 32,
+      "task_seed_stride": 100
+    },
+    "replay_on_switch": "ft",
+    "sc2_game_version": "4.10",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {},
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "gradient_monitor_interval": 100,
+    "topk_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1,
+      "k": 1
+    },
+    "full_shared_prefix": true,
+    "algorithm": "vdn_1ff",
+    "method": "topk_preference"
+  },
+  "config": {
+    "runner": "episode",
+    "mac": "basic_mac",
+    "env": "action_set_protoss",
+    "env_args": {
+      "continuing_episode": false,
+      "difficulty": "7",
+      "game_version": "4.10",
+      "map_name": "10gen_protoss",
+      "move_amount": 2,
+      "obs_all_health": true,
+      "obs_instead_of_state": false,
+      "obs_last_action": false,
+      "obs_own_health": true,
+      "obs_pathing_grid": false,
+      "obs_terrain_height": false,
+      "obs_timestep_number": false,
+      "reward_death_value": 10,
+      "reward_defeat": 0,
+      "reward_negative_scale": 0.5,
+      "reward_only_positive": true,
+      "reward_scale": true,
+      "reward_scale_rate": 20,
+      "reward_sparse": false,
+      "reward_win": 200,
+      "replay_dir": "",
+      "replay_prefix": "",
+      "conic_fov": false,
+      "use_unit_ranges": true,
+      "min_attack_range": 2,
+      "obs_own_pos": true,
+      "num_fov_actions": 12,
+      "capability_config": {
+        "n_units": 5,
+        "n_enemies": 5,
+        "team_gen": {
+          "dist_type": "weighted_teams",
+          "unit_types": [
+            "stalker",
+            "zealot",
+            "colossus"
+          ],
+          "weights": [
+            0.45,
+            0.45,
+            0.1
+          ],
+          "observe": true,
+          "env_key": "team_gen",
+          "n_units": 5,
+          "n_enemies": 5
+        },
+        "start_positions": {
+          "dist_type": "surrounded_and_reflect",
+          "p": 0.5,
+          "map_x": 32,
+          "map_y": 32,
+          "env_key": "start_positions",
+          "n_units": 5,
+          "n_enemies": 5
+        }
+      },
+      "state_last_action": true,
+      "state_timestep_number": false,
+      "step_mul": 8,
+      "heuristic_ai": false,
+      "debug": false,
+      "prob_obs_enemy": 1.0,
+      "action_mask": true,
+      "seed": 2222,
+      "rosters": {
+        "A": {
+          "ally": [
+            5,
+            0,
+            0
+          ],
+          "enemy": [
+            5,
+            0,
+            0
+          ]
+        },
+        "B": {
+          "ally": [
+            0,
+            5,
+            0
+          ],
+          "enemy": [
+            0,
+            5,
+            0
+          ]
+        },
+        "C": {
+          "ally": [
+            0,
+            0,
+            5
+          ],
+          "enemy": [
+            0,
+            0,
+            5
+          ]
+        },
+        "D": {
+          "ally": [
+            2,
+            3,
+            0
+          ],
+          "enemy": [
+            2,
+            3,
+            0
+          ]
+        },
+        "E": {
+          "ally": [
+            0,
+            2,
+            3
+          ],
+          "enemy": [
+            0,
+            2,
+            3
+          ]
+        }
+      }
+    },
+    "batch_size_run": 1,
+    "test_nepisode": 32,
+    "test_interval": 10000,
+    "test_greedy": true,
+    "log_interval": 2000,
+    "runner_log_interval": 2000,
+    "learner_log_interval": 2000,
+    "t_max": 5000000,
+    "use_cuda": true,
+    "buffer_cpu_only": true,
+    "use_tensorboard": false,
+    "save_model": false,
+    "save_model_interval": 2000000,
+    "checkpoint_path": "",
+    "evaluate": false,
+    "load_step": 0,
+    "save_replay": false,
+    "local_results_path": "runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001",
+    "gamma": 0.99,
+    "batch_size": 32,
+    "buffer_size": 5000,
+    "lr": 0.0005,
+    "critic_lr": 0.0005,
+    "optim_alpha": 0.99,
+    "optim_eps": 1e-05,
+    "grad_norm_clip": 10,
+    "agent": "single_ff_rnn",
+    "rnn_hidden_dim": 64,
+    "obs_agent_id": true,
+    "obs_last_action": true,
+    "repeat_id": 1,
+    "label": "default_label",
+    "action_selector": "epsilon_greedy",
+    "epsilon_start": 1.0,
+    "epsilon_finish": 0.05,
+    "epsilon_anneal_time": 50000,
+    "target_update_interval": 200,
+    "agent_output_type": "q",
+    "learner": "q_learner",
+    "double_q": true,
+    "mixer": "vdn",
+    "name": "vdn_1ff",
+    "seed": 2222,
+    "device": "cuda:0",
+    "algorithm": "vdn_1ff",
+    "method": "topk_preference",
+    "epsilon_on_switch": "per_task",
+    "replay_on_switch": "ft",
+    "gradient_monitor_interval": 100,
+    "optimizer": "rmsprop",
+    "action_set": {
+      "weight": 1.0,
+      "margin": 0.0,
+      "batch_episodes": 8,
+      "success_episodes": 100,
+      "seed_offsets": [
+        301001,
+        302001,
+        303001,
+        304001
+      ],
+      "attempts_per_seed": 125,
+      "delta_candidates_by_task": {},
+      "second_gap_quantile": 0.5,
+      "probe_episodes_per_seed": 4,
+      "delta_by_task": {}
+    },
+    "full_shared_prefix": true,
+    "topk_preference": {
+      "weight": 1.0,
+      "temperature": 1.0,
+      "min_gap": 0.5,
+      "q_scale_floor": 0.1,
+      "k": 1
+    },
+    "preference_role": "shared-branch",
+    "parent": "runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "preference_weight": 1.0,
+    "n_agents": 5,
+    "n_actions": 11,
+    "state_shape": 130
+  },
+  "status": {
+    "status": "completed",
+    "phase": 4,
+    "t_env": 5000008,
+    "episode": 72926,
+    "updates": 72771,
+    "elapsed_seconds": 27970.433073764667
+  },
+  "branch_restore": {
+    "parent": "runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "checkpoint": "runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/models/phase0000_1000038",
+    "role": "shared-branch",
+    "preference_weight": 1.0,
+    "t_env": 1000038,
+    "episode": 19281,
+    "updates": 19250,
+    "last_target_update_episode": 19200,
+    "model_hash": "a7742b0653445b68cb1014317c6d26185c8b6459f0e5d4f14b57641ae94ddab8",
+    "parent_model_hash": "a7742b0653445b68cb1014317c6d26185c8b6459f0e5d4f14b57641ae94ddab8",
+    "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "branch_id": "ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001",
+    "seed": 2222,
+    "prefix_checkpoint_sha256": "b305acaf6ee25c61826402ca1d0750ecafcdbb19521b02ca15df90cb439d1247",
+    "restored_replay_episodes": 5000,
+    "restored_replay_index": 4281,
+    "replay_on_switch": "ft",
+    "parent_memory_input_hash": "b1d97100f7ea32410ca2325676acfad8bafadd13939edeb9d242cae8b396414e",
+    "branch_memory_input_hash": "b1d97100f7ea32410ca2325676acfad8bafadd13939edeb9d242cae8b396414e",
+    "engine": "new SC2 process, distribution RNG restored"
+  },
+  "prefix_state_manifest": {
+    "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "run_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "seed": 2222,
+    "checkpoint": "models/phase0000_1000038",
+    "checkpoint_sha256": "b305acaf6ee25c61826402ca1d0750ecafcdbb19521b02ca15df90cb439d1247",
+    "files": {
+      "return_state.th": "0960a756344213b004e51a259883efe5a625948e843cb080573b659067463037",
+      "prefix_replay.th": "038f456e49b67a1e5f1e595e19fab54dafaf0c9fb7bb3aac27aef66a8bde3134",
+      "models/phase0000_1000038/agent.th": "b305acaf6ee25c61826402ca1d0750ecafcdbb19521b02ca15df90cb439d1247",
+      "action_set_memory/phase0000/success.th": "f22c1f4d35446103c930d40f5d4637624e4673416dfe0de1571deaca7d1cefb3"
+    }
+  },
+  "final_state_manifest": {
+    "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "run_id": "ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001",
+    "seed": 2222,
+    "checkpoint": "models/phase0004_5000008",
+    "checkpoint_sha256": "51d1801e81da7b7ab0554f46d4872c25d8188ed9c53e97e48f7044f164b114d7",
+    "files": {
+      "return_state.th": "6a24f06de5d2c5d33eacf9b58d7f8732221215ddbdced2838cba66b25250a1ff",
+      "final_replay.th": "d98f556c7a1a4b7e1321bc2b4db3bd9c180d517c7b271afb9d8d195ed4199919",
+      "models/phase0004_5000008/agent.th": "51d1801e81da7b7ab0554f46d4872c25d8188ed9c53e97e48f7044f164b114d7",
+      "action_set_memory/phase0000/success.th": "4851e443a9025f410793f641b7cec51d6077566b6d2f5dbc1bf2b9085c4698c9"
+    }
+  }
+}

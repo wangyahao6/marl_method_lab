@@ -1,0 +1,870 @@
+{
+  "plan": "results/ts5_tkpr_cpr_1m_20261124/plan.json",
+  "exported_utc": "2026-11-25T17:20:22.002778+00:00",
+  "sources": {
+    "/home/wyh/marl_method_lab/results/ts5_tkpr_cpr_1m_20261124/plan.json": {
+      "bytes": 30485,
+      "sha256": "955869917f802df9e0f66147623e334fc9d7e5b79f9a6a226f13668b2f33c33b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "4aad55533b18b994aa6f47d31a99958a680d17d04ceac9273ce23a35f0f42892"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/launch.json": {
+      "bytes": 143455,
+      "sha256": "654b58979dfa6fc358e8fa7304a5e6d9fb37dd6081cea229af1e6e7775651fcf"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "dd0022fe54ba106a4f6a349b9b070a29cacc057aed10a9b6c398b60db561b647"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/retention.json": {
+      "bytes": 428,
+      "sha256": "f390d39d2a213e7ba445ebf3dfd77b043e75feb4126aec88e33896d096bb685f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/protocol.json": {
+      "bytes": 2006,
+      "sha256": "73cb1ba77371af1584e479c7539daae9dcdfcb5b81b3cb5a3028bafd26adeb99"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/config.json": {
+      "bytes": 4520,
+      "sha256": "cac2a67cfb8fcfb3ce57c1ab0f46f750d5ac55018c359ba81db50da4cd4212dc"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/prefix_state_manifest.json": {
+      "bytes": 703,
+      "sha256": "4ef9acff4ebe9c1eff340640b411d5960094d999f30692411faf3c37e2a1d0c8"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/evaluations.jsonl": {
+      "bytes": 123083,
+      "sha256": "62c1a954a002ed522887a460fdd464905b9957ea153702e1495ed41e6d05a1f2",
+      "lines": 46
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/memory_collection.jsonl": {
+      "bytes": 350,
+      "sha256": "9d4fc22da0aafc87d7920b8ea6048a1b2babfe0a99e3548827cb8744acf7b3a1",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/memory_inventory.jsonl": {
+      "bytes": 65,
+      "sha256": "1f640292222b868390b281a7b0f0a79189a626c7a04f4546552c28b6e28da0a9",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/phase_execution.jsonl": {
+      "bytes": 205,
+      "sha256": "20f11d2d52a6c54458445ecb5824039493916d1ec4a7d86ae38598c4cb4a0ac4",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/experiment_metrics.jsonl": {
+      "bytes": 362757,
+      "sha256": "03c2d420e1c5a7aacf7550aa34fad105ae8379d7feed807bd05e4ff760fba8ab",
+      "lines": 1002
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/models/phase0000_1000025/agent.th": {
+      "bytes": 133387,
+      "sha256": "1da19389f502d6d95c61c4b74117c6c3aa82bf28c6db0b5c26707fec07138eb3"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001/prefix_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "c16af60853ddf9f8a505abbaa4f06ecf706fd7b6eff79979b9737470216952a7",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "5801d9d2044a4ded87431cab630700e13faaeba15944fa183948ef3d931763d6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/launch.json": {
+      "bytes": 143455,
+      "sha256": "9ea43a596276a47e31bf522ea13fcb080d03994f70feb7afae01b65323f22965"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "5a66bb7502dc4523eeaf48f3edd4c4360111d66cf98f27edc731382e6515c53f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/retention.json": {
+      "bytes": 431,
+      "sha256": "7aff3e7489df95bcfc76a70c094aa4bc6a65f4830c376534d8c3f3768038c984"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/protocol.json": {
+      "bytes": 2006,
+      "sha256": "73cb1ba77371af1584e479c7539daae9dcdfcb5b81b3cb5a3028bafd26adeb99"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/config.json": {
+      "bytes": 4520,
+      "sha256": "34ebe14de2177e6b0d6f087e107ae6558811941539448a6a11a4385c2cabafbd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/prefix_state_manifest.json": {
+      "bytes": 703,
+      "sha256": "a3ad732286eda5f74d9b80a8e16c27602c09699412ec8fe177773ddee9e61365"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/evaluations.jsonl": {
+      "bytes": 123172,
+      "sha256": "3d125891aa12a4313a40fedcee9e95b7845144d9b4d0e4d581a94051147d261b",
+      "lines": 46
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/memory_collection.jsonl": {
+      "bytes": 352,
+      "sha256": "ba0b8d06f9c6b7fa6fc1c8fd0b7958feccd24a4e922afdeb7d85582a04f8c041",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/memory_inventory.jsonl": {
+      "bytes": 65,
+      "sha256": "2c5e860cee01515b871a2d41e9f074ee04b5a45f38a82c3cfef9eb4cbb5e270e",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/phase_execution.jsonl": {
+      "bytes": 205,
+      "sha256": "6a029cdc3039688d9af051d498cb7658a1170b11126558ace5f02dbcdaa680f5",
+      "lines": 1
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/experiment_metrics.jsonl": {
+      "bytes": 364587,
+      "sha256": "fbdf8aa0308536579a54065cad65c36d8fc237bb027468063ab52a8fbc6ad78e",
+      "lines": 1007
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/models/phase0000_1000038/agent.th": {
+      "bytes": 133387,
+      "sha256": "b305acaf6ee25c61826402ca1d0750ecafcdbb19521b02ca15df90cb439d1247"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001/prefix_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "038f456e49b67a1e5f1e595e19fab54dafaf0c9fb7bb3aac27aef66a8bde3134",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "13f62949dd3fc19a90a98b2a9de685326aee3d26c65583c502ae01b6a1a688e8"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/launch.json": {
+      "bytes": 143582,
+      "sha256": "39fb0090cb68bcdf01c9d5058df688dfbcefbc1f33ac5bb87cd3bde7c23388f4"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "147779e0981ccdec914087df5f5c943aadda1a865c55ad7ca2dec6e8c0ad272f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/retention.json": {
+      "bytes": 1945,
+      "sha256": "633230221dadb2a18bfe1294015223ee276136e74c6c9a6278775c60d86d6baa"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/protocol.json": {
+      "bytes": 1871,
+      "sha256": "64f6c0bb5c26f12a3f826fa30091c8c8db4eda693e351dedbffca2a618f8edaf"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/config.json": {
+      "bytes": 4465,
+      "sha256": "b56fe6e82d871d81cbc1fd9b5df1f219778e8c0b1031c076f44ce9592f47c9ca"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/branch_restore.json": {
+      "bytes": 1146,
+      "sha256": "9e803a1d99bc308eb9c1669e34b385517a1a5b48050e8daa376fe07031729dc4"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/final_state_manifest.json": {
+      "bytes": 707,
+      "sha256": "e707e5e3b49a3c28173f057a345d7f17f5bae4e463ef9fa736c98e6cb3ef8b69"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/evaluations.jsonl": {
+      "bytes": 439266,
+      "sha256": "b94a13a846863d8f2e985b822d52f6fce4b81311b04ab98ff364f1efdaa6116a",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/memory_inventory.jsonl": {
+      "bytes": 260,
+      "sha256": "77c55c60e88e533198fa93c039494a214d0d33a7358e4cdc5bcfa15da1a58200",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/phase_execution.jsonl": {
+      "bytes": 952,
+      "sha256": "a53e1e90c75a3c0b71a6e21979515adff53088e44c9591f92b9edfd89cbbee67",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/experiment_metrics.jsonl": {
+      "bytes": 1106732,
+      "sha256": "bd82e8b620ea99bb1984e5aec492e610b21e41f8ab53869c0f9a4d6564855f9e",
+      "lines": 3064
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/evaluation/20261125T131612653037/results.json": {
+      "bytes": 74560,
+      "sha256": "963c33e14ce395ac1e4f3a66c910100b5c27e23d755950847f99a39d23e2b9ee"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/evaluation/20261125T131612653037/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/models/phase0001_2000045/agent.th": {
+      "bytes": 133387,
+      "sha256": "ab1d612444d2b321bba196de0fcc6a0648864a20265ec6eab69f1ecb53e4a051"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/models/phase0002_3000056/agent.th": {
+      "bytes": 133387,
+      "sha256": "6a00e922b481de63d458966eed7798e19c0264ee76cc7007c891dfa0c3a12b9b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/models/phase0004_5000039/agent.th": {
+      "bytes": 133387,
+      "sha256": "2181278fdc87aa848a42b0395e1a6bc1fffb9f60639bdf9c5fd39c18697f4cdc"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/models/phase0003_4000002/agent.th": {
+      "bytes": 133387,
+      "sha256": "36034b220e012a431f45d35865f9053481bb9535eb2b1aed17e3c336bc148907"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001/final_replay.th": {
+      "bytes": 2867283151,
+      "sha256": "d2fa9e88ee1d6e2026049d7efc17e261321ad92d18bc86a21877b429b5e6a1fc",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "eff6da1f56032514fc8c8f6bbc40a7c5eeba0be2b9c15b5ffeceb70c192495cd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/launch.json": {
+      "bytes": 143759,
+      "sha256": "ae338edfc39a1c012432b928f65f05ca37109cd8fd607383228bb99ad609c963"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "ab0b0506262ac3b81e9e33bb0b4c0fde8b12df3becaa91052edff2a719c6da2a"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/retention.json": {
+      "bytes": 1930,
+      "sha256": "d05d325b1c3b0196e323601bac5b9170222816e9d213917d6bd546797461ca6f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/protocol.json": {
+      "bytes": 2007,
+      "sha256": "c57cab0f8f05594284440efc310f8acc5b090e24528dfc91c4418d1a32251164"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/config.json": {
+      "bytes": 4601,
+      "sha256": "0d75e87777f020b661d5c02cbcb581520072394074abeafcf5b44544df1d3290"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/branch_restore.json": {
+      "bytes": 1147,
+      "sha256": "22117c7ab5c08037f49e53af56346bbdc85ccb6e571452b6b1af57865d4cefcf"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/final_state_manifest.json": {
+      "bytes": 708,
+      "sha256": "493b518d6007ad098758eab275f2de694bff1b9c9e4c36cdc4c84961dd42954e"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/evaluations.jsonl": {
+      "bytes": 439811,
+      "sha256": "3120e58ddd075f135ee79ac2746638ab60c50a96cf4ebfa06702a164cc0c6f38",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/memory_collection.jsonl": {
+      "bytes": 1399,
+      "sha256": "19e5f7376ca496002e456d4867f34ddfdb950b31d5c411c157243784fc78c911",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "7a21266cdcd1b58c2427cce96a2704911a2d14611683562fb4b7113696ec86ac",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/phase_execution.jsonl": {
+      "bytes": 842,
+      "sha256": "d5ae4f146b1ed49d7c73ef1bd38c583e8038bb8c6bbcd727da3439293c19f98a",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/topk_preference_updates.jsonl": {
+      "bytes": 99686088,
+      "sha256": "06db906f6fb0b35fabb3db35e416f0f7b42c517b06c704f7840a3369bc51c9ac",
+      "lines": 54840
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/experiment_metrics.jsonl": {
+      "bytes": 866306172,
+      "sha256": "419f433c5148c6eb5cefac7303217d9a4f2b6fee845861d37757f260b73edd91",
+      "lines": 2170734
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/evaluation/20261125T140509566391/results.json": {
+      "bytes": 74514,
+      "sha256": "f8b694ea3a5da8536b534f7a443c6d30f891634f9fd6fe42363cafc32f51ac6b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/evaluation/20261125T140509566391/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/models/phase0003_4000042/agent.th": {
+      "bytes": 133387,
+      "sha256": "a454ca829b25329febc52de618ffe58aafc4dff92881ec929f492a79dbfe729c"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/models/phase0001_2000034/agent.th": {
+      "bytes": 133387,
+      "sha256": "c810843ad4329163424fa655062405bf999e181671a618d6489373191248d022"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/models/phase0004_5000017/agent.th": {
+      "bytes": 133387,
+      "sha256": "5d3f150fb830315c3c24ce565f19f06c5697142ed8bddee9f314359786e08de7"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/models/phase0002_3000039/agent.th": {
+      "bytes": 133387,
+      "sha256": "3a8f09ab3c3fe1b8823c89fbe95ddd84642981777c53311dc69321b315ab1656"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "18fe132d224ef2a901bc1fcc7d8e7863b5d00d1bf791990af3867af9a04823c7",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/status.json": {
+      "bytes": 140,
+      "sha256": "1bb03a1713cac9baafcb0228ced01db14f92969ce81dae49d25fe403817439e7"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/launch.json": {
+      "bytes": 143869,
+      "sha256": "aaef30985f92ed4401a24352e36137f0ec4ca9040406b667b53762f3de4939d0"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "15275dd9d1732344915c27439c87d744b4843baabb4c32a0a9154c9350db143d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/retention.json": {
+      "bytes": 1942,
+      "sha256": "5810716c321832240331b627719ff239057c928d89b034c13892c641ab173677"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/protocol.json": {
+      "bytes": 2106,
+      "sha256": "9a4ec3002c9c75471df97218638cd3e74448f90d9c5fb4ec9be1a955b539577b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/config.json": {
+      "bytes": 4700,
+      "sha256": "ae29dd8bcb3ccc0b8ea1f2c4c16b1d15d3c3da4e9064ca42c17d55d8e3ecc31b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/branch_restore.json": {
+      "bytes": 1148,
+      "sha256": "97e6ee2bfdf87cdb1fd604378e0bc8969557d5d46c1617b1c6e3a4d39e18f2d6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/final_state_manifest.json": {
+      "bytes": 709,
+      "sha256": "a6594dca0c965c5959256c391cc2051793525af73badb4a5d87749b5ce48309d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/evaluations.jsonl": {
+      "bytes": 440352,
+      "sha256": "320b0a267106b5dfe1cd6c5b6343a8aadf2a096eeb4aeb4bb0d23877d16797e6",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/tkpr_cpr_updates.jsonl": {
+      "bytes": 8290,
+      "sha256": "b5eee566bf50fd86e95537d9f7af8bf9c1c1239d7730112e255768c05f109d3c",
+      "lines": 10
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/memory_collection.jsonl": {
+      "bytes": 1400,
+      "sha256": "491fb1a48479f2dc75e4aa1848f42b918de8ed2f0b2e3a88c796e8c8a7eb991a",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "1e071802e49d5dc180e390499dada8e7f3dba19b8f1ed0cc1d46fdd47a1c1981",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/phase_execution.jsonl": {
+      "bytes": 843,
+      "sha256": "fc6e30fef965d3fe5885e5f8d7de54472ca37d7435cde6187810a7c1ec1209c2",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/tkpr_cpr_preference_updates.jsonl": {
+      "bytes": 116083823,
+      "sha256": "48dae5f10cafe16458e4e63a2167db9a26492116313d936925817d34e0b8b802",
+      "lines": 53511
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/experiment_metrics.jsonl": {
+      "bytes": 825388585,
+      "sha256": "a5a5e464d74fe9a65a7ea2fd87c4dda9cefab52ca4069d0f0e2b863e6b32ea23",
+      "lines": 2102429
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/evaluation/20261125T181257709884/results.json": {
+      "bytes": 74590,
+      "sha256": "1011a32cb433cb28c5559413b7a31ccffdb0a4d4e04ef94d3c470aa6dbf04b45"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/evaluation/20261125T181257709884/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/models/phase0004_5000051/agent.th": {
+      "bytes": 133387,
+      "sha256": "a643fd5c07371df26684b30fde949504dd6ab10625c2b3cef4756b94a44c5e7c"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/models/phase0001_2000034/agent.th": {
+      "bytes": 133387,
+      "sha256": "c810843ad4329163424fa655062405bf999e181671a618d6489373191248d022"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/models/phase0002_3000001/agent.th": {
+      "bytes": 133387,
+      "sha256": "408f05a507075c72e34764d7139f6c7e64612bde5426b11685e03abcd5b370de"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/models/phase0003_4000030/agent.th": {
+      "bytes": 133387,
+      "sha256": "e011014621cc2770e16a203c80d3d221db380d8d9f997950c4a73e916118d839"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "fc2b213ef9be3a657f016c0dbac2e78dc7220474029ee56650ff22e6dce6c1c3",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "146e1b4d68b1e2eb3d8eb9e9088bbce0960850c8ba25d1ac7e081dd48e99626d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/launch.json": {
+      "bytes": 143863,
+      "sha256": "abba038a7133dc565fa708dbcaa89c0c1a1885d1180cfd96a9f04be53b25ebb9"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "caf1ef1bb93ab0ae099bddfca9bff2231cade0f61d32fe5caca7e11405451c82"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/retention.json": {
+      "bytes": 1923,
+      "sha256": "bf962679efaed9ce907988a3af33d90e80f107949c558d2f32744324bff3d254"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/protocol.json": {
+      "bytes": 2076,
+      "sha256": "3375e0fa4accfc5128a626db4d00d3c7282bce9e1f274783643ea0a99b5b5da3"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/config.json": {
+      "bytes": 4670,
+      "sha256": "ad3a410dbd2c0217c3e5ca848842b966552f78d93c862c67d92a26ea595798e2"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/branch_restore.json": {
+      "bytes": 1152,
+      "sha256": "ed8b9ab7fd9eb89278b23ca92c85be03ae418a7b10176ad448ee96765d39b883"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/final_state_manifest.json": {
+      "bytes": 713,
+      "sha256": "dd214f6fbc5167698f75e7ec2ecf3569c3a356f53fc99a0b550182ad87f10a70"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/evaluations.jsonl": {
+      "bytes": 440322,
+      "sha256": "01cbb2dacb29b217844a4faba27bd351f78e5920f25655a06d422846f7ff4f0f",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/memory_collection.jsonl": {
+      "bytes": 4882,
+      "sha256": "2cb8d3d71a9d18e62f51349ab2a3f0cd7128b8133aa222481c1473b26d4a8927",
+      "lines": 14
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "d89a003b21589f198484c67bc5044b58cbcff0af853b3616ed6a9d99a7a3ae95",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/phase_execution.jsonl": {
+      "bytes": 843,
+      "sha256": "660963a035267ba6367deff2ea2808c71cd44902b72712c95dfc9beba5e04cfc",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/tkpr_refresh_updates.jsonl": {
+      "bytes": 98776012,
+      "sha256": "2183643ebe9c6612414bdb74472ee82159c5494f14a9b9166e81a561e11faa34",
+      "lines": 53121
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/experiment_metrics.jsonl": {
+      "bytes": 836908608,
+      "sha256": "d5c5874cc79b496453688a0bb904b5fcf7815ca45ea39beeccd1741418154322",
+      "lines": 2085519
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/evaluation/20261125T181857661024/results.json": {
+      "bytes": 74562,
+      "sha256": "64738bc29987ea5d7fbf43383c7aa5074cbb4ed42c06da6843fb98d6b8d914d1"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/evaluation/20261125T181857661024/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/models/phase0001_2000034/agent.th": {
+      "bytes": 133387,
+      "sha256": "c810843ad4329163424fa655062405bf999e181671a618d6489373191248d022"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/models/phase0003_4000027/agent.th": {
+      "bytes": 133387,
+      "sha256": "776da507a92bec7752ff3c49292756909a9e8f0942e8955d7786f1dc0d7a9c8a"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/models/phase0004_5000049/agent.th": {
+      "bytes": 133387,
+      "sha256": "13716fa144e2e8d447077447e5a49eabfff198951a475ecc96de1e0eba31c3fa"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/models/phase0002_3000000/agent.th": {
+      "bytes": 133387,
+      "sha256": "19fb97003797089f0dbb4f19a2ff649b435e6121e6f01217a6785135fce258f5"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "d0f0a3357fff90943579414443d621c77ff9f55ca5ddda5bf58f288c8b742c19",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/status.json": {
+      "bytes": 141,
+      "sha256": "e1a4d600334cb39d1f1a8b5b436d046b4636f2ca9ec3002f2047acf224c64c5f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/launch.json": {
+      "bytes": 143582,
+      "sha256": "a88e276e255ed5d91730d0b8865248a41da0c9d34018041d89fe961c8d6155f6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "42dcfb2d0a10b6492a24fd96bfbd52f524a85b8fc0b7d3a0f934f75f86df1f47"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/retention.json": {
+      "bytes": 1952,
+      "sha256": "56e7f5942e6e86ecb63dbdd92cdd18252914e3fd34496acadd2b5eaeef453b0d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/protocol.json": {
+      "bytes": 1871,
+      "sha256": "64f6c0bb5c26f12a3f826fa30091c8c8db4eda693e351dedbffca2a618f8edaf"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/config.json": {
+      "bytes": 4465,
+      "sha256": "2981b52217b87410e1360a1de8375ccc0f3d5f4786357f12e1702fef292747d6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/branch_restore.json": {
+      "bytes": 1146,
+      "sha256": "216b83b77003f43da0f86e02267ab300d32dda9f9275276ec333f8a59c466d6c"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/final_state_manifest.json": {
+      "bytes": 707,
+      "sha256": "483a0ebe7541c626e1a750be7742799addb594908bf4ca0cbaf5ab705f8dde13"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/evaluations.jsonl": {
+      "bytes": 439377,
+      "sha256": "e7f92e7fd783951d60e86ba11ff7f7d6c515cdb51cbc83c98929b4223da7f35a",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/memory_inventory.jsonl": {
+      "bytes": 260,
+      "sha256": "b47b48f803a728c5f9ff9e5c2a2191b7347f4a7667abef3bf65ad8a08984b33f",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/phase_execution.jsonl": {
+      "bytes": 953,
+      "sha256": "274af151a79f2cb6ad1dc8f4e12262b7d40997db01b037d3dbf34ec1bddded0d",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/experiment_metrics.jsonl": {
+      "bytes": 1143056,
+      "sha256": "7ab01fdfb26eb6b7931850bd2e8ad9721fe225d66d38d3113c0afff98aaca508",
+      "lines": 3164
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/evaluation/20261125T191955836469/results.json": {
+      "bytes": 74579,
+      "sha256": "d26919d6d21c4550f030712aed13d68882330ea3c2782d1e5b26a323e916f83c"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/evaluation/20261125T191955836469/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/models/phase0004_5000015/agent.th": {
+      "bytes": 133387,
+      "sha256": "c8c1807b441e98c31d59d28a660bcaa393eb9e455e1426e6223cee05a5034094"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/models/phase0002_3000007/agent.th": {
+      "bytes": 133387,
+      "sha256": "48565ee998c78c0679a6320ba0ea7f5b1d19039063a11dbaf6fd345c3452faa1"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/models/phase0001_2000042/agent.th": {
+      "bytes": 133387,
+      "sha256": "cc1f51168acdb70f38a47ea2574a30054a3cca016792840a4241e917f680fa83"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/models/phase0003_4000038/agent.th": {
+      "bytes": 133387,
+      "sha256": "946cae6db2d265728fdd03e8f09d40a149fb2e59cdcf09ef5ba8a1aa6c39ad91"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001/final_replay.th": {
+      "bytes": 2867283151,
+      "sha256": "2db7ac01bd7bcd58900624f4d2989311ce4799d0d9ed4553ebc5cbb1358922ac",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/status.json": {
+      "bytes": 142,
+      "sha256": "c9a548409680cfaff343434ed386bfc6dfacca6b316a054f7825d378bd39f187"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/launch.json": {
+      "bytes": 143759,
+      "sha256": "97747fed7426ba6ae9097c06ae6e5f7b1636245e10f1c11e3f691d58727e0f61"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "c08c1c4d7462236d903fee9959903380a35330fcdc9f10c5703f682e664e7b94"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/retention.json": {
+      "bytes": 1928,
+      "sha256": "9dd6e8b2154fe6c1130cb2cab9162669f58ff233426f7009d8a4abcc74285e7d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/protocol.json": {
+      "bytes": 2007,
+      "sha256": "c57cab0f8f05594284440efc310f8acc5b090e24528dfc91c4418d1a32251164"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/config.json": {
+      "bytes": 4601,
+      "sha256": "6e9b620ca31c3d8bd95ccbaf629224c5f99fec15942ee45850b47ddbd77e0de4"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/branch_restore.json": {
+      "bytes": 1147,
+      "sha256": "fec10750662e1b045d04ec11b5d101e0222f0a8baba84ab37fbc320019aae4c1"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/final_state_manifest.json": {
+      "bytes": 708,
+      "sha256": "54fb3e4eb46ec65ffebfdbf3b48a786639215b8af11a455ee5ddc18e2b0aca64"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/evaluations.jsonl": {
+      "bytes": 439912,
+      "sha256": "ba922636581e88f5fea5f0e6be911f0b2257983308dbf7d5b1f71265562823d4",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/memory_collection.jsonl": {
+      "bytes": 1398,
+      "sha256": "7b2dca07ac4497a4b9990a4cc5610ebd26d30b5b501f14feb398417b97994c12",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "31e4df3904c5cc4c5ee788a2d8634e7ece594d8416a048d5301a284ea90d61e1",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/phase_execution.jsonl": {
+      "bytes": 842,
+      "sha256": "52485ef4988ab403a75e73a7d231b9b662d33743d6a59d3bcb5f7e402f25fd8c",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/topk_preference_updates.jsonl": {
+      "bytes": 97084203,
+      "sha256": "67ca262697a19c547a4a6bec123e1fe60fd470e4d4c8c1c51c41f9562865c2e5",
+      "lines": 53521
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/experiment_metrics.jsonl": {
+      "bytes": 843987298,
+      "sha256": "5cd0bd09ec62755e83ab9446c07ff7ead8caef6022566e6c60c06b44183fbb56",
+      "lines": 2114995
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/evaluation/20261125T210228877890/results.json": {
+      "bytes": 74546,
+      "sha256": "9334bc697a5b6ec9199b28dbebcaba9fa2c4196772a006ffd809869a0883dce1"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/evaluation/20261125T210228877890/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/models/phase0001_2000003/agent.th": {
+      "bytes": 133387,
+      "sha256": "86cc513c04b0d78042cbe9e6968e48ff72b81daff6fc7ce33fdb7cc5673c653d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/models/phase0002_3000042/agent.th": {
+      "bytes": 133387,
+      "sha256": "1fa00295cca44e953cce9534b4e7ef86e6204d30a4444a71d1164a999e536ff7"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/models/phase0004_5000008/agent.th": {
+      "bytes": 133387,
+      "sha256": "51d1801e81da7b7ab0554f46d4872c25d8188ed9c53e97e48f7044f164b114d7"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/models/phase0003_4000070/agent.th": {
+      "bytes": 133387,
+      "sha256": "d24be843bfbc6d99d9bee42fc1c8370eb80e51e7a5d37324d2624d2db00f666b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "d98f556c7a1a4b7e1321bc2b4db3bd9c180d517c7b271afb9d8d195ed4199919",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/status.json": {
+      "bytes": 142,
+      "sha256": "855b6c987fd482e8c8f3dd7933d2a4803e5140f9e13a4ef8fb9e84ba64ee4a87"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/launch.json": {
+      "bytes": 143869,
+      "sha256": "8fe312db2b45bcbfdfb9ae186c01f11890c6febe97615da633f717e607a5dec7"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "f0695e7b8162c4f80d9ce8ba58638d1b62b51e057d1c9a6f803220f980d32c65"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/retention.json": {
+      "bytes": 1925,
+      "sha256": "558f9a987c0f7628d0486df8e3afb6e950a7ab668b4e9220b0e2076c3da4a3a4"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/protocol.json": {
+      "bytes": 2106,
+      "sha256": "9a4ec3002c9c75471df97218638cd3e74448f90d9c5fb4ec9be1a955b539577b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/config.json": {
+      "bytes": 4700,
+      "sha256": "b494707c0e6709ead0a15a6f3070081b347213a6f28da04ea371e33ac7c24b80"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/branch_restore.json": {
+      "bytes": 1148,
+      "sha256": "17a177c4dd9de745bf4585aefe572144142e43f34db32b841625449e0fd8c173"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/final_state_manifest.json": {
+      "bytes": 709,
+      "sha256": "c0f4d49546d7c4f240e7bff07557a98ebf1ed462c008897eeb4c8c5db14919d1"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/evaluations.jsonl": {
+      "bytes": 440199,
+      "sha256": "0f8fc1cf88d1ffe0626cd8fc48efe2d1513fa5867cc19af48d1f021bd77eb833",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/tkpr_cpr_updates.jsonl": {
+      "bytes": 8639,
+      "sha256": "628a1d7f5e40ebebf65535fa3abe89924e1b7373e0e6475c2980c0190f0adf5c",
+      "lines": 10
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/memory_collection.jsonl": {
+      "bytes": 1404,
+      "sha256": "377461e3b9cb1a6d6dc056480d70d3e634eaf7f006b8b012647e0ba00c348ba7",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "bd1c0daf3a7c9f03d68f6a9c664e16c5adf006e5cfc4e9acb13be1374d63c195",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/phase_execution.jsonl": {
+      "bytes": 841,
+      "sha256": "5b0253a50e66984ae633b47a9b8d1ddf6a326eebdbc606f9ad2551740a0ed946",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/tkpr_cpr_preference_updates.jsonl": {
+      "bytes": 116096059,
+      "sha256": "37a87df487878d3116af5cfcda80cc1fa61eafbac3bd14f4f546920e23c35530",
+      "lines": 53237
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/experiment_metrics.jsonl": {
+      "bytes": 826629084,
+      "sha256": "61c2ef20bbc9941d3cac6422843080e2451e683b96d578b5b3e2567a9a675ac0",
+      "lines": 2105604
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/evaluation/20261125T213822375386/results.json": {
+      "bytes": 74540,
+      "sha256": "0875d4a6df00740a9987f7e413b456d83c491abcd21b0c8435a402096e39fbb6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/evaluation/20261125T213822375386/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/models/phase0001_2000003/agent.th": {
+      "bytes": 133387,
+      "sha256": "86cc513c04b0d78042cbe9e6968e48ff72b81daff6fc7ce33fdb7cc5673c653d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/models/phase0002_3000063/agent.th": {
+      "bytes": 133387,
+      "sha256": "031fa06ca13001edacd66a519aa27e6bab69094873267f9fecbe7f881ec6f3ba"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/models/phase0004_5000015/agent.th": {
+      "bytes": 133387,
+      "sha256": "a35eac9518552fac1e7e08b921a622f185c211e49ee79afc44af9b48f9de6260"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/models/phase0003_4000094/agent.th": {
+      "bytes": 133387,
+      "sha256": "45ecd0f226733ceab93bee57411be0d50727b6f12387afcc2c4e37698e0d22d8"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "1883e5c2a70884be44d31878803910330459c6b06ea0f927f202b81462458e2a",
+      "retained_on_experiment_host": true
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/status.json": {
+      "bytes": 142,
+      "sha256": "50fbca0e70fb602262f877312cb56a8cbbcb31f2b56e7795c8a723c648830129"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/launch.json": {
+      "bytes": 143863,
+      "sha256": "d30d0cac67fe25af43a31d425a3a1d07bf040db38de2c5e4c7c27b8c18047a92"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/launcher_status.json": {
+      "bytes": 174,
+      "sha256": "d1e0e5192dddd074c2a4675c019d7b3ff22e1ae6cd6c3530bc91d98648b2977f"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/retention.json": {
+      "bytes": 1933,
+      "sha256": "ed98aa260a16e787d1c8e22c63eb54d0dc85c43f80c3218a495601c968be8265"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/protocol.json": {
+      "bytes": 2076,
+      "sha256": "3375e0fa4accfc5128a626db4d00d3c7282bce9e1f274783643ea0a99b5b5da3"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/config.json": {
+      "bytes": 4670,
+      "sha256": "f524eec0c45afa9df391ff9995608751eb0496900164bca3f1679b09a72d9848"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/branch_restore.json": {
+      "bytes": 1152,
+      "sha256": "c163e137f8d5c6afc8db6852ff93ba53d4c35f6d92bf396cc68031ea44f2a9bf"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/final_state_manifest.json": {
+      "bytes": 713,
+      "sha256": "3c92362e914a54298f4e6047ceb76182a3a14835693b2d699a90d0e589f7870b"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/evaluations.jsonl": {
+      "bytes": 440328,
+      "sha256": "3239df7178815ad8717ae189dabde99f059ec9dcc9d2d00c043f9304b7610b6f",
+      "lines": 177
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/memory_collection.jsonl": {
+      "bytes": 4885,
+      "sha256": "17f66bc32ada90f3e536336562a5c7670d6593cec501baec289468d1d170eb29",
+      "lines": 14
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/memory_inventory.jsonl": {
+      "bytes": 360,
+      "sha256": "335b53f5c8c84a5464ffff694cb2198e56fa3ac8ab16977af7986cf2d60334a7",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/phase_execution.jsonl": {
+      "bytes": 842,
+      "sha256": "39ef625d4be61c4171da19ddabf8a2c52d6f465af7a073a7802e9f1649287048",
+      "lines": 4
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/tkpr_refresh_updates.jsonl": {
+      "bytes": 98037610,
+      "sha256": "3d017702a484fcabdef3a7b5c6d2904ece833f83ab158ce7bd33f0ac00eda8c1",
+      "lines": 52615
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/experiment_metrics.jsonl": {
+      "bytes": 831019201,
+      "sha256": "6a190c0e5d3ea7dfcc12fe358d7cb7daa8067e7cf2d3a37498ee4c9f56c769a1",
+      "lines": 2070796
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/evaluation/20261126T011537630092/results.json": {
+      "bytes": 74596,
+      "sha256": "a114f7d05f697e3e5cc5c3421a75a52ad40e91e07762161dfc1f225aa0533ff6"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/evaluation/20261126T011537630092/launcher_status.json": {
+      "bytes": 35,
+      "sha256": "bc3eab1d15d1966b73e75e8d531d5ea91c00bdebcb0a39a585e2b9f25e2a2afd"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/models/phase0004_5000027/agent.th": {
+      "bytes": 133387,
+      "sha256": "77ce90ff627728b5ef28665245e0626b2beaa74a23237ef74758a5e9bb3745c9"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/models/phase0001_2000003/agent.th": {
+      "bytes": 133387,
+      "sha256": "86cc513c04b0d78042cbe9e6968e48ff72b81daff6fc7ce33fdb7cc5673c653d"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/models/phase0003_4000000/agent.th": {
+      "bytes": 133387,
+      "sha256": "1b91760458ab2ea50a17635204c0f45fe6f0ccd3fd83a30fd5f87f69d63735cb"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/models/phase0002_3000052/agent.th": {
+      "bytes": 133387,
+      "sha256": "807e42c2a8a396ca67e1ec4a4bae71fa99d16931ab4227e2f8708474a0292302"
+    },
+    "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001/final_replay.th": {
+      "bytes": 2867268047,
+      "sha256": "5f2e908ec8b87cb41200bddd59b6e77a4474431e180edd32153597a872819303",
+      "retained_on_experiment_host": true
+    }
+  },
+  "run_ids": [
+    "ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_vdn_er_seed3535_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed3535_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed3535_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed3535_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_vdn_er_seed2222_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_k1_seed2222_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_cpr_seed2222_attempt001",
+    "ts5_tkpr_cpr_1m_20261124_tkpr_refresh_seed2222_attempt001"
+  ],
+  "prefix_checkpoint_sha256": {
+    "ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001": "1da19389f502d6d95c61c4b74117c6c3aa82bf28c6db0b5c26707fec07138eb3",
+    "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001": "b305acaf6ee25c61826402ca1d0750ecafcdbb19521b02ca15df90cb439d1247"
+  },
+  "expected_nominal_new_training_steps": 34000000,
+  "independent_evaluation_seed_policy": "same focus seeds: independent-process recheck, not independent test set"
+}

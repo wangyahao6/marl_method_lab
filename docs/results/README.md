@@ -6,6 +6,7 @@
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
+| [TS5-1M · TKPR-CPR共同前缀对照](comparisons/ts5-tkpr-cpr-1m/README.md) | 单前馈VDN64，seed3535/2222，A共用1M、B–E各1M | ER、K1、CPR、Refresh的保持矩阵、学习AUC、参考更新及梯度诊断。 |
 | [TS5 · TKPR-Refresh 四方法对照](comparisons/ts5-tkpr-refresh/README.md) | 单前馈层 VDN64，seed 3535，五阶段各 2M | TKPR-K1、TKPR-Refresh、VDN-FT/ER 的评价矩阵、学习曲线数据、实际配置与记忆更新记录。 |
 | [SZC · 双层 VDN64 约束方法结果](comparisons/szc-vdn64/README.md) | 追猎者 → 狂热者 → 巨像，33 条独立运行，每阶段 2M 步 | 集中查看 FRPR-Raw、RawLoss、Unfiltered、ReLU、TKPR、T1PR、ASPR-Max、CHI 与 VDN-FT/ER 的逐种子指标、同种子差值和诊断 CSV。 |
 | [SZC · TKPR-K1 共同前缀对照](comparisons/szc-vdn64-tkpr-k1-shared/README.md) | 双层 VDN64，seed 2222、3535，各 1 个 S 前缀与 5 个 Z→C 分支 | 学习曲线、ACC/BWT/FWT/AUC、同前缀差值、偏好诊断和 Z/C 配对更新时间。 |

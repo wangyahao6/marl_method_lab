@@ -1218,6 +1218,59 @@
         "实际有效对数和 Q-gap 分布由训练采样编号重建，包含重复抽取。",
         "gap_kept 是间隔筛选后的诊断总体，loss 进一步应用方法拓扑；Adjacent G1-G3 不进入损失。"
       ]
+    },
+    {
+      "id": "ts5-tkpr-cpr-1m",
+      "category": "comparisons",
+      "report": "comparisons/ts5-tkpr-cpr-1m/README.md",
+      "files": {
+        "runs": "comparisons/ts5-tkpr-cpr-1m/runs.csv",
+        "evaluations": "comparisons/ts5-tkpr-cpr-1m/evaluations.csv",
+        "stage_metrics": "comparisons/ts5-tkpr-cpr-1m/stage_metrics.csv",
+        "learning_curves": "comparisons/ts5-tkpr-cpr-1m/learning_curves.csv",
+        "paired_final": "comparisons/ts5-tkpr-cpr-1m/paired_final.csv",
+        "preference_diagnostics": "comparisons/ts5-tkpr-cpr-1m/preference_diagnostics.csv",
+        "cpr_reference_updates": "comparisons/ts5-tkpr-cpr-1m/cpr_reference_updates.csv",
+        "gradient_diagnostics": "comparisons/ts5-tkpr-cpr-1m/gradient_diagnostics.csv",
+        "memory_collection": "comparisons/ts5-tkpr-cpr-1m/memory_collection.csv",
+        "sampling_cost": "comparisons/ts5-tkpr-cpr-1m/sampling_cost.csv",
+        "independent_final": "comparisons/ts5-tkpr-cpr-1m/independent_final.csv",
+        "final_summary": "comparisons/ts5-tkpr-cpr-1m/final_summary.csv"
+      },
+      "task_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "training_seeds": [
+        3535,
+        2222
+      ],
+      "final_phase": 4,
+      "comparison": {
+        "kind": "shared_prefix_matched_by_seed",
+        "match_on": [
+          "seed",
+          "prefix_id"
+        ],
+        "primary_control": {
+          "method": "TKPR-K1",
+          "role": "shared-branch"
+        },
+        "additional_control": {
+          "method": "VDN-ER",
+          "role": "shared-branch"
+        }
+      },
+      "interpretation_limits": [
+        "两个训练种子、单TS5顺序；共同A仅计一次。B之后各方法独立训练。",
+        "最终独立进程复核复用focus评价种子，不是独立测试集。",
+        "K1/CPR总8条，Refresh每任务8条，未单独消融Refresh采样和刷新。",
+        "无本批FT分支，不把旧2M FT作为同前缀配对对照。",
+        "边界c的参考更新影响下一阶段；不能从局部梯度/掩码相关变化推断性能因果。"
+      ]
     }
   ]
 }
