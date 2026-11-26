@@ -26,6 +26,7 @@
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
+| [TS5-1M · 原生 TKPR-K1 Gap 消融](parameter-ablations/ts5-native-tkpr-k1-gap/README.md) | 原生 topk_preference(k=1)，gap0/0.5 × 2222/3535 | 完整共同历史池、无状态筛选、实际动作对计数与配对性能。 |
 | [TS5-1M · K1 与 gap0/0.5 扩展](parameter-ablations/ts5-vdn64-tc-gap-extension/README.md) | Seed2222/3535；10 新分支、6 旧 TC 分支复用 | 两个同种子四方法对照组、筛后共同状态、固定配额和 Q-gap。 |
 | [TS5-1M · 传递闭包覆盖率](parameter-ablations/ts5-vdn64-tc-coverage/README.md) | 单层 VDN64，三个种子，3 个新 FT 参考与 9 个同 S 分支 | 相同 K1、预算、距离配额下的 Micro/Macro TC、ACC/BWT/FWT/AUC、Q-gap 与机制诊断。 |
 | [SZC · TKPR K 值消融](parameter-ablations/szc-vdn64-tkpr-k/README.md) | 双层 VDN64，seed 1111，K=1、2、3、5 与 FRPR | 阶段末胜率、当前任务曲线、有效 K 分布及梯度诊断。 |

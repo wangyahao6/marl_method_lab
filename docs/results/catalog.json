@@ -1327,6 +1327,55 @@
         "间隔筛选同样作用于K1基础对，TC额外N−2预算与距离配额不降低。",
         "只有两个训练种子；图结构、TC及残余Q-gap差异不构成标量TC因果证明。"
       ]
+    },
+    {
+      "id": "ts5-native-tkpr-k1-gap",
+      "category": "parameter-ablations",
+      "report": "parameter-ablations/ts5-native-tkpr-k1-gap/README.md",
+      "files": {
+        "stage_metrics": "parameter-ablations/ts5-native-tkpr-k1-gap/stage_metrics.csv",
+        "runs": "parameter-ablations/ts5-native-tkpr-k1-gap/runs.csv",
+        "paired_gap05_minus_gap0": "parameter-ablations/ts5-native-tkpr-k1-gap/paired_gap05_minus_gap0.csv",
+        "learning_curves": "parameter-ablations/ts5-native-tkpr-k1-gap/learning_curves.csv",
+        "memory_copies": "parameter-ablations/ts5-native-tkpr-k1-gap/memory_copies.csv",
+        "training_pair_counts": "parameter-ablations/ts5-native-tkpr-k1-gap/training_pair_counts.csv",
+        "seed_summary": "parameter-ablations/ts5-native-tkpr-k1-gap/seed_summary.csv",
+        "independent_final": "parameter-ablations/ts5-native-tkpr-k1-gap/independent_final.csv",
+        "verification": "parameter-ablations/ts5-native-tkpr-k1-gap/verification.csv",
+        "historical_pair_inventory": "parameter-ablations/ts5-native-tkpr-k1-gap/historical_pair_inventory.csv",
+        "evaluations": "parameter-ablations/ts5-native-tkpr-k1-gap/evaluations.csv"
+      },
+      "task_order": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "training_seeds": [
+        2222,
+        3535
+      ],
+      "final_phase": 4,
+      "comparison": {
+        "kind": "native_TKPR_K1_gap_only_same_full_history",
+        "match_on": [
+          "seed",
+          "parent_run_id"
+        ],
+        "min_gap": [
+          0,
+          0.5
+        ],
+        "method": "topk_preference",
+        "k": 1
+      },
+      "interpretation_limits": [
+        "仅四条新增训练；没有参考重训或TC分支重跑。",
+        "两个gap使用相同完整历史轨迹；仅原生动作对筛选变化，零对状态仍保留。",
+        "原生 RankingPreference/topk_preference，不是 pair_tc_k1；历史池按任务边界激活。",
+        "S前缀每种子共享，两训练种子不足以推断普遍最优阈值。"
+      ]
     }
   ]
 }
