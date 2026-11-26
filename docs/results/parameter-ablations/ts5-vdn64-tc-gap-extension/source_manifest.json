@@ -11016,5 +11016,41 @@
       "ended": null,
       "exit_code": null
     }
-  ]
+  ],
+  "terminal_verification": {
+    "verified_at": "2026-11-26T16:17:29.246151+08:00",
+    "task_states": {
+      "ts5_tc_gap_extension_20261125_offline_verify": "completed",
+      "ts5_tc_gap_extension_20261125_gap0_k1_seed2222": "completed",
+      "ts5_tc_gap_extension_20261125_gap0_k1_seed2222_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_k1_seed2222": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_k1_seed2222_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_low_seed2222": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_low_seed2222_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_medium_seed2222": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_medium_seed2222_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_high_seed2222": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_high_seed2222_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap0_k1_seed3535": "completed",
+      "ts5_tc_gap_extension_20261125_gap0_k1_seed3535_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_k1_seed3535": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_k1_seed3535_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_low_seed3535": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_low_seed3535_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_medium_seed3535": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_medium_seed3535_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_high_seed3535": "completed",
+      "ts5_tc_gap_extension_20261125_gap05_high_seed3535_independent_final": "completed",
+      "ts5_tc_gap_extension_20261125_summary": "completed",
+      "ts5_tc_gap_extension_20261125_publication": "completed"
+    },
+    "new_training_completed": 10,
+    "new_independent_model_task_evaluations": 50,
+    "unique_comparison_runs": 18,
+    "unique_comparison_model_task_evaluations": 90,
+    "comparison_training_seeds": [
+      2222,
+      3535
+    ]
+  }
 }

@@ -30,3 +30,12 @@ Pair-violation and preference-loss diagnostics count repeated sampled historical
 All ten new training states, configurations, independent final evaluations (5 tasks × 128 episodes per model), and 40 frozen history masks were verified before packaging. Training commits and successful gate timing are in [source_manifest.json](source_manifest.json). The original three-seed dataset, including seed4646, is preserved [here](../ts5-vdn64-tc-coverage/README.md). Only seeds2222/3535 are in the present main comparisons.
 
 Offline Q-gap means/medians/std are in offline_statistics.csv and per-cohort offline_statistics.csv; histograms are in qgap_histogram.csv. TC state histograms combine the new controls and reused old TC masks. Raw masks, full history pools, checkpoints and training logs remain remote.
+
+## 2026-11-26 终态核验与结果解读
+
+本轮 23 个调度任务均为 completed，无失败或阻塞。10 条新增分支、50 条新增模型×任务独立评价（每条128局）齐全；复用原实验后共有18个唯一运行、90个唯一模型×任务终点评价。表中同一个 FT 参考在两个 gap 对照组各列一次，不是额外训练重复。配置、两种子范围、链接和40份新增历史掩码已核验。source_manifest.json 的初始 execution 记录采于发布任务执行中；terminal_verification 记录本次发布后的完整终态。
+
+- gap=0：K1-only / Low / Medium / High 的最终两种子平均 ACC 为 51.328% / 53.594% / 52.344% / 53.438%。
+- gap=0.5：对应均值为 44.922% / 47.656% / 46.719% / 47.969%。
+- Low 相对 K1，在 gap=0 的两个种子中 ACC 分别提高 +2.656、+1.875 pp；在 gap=0.5 中分别提高 +3.281、+2.188 pp。对应 BWT 差值也均为正。这里只报告两个种子的配对观察，不作显著性或普遍优越性判断。
+- 两种 gap 下，TC 三组的平均性能均不随 TC 覆盖率单调增加。gap=0.5 各方法的平均 ACC 低于 gap=0，但筛选后共同状态仅保留原总体约15%–17%，且筛后 K1 基础对数量改变；跨 gap 差值不能识别阈值本身的独立因果影响。Q-gap、阶段 AUC 和逐任务胜率保留在数据表中。
