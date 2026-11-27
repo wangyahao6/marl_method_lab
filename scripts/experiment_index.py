@@ -10,6 +10,7 @@ import re
 import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path, PurePosixPath
+from sanitize_experiment_metadata import redact
 
 UNKNOWN = 'unknown'
 RUN_FIELDS = ['run_id','experiment_id','experiment_ids','experiment_group_id','environment_id','benchmark_id','protocol_id','protocol_fingerprint','method','method_id','algorithm','method_variant_id','method_parameters','seed','status','result_status','git_commit','config_path','parent_run_id','role','attempt','attempt_source','logical_run_id','retry_of','run_path','result_paths','source_records','method_aliases','conflicts','execution_evidence','trained_steps','replay_on_switch','epsilon_on_switch','completed_phases','scheduler_task_ids','scheduler_dependencies','observed_at']
@@ -171,8 +172,8 @@ def refs_in(value, known):
     return sorted(set(re.findall(r'[A-Za-z0-9_.-]+', text)) & known.keys())
 
 
-def backbone_signature(text, class_name, agent=False):
-    """Version 1: active layer assignments and forward AST, independent of formatting."""
+def backbone_signature(text, class_name, agent=False, full_class=False):
+    """Version 2 adds full gate-class coverage to the version 1 backbone rules."""
     try:
         tree=ast.parse(text)
         # Python 3.12 adds an empty type_params field to otherwise identical functions.
@@ -181,6 +182,8 @@ def backbone_signature(text, class_name, agent=False):
                 delattr(node,'type_params')
         cls = next(n for n in tree.body
                    if isinstance(n, ast.ClassDef) and n.name == class_name)
+        if full_class:
+            return hashlib.sha256(ast.dump(cls,include_attributes=False).encode()).hexdigest()
         nodes = []
         for fn in cls.body:
             if not isinstance(fn, ast.FunctionDef):
@@ -202,7 +205,7 @@ class ArchitectureResolver:
     def __init__(self, root, registry):
         self.root, self.registry = Path(root), registry
         self.cache = {}
-        if registry.get('schema_version') != 1 or registry.get('resolver_version') != 1:
+        if registry.get('schema_version') != 1 or registry.get('resolver_version') != 2:
             raise ValueError('Unsupported architecture registry/resolver version')
 
     def code(self, commit, path):
@@ -237,7 +240,8 @@ class ArchitectureResolver:
         path = architecture['implementation_paths'][0]
         registry_path = 'src/modules/agents/__init__.py'
         mixer_path = 'src/modules/mixers/vdn.py'
-        texts = {p: self.code(commit, p) for p in (path, registry_path, mixer_path)}
+        gate_path = 'src/modules/layers/act_layer.py'
+        texts = {p: self.code(commit, p) for p in architecture['implementation_paths']}
         source['implementations'] = [dict(path='git:' + commit + ':' + p,
                                          sha256=hashlib.sha256(text.encode()).hexdigest())
                                      for p, text in texts.items() if text]
@@ -258,6 +262,9 @@ class ArchitectureResolver:
             source['source_verification']='launch_hashes_match_git'
         try:
             registry_nodes=ast.parse(texts[registry_path]).body
+            gate_imported=any(isinstance(n,ast.ImportFrom) and n.module=='modules.layers.act_layer'
+                              and any(a.name=='ActivateLayer' and a.asname in (None,a.name) for a in n.names)
+                              for n in ast.parse(texts[path]).body)
             imported=any(isinstance(n,ast.ImportFrom) and n.level==1 and
                          n.module==Path(path).stem and any(
                              a.name==architecture['agent_class'] and a.asname in (None,a.name)
@@ -272,8 +279,10 @@ class ArchitectureResolver:
             registered = False
         if not registered:
             source['reason'] = 'agent_registry_mismatch'
-        elif (backbone_signature(texts[path], architecture['agent_class'], True) != architecture['backbone_signature']
-              or backbone_signature(texts[mixer_path], 'VDNMixer') != architecture['mixer_signature']):
+        elif (not gate_imported
+              or backbone_signature(texts[path], architecture['agent_class'], True) != architecture['backbone_signature']
+              or backbone_signature(texts[mixer_path], 'VDNMixer') != architecture['mixer_signature']
+              or backbone_signature(texts[gate_path], 'ActivateLayer', full_class=True) != architecture['gate_signature']):
             source['reason'] = 'unrecognized_backbone_implementation'
         else:
             result['architecture_id'] = architecture['id']
@@ -281,8 +290,9 @@ class ArchitectureResolver:
         return result
 
 class Builder:
-    def __init__(self, root):
+    def __init__(self, root, include_local=False):
         self.root=Path(root);self.catalog=load_json((self.root/'docs/results/catalog.json').read_text())
+        self.include_local=include_local
         spec=self.catalog.get('global_index',{})
         self.sources=[Source(root)] + [Source(root,b['commit']) for b in spec.get('branch_sources',[])]
         self.runs=defaultdict(list);self.analyses=[];self.issues=[];self.tasks={};self.benchmarks={};self.sequences={};self.protocols=[];self.catalogs=[];self.runtime_analyses=[];self.scheduler_rows=[];self.collection=[]
@@ -315,6 +325,7 @@ class Builder:
         if source not in b['sources']:b['sources'].append(source)
         return env,bid
     def candidate(self,run_id,row,config,protocol,request,source,experiment,results,priority=1,status=None,evidence='published_run_record'):
+        row,config,protocol,request,source,results=redact([row,config,protocol,request,source,results])
         binding=self.bindings.get(experiment,{}).get('environment_id',UNKNOWN)
         # Native single-agent snapshots are flat config objects.
         env,bid=self.benchmark(config,protocol,request,binding,source)
@@ -624,7 +635,7 @@ class Builder:
                 self.scheduler_graph[x['analysis_id']]=x.get('spec',{})
         for x,source in self.scheduler_rows:
             spec=x.get('spec',{});argv=spec.get('argv',[]);rid=arguments(argv).get('run_id') or (Path(spec['run_dir']).name if spec.get('run_dir') else None)
-            if argv and argv[0]=='/usr/bin/true':
+            if argv and argv[0] in ('/usr/bin/true','tools/true'):
                 self.issues.append(dict(kind='scheduler_import_placeholder',task_id=x['analysis_id'],source=source));continue
             if rid in known:
                 row=known[rid]
@@ -648,7 +659,9 @@ class Builder:
         return result
 
     def build(self):
-        self.published();self.code_definitions();self.local_runtime();self.runtime();self.merge();self.scheduler_links();self.complete_results();self.analyses_index()
+        self.published();self.code_definitions()
+        if self.include_local:self.local_runtime()
+        self.runtime();self.merge();self.scheduler_links();self.complete_results();self.analyses_index()
         self.issues=[x for x in self.issues if x['kind']!='scheduler_training_observation' or x['run_id'] not in self.runs]
         for r in self.final:
             if r['parent_run_id'] not in ('none',UNKNOWN) and r['parent_run_id'] not in self.runs:self.issues.append(dict(kind='missing_parent',run_id=r['run_id'],parent=r['parent_run_id']))
@@ -679,16 +692,18 @@ class Builder:
 
 def csv_text(fields,rows):
     out=io.StringIO(newline='');w=csv.DictWriter(out,fieldnames=fields,lineterminator='\n');w.writeheader()
-    for r in rows:w.writerow({k:dumps(r.get(k)) if isinstance(r.get(k),(list,dict)) else r.get(k,UNKNOWN) for k in fields})
+    for r in redact(rows):w.writerow({k:dumps(r.get(k)) if isinstance(r.get(k),(list,dict)) else r.get(k,UNKNOWN) for k in fields})
     return out.getvalue()
 
 def artifacts(b):
     benches=dict(schema_version=1,task_sequences=sorted(b.sequences.values(),key=lambda x:x['id']),generated_by='scripts/experiment_index.py build',tasks=sorted(b.tasks.values(),key=lambda x:x['id']),benchmarks=sorted(b.benchmarks.values(),key=lambda x:x['id']),protocol_sources=sorted(b.protocols,key=lambda x:x['path']))
     summary=dict(run_count=len(b.final),analysis_count=len(b.analyses),architecture_counts=dict(Counter(r['architecture_id'] for r in b.final)),environment_counts=dict(Counter(r['environment_id'] for r in b.final)),status_counts=dict(Counter(r['status'] for r in b.final)),result_counts=dict(Counter(r['result_status'] for r in b.final)),issue_counts=dict(Counter(x['kind'] for x in b.issues)),issues=b.issues)
     summary['collection']=b.collection
+    summary['local_runtime_included']=b.include_local
     summary['branch_sources']=b.catalog.get('global_index',{}).get('branch_sources',[])
     raw=b.root/b.raw
     summary['runtime_snapshot_sha256']=hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else UNKNOWN
+    summary=redact(summary)
     return {'docs/architectures/architectures.json':json.dumps(b.architectures,ensure_ascii=False,indent=2)+'\n','docs/environments/environments.json':json.dumps(b.envs,ensure_ascii=False,indent=2)+'\n','docs/environments/benchmarks.json':json.dumps(benches,ensure_ascii=False,indent=2)+'\n','docs/results/run_index.csv':csv_text(RUN_FIELDS,b.final),'docs/results/analysis_index.csv':csv_text(ANALYSIS_FIELDS,b.analyses),'docs/results/index_audit.json':json.dumps(summary,ensure_ascii=False,indent=2)+'\n'}
 
 def read_runs(root):
@@ -739,7 +754,9 @@ def matrix(rows,axis,include_prefix=False,coverage='reported_completed',environm
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1]);sub=p.add_subparsers(dest='command',required=True)
-    sub.add_parser('build');sub.add_parser('check');sub.add_parser('summary')
+    for command in ('build','check'):
+        q=sub.add_parser(command);q.add_argument('--include-local',action='store_true',help='Explicitly scan accessible local Git worktree runs')
+    sub.add_parser('summary')
     for name in ('environments','benchmarks','tasks','task_sequences'):
         q=sub.add_parser(name);q.add_argument('--environment');q.add_argument('--observed',action='store_true')
     q=sub.add_parser('architectures');q.add_argument('--architecture');q.add_argument('--observed',action='store_true')
@@ -749,7 +766,7 @@ def main():
     q=sub.add_parser('matrix');q.add_argument('axis',choices=['environment-method','benchmark-seed','seed-coverage','architecture-method','architecture-environment']);q.add_argument('--experiment');q.add_argument('--environment');q.add_argument('--include-prefix',action='store_true');q.add_argument('--benchmark');q.add_argument('--architecture');q.add_argument('--method');q.add_argument('--seed');q.add_argument('--coverage',choices=['reported_completed','complete_result'],default='reported_completed')
     args=p.parse_args();root=args.root
     if args.command in ('build','check'):
-        b=Builder(root).build();files=artifacts(b)
+        b=Builder(root,include_local=args.include_local).build();files=artifacts(b)
         if args.command=='build':
             for name,text in files.items():(root/name).parent.mkdir(parents=True,exist_ok=True);(root/name).write_text(text)
         else:

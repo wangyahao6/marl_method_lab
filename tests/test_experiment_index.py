@@ -7,6 +7,7 @@ import sqlite3
 import hashlib
 import argparse
 import ast
+import sys
 import subprocess
 import tempfile
 import unittest
@@ -17,7 +18,8 @@ from unittest.mock import patch
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts/experiment_index.py'
 SPEC = importlib.util.spec_from_file_location('experiment_index', SCRIPT)
 index = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(index)
+with patch.object(sys, 'path', [str(SCRIPT.parent), *sys.path]):
+    SPEC.loader.exec_module(index)
 
 
 class ExperimentIndexTest(unittest.TestCase):
@@ -45,7 +47,7 @@ class ExperimentIndexTest(unittest.TestCase):
             return subprocess.check_output(['git', *args], cwd=self.root, text=True).strip()
         git('init', '-q')
         for path in ('src/modules/agents/rnn_agent.py', 'src/modules/agents/single_ff_rnn_agent.py',
-                     'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py'):
+                     'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py', 'src/modules/layers/act_layer.py'):
             target = self.root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text((SCRIPT.parents[1] / path).read_text())
@@ -78,6 +80,20 @@ class ExperimentIndexTest(unittest.TestCase):
         self.assertEqual(b.final, [])
         self.assertTrue(b.benchmarks)
         self.assertTrue(all(x['evidence_level'] == 'code_only' for x in b.benchmarks.values()))
+
+    def test_local_worktrees_are_only_scanned_with_explicit_opt_in(self):
+        with patch.object(index.Builder, 'local_runtime') as local:
+            b = self.builder().build()
+            local.assert_not_called()
+            self.assertFalse(json.loads(index.artifacts(b)['docs/results/index_audit.json'])['local_runtime_included'])
+        with patch.object(index.Builder, 'local_runtime') as local:
+            index.Builder(self.root, include_local=True).build()
+            local.assert_called_once()
+        with patch.object(index.Builder, 'local_runtime') as local:
+            with patch('sys.argv', ['experiment_index', '--root', str(self.root), 'build', '--include-local']):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    index.main()
+            local.assert_called_once()
 
     def test_dedup_memberships_and_empty_results_stay_runtime_only(self):
         b = self.builder()
@@ -152,7 +168,7 @@ class ExperimentIndexTest(unittest.TestCase):
         git, commit = self.architecture_code()
         resolver = self.builder().architecture_resolver
         config = dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac')
-        paths = ('src/modules/agents/rnn_agent.py', 'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py')
+        paths = ('src/modules/agents/rnn_agent.py', 'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py', 'src/modules/layers/act_layer.py')
         hashes = {p: hashlib.sha256((self.root / p).read_bytes()).hexdigest() for p in paths}
         r = resolver.resolve(config, commit, 'config', hashes)
         self.assertEqual(r['architecture_source']['source_verification'], 'launch_hashes_match_git')
@@ -166,6 +182,58 @@ class ExperimentIndexTest(unittest.TestCase):
         r = resolver.resolve(config, git('rev-parse', 'HEAD'), 'config')
         self.assertEqual(r['architecture_id'], 'unknown')
         self.assertEqual(r['architecture_source']['reason'], 'unrecognized_backbone_implementation')
+
+    def test_gate_is_required_for_both_hash_verification_and_backbone_matching(self):
+        git, commit = self.architecture_code()
+        resolver = self.builder().architecture_resolver
+        config = dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac')
+        files = ('src/modules/agents/rnn_agent.py','src/modules/agents/__init__.py','src/modules/mixers/vdn.py')
+        hashes = {p: hashlib.sha256((self.root / p).read_bytes()).hexdigest() for p in files}
+        r = resolver.resolve(config, commit, 'config', hashes)
+        self.assertEqual(r['architecture_source']['source_verification'], 'git_commit_only')
+        gate = 'src/modules/layers/act_layer.py'
+        r = resolver.resolve(config, commit, 'config', dict(hashes, **{gate: 'mismatch'}))
+        self.assertEqual(r['architecture_source']['reason'], 'launch_source_hash_mismatch')
+        path = self.root / gate
+        path.write_text(path.read_text().replace('th.ones(dim)', 'th.zeros(dim)'))
+        git('add', '.')
+        git('-c', 'user.name=Index Test', '-c', 'user.email=index@example.invalid', 'commit', '-qm', 'changed gate initialization')
+        r = resolver.resolve(config, git('rev-parse', 'HEAD'), 'config')
+        self.assertEqual(r['architecture_id'], 'unknown')
+        self.assertEqual(r['architecture_source']['reason'], 'unrecognized_backbone_implementation')
+        old = json.loads((self.root / 'docs/architectures/architectures.json').read_text())
+        old['resolver_version'] = 1
+        with self.assertRaisesRegex(ValueError, 'Unsupported'):
+            index.ArchitectureResolver(self.root, old)
+
+    def test_metadata_redaction_preserves_identity_and_is_idempotent(self):
+        records = [dict(kind='collection',host='private-machine',roots=['/home/private/project']),
+                   dict(kind='runtime',host='private-machine',root='/home/private/project',run_id='run-1',
+                        run_dir='/home/private/project/runs/run-1',
+                        config={'seed':3535,'agent':'rnn','rnn_hidden_dim':64},
+                        launch={'request':{'parent':'/home/private/project/runs/prefix-1'},'git_commit':'a'*40},
+                        status_documents={'status.json':{'state':'completed','t_env':100}},
+                        error='File "/home/private/project/src/train.py"; PYTHONPATH=/home/private/lib:/home/private/deps',
+                        command=['/usr/bin/env','C:\\Users\\Private Name\\python.exe'])]
+        safe = index.redact(records)
+        self.assertEqual(index.redact(safe), safe)
+        text = json.dumps(safe)
+        self.assertNotIn('/home/private', text)
+        self.assertNotIn('private-machine', text)
+        self.assertNotIn('Private Name', text)
+        self.assertEqual(safe[1]['run_id'], 'run-1')
+        self.assertTrue(safe[1]['run_dir'].endswith('/runs/run-1'))
+        self.assertTrue(safe[1]['launch']['request']['parent'].endswith('/runs/prefix-1'))
+        self.assertEqual(safe[1]['config'], records[1]['config'])
+        self.assertEqual(safe[1]['status_documents'], records[1]['status_documents'])
+        self.assertEqual(safe[1]['launch']['git_commit'], 'a'*40)
+        self.assertEqual(index.redact({'parent':'/private/location/prefix-1'})['parent'].split('/')[-1], 'prefix-1')
+        self.assertEqual(index.redact('https://example.com/source'), 'https://example.com/source')
+        path = index.redact('/private/lib')
+        self.assertEqual(index.redact('PYTHONPATH=/private/lib:/private/deps').split(':')[0], 'PYTHONPATH='+path)
+        remote = index.redact('private-user@private-machine:/private/project/runs/run-1')
+        self.assertNotIn('private-user', remote)
+        self.assertNotIn('private-machine', remote)
 
     def test_architecture_conflicts_remain_unknown(self):
         _, commit = self.architecture_code()
@@ -329,7 +397,8 @@ class ExperimentIndexTest(unittest.TestCase):
         self.write('runs/actual/status.json', {'t_env': 10})
         self.write('runs/actual/config.json', {'seed': 3535})
         self.write('runs/actual/launch.json', {'source_sha256': {
-            'src/modules/agents/rnn_agent.py': 'network-hash', 'docs/unrelated.md': 'unrelated-hash'}})
+            'src/modules/agents/rnn_agent.py': 'network-hash',
+            'src/modules/layers/act_layer.py':'gate-hash', 'docs/unrelated.md': 'unrelated-hash'}})
         database = self.root / 'runtime/scheduler/state.sqlite3'
         database.parent.mkdir(parents=True)
         connection = sqlite3.connect(database)
@@ -345,7 +414,10 @@ class ExperimentIndexTest(unittest.TestCase):
         records = [json.loads(line) for line in output.getvalue().splitlines()]
         self.assertEqual([r['kind'] for r in records], ['collection', 'runtime', 'scheduler_training'])
         self.assertEqual(records[1]['config']['seed'], 3535)
-        self.assertEqual(records[1]['launch']['source_sha256'], {'src/modules/agents/rnn_agent.py': 'network-hash'})
+        self.assertEqual(records[1]['launch']['source_sha256'], {
+            'src/modules/agents/rnn_agent.py': 'network-hash','src/modules/layers/act_layer.py':'gate-hash'})
+        registered=set().union(*(set(a['implementation_paths']) for a in self.builder().architectures['architectures']))
+        self.assertEqual(registered,set(collector.ARCHITECTURE_FILES))
         self.assertEqual(database.read_bytes(), before)
 
 

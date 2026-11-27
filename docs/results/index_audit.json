@@ -3446,18 +3446,23 @@
   ],
   "collection": [
     {
-      "kind": "collection",
-      "host": "rl-navigation-ubuntu",
       "captured_at": "2026-11-27T02:37:29.743616+00:00",
+      "host": "host-bd6b3638f6462008",
+      "kind": "collection",
+      "redaction": {
+        "version": 1,
+        "policy": "stable_host_and_location_aliases"
+      },
       "roots": [
-        "/home/wyh/marl_method_lab",
-        "/home/wyh/marl_method_lab_aspr_multigroup",
-        "/home/wyh/marl_method_lab_cpr_anchor",
-        "/home/wyh/marl_method_lab_single_agent_tkpr",
-        "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124"
+        "repos/repo-efc94568b23ffcf8",
+        "repos/repo-bf32d3344f22ca15",
+        "repos/repo-4766dd55e21a4623",
+        "repos/repo-d60440d2165b3536",
+        "repos/repo-962836db60436cf9"
       ]
     }
   ],
+  "local_runtime_included": false,
   "branch_sources": [
     {
       "ref": "refs/remotes/origin/feature/single-agent-tkpr-mountaincar",
@@ -3496,5 +3501,5 @@
       "commit": "2f0dea0734cfab543cd10a30b3979db72cd7df30"
     }
   ],
-  "runtime_snapshot_sha256": "b4de70bd4df96e9e5c1dfe724825dda7ef36144257c4b67787c8719df93c7432"
+  "runtime_snapshot_sha256": "963091c9ed766d7e8762952368e1691e601de414b8639daa65ce2c5275700aee"
 }

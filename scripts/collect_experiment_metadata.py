@@ -4,6 +4,7 @@ import datetime
 import json
 import sqlite3
 from pathlib import Path
+from sanitize_experiment_metadata import redact
 
 
 STATUS_FILES = ('status.json', 'launcher_status.json', 'training_complete.json')
@@ -11,7 +12,8 @@ LAUNCH_FIELDS = ('request', 'details', 'git_commit', 'started', 'output', 'metad
                  'command', 'python', 'sc2path', 'git_status')
 ARCHITECTURE_FILES = ('src/modules/agents/rnn_agent.py',
                       'src/modules/agents/single_ff_rnn_agent.py',
-                      'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py')
+                      'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py',
+                      'src/modules/layers/act_layer.py')
 
 
 def read(path):
@@ -22,7 +24,7 @@ def read(path):
 
 
 def emit(record):
-    print(json.dumps(record, sort_keys=True))
+    print(json.dumps(redact(record), sort_keys=True))
 
 
 def collect(roots, host):

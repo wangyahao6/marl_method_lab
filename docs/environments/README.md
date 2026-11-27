@@ -53,7 +53,7 @@ python3 scripts/experiment_index.py show minatar_ft_tkpr_k1_seed3535_20261122_ft
 
 生成器直接复用 `catalog.json`、各实验 `runs.csv`、配置快照、阶段结果和 `configs/`。当前已检查本地 Git refs，将有独有历史记录／配置的分支 SHA 固定在 Catalog 的 `branch_sources`；用 Git 对象只读访问，不切分支、不合并、不执行历史代码。`git:<sha>:<path>`表示该版本中的文件，不是当前检出路径。复现生成需要这些提交对象仍在本地；缺失时明确报错，不静默漏扫。新增分支记录时人工审查并更新此唯一来源列表，再生成即可。
 
-运行元数据输入是 [runtime_records.jsonl](../results/runtime_records.jsonl) 的冻结导出，头记录包含采集时间、主机和目录。本次快照为 2026-11-27，包含五个 Ubuntu 检出及调度任务；不能作为以后的实时运行状态。生成时另只读扫描本机注册 worktree 中可访问的 `runs/` 元数据。未连接远端的目录不声称已扫描。
+运行元数据输入是 [runtime_records.jsonl](../results/runtime_records.jsonl) 的冻结导出，头记录包含采集时间、主机和目录。本次快照为 2026-11-27，包含五个 Ubuntu 检出及调度任务；不能作为以后的实时运行状态。默认 build/check 不扫描本机 Git worktree，只依赖仓库中冻结记录和固定提交。显式 `build --include-local` 才额外只读扫描本机注册 worktree 的 `runs/` 元数据；核对该视图需使用 `check --include-local`。审计中的 `local_runtime_included`记录这一选择；仓库发布视图使用默认模式。未连接远端的目录不声称已扫描。
 
 需要更新运行快照时，在已授权的实验主机使用只读导出器，例如：
 
@@ -61,6 +61,20 @@ python3 scripts/experiment_index.py show minatar_ft_tkpr_k1_seed3535_20261122_ft
 python3 scripts/collect_experiment_metadata.py --host HOST --root /absolute/repo > /tmp/runtime_records.new.jsonl
 ```
 
-先核对新导出范围，再用新快照更新索引。导出器只读取元数据，SQLite 使用 `mode=ro`；不读取模型权重、不调用 scheduler 的写连接、不提交或启动任务。生成文件是可重建视图，更新时不手工编辑 CSV 或矩阵，也不改历史实验文件。`check`重建并逐字比较生成物；来源数据发生变化时应重新生成。
+先核对新导出范围，再用新快照更新索引。导出器默认将主机名和文件系统位置替换为稳定哈希别名：host-*、repos/repo-*、external/path-*；保留 run_id、父子关系、任务、方法、种子、状态、时间和 Git 提交。嵌套命令、PYTHONPATH 和异常堆栈中的路径也处理。别名是追溯位置的逻辑标识，不能直接作为实际执行路径。导出器只读取元数据，SQLite 使用 `mode=ro`；不读取模型权重、不调用 scheduler 的写连接、不提交或启动任务。生成文件是可重建视图，更新时不手工编辑 CSV 或矩阵，也不改历史实验文件。`check`重建并逐字比较生成物；来源数据发生变化时应重新生成。
 
 当前局限：部分早期运行没有 Catalog 实验 ID、明确 parent 或协议 ID；许多旧评价／汇总任务只有批次路径，无法唯一确定输入运行。缺失训练输出的调度任务另列待确认。MinAtar/MountainCar 的源码与结果仍在其原功能分支，由固定 SHA 引用；没有迁移或合并到当前分支。这里只整理可追溯关系，不重算指标、不验证模型恢复等价性，也不提供后台同步。
+
+## 冻结元数据脱敏
+
+本次只改写索引用的 `runtime_records.jsonl`及其派生视图，不改实验主机原记录、历史协议、配置快照或实验数据。主机和根位置别名由原值确定性生成，不发布原值映射；相同原值对应同一别名。run ID、源码哈希、种子、进度、状态与行顺序保留，第一条 collection 标明脱敏版本。仓库外私有原件用于保留追溯，未加入 Git。
+
+已有私有导出可使用以下命令生成发布副本（工具可重复执行，结果不二次哈希／改名）：
+
+```sh
+python3 scripts/sanitize_experiment_metadata.py /private/export.jsonl /tmp/runtime_records.public.jsonl
+```
+
+生成器在构造运行身份前脱敏路径元数据，并对派生 CSV 与审计中的来源位置应用同一规则；旧发布配置保持原文，不反写。位置别名变化会使包含来源路径的派生协议／方法签名相应重算，不代表训练方法或历史协议被改变。默认 build/check 不受本机其他 worktree 的增删影响。
+
+脱敏仅覆盖当前文件版本；旧 Git 提交和既有实验报告仍可能保留原位置，本次未重写 Git 历史或改动那些报告。稳定哈希别名用于减少直接暴露，不是对已知原值的加密保护。

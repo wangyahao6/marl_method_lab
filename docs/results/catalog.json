@@ -1439,6 +1439,6 @@
     },
     "architectures": "../architectures/architectures.json",
     "method_identity_version": 2,
-    "architecture_resolver_version": 1
+    "architecture_resolver_version": 2
   }
 }

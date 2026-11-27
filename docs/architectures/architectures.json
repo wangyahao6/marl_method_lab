@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "resolver_version": 1,
+  "resolver_version": 2,
   "architectures": [
     {
       "id": "vdn_2ff_h64",
@@ -33,7 +33,7 @@
       "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
       "backbone_signature": "0e77818a82af25678ebd9df0ac87fb04c040fa93402089e1b98377fdd1a26b26",
       "mixer_signature": "e05b0eab1a416aec59c27cf564c07cf71ae507ebb7f87ec754873af6413fa267",
-      "notes": "H is both feedforward and GRU width. ActivateLayer is a diagnostic/intervention gate. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
       "actual_run_count": 212,
       "seeds": [
         "1111",
@@ -42,7 +42,9 @@
         "3535",
         "4242",
         "4567"
-      ]
+      ],
+      "gate_signature": "79541c8d6c29f13230e5d8eed8dd19eecddad8c441716fcd671e57ef5e409a10",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
     },
     {
       "id": "vdn_1ff_h64",
@@ -72,14 +74,16 @@
       "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
       "backbone_signature": "861871e36aebde39d2c36dc9285eab98fc37ee8336360d41f68a7fbee609c498",
       "mixer_signature": "e05b0eab1a416aec59c27cf564c07cf71ae507ebb7f87ec754873af6413fa267",
-      "notes": "H is both feedforward and GRU width. ActivateLayer is a diagnostic/intervention gate. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
       "actual_run_count": 55,
       "seeds": [
         "1234",
         "2222",
         "3535",
         "4646"
-      ]
+      ],
+      "gate_signature": "79541c8d6c29f13230e5d8eed8dd19eecddad8c441716fcd671e57ef5e409a10",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
     },
     {
       "id": "vdn_1ff_h128",
@@ -109,12 +113,14 @@
       "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
       "backbone_signature": "861871e36aebde39d2c36dc9285eab98fc37ee8336360d41f68a7fbee609c498",
       "mixer_signature": "e05b0eab1a416aec59c27cf564c07cf71ae507ebb7f87ec754873af6413fa267",
-      "notes": "H is both feedforward and GRU width. ActivateLayer is a diagnostic/intervention gate. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
       "actual_run_count": 32,
       "seeds": [
         "1234",
         "3535"
-      ]
+      ],
+      "gate_signature": "79541c8d6c29f13230e5d8eed8dd19eecddad8c441716fcd671e57ef5e409a10",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
     }
   ]
 }
