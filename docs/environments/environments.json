@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "environments": [
+    {
+      "id": "smac",
+      "name": "SMAC",
+      "implementation_paths": [
+        "src/envs/__init__.py",
+        "docs/PROVENANCE.md"
+      ],
+      "support_notes": "External SMAC dependency; configured availability does not verify runtime.",
+      "actual_run_count": 5,
+      "reported_complete_result_count": 0,
+      "evidence_level": "actual_runs"
+    },
+    {
+      "id": "smacv2",
+      "name": "SMACv2",
+      "implementation_paths": [
+        "vendor/smacv2/smacv2",
+        "drivers/continual/environment.py"
+      ],
+      "support_notes": "Vendored implementation and custom continual adapters.",
+      "actual_run_count": 330,
+      "reported_complete_result_count": 156,
+      "evidence_level": "complete_results"
+    },
+    {
+      "id": "mpe",
+      "name": "MPE",
+      "implementation_paths": [
+        "src/envs/particle/particle.py",
+        "src/envs/particle/scenarios/simple_tag_coop.py"
+      ],
+      "support_notes": "Legacy adapter; registration catches import failures, execution support unverified.",
+      "actual_run_count": 0,
+      "reported_complete_result_count": 0,
+      "evidence_level": "code_only"
+    },
+    {
+      "id": "stag-hunt",
+      "name": "Stag Hunt",
+      "implementation_paths": [
+        "src/envs/stag_hunt/stag_hunt.py"
+      ],
+      "support_notes": "Code present; no verified run found yet.",
+      "actual_run_count": 0,
+      "reported_complete_result_count": 0,
+      "evidence_level": "code_only"
+    },
+    {
+      "id": "minatar",
+      "name": "MinAtar",
+      "implementation_paths": [
+        "git:c54a6cea7a18601ce793fbf3245dba17f4f5e45f:src/single_agent/minatar_env.py"
+      ],
+      "support_notes": "Branch-only implementation; official v0 six-action adapter, padded observations.",
+      "actual_run_count": 2,
+      "reported_complete_result_count": 2,
+      "evidence_level": "complete_results"
+    },
+    {
+      "id": "gym-classic-control",
+      "name": "Gymnasium Classic Control",
+      "implementation_paths": [
+        "git:c54a6cea7a18601ce793fbf3245dba17f4f5e45f:src/single_agent/mountaincar.py"
+      ],
+      "support_notes": "Historical custom MountainCar task implementation, branch-only.",
+      "actual_run_count": 4,
+      "reported_complete_result_count": 4,
+      "evidence_level": "complete_results"
+    }
+  ]
+}
