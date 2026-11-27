@@ -1,0 +1,3505 @@
+{
+  "run_count": 341,
+  "analysis_count": 416,
+  "architecture_counts": {
+    "unknown": 42,
+    "vdn_2ff_h64": 212,
+    "vdn_1ff_h64": 55,
+    "vdn_1ff_h128": 32
+  },
+  "environment_counts": {
+    "smacv2": 330,
+    "minatar": 2,
+    "gym-classic-control": 4,
+    "smac": 5
+  },
+  "status_counts": {
+    "completed": 331,
+    "failed": 10
+  },
+  "result_counts": {
+    "runtime_only": 164,
+    "reported_complete_result": 162,
+    "published_partial_or_unverified": 6,
+    "reported_prefix_result": 9
+  },
+  "issue_counts": {
+    "scheduler_without_runtime_evidence": 21,
+    "unresolved_run_fields": 170,
+    "unresolved_analysis_inputs": 294
+  },
+  "issues": [
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_Aprefix_seed1234_20261107_attempt001",
+      "run_id": "ts7_vdn_Aprefix_seed1234_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=362"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_Aprefix_seed4567_20261107_attempt001",
+      "run_id": "ts7_vdn_Aprefix_seed4567_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=363"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_Aprefix_seed3535_20261107_attempt001",
+      "run_id": "ts7_vdn_Aprefix_seed3535_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=364"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_N_seed1234_20261107_attempt001",
+      "run_id": "ts6_vdn_N_seed1234_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=365"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_A2_union_seed1234_20261107_attempt001",
+      "run_id": "ts6_vdn_A2_union_seed1234_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=366"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_N_seed4567_20261107_attempt001",
+      "run_id": "ts6_vdn_N_seed4567_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=367"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_A2_union_seed4567_20261107_attempt001",
+      "run_id": "ts6_vdn_A2_union_seed4567_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=368"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_N_seed3535_20261107_attempt001",
+      "run_id": "ts6_vdn_N_seed3535_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=369"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts6_vdn_A2_union_seed3535_20261107_attempt001",
+      "run_id": "ts6_vdn_A2_union_seed3535_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=370"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_N_seed1234_20261107_attempt001",
+      "run_id": "ts7_vdn_N_seed1234_20261107_attempt001",
+      "state": "completed",
+      "source": "docs/results/runtime_records.jsonl#line=371"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_A2_union_seed1234_20261107_attempt001",
+      "run_id": "ts7_vdn_A2_union_seed1234_20261107_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=372"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_N_seed4567_20261107_attempt001",
+      "run_id": "ts7_vdn_N_seed4567_20261107_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=373"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_A2_union_seed4567_20261107_attempt001",
+      "run_id": "ts7_vdn_A2_union_seed4567_20261107_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=374"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_N_seed3535_20261107_attempt001",
+      "run_id": "ts7_vdn_N_seed3535_20261107_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=375"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts7_vdn_A2_union_seed3535_20261107_attempt001",
+      "run_id": "ts7_vdn_A2_union_seed3535_20261107_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=376"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt002",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt002",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=393"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts8_chi_release_3535_20261112_vdn_1ff_immediate_attempt001",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_immediate_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=573"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts8_chi_release_3535_20261112_vdn_1ff_50k_attempt001",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_50k_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=574"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts8_chi_release_3535_20261112_vdn_1ff_100k_attempt001",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_100k_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=575"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts8_chi_release_3535_20261112_vdn_1ff_200k_attempt001",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_200k_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=576"
+    },
+    {
+      "kind": "scheduler_without_runtime_evidence",
+      "task_id": "ts8_chi_release_3535_20261112_vdn_1ff_keep_attempt001",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_keep_attempt001",
+      "state": "failed",
+      "source": "docs/results/runtime_records.jsonl#line=577"
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_Aprefix_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_G12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_G1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_G2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_N_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_R12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_R1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_R2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_T12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_T1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_M_T2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_G12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_G1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_G2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_N_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_R12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_R1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_R2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_T12_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_T1_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "hetero_R_T2_seed3535_20261101_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "minatar_ft_tkpr_k1_seed3535_20261122_ft_attempt001",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "minatar_ft_tkpr_k1_seed3535_20261122_tkpr_k1_attempt001",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "mountaincar_tkpr_3535_20261122_dqn_ft",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "mountaincar_tkpr_3535_20261122_dqn_tkpr_k1",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "mountaincar_tkpr_3535_20261122_dqn_tkpr_k1_w",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "mountaincar_tkpr_3535_20261122_dqn_tkpr_k2",
+      "fields": [
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_2s3z_detect_seed1111_20261101_attempt003",
+      "fields": [
+        "experiment_id",
+        "protocol_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_2s3z_detect_seed2222_20261101_attempt003",
+      "fields": [
+        "experiment_id",
+        "protocol_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_2s3z_detect_seed3535_20261101_attempt003",
+      "fields": [
+        "experiment_id",
+        "protocol_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_A2_1M_baseline_seed2222_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_A2_1M_baseline_seed3535_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_A2_1M_softprotect_seed2222_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_A2_1M_softprotect_seed3535_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_baseline_seed1111_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "qmix_ABA_softprotect_seed1111_20261031",
+      "fields": [
+        "experiment_id",
+        "parent_run_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "szc_vdn64_adam_1m_3535_20261120_S_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "szc_vdn64_t1pr_seed2222_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "szc_vdn64_t1pr_seed3535_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "trhr_single_5m6m_baseline_seed1234_20261109_attempt001",
+      "fields": [
+        "experiment_id",
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "trhr_single_5m6m_trhr_seed1234_20261109_attempt001",
+      "fields": [
+        "experiment_id",
+        "protocol_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_A1_linear_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_A1_union_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_A2_linear_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_A2_union_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_Aprefix_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_N_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn64_aspr_3535_20261112_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff64_aspr_3535_20261112_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_activation_3535_20261110_A_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_A_union_TRHR_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_A_union_TRHR_attempt002",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_A_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_A_union_attempt002",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_Aprefix_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt003",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_TRHR_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_128_trhr_3535_20261109_TRHR_attempt002",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_1ff_N_seed3535_20261110_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_gt3_seed1234_20261108_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_gt3_seed3535_20261108_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_gt3_seed4567_20261108_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_high_seed1234_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_high_seed3535_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_high_seed4567_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_low_seed1234_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_low_seed3535_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_low_seed4567_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_middle_seed1234_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_middle_seed3535_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_localgem_middle_seed4567_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_matched_threshold_A2_union_seed1234_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_matched_threshold_A2_union_seed4567_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_matched_top3_A2_union_seed3535_20261104_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_overallunion_A2_union_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_A2_union_seed1234_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_A2_union_seed4567_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_Aprefix_seed1234_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_Aprefix_seed4567_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_N_seed1234_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_top3_N_seed4567_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_typeunion_A2_union_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_typeunion_Aprefix_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts3_vdn_typeunion_N_seed3535_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_chi_selection_matched_3535_20261111_Bprefix_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn64_a2_chi_3535_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_chi_3535_20261111_A_chi_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_chi_3535_20261111_A_chi_input_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_chi_3535_20261111_A_chi_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_chi_3535_20261111_A_chi_union_input_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_chi_trhr_from_A_3535_20261112_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_A_equal_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_A_union_TRHR_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_A_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_Aprefix_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_N_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_3535_20261111_TRHR_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_supplement_3535_20261111_chi_trhr_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_128_trhr_supplement_3535_20261111_trhr_from_A_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_N_seed3535_20261111_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_softprotect_3535_20261111_A_chi_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_softprotect_3535_20261111_A_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_1ff_softprotect_3535_20261111_Aprefix_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_A1_linear_seed4242_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_A2_linear_seed4242_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_N_seed3535_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts4_vdn_N_seed4242_20261102_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts5_vdn_1ff_N_seed3535_20261110_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts6_vdn_1ff_128_N_seed1234_pertask_20261109_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts6_vdn_1ff_N_seed1234_pertask_20261109_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_100k_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_200k_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_50k_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_immediate_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_keep_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_128_search_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_chi_release_3535_20261112_vdn_1ff_search_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_vdn_1ff_128_N_seed3535_20261111_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_vdn_1ff_N_seed3535_20261111_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_vdn_1ff_softprotect_3535_20261111_A_chi_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_vdn_1ff_softprotect_3535_20261111_A_union_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "ts8_vdn_1ff_softprotect_3535_20261111_Aprefix_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CSZ_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CSZ_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CSZ_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CS_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CS_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CS_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZS_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZS_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZS_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZ_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZ_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_CZ_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_C_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_C_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_C_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SCZ_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SCZ_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SCZ_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SC_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SC_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SC_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZC_ASPR_seed2222_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZC_ASPR_seed3535_20261113_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZC_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZC_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZC_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZ_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZ_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_SZ_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_S_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_S_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_S_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZCS_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZCS_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZCS_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZC_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZC_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZC_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZSC_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZSC_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZSC_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZS_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZS_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_ZS_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_Z_seed1111_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_Z_seed2222_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_run_fields",
+      "run_id": "vdnh_Z_seed3535_20261103_attempt001",
+      "fields": [
+        "experiment_id"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "smacv2_counterfactual_20261118_attempt001",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc-vdn64-action-intervention",
+      "inputs": [
+        "szc_vdn64_action_intervention_20261117_attempt002",
+        "szc_vdn64_action_intervention_20261117_pilot003"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-00-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-00-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-01-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-01-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-02-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-02-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-03-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-03-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-04-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-04-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-05-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-05-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-06-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-06-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt001-case-07-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-00-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-00-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-01-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-01-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-02-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-02-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-03-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-03-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-04-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-04-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-05-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-05-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-06-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-06-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-07-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-07-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-08-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-08-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-09-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-09-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-10-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-10-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-11-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-11-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-12-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-12-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-13-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-13-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-14-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-14-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-15-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-15-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-16-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-16-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-17-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-17-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-18-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-18-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-19-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-19-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-20-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-case-20-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-00-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-00-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-01-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-01-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-02-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-02-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-03-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-03-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-04-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-04-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-05-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-05-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-06-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-06-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-07-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-07-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-08-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-08-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-09-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-reference-09-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_attempt002-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-case-00-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-case-00-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-case-01-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-case-01-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-reference-00-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-reference-00-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-reference-01-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-reference-01-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot001-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-case-00-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-case-00-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-case-01-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-case-01-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-reference-00-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-reference-00-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-reference-01-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-reference-01-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot002-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-case-00-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-case-00-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-case-01-A",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-case-01-B",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-reference-00-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-reference-00-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-reference-01-C",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-reference-01-D",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_pilot003-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_intervention_20261117_reset_benchmark",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_action_regret_20261117_attempt001",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-stalker-158e651caa6b659f-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-stalker-91b23e4bd06d32e6-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-stalker-cec458a1884efa98-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-49ffcd505b228ed2-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-7680c083fbeeb14e-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-7a2294fef56c68e7-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-7b893ede5048a98c-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-992410da6a2977f5-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-a96c38b8940b9093-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-b66e5e35e024f3b5-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117-zealot-c2b0edbf44f80577-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-stalker-158e651caa6b659f-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-stalker-91b23e4bd06d32e6-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-stalker-cec458a1884efa98-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-49ffcd505b228ed2-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-7680c083fbeeb14e-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-7a2294fef56c68e7-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-7b893ede5048a98c-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-992410da6a2977f5-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-a96c38b8940b9093-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-b66e5e35e024f3b5-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_greedy_action_agreement_20261117_attempt002-zealot-c2b0edbf44f80577-f075736e",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_2222_s_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_2222_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_2222_z_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_3535_s_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_3535_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_pilot_20261119_attempt001_3535_z_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_smoke_20261119_attempt001",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_2222_s_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_2222_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_2222_z_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_3535_s_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_3535_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_3535_z_after_c",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_20261120_attempt001_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_smoke_20261120_attempt001_2222_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "szc_vdn64_shapley_frpr_validation_smoke_20261120_attempt002_2222_s_after_z",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_1ff_128_activation_3535_20261110_summary",
+      "inputs": [
+        "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt002"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_1ff_128_trhr_3535_20261109_attempt002_summary",
+      "inputs": [
+        "ts3_vdn_1ff_128_trhr_3535_20261109_N_attempt002"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_E_rank_seed3535_20261110_attempt002",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_report",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_A_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_A_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_A_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_A_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_B_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_B_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_B_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_B_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_C_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_C_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_C_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_C_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_D_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_D_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_D_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_D_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_E_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_E_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_E_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed1234_E_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_A_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_A_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_A_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_A_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_B_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_B_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_B_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_B_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_C_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_C_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_C_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_C_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_D_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_D_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_D_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_D_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_E_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_E_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_E_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed3535_E_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_A_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_A_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_A_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_A_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_B_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_B_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_B_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_B_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_C_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_C_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_C_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_C_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_D_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_D_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_D_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_D_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_E_block0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_E_block1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_E_block2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_seed4567_E_block3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_final_union_ablation_20261110_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s1234_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s1234_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s1234_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s1234_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s3535_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s3535_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s3535_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s3535_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s4567_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s4567_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s4567_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_s4567_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_attempt002_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s1234_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s1234_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s1234_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s1234_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s3535_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s3535_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s3535_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s3535_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s4567_b0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s4567_b1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s4567_b2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_s4567_b3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_a2_screen_ablation_20261110_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_B_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_B_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_B_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_B_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_C_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_C_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_C_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_C_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_reference_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_1ff128_s3535_reference_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_B_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_B_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_B_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_B_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_C_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_C_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_C_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_C_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_reference_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s1234_reference_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_B_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_B_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_B_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_B_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_C_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_C_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_C_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_C_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_reference_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s3535_reference_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_B_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_B_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_B_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_B_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_C_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_C_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_C_2",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_C_3",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_reference_0",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_a2_s4567_reference_1",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_frozen_sampling_20261110_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_1ff128_s3535",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_a2_s1234",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_a2_s3535",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_a2_s4567",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_attempt002_1ff128_s3535",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_attempt002_a2_s1234",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_attempt002_a2_s3535",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_attempt002_a2_s4567",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_attempt002_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts3_vdn_screen_sample_size_20261110_summary",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts5_tc_gap_extension_20261125_offline_verify",
+      "inputs": [
+        "unknown"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "ts8_chi_release_3535_20261112_summary",
+      "inputs": [
+        "ts8_chi_release_3535_20261112_vdn_1ff_100k_attempt001",
+        "ts8_chi_release_3535_20261112_vdn_1ff_200k_attempt001",
+        "ts8_chi_release_3535_20261112_vdn_1ff_50k_attempt001",
+        "ts8_chi_release_3535_20261112_vdn_1ff_immediate_attempt001",
+        "ts8_chi_release_3535_20261112_vdn_1ff_keep_attempt001"
+      ]
+    },
+    {
+      "kind": "unresolved_analysis_inputs",
+      "analysis_id": "vdn_network_similarity_20261104_attempt001",
+      "inputs": [
+        "unknown"
+      ]
+    }
+  ],
+  "collection": [
+    {
+      "captured_at": "2026-11-27T02:37:29.743616+00:00",
+      "host": "host-bd6b3638f6462008",
+      "kind": "collection",
+      "redaction": {
+        "version": 1,
+        "policy": "stable_host_and_location_aliases"
+      },
+      "roots": [
+        "repos/repo-efc94568b23ffcf8",
+        "repos/repo-bf32d3344f22ca15",
+        "repos/repo-4766dd55e21a4623",
+        "repos/repo-d60440d2165b3536",
+        "repos/repo-962836db60436cf9"
+      ]
+    }
+  ],
+  "local_runtime_included": false,
+  "branch_sources": [
+    {
+      "ref": "refs/remotes/origin/feature/single-agent-tkpr-mountaincar",
+      "commit": "1e6212585d35124e2c488f81948fbe7dfbeac741"
+    },
+    {
+      "ref": "refs/heads/feature/generic-prefix",
+      "commit": "3726b2264615fcdfb136ca37f9490d7bd6508438"
+    },
+    {
+      "ref": "refs/heads/feature/single-agent-tkpr-minatar",
+      "commit": "c54a6cea7a18601ce793fbf3245dba17f4f5e45f"
+    },
+    {
+      "ref": "refs/heads/feature/single-agent-tkpr-mountaincar",
+      "commit": "d49be537d2d7f74a4d2ae9b9fcc4383808d34b9a"
+    },
+    {
+      "ref": "refs/heads/gap05-publication",
+      "commit": "dfe70df05917e263896eb984d78975cad26bd93e"
+    },
+    {
+      "ref": "refs/remotes/github/feature/tkpr-cpr-anchor",
+      "commit": "e7f1dd3b6f1051932198f5539d44afe7d868179d"
+    },
+    {
+      "ref": "refs/heads/aspr-multigroup",
+      "commit": "3bb47ae8bcabc63746ddc8081f76c34a19087618"
+    },
+    {
+      "ref": "refs/heads/gapmatched-dev",
+      "commit": "d93b5e1d316d52a9342d6bf5a4daa58cb82b587a"
+    },
+    {
+      "ref": "refs/heads/publish-aspr-groups",
+      "commit": "2f0dea0734cfab543cd10a30b3979db72cd7df30"
+    }
+  ],
+  "runtime_snapshot_sha256": "963091c9ed766d7e8762952368e1691e601de414b8639daa65ce2c5275700aee"
+}

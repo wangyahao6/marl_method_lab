@@ -1377,5 +1377,68 @@
         "S前缀每种子共享，两训练种子不足以推断普遍最优阈值。"
       ]
     }
-  ]
+  ],
+  "global_index": {
+    "schema_version": 1,
+    "generator": "scripts/experiment_index.py",
+    "environments": "../environments/environments.json",
+    "benchmarks": "../environments/benchmarks.json",
+    "run_index": "run_index.csv",
+    "analysis_index": "analysis_index.csv",
+    "audit": "index_audit.json",
+    "runtime_metadata": "docs/results/runtime_records.jsonl",
+    "branch_sources": [
+      {
+        "ref": "refs/remotes/origin/feature/single-agent-tkpr-mountaincar",
+        "commit": "1e6212585d35124e2c488f81948fbe7dfbeac741"
+      },
+      {
+        "ref": "refs/heads/feature/generic-prefix",
+        "commit": "3726b2264615fcdfb136ca37f9490d7bd6508438"
+      },
+      {
+        "ref": "refs/heads/feature/single-agent-tkpr-minatar",
+        "commit": "c54a6cea7a18601ce793fbf3245dba17f4f5e45f"
+      },
+      {
+        "ref": "refs/heads/feature/single-agent-tkpr-mountaincar",
+        "commit": "d49be537d2d7f74a4d2ae9b9fcc4383808d34b9a"
+      },
+      {
+        "ref": "refs/heads/gap05-publication",
+        "commit": "dfe70df05917e263896eb984d78975cad26bd93e"
+      },
+      {
+        "ref": "refs/remotes/github/feature/tkpr-cpr-anchor",
+        "commit": "e7f1dd3b6f1051932198f5539d44afe7d868179d"
+      },
+      {
+        "ref": "refs/heads/aspr-multigroup",
+        "commit": "3bb47ae8bcabc63746ddc8081f76c34a19087618"
+      },
+      {
+        "ref": "refs/heads/gapmatched-dev",
+        "commit": "d93b5e1d316d52a9342d6bf5a4daa58cb82b587a"
+      },
+      {
+        "ref": "refs/heads/publish-aspr-groups",
+        "commit": "2f0dea0734cfab543cd10a30b3979db72cd7df30"
+      }
+    ],
+    "experiment_bindings": {
+      "minatar-single-agent-tkpr-3535": {
+        "environment_id": "minatar",
+        "evidence": "git:c54a6cea7a18601ce793fbf3245dba17f4f5e45f:docs/results/comparisons/minatar-single-agent-tkpr-3535/README.md",
+        "algorithm": "dqn"
+      },
+      "mountaincar-single-agent-tkpr": {
+        "environment_id": "gym-classic-control",
+        "evidence": "git:d49be537d2d7f74a4d2ae9b9fcc4383808d34b9a:docs/results/comparisons/mountaincar-single-agent-tkpr/README.md",
+        "algorithm": "dqn"
+      }
+    },
+    "architectures": "../architectures/architectures.json",
+    "method_identity_version": 2,
+    "architecture_resolver_version": 3
+  }
 }

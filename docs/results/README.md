@@ -2,6 +2,8 @@
 
 这里保存 MARL Method Lab 已核对并公开的实验。自动分析从[机器可读索引](catalog.json)开始，按实验 ID 获取数据文件、关联合并键、对照组与解释边界。每页先给出比较问题、图表与结论，再链接逐种子评估和实际运行版本。指标、字段和后续整理方式见[数据说明](DATA.md)。
 
+[全局运行索引](run_index.csv)与[分析索引](analysis_index.csv)还收录可访问的历史运行证据、失败尝试及未归档运行，不等于新增公开结论。按环境、任务、方法和种子查询及生成覆盖矩阵见[环境与任务索引](../environments/README.md)；无法确认的记录见[索引审计](index_audit.json)。这些视图由 `scripts/experiment_index.py` 自动生成，原实验报告、CSV 和 scheduler 保持各自原有职责。
+
 ## 方法与基线对照
 
 | 实验 | 设置 | 从哪里读起 |

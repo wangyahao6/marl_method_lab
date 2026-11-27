@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "resolver_version": 3,
+  "architectures": [
+    {
+      "id": "vdn_2ff_h64",
+      "algorithm": "vdn",
+      "agent_type": "rnn",
+      "agent_class": "RNNAgent",
+      "hidden_dim": 64,
+      "mixer_type": "vdn",
+      "feedforward_layers": 2,
+      "structure": [
+        "Linear(input, H)",
+        "ReLU",
+        "ActivateLayer(A)",
+        "Linear(H, H)",
+        "ReLU",
+        "GRUCell(H, H)",
+        "Linear(H, n_actions)",
+        "VDNMixer: sum(agent Q)"
+      ],
+      "config_paths": [
+        "src/config/algs/vdn.yaml",
+        "src/config/default.yaml"
+      ],
+      "implementation_paths": [
+        "src/modules/agents/rnn_agent.py",
+        "src/modules/agents/__init__.py",
+        "src/modules/layers/act_layer.py",
+        "src/modules/mixers/vdn.py"
+      ],
+      "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
+      "backbone_signature": "8cb1de90d157ee2aa0d95078f36a633d007c6ad396b61fa7beb022170add1cd7",
+      "mixer_signature": "015067404c6873fc35aba607f0cbb12830102d9dcbf41c47242a7484423fd552",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "actual_run_count": 212,
+      "seeds": [
+        "1111",
+        "1234",
+        "2222",
+        "3535",
+        "4242",
+        "4567"
+      ],
+      "gate_signature": "6fa50583f028b9212607d92fc4fae17d3a0562b0f14ff49bcda052c56b76a301",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
+    },
+    {
+      "id": "vdn_1ff_h64",
+      "algorithm": "vdn",
+      "agent_type": "single_ff_rnn",
+      "agent_class": "SingleFFRNNAgent",
+      "hidden_dim": 64,
+      "mixer_type": "vdn",
+      "feedforward_layers": 1,
+      "structure": [
+        "Linear(input, H)",
+        "ReLU",
+        "ActivateLayer(A)",
+        "GRUCell(H, H)",
+        "Linear(H, n_actions)",
+        "VDNMixer: sum(agent Q)"
+      ],
+      "config_paths": [
+        "src/config/algs/vdn_1ff.yaml"
+      ],
+      "implementation_paths": [
+        "src/modules/agents/single_ff_rnn_agent.py",
+        "src/modules/agents/__init__.py",
+        "src/modules/layers/act_layer.py",
+        "src/modules/mixers/vdn.py"
+      ],
+      "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
+      "backbone_signature": "2826b4f5afceba04e8339825dd5eb1e19048b70662f3adbc0e43f103b5ed69cf",
+      "mixer_signature": "015067404c6873fc35aba607f0cbb12830102d9dcbf41c47242a7484423fd552",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "actual_run_count": 55,
+      "seeds": [
+        "1234",
+        "2222",
+        "3535",
+        "4646"
+      ],
+      "gate_signature": "6fa50583f028b9212607d92fc4fae17d3a0562b0f14ff49bcda052c56b76a301",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
+    },
+    {
+      "id": "vdn_1ff_h128",
+      "algorithm": "vdn",
+      "agent_type": "single_ff_rnn",
+      "agent_class": "SingleFFRNNAgent",
+      "hidden_dim": 128,
+      "mixer_type": "vdn",
+      "feedforward_layers": 1,
+      "structure": [
+        "Linear(input, H)",
+        "ReLU",
+        "ActivateLayer(A)",
+        "GRUCell(H, H)",
+        "Linear(H, n_actions)",
+        "VDNMixer: sum(agent Q)"
+      ],
+      "config_paths": [
+        "src/config/algs/vdn_1ff_128.yaml"
+      ],
+      "implementation_paths": [
+        "src/modules/agents/single_ff_rnn_agent.py",
+        "src/modules/agents/__init__.py",
+        "src/modules/layers/act_layer.py",
+        "src/modules/mixers/vdn.py"
+      ],
+      "reference_commit": "e61b5e759f30d3e89bd3b0d4807abb470da7b1a8",
+      "backbone_signature": "2826b4f5afceba04e8339825dd5eb1e19048b70662f3adbc0e43f103b5ed69cf",
+      "mixer_signature": "015067404c6873fc35aba607f0cbb12830102d9dcbf41c47242a7484423fd552",
+      "notes": "H is both feedforward and GRU width. ActivateLayer is an architecture component; methods intervene on its gate state. Optional TRHR changes activation handling, not this backbone ID. Legacy unused fc1 is excluded from the forward backbone.",
+      "actual_run_count": 32,
+      "seeds": [
+        "1234",
+        "3535"
+      ],
+      "gate_signature": "6fa50583f028b9212607d92fc4fae17d3a0562b0f14ff49bcda052c56b76a301",
+      "gate_ownership": "architecture_component; method interventions modify its gate state"
+    }
+  ]
+}
