@@ -1,0 +1,169 @@
+{
+  "id": "ts5_tkpr_cpr_anchor_1m_20261126",
+  "tasks": [
+    {
+      "id": "ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001",
+      "argv": [
+        "/home/wyh/marl_method_lab_cpr_anchor/.venv/bin/python",
+        "scripts/run.py",
+        "--suite",
+        "vdn_action_set",
+        "--algorithm",
+        "vdn_1ff",
+        "--method",
+        "tkpr_cpr_anchor",
+        "--seed",
+        "3535",
+        "--run-id",
+        "ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001",
+        "--protocol",
+        "configs/continual/action_preference/ts5/cpr_shared_1m/tkpr_cpr_anchor.json",
+        "--preference-role",
+        "shared-branch",
+        "--parent",
+        "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001"
+      ],
+      "cwd": "/home/wyh/marl_method_lab_cpr_anchor",
+      "run_dir": "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001",
+      "type": "training",
+      "dependencies": [
+        "ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001"
+      ],
+      "queue": "ts5_tkpr_cpr_anchor_1m_20261126",
+      "queue_limit": 6,
+      "resources": {
+        "gpu": 0,
+        "gpu_mib": 2000,
+        "ram_mib": 7500
+      },
+      "metadata": {
+        "experiment_group_id": "ts5_tkpr_cpr_1m_20261124",
+        "experiment_group_title": "TS5-1M CPR shared-prefix comparison",
+        "method": "TKPR-CPR-Anchor",
+        "seed": 3535,
+        "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001",
+        "branch_id": "tkpr_cpr_anchor_seed3535",
+        "branch_title": "TKPR-CPR-Anchor seed3535",
+        "attempt": 1,
+        "results": "/home/wyh/marl_method_lab/results/ts5_tkpr_cpr_anchor_1m_20261126"
+      }
+    },
+    {
+      "id": "ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001_independent_final",
+      "argv": [
+        "/home/wyh/marl_method_lab_cpr_anchor/.venv/bin/python",
+        "scripts/evaluate.py",
+        "--run",
+        "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001",
+        "--episodes",
+        "128"
+      ],
+      "cwd": "/home/wyh/marl_method_lab_cpr_anchor",
+      "run_dir": "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001/evaluation",
+      "type": "evaluation",
+      "dependencies": [
+        "ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001"
+      ],
+      "queue": "ts5_tkpr_cpr_anchor_1m_20261126",
+      "queue_limit": 6,
+      "resources": {
+        "gpu_mib": 0,
+        "ram_mib": 2000
+      },
+      "metadata": {
+        "experiment_group_id": "ts5_tkpr_cpr_1m_20261124",
+        "experiment_group_title": "TS5-1M CPR shared-prefix comparison",
+        "method": "TKPR-CPR-Anchor",
+        "seed": 3535,
+        "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed3535_attempt001",
+        "branch_id": "tkpr_cpr_anchor_seed3535",
+        "branch_title": "TKPR-CPR-Anchor seed3535",
+        "attempt": 1,
+        "results": "/home/wyh/marl_method_lab/results/ts5_tkpr_cpr_anchor_1m_20261126",
+        "inherit_from": "ts5_tkpr_cpr_anchor_1m_20261126_seed3535_attempt001"
+      }
+    },
+    {
+      "id": "ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001",
+      "argv": [
+        "/home/wyh/marl_method_lab_cpr_anchor/.venv/bin/python",
+        "scripts/run.py",
+        "--suite",
+        "vdn_action_set",
+        "--algorithm",
+        "vdn_1ff",
+        "--method",
+        "tkpr_cpr_anchor",
+        "--seed",
+        "2222",
+        "--run-id",
+        "ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001",
+        "--protocol",
+        "configs/continual/action_preference/ts5/cpr_shared_1m/tkpr_cpr_anchor.json",
+        "--preference-role",
+        "shared-branch",
+        "--parent",
+        "/home/wyh/marl_method_lab_ts5_cpr_1m_20261124/runs/ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001"
+      ],
+      "cwd": "/home/wyh/marl_method_lab_cpr_anchor",
+      "run_dir": "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001",
+      "type": "training",
+      "dependencies": [
+        "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001"
+      ],
+      "queue": "ts5_tkpr_cpr_anchor_1m_20261126",
+      "queue_limit": 6,
+      "resources": {
+        "gpu": 0,
+        "gpu_mib": 2000,
+        "ram_mib": 7500
+      },
+      "metadata": {
+        "experiment_group_id": "ts5_tkpr_cpr_1m_20261124",
+        "experiment_group_title": "TS5-1M CPR shared-prefix comparison",
+        "method": "TKPR-CPR-Anchor",
+        "seed": 2222,
+        "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+        "branch_id": "tkpr_cpr_anchor_seed2222",
+        "branch_title": "TKPR-CPR-Anchor seed2222",
+        "attempt": 1,
+        "results": "/home/wyh/marl_method_lab/results/ts5_tkpr_cpr_anchor_1m_20261126"
+      }
+    },
+    {
+      "id": "ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001_independent_final",
+      "argv": [
+        "/home/wyh/marl_method_lab_cpr_anchor/.venv/bin/python",
+        "scripts/evaluate.py",
+        "--run",
+        "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001",
+        "--episodes",
+        "128"
+      ],
+      "cwd": "/home/wyh/marl_method_lab_cpr_anchor",
+      "run_dir": "/home/wyh/marl_method_lab_cpr_anchor/runs/ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001/evaluation",
+      "type": "evaluation",
+      "dependencies": [
+        "ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001"
+      ],
+      "queue": "ts5_tkpr_cpr_anchor_1m_20261126",
+      "queue_limit": 6,
+      "resources": {
+        "gpu_mib": 0,
+        "ram_mib": 2000
+      },
+      "metadata": {
+        "experiment_group_id": "ts5_tkpr_cpr_1m_20261124",
+        "experiment_group_title": "TS5-1M CPR shared-prefix comparison",
+        "method": "TKPR-CPR-Anchor",
+        "seed": 2222,
+        "prefix_id": "ts5_tkpr_cpr_1m_20261124_A_seed2222_attempt001",
+        "branch_id": "tkpr_cpr_anchor_seed2222",
+        "branch_title": "TKPR-CPR-Anchor seed2222",
+        "attempt": 1,
+        "results": "/home/wyh/marl_method_lab/results/ts5_tkpr_cpr_anchor_1m_20261126",
+        "inherit_from": "ts5_tkpr_cpr_anchor_1m_20261126_seed2222_attempt001"
+      }
+    }
+  ]
+}

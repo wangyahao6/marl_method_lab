@@ -89,7 +89,7 @@ def auc(rows, stage):
     return float(np.trapz([p[1] for p in points], [p[0] for p in points]) / (end - start)), len(points) - 1
 
 
-def export(plan_path, output):
+def export(plan_path, output, *, render_output=True):
     ex = Export(plan_path, output)
     plan = ex.read(plan_path)
     tasks = [t for t in plan['tasks'] if t['type'] == 'training']
@@ -98,7 +98,7 @@ def export(plan_path, output):
     executions, run_data = [], {}
     for task in tasks:
         run, meta = Path(task['run_dir']), task['metadata']
-        rid, role, method, seed = task['id'], meta['role'], meta['method'], meta['seed']
+        rid, role, method, seed = task['id'], meta.get('role', 'shared-branch'), meta['method'], meta['seed']
         prefix_id = meta.get('prefix_id', rid)
         status, launch = ex.read(run / 'status.json'), ex.read(run / 'launch.json')
         launcher = ex.read(run / 'launcher_status.json')
@@ -106,7 +106,7 @@ def export(plan_path, output):
         protocol, cfg = ex.read(run / 'protocol.json'), ex.read(run / 'config.json')
         restored = ex.read(run / 'branch_restore.json')
         final_state_manifest = ex.read(run / 'final_state_manifest.json')
-        parent = ROOT / 'runs' / prefix_id if role == 'shared-branch' else run
+        parent = Path(restored.get('parent', str(ROOT / 'runs' / prefix_id))) if role == 'shared-branch' else run
         prefix_manifest = ex.read(parent / 'prefix_state_manifest.json')
         checkpoint_sha = restored.get('prefix_checkpoint_sha256', prefix_manifest.get('checkpoint_sha256'))
         ident = dict(run_id=rid, prefix_id=prefix_id, method=method, seed=seed, role=role)
@@ -166,7 +166,7 @@ def export(plan_path, output):
                       **{name+'_win_pct':100*s['win_rates'][name] if name in s['win_rates'] else None for name in TASKS})
             stages.append(sr);stage_rows.append(sr)
         run_data[rid] = dict(ident=ident, complete=complete, stages=stage_rows, retention=retention, ev=ev)
-        for event in ex.lines(run / 'tkpr_cpr_updates.jsonl'):
+        for event in ex.lines(run / ('tkpr_cpr_anchor_updates.jsonl' if method == 'TKPR-CPR-Anchor' else 'tkpr_cpr_updates.jsonl')):
             count = event['decision_states']
             row = dict(**ident, **{k:v for k,v in event.items()
                                   if k not in ('old_reference_confidence','new_reference_confidence','reference_source_counts')})
@@ -187,7 +187,7 @@ def export(plan_path, output):
                                    trained_task=event['task'],t_env=event['t_env'],pool_size=size))
         phase_execution = {row['phase']:row for row in ex.lines(run / 'phase_execution.jsonl')}
         pref_name = {'TKPR-K1':'topk_preference','TKPR-Refresh':'tkpr_refresh',
-                     'TKPR-CPR':'tkpr_cpr_preference'}.get(method)
+                     'TKPR-CPR':'tkpr_cpr_preference', 'TKPR-CPR-Anchor':'tkpr_cpr_anchor_preference'}.get(method)
         hist = {}
         cost = defaultdict(lambda:defaultdict(lambda:array('d')))
         for event in ex.lines(run / (pref_name+'_updates.jsonl')) if pref_name else ():
@@ -220,7 +220,7 @@ def export(plan_path, output):
             row = dict(**ident,phase=phase,historical_task=name,logged_updates=g['updates'])
             for k in ('sampled_episodes','valid_states','decision_states','valid_pairs',
                       'raw_decision_states','reference_mask_valid_states'):
-                row[k]=g[k] if k not in ('raw_decision_states','reference_mask_valid_states') or method=='TKPR-CPR' else None
+                row[k]=g[k] if k not in ('raw_decision_states','reference_mask_valid_states') or method in ('TKPR-CPR','TKPR-CPR-Anchor') else None
             row['constraint_coverage'] = g['valid_states']/g['decision_states'] if g['decision_states'] else None
             row['effective_coverage_of_raw_decisions'] = g['valid_states']/g['raw_decision_states'] if g['raw_decision_states'] else None
             for k,values in g['values'].items():
@@ -307,26 +307,29 @@ def export(plan_path, output):
     ex.csv('sampling_cost.csv',costs,['run_id','prefix_id','method','seed','phase','actual_steps','train_updates','phase_elapsed_seconds','auxiliary_update_records'])
     ex.csv('independent_final.csv',independent,['run_id','prefix_id','method','seed','phase','task','wins','episodes','win_rate','evaluation_kind'])
     summaries=[]
-    for method in METHODS:
+    for method in (*METHODS, *(('TKPR-CPR-Anchor',) if any(r['method']=='TKPR-CPR-Anchor' for r in final_rows) else ())):
         rs=[r for r in final_rows if r['method']==method]
         row=dict(method=method,completed_seeds=json.dumps(sorted(r['seed'] for r in rs)),n=len(rs))
         for k in ('acc_pct','bwt_pp','fwt_pp',*[t+'_win_pct' for t in TASKS]):
             row.update({k+'_'+s:v for s,v in statistics([r[k] for r in rs if finite(r[k])]).items()})
         summaries.append(row)
     ex.csv('final_summary.csv',summaries,['method','completed_seeds','n','acc_pct_mean','acc_pct_std','bwt_pp_mean','bwt_pp_std','fwt_pp_mean','fwt_pp_std'])
-    all_complete=(len(executions)==10 and all(x['complete'] for x in executions) and len(independent)==40
+    expected_prefixes=sum(t['metadata'].get('role') == 'shared-prefix' for t in tasks)
+    expected_branches=len(tasks)-expected_prefixes
+    all_complete=(all(x['complete'] for x in executions) and len(independent)==5*expected_branches
                   and all(x['episodes']==128 for x in independent))
     ex.json('execution_summary.json',dict(all_complete=all_complete,training_runs=executions,
-                                          expected_prefixes=2,expected_branches=8,expected_independent_task_points=40,
+                                          expected_prefixes=expected_prefixes,expected_branches=expected_branches,expected_independent_task_points=5*expected_branches,
                                           actual_independent_task_points=len(independent),
                                           metric_mismatches=[r for r in stages if not r['metrics_match_retention']],
                                           evaluation_count_mismatches=[r for r in evaluations if not r['count_check']]))
     ex.json('source_manifest.json',dict(plan=str(plan_path),exported_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
                                       sources=ex.sources,run_ids=[r['run_id'] for r in run_rows],
                                       prefix_checkpoint_sha256={r['prefix_id']:r['prefix_checkpoint_sha256'] for r in run_rows},
-                                      expected_nominal_new_training_steps=34000000,
+                                      expected_nominal_new_training_steps=expected_prefixes*1000000+expected_branches*4000000,
                                       independent_evaluation_seed_policy='same focus seeds: independent-process recheck, not independent test set'))
-    render(ex,run_rows,stages,curves,paired,preferences,cpr,gradients,independent,summaries,all_complete)
+    if render_output:
+        render(ex,run_rows,stages,curves,paired,preferences,cpr,gradients,independent,summaries,all_complete)
     if (all_complete and output.name=='ts5-tkpr-cpr-1m'
             and output.parent.name=='comparisons' and output.parents[1].name=='results'):
         register_completed_result(output.parents[3])
