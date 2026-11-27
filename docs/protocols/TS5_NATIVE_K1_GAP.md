@@ -42,3 +42,7 @@ Gap0 includes634/674 native pairs from states with two or three legal actions; g
 Results: `results/ts5_native_tkpr_k1_gap_20261126/`. Runs: `runs/ts5_native_tkpr_k1_gap_20261126_*`. Configuration files: `configs/continual/action_preference/ts5/native_k1_gap/`.
 
 Only after all four trainings and20 independent model/task final evaluations (128 episodes each) are verified will the publication job package a standalone result under `docs/results/parameter-ablations/ts5-native-tkpr-k1-gap/`, update result indices and commit scoped reports/data to Ubuntu main. Existing TC datasets and other experiment results are not edited. GitHub main synchronization follows the existing deployment workflow after terminal verification. Failures retain partial evidence and do not authorize reruns, extra seeds or extra budgets.
+
+## 2026-11-27 terminal outcome
+
+All ten scheduler tasks completed: four native training branches, four independent final evaluations, report and publication. The [published result](../results/parameter-ablations/ts5-native-tkpr-k1-gap/README.md) includes twenty stage metrics with AUC, twenty independent model/task outcomes (128 episodes each), per-task win rates and same-seed gap contrasts. All sixteen attached history copies match their source bytes and native loss/optimizer source hashes match the preparation baseline. Mean final ACC is52.344% at gap0 and55.000% at gap0.5, with seedwise differences +5.781 and−0.469pp; two seeds do not establish a stable threshold advantage. The original TC results remain unchanged.

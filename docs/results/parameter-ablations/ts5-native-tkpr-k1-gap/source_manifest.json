@@ -4672,5 +4672,30 @@
       "state": "running",
       "reason": ""
     }
-  ]
+  ],
+  "terminal_verification": {
+    "verified_at": "2026-11-27T09:57:43.157445+08:00",
+    "task_states": {
+      "ts5_native_tkpr_k1_gap_20261126_gap0_seed2222": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap0_seed2222_independent_final": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap05_seed2222": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap05_seed2222_independent_final": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap0_seed3535": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap0_seed3535_independent_final": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap05_seed3535": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_gap05_seed3535_independent_final": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_report": "completed",
+      "ts5_native_tkpr_k1_gap_20261126_publication": "completed"
+    },
+    "native_training_completed": 4,
+    "independent_model_task_evaluations": 20,
+    "episodes_per_task": 128,
+    "complete_history_copies_verified": 16,
+    "native_loss_optimizer_source_hashes_match": true,
+    "training_seeds": [
+      2222,
+      3535
+    ],
+    "state_filter": false
+  }
 }
