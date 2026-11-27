@@ -1,0 +1,145 @@
+{
+  "training_source_commit": "2c761c44b3aa2ab4dda68f71ec9b7dccbdb86818",
+  "task": "stalker",
+  "training_seeds": [
+    2222,
+    3535
+  ],
+  "episodes_per_seed": 32,
+  "trajectory_seed_rule": "1500000 + training_seed",
+  "trajectory_source": "fresh greedy S rollout from the shared parent checkpoint",
+  "teacher_forced": true,
+  "history_memory_used": false,
+  "seeds": {
+    "2222": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+      "parent_model_hash": "ece6065fad06aed070f3d1a3d2c7b016dc2c1ac61bca990fef6f43ff9c6becd4",
+      "trajectory": {
+        "path": "historical_trajectories_seed2222.th.gz",
+        "sha256": "decb27cfa8875cad50c821accc9f4a7610ce94a23961e269c8ae70d932620cd2",
+        "seed": 1502222,
+        "episodes": 32,
+        "wins": 23,
+        "failures": 9,
+        "total_steps": 1996
+      },
+      "masks": {
+        "valid_agent_decisions": 7246,
+        "joint_steps": 1887
+      },
+      "models": {
+        "S": {
+          "run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+          "t_env": 2000007,
+          "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001/models/phase0000_2000007/agent.th",
+          "sha256": "91b23e4bd06d32e6c97c331b064bfb86b0edce69a60dd458cd4200312d59a86c"
+        },
+        "VDN-FT": {
+          "Z": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_ft_seed2222_attempt001",
+            "phase": 1,
+            "t_env": 4000015,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_ft_seed2222_attempt001/models/phase0001_4000015/agent.th",
+            "sha256": "b2563db1c2c9be19674caffa2c6fd962155eff7affb3593204113008397e0f0f",
+            "s_win_rate": 0.1015625
+          },
+          "C": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_ft_seed2222_attempt001",
+            "phase": 2,
+            "t_env": 6000095,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_ft_seed2222_attempt001/models/phase0002_6000095/agent.th",
+            "sha256": "44a2eb6346048af0392392d859533a9cf7f0597f331cfde6bd3b75a2568edfd7",
+            "s_win_rate": 0.0
+          },
+          "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+          "restore_model_hash": "ece6065fad06aed070f3d1a3d2c7b016dc2c1ac61bca990fef6f43ff9c6becd4"
+        },
+        "TKPR-K1": {
+          "Z": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_k1_seed2222_attempt001",
+            "phase": 1,
+            "t_env": 4000016,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_k1_seed2222_attempt001/models/phase0001_4000016/agent.th",
+            "sha256": "94da08a9acdd90ad4f7282a0cb97a3efc9a84293766830774eded24e18b024cd",
+            "s_win_rate": 0.5078125
+          },
+          "C": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_k1_seed2222_attempt001",
+            "phase": 2,
+            "t_env": 6000037,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_k1_seed2222_attempt001/models/phase0002_6000037/agent.th",
+            "sha256": "3878115b5152289116845d91c3263f924811dd7a28a57904b49a0fe34e78fd38",
+            "s_win_rate": 0.5625
+          },
+          "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed2222_attempt001",
+          "restore_model_hash": "ece6065fad06aed070f3d1a3d2c7b016dc2c1ac61bca990fef6f43ff9c6becd4"
+        }
+      }
+    },
+    "3535": {
+      "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+      "parent_model_hash": "5b384e469fe3ce6395048ba8300a15beef62e1c9e2f736370d44db70c478ed74",
+      "trajectory": {
+        "path": "historical_trajectories_seed3535.th.gz",
+        "sha256": "1e32c0d1f4797ce5c95c8b8b413464e8f363460c3023697c390971c539851c7a",
+        "seed": 1503535,
+        "episodes": 32,
+        "wins": 18,
+        "failures": 14,
+        "total_steps": 2040
+      },
+      "masks": {
+        "valid_agent_decisions": 7161,
+        "joint_steps": 1839
+      },
+      "models": {
+        "S": {
+          "run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+          "t_env": 2000032,
+          "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001/models/phase0000_2000032/agent.th",
+          "sha256": "cec458a1884efa98292ac259909ce9babc21fd91d53ebc62bddf0e724a10dd6a"
+        },
+        "VDN-FT": {
+          "Z": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_ft_seed3535_attempt001",
+            "phase": 1,
+            "t_env": 4000021,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_ft_seed3535_attempt001/models/phase0001_4000021/agent.th",
+            "sha256": "db04f6f6757a37328c501d4eac65e930eb6ee4260752186f5ad86a07a96f5aeb",
+            "s_win_rate": 0.1640625
+          },
+          "C": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_ft_seed3535_attempt001",
+            "phase": 2,
+            "t_env": 6000002,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_ft_seed3535_attempt001/models/phase0002_6000002/agent.th",
+            "sha256": "2f51da5479e1a5762aa34c042a150447a95e462ee340b03a8009316ebe9b9412",
+            "s_win_rate": 0.0
+          },
+          "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+          "restore_model_hash": "5b384e469fe3ce6395048ba8300a15beef62e1c9e2f736370d44db70c478ed74"
+        },
+        "TKPR-K1": {
+          "Z": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_k1_seed3535_attempt001",
+            "phase": 1,
+            "t_env": 4000021,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_k1_seed3535_attempt001/models/phase0001_4000021/agent.th",
+            "sha256": "170e3c1d517f1fbac6c33eeadad928bcf9ee294f9899a9d83656c2128f3bba40",
+            "s_win_rate": 0.4609375
+          },
+          "C": {
+            "run_id": "szc_vdn64_tkpr_k1_shared_20261117_k1_seed3535_attempt001",
+            "phase": 2,
+            "t_env": 6000043,
+            "path": "/home/wyh/marl_method_lab/runs/szc_vdn64_tkpr_k1_shared_20261117_k1_seed3535_attempt001/models/phase0002_6000043/agent.th",
+            "sha256": "0cdae0f62cb97bf36b539ac97e3bb69abc7c3712b85410297e39f7ffb66faa75",
+            "s_win_rate": 0.4921875
+          },
+          "parent_run_id": "szc_vdn64_tkpr_k1_shared_20261117_S_seed3535_attempt001",
+          "restore_model_hash": "5b384e469fe3ce6395048ba8300a15beef62e1c9e2f736370d44db70c478ed74"
+        }
+      }
+    }
+  }
+}

@@ -26,6 +26,8 @@ MinAtar 单智能体结果使用原始每局回报：其 `evaluations.csv` 的 `
 
 MinAtar 历史动作保持分析的 `action_retention.csv` 以 `(method, game, reference_stage, current_stage)` 为键。`har` 是同一固定观测上两次贪心动作相同的比例，`adr=1-har`；`mean_old_q_regret` 等分布统计来自历史模型对两个动作的 Q 差。`states/*.npz` 为两方法共同使用的原评价种子贪心轨迹观测，`pointwise/*.npz` 保留每个对比的旧 Q 估值与损失。`historical_performance.csv` 复用原来的阶段末贪心回报。Q 差不跨游戏合并，动作保持也不等同于真实回报保持。
 
+SZC 共享前缀联合动作保持分析的 `joint_action_retention.csv` 以 `(seed, method, phase)` 为键，指标是 32 局独立 S 轨迹的逐局等权均值；`episode_metrics.csv` 保留每局分子、分母，`per_agent_retention.csv` 保留五名智能体的逐局汇总。轨迹数据 `historical_trajectories_seed*.th.gz` 包含完整序列；清单记录原检查点和轨迹哈希。`IAR` 仅含存活智能体，`JAA` 与改变人数仅含至少两人存活的时间步，均为固定历史轨迹上的离线动作比较。
+
 评估标签中，`initial_reference` 是初始模型在将来任务上的表现，`next_unseen` 是首次训练该任务前的评估，`phase_start` 和 `periodic` 描述本阶段当前任务的学习过程，`stage_end` 用于比较该阶段末各已见任务。曲线的圆点为阶段末评估。定期与阶段末评估的局数与种子块可不同，见各实验的协议。
 
 ## 重算阶段指标

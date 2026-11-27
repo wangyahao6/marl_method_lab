@@ -40,6 +40,7 @@
 
 | 实验 | 设置 | 分析内容 |
 | --- | --- | --- |
+| [SZC · 共享前缀历史联合动作保持](behavioral-analysis/szc-joint-action-retention/README.md) | VDN-FT 与 TKPR-K1，seed 2222、3535，共享 S 模型的独立 32 局轨迹 | S→Z/C 的 IAR、JAA、同时改变智能体数量、逐智能体保持率及原 S 胜率。 |
 | [SZC · VDN64 贪婪动作一致率](behavioral-analysis/szc-vdn64-greedy-action-agreement/README.md) | 冻结检查点与固定旧策略轨迹 | K1/K2/K3/K5/FRPR 的阶段间动作一致率、置信度和旧任务胜率。 |
 | [SZC · VDN64 旧策略估计的动作价值损失](behavioral-analysis/szc-vdn64-action-regret/README.md) | 复用 AGR 的 1,408 局归档轨迹 | 比较动作变化的归一化损失、置信度和 VDN 团队损失。 |
 | [SZC · VDN64 高损失动作的环境干预](behavioral-analysis/szc-vdn64-action-intervention/README.md) | 冻结 VDN64，新策略、高损失纠正、全纠正、旧策略各 128 局 | 比较实测胜率、回报和干预量。 |

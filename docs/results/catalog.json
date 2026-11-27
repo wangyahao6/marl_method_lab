@@ -867,6 +867,33 @@
       ]
     },
     {
+      "id": "szc-joint-action-retention",
+      "category": "behavioral-analysis",
+      "report": "behavioral-analysis/szc-joint-action-retention/README.md",
+      "files": {
+        "summary": "behavioral-analysis/szc-joint-action-retention/joint_action_retention.csv",
+        "per_agent": "behavioral-analysis/szc-joint-action-retention/per_agent_retention.csv",
+        "episodes": "behavioral-analysis/szc-joint-action-retention/episode_metrics.csv",
+        "manifest": "behavioral-analysis/szc-joint-action-retention/manifest.json",
+        "curves": "behavioral-analysis/szc-joint-action-retention/iar_jaa_curves.svg",
+        "trajectories_2222": "behavioral-analysis/szc-joint-action-retention/historical_trajectories_seed2222.th.gz",
+        "trajectories_3535": "behavioral-analysis/szc-joint-action-retention/historical_trajectories_seed3535.th.gz"
+      },
+      "task_order": ["stalker", "zealot", "colossus"],
+      "training_seeds": [2222, 3535],
+      "final_phase": 2,
+      "comparison": {
+        "kind": "shared_s_prefix_common_fixed_episodes",
+        "match_on": ["seed", "phase"],
+        "primary_control": {"method": "VDN-FT", "role": "shared-prefix branch"}
+      },
+      "interpretation_limits": [
+        "每个 seed 下两方法共用 S 模型和独立的 32 局 S 轨迹，后续检查点不重新采样。",
+        "IAR/JAA 等指标先逐 episode 计算再等权平均，时间步不视为独立训练样本。",
+        "仅描述旧 S 轨迹的 teacher-forced 动作漂移，不等于反事实胜率或因果效应；只有两个训练 seed。"
+      ]
+    },
+    {
       "id": "minatar-historical-action-retention-3535",
       "category": "behavioral-analysis",
       "report": "behavioral-analysis/minatar-historical-action-retention-3535/README.md",
