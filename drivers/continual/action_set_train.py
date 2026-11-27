@@ -492,7 +492,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if method == "tkpr_cpr":
                 update_log = "tkpr_cpr_preference"
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
-            if method == "tkpr_refresh":
+            if method in ("tkpr_refresh", "tkpr_k1_per_task8"):
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
             if pair_ablation:
                 preference_type = (TCPPreference if protocol.get("pair_ablation_experiment") == "tc_coverage"

@@ -86,7 +86,7 @@ class Metrics:
             fields += ('constrained_top1_flip_rate', 'margin_violation_rate')
         elif self.identity['method'] == 'top1_unfiltered_preference':
             fields += ('mean_constrained_confidence',)
-        elif self.identity['method'] in ('topk_preference', 'tkpr_refresh', 'tkpr_cpr', 'topk_preference_weighted',
+        elif self.identity['method'] in ('topk_preference', 'tkpr_refresh', 'tkpr_cpr', 'tkpr_k1_per_task8', 'topk_preference_weighted',
                                            'topk_preference_high_regret'):
             fields += ('pair_violation_rate', 'mean_effective_k', 'k_clip_rate',
                        'effective_k_histogram', 'mean_state_confidence', 'zero_confidence_states',

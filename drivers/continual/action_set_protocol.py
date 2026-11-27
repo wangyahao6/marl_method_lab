@@ -3,7 +3,7 @@ from math import isfinite
 
 from common.exploration import epsilon_on_switch
 
-TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr")
+TOPK_VARIANTS = ("topk_preference_weighted", "topk_preference_high_regret", "tkpr_refresh", "tkpr_k1_gap0", "tkpr_cpr", "tkpr_k1_per_task8")
 FORK_ROLES = ("prefix", "keep", "release", "shared-prefix", "shared-branch", "pair-reference")
 
 ALGORITHMS = ("vdn", "vdn_1ff", "vdn_1ff_128")
@@ -120,7 +120,8 @@ def validate(protocol, algorithm, method):
         raise ValueError("task_seed_stride must be a nonnegative integer")
 
     refresh_defaults = (dict(batch_episodes_per_task=8, refresh_success_episodes=50)
-                        if method == "tkpr_refresh" else {})
+                        if method == "tkpr_refresh" else
+                        dict(batch_episodes_per_task=8) if method == "tkpr_k1_per_task8" else {})
     settings = settings_with_defaults(protocol.get("action_set", {}),
                                       dict(DEFAULTS, **refresh_defaults), ("delta_by_task",))
     for key in ("weight", "margin"):
@@ -129,6 +130,9 @@ def validate(protocol, algorithm, method):
     for key in ("batch_episodes", "success_episodes", "attempts_per_seed"):
         if not positive_integer(settings[key]):
             raise ValueError(f"action_set.{key} must be a positive integer")
+    if method == "tkpr_k1_per_task8" and (type(settings["batch_episodes_per_task"]) is not int
+                                              or settings["batch_episodes_per_task"] != 8):
+        raise ValueError("tkpr_k1_per_task8 requires batch_episodes_per_task=8")
     if method == "tkpr_refresh":
         for key in refresh_defaults:
             if not positive_integer(settings.get(key)):
@@ -167,6 +171,7 @@ def validate(protocol, algorithm, method):
                 "top1_max_preference": TOP1_MAX_DEFAULTS,
                 "topk_preference": TOPK_DEFAULTS,
                 "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
+                "tkpr_k1_per_task8": TOPK_WEIGHTED_DEFAULTS,
                 "tkpr_cpr": CPR_DEFAULTS,
                 "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
                 "topk_preference_weighted": TOPK_WEIGHTED_DEFAULTS,
@@ -255,7 +260,7 @@ def validate(protocol, algorithm, method):
             ranking[name] = options
     fixed = protocol.get("fixed_reference_history", False)
     if type(fixed) is not bool or (fixed and (
-            method != "topk_preference" or ranking[method]["k"] != 1
+            method not in ("topk_preference", "tkpr_k1_per_task8") or ranking[method]["k"] != 1
             or protocol.get("pair_ablation_experiment") or protocol.get("full_shared_prefix"))):
         raise ValueError("fixed_reference_history is supported for native TKPR-K1 only")
     uses_sets = ((method in ASPR_MAX_METHODS and settings["weight"])
@@ -345,7 +350,11 @@ def matching_pair_reference(parent, branch):
 
 def matching_fixed_reference_protocol(parent, branch):
     """Keep original FT training/environment settings; only the native K1 intervention differs."""
-    ignored = {"id", "method", "pair_ablation_experiment", "fixed_reference_history", "topk_preference"}
+    ignored = {"id", "method", "pair_ablation_experiment", "fixed_reference_history", "topk_preference", "tkpr_k1_per_task8"}
     def common(protocol):
         return {"optimizer": "rmsprop", **{k: v for k, v in protocol.items() if k not in ignored}}
+    if branch.get("method") == "tkpr_k1_per_task8":
+        branch = dict(branch, gradient_monitor_interval=parent.get("gradient_monitor_interval", 0),
+                      action_set={k:v for k,v in branch["action_set"].items()
+                                         if k != "batch_episodes_per_task"})
     return common(parent) == common(branch)

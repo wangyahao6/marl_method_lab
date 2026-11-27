@@ -335,3 +335,8 @@ G1-G3 的诊断有效对指可统计的非平局对，`participates_in_loss=fals
 `aspr_adjacent_offline_pairs.csv` 保存已有固定贪心探测轨迹的阶段末诊断。
 
 `scripts/plan_aspr_3g_adjacent.py <唯一批次ID>` 只生成包含全部四条分支的预览计划；通过统一调度提交后执行。
+
+
+## TKPR-K1-PerTask8
+
+独立标识 `tkpr_k1_per_task8` 复用原生K1损失和任务等权平均，仅启用既有逐任务采样器：每个非空历史任务8条，无放回优先、不足时有放回。与Refresh不同，不刷新、不替换历史轨迹或参考Q。TS5原生对照的固定池按原任务边界激活，B/C/D/E分别采样8/16/24/32条。原K1仍是总预算8条。配置与配对协议见 [TS5 PerTask8](protocols/TS5_K1_PER_TASK8.md)。
