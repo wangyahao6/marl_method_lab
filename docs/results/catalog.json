@@ -828,12 +828,21 @@
           "ASPR-3G",
           "ASPR-4G"
         ],
-        "primary_control": "ASPR-2G"
+        "primary_control": {
+          "experiment_id": "szc-vdn64-aspr-adam",
+          "method": "RMSprop ASPR",
+          "report_label": "ASPR-2G"
+        },
+        "matched_contrasts": {
+          "file": "paired_metrics",
+          "control_join_key": "control_run_id"
+        }
       },
       "interpretation_limits": [
         "只有两个训练种子。",
         "每个种子的 S 检查点相同，Z/C 训练和历史采集独立。",
-        "训练采样分布按抽取次数计数，组大小行重复携带动作对总计。"
+        "训练采样分布按抽取次数计数，组大小行重复携带动作对总计。",
+        "ASPR-2G 对照来自 szc-vdn64-aspr-adam 的 RMSprop ASPR 两条运行，本条 runs.csv 仅含新增 3G/4G。"
       ]
     },
     {
@@ -1075,12 +1084,10 @@
           "seed"
         ],
         "primary_control": {
-          "method": "VDN-FT",
-          "role": "independent"
+          "method": "VDN-FT"
         },
         "additional_control": {
-          "method": "VDN-ER",
-          "role": "independent"
+          "method": "VDN-ER"
         }
       },
       "interpretation_limits": [
@@ -1089,7 +1096,28 @@
         "无共享前缀，实际训练版本见 runs.csv。",
         "来源漂移分析仅有最终池留存样本，无法还原D/E真实训练池；无同次TD minibatch，不能验证来源与TD方向或性能下降因果。",
         "采样预算分析固定原始K1静态池及C/D/E末模型；每预算30次仅反映采样波动，不等于训练种子或Refresh在线效果。"
-      ]
+      ],
+      "preference_protocols": {
+        "TKPR-K1": {
+          "experiment_role": "default_method",
+          "entrypoint": "topk_preference",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "own_policy",
+          "state_selection": "native",
+          "k": 1
+        },
+        "TKPR-Refresh": {
+          "experiment_role": "extension",
+          "entrypoint": "tkpr_refresh",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "own_policy_refreshed_trajectories",
+          "state_selection": "native"
+        }
+      }
     },
     {
       "id": "ts5-vdn64-tc-coverage",
@@ -1131,8 +1159,7 @@
           "parent_run_id"
         ],
         "primary_control": {
-          "method": "VDN-FT-reference",
-          "role": "fresh_reference"
+          "method": "VDN-FT-reference"
         },
         "arms": [
           "low-TC",
@@ -1144,8 +1171,38 @@
         "三种子，固定 Top-1、每状态动作对预算与距离配额，Q-gap 仅近似匹配。",
         "有效决策至少四合法动作、严格 old-Q 排序；全部组 Complete Order Coverage 为零。",
         "参考训练 cd31d7a；正式分支 13a6d9b/470c22c，逐运行保留启动版本与源码哈希。",
-        "High-Low ACC 跨种子方向不一致；图拓扑与 TC 同时变化，相关性不等于标量 TC 的因果效应。"
-      ]
+        "High-Low ACC 跨种子方向不一致；图拓扑与 TC 同时变化，相关性不等于标量 TC 的因果效应。",
+        "原始批次无 K1-only 训练组；扩展实验在复用两个种子 TC 分支后加入该对照。"
+      ],
+      "preference_protocols": {
+        "low-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_low",
+          "min_gap": [
+            0
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions"
+        },
+        "medium-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_medium",
+          "min_gap": [
+            0
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions"
+        },
+        "high-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_high",
+          "min_gap": [
+            0
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions"
+        }
+      }
     },
     {
       "id": "szc-vdn64-aspr-3g-gap-ablation",
@@ -1269,8 +1326,39 @@
         "最终独立进程复核复用focus评价种子，不是独立测试集。",
         "K1/CPR总8条，Refresh每任务8条，未单独消融Refresh采样和刷新。",
         "无本批FT分支，不把旧2M FT作为同前缀配对对照。",
-        "边界c的参考更新影响下一阶段；不能从局部梯度/掩码相关变化推断性能因果。"
-      ]
+        "边界c的参考更新影响下一阶段；不能从局部梯度/掩码相关变化推断性能因果。",
+        "K1 各任务的偏好记忆由 K1 策略生成，A 为共同 K1 前缀胜局；VDN-FT 固定历史池属于其他批次。"
+      ],
+      "preference_protocols": {
+        "TKPR-K1": {
+          "experiment_role": "default_method",
+          "entrypoint": "topk_preference",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "shared_k1_prefix_then_own_policy",
+          "state_selection": "native",
+          "k": 1
+        },
+        "TKPR-CPR": {
+          "experiment_role": "extension",
+          "entrypoint": "tkpr_cpr",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "own_policy_trajectories_reevaluated_q",
+          "state_selection": "cpr_reference_valid_mask"
+        },
+        "TKPR-Refresh": {
+          "experiment_role": "extension",
+          "entrypoint": "tkpr_refresh",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "own_policy_refreshed_trajectories",
+          "state_selection": "native"
+        }
+      }
     },
     {
       "id": "ts5-vdn64-tc-gap-extension",
@@ -1309,10 +1397,10 @@
           "parent_run_id"
         ],
         "arms": [
-          "K1-only",
-          "Low-TC",
-          "Medium-TC",
-          "High-TC"
+          "k1-TC",
+          "low-TC",
+          "medium-TC",
+          "high-TC"
         ],
         "min_gap": [
           0,
@@ -1325,8 +1413,52 @@
         "Seed4646仅保留在原始实验，不进入主对比。",
         "gap0.5四组共用配额可行状态，保留比例约15%–17%；跨gap不控制状态集合。",
         "间隔筛选同样作用于K1基础对，TC额外N−2预算与距离配额不降低。",
-        "只有两个训练种子；图结构、TC及残余Q-gap差异不构成标量TC因果证明。"
-      ]
+        "只有两个训练种子；图结构、TC及残余Q-gap差异不构成标量TC因果证明。",
+        "报告中的 K1-only 对应 comparison_runs.csv 的 k1-TC，两个 gap 均无额外边。"
+      ],
+      "preference_protocols": {
+        "k1-TC": {
+          "experiment_role": "tc_control",
+          "entrypoint": "pair_tc_k1",
+          "min_gap": [
+            0,
+            0.5
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions_plus_gap_0.5_quota_feasibility",
+          "report_label": "K1-only"
+        },
+        "low-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_low",
+          "min_gap": [
+            0,
+            0.5
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions_plus_gap_0.5_quota_feasibility"
+        },
+        "medium-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_medium",
+          "min_gap": [
+            0,
+            0.5
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions_plus_gap_0.5_quota_feasibility"
+        },
+        "high-TC": {
+          "experiment_role": "structure_ablation",
+          "entrypoint": "pair_tc_high",
+          "min_gap": [
+            0,
+            0.5
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "tc_common_strict_order_at_least_four_legal_actions_plus_gap_0.5_quota_feasibility"
+        }
+      }
     },
     {
       "id": "ts5-native-tkpr-k1-gap",
@@ -1374,10 +1506,59 @@
         "仅四条新增训练；没有参考重训或TC分支重跑。",
         "两个gap使用相同完整历史轨迹；仅原生动作对筛选变化，零对状态仍保留。",
         "原生 RankingPreference/topk_preference，不是 pair_tc_k1；历史池按任务边界激活。",
-        "S前缀每种子共享，两训练种子不足以推断普遍最优阈值。"
-      ]
+        "S前缀每种子共享，两训练种子不足以推断普遍最优阈值。",
+        "即使 gap=0.5 也沿用 VDN-FT 固定历史池；此组用于固定记忆对照。"
+      ],
+      "preference_protocols": {
+        "TKPR-K1-native": {
+          "experiment_role": "gap_ablation",
+          "entrypoint": "topk_preference",
+          "min_gap": [
+            0,
+            0.5
+          ],
+          "history_source": "fixed_vdn_ft",
+          "state_selection": "native",
+          "k": 1,
+          "fixed_reference_history": true
+        }
+      }
     }
   ],
+  "branch_experiments": {
+    "ts5-tkpr-cpr-anchor-1m": {
+      "branch": "feature/tkpr-cpr-anchor",
+      "implementation_commit": "0e4d330",
+      "training_commit": "9ff065fb08ea91d6113f8f70383ade3f500a26e6",
+      "publication_commit": "e7f1dd3b6f1051932198f5539d44afe7d868179d",
+      "report_url": "https://github.com/wangyahao6/marl_method_lab/blob/e7f1dd3b6f1051932198f5539d44afe7d868179d/docs/results/comparisons/ts5-tkpr-cpr-anchor-1m/README.md",
+      "catalog_url": "https://github.com/wangyahao6/marl_method_lab/blob/e7f1dd3b6f1051932198f5539d44afe7d868179d/docs/results/catalog.json",
+      "reuses_experiment_ids": [
+        "ts5-tkpr-cpr-1m"
+      ],
+      "preference_protocols": {
+        "TKPR-CPR-Anchor": {
+          "experiment_role": "extension",
+          "entrypoint": "tkpr_cpr_anchor",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "own_policy_trajectories_anchor_constrained_reevaluated_q",
+          "state_selection": "cpr_reference_valid_mask"
+        },
+        "TKPR-K1": {
+          "experiment_role": "reused_default_method",
+          "entrypoint": "topk_preference",
+          "min_gap": [
+            0.5
+          ],
+          "history_source": "shared_k1_prefix_then_own_policy",
+          "state_selection": "native",
+          "k": 1
+        }
+      }
+    }
+  },
   "global_index": {
     "schema_version": 1,
     "generator": "scripts/experiment_index.py",

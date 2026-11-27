@@ -1,8 +1,8 @@
-# 可接受动作集合偏好回放（ASPR）
+# VDN 动作偏好回放协议
 
-Action-Set Preference Replay（ASPR）用每个已完成任务的阶段末 Agent 给成功轨迹标记可接受动作集合。新阶段在当前任务上执行原 VDN TD 更新，同时重新展开旧任务轨迹，约束当前 Agent 对旧任务动作的排序。
+[方法总览](METHODS.md#动作偏好约束方法)维护命名与分支。正式方法是 [TKPR-K1](#top-k-偏好回放tkpr)，显式采用 `k=1`、`min_gap=0.5` 和阶段末自身策略采集的成功轨迹与参考 Q。下文的 ASPR-2G 指代码入口 `aspr_preference`，ASPR-Max 指旧的最大 Q hinge 版本。
 
-## 启动与配置
+## ASPR-2G 与历史 ASPR-Max 的启动与配置
 
 ```sh
 cd /home/wyh/marl_method_lab
@@ -17,7 +17,7 @@ cd /home/wyh/marl_method_lab
 | --- | --- |
 | `tasks` | 每个任务独立指定己方和敌方阵容，按 Stalker、Zealot、Colossus 计数。 |
 | `stages[].task`、`stages[].steps` | 任意长度的任务顺序与阶段内步数。达到步数后跑完当局，因此实际步数可以超出该阶段预算。 |
-| `aspr_preference` | ASPR 使用 `weight=1.0`、`temperature=1.0`、`min_gap=0.5`、`q_scale_floor=0.1`。`weight=0` 禁用历史采集与偏好更新。 |
+| `aspr_preference` | ASPR-2G 使用 `weight=1.0`、`temperature=1.0`、`min_gap=0.5`、`q_scale_floor=0.1`。`weight=0` 禁用历史采集与偏好更新。 |
 | `action_set.weight` | ASPR-Max 的 λ，默认 1。设为 0 时禁用记忆采集和偏好损失。 |
 | `action_set.margin` | ASPR-Max 的偏好间隔 m，默认 0，允许两组最大 Q 打平。 |
 | `action_set.batch_episodes` | 每次 learner 更新采样的历史 episode 总数，默认 8。 |
@@ -30,7 +30,7 @@ cd /home/wyh/marl_method_lab
 | `action_set.attempts_per_seed` | 每个采集种子的最大局数，默认 125。按种子块递增分配累计目标，最后一块可补前面块的不足。 |
 | `evaluation.seeds`、`episodes_per_seed`、`interval` | 独立贪心评价使用固定种子和每种子局数。阶段内定期评价当前任务，interval=0 关闭定期评价。 |
 
-每阶段重新分配当前任务的 TD replay。ε 可逐任务重置（默认）或累计退火。阶段阈值可按本阶段步数或全序列累计步数计算。在线网络、目标网络、优化器和全局步数跨阶段延续。阶段末评价所有已见任务，并在新任务首次训练前保存对应评价；结合初始模型评价计算 ACC、BWT、FWT。最终检查点可用 `scripts/evaluate.py --run <run-dir> --episodes <n>` 独立评价所有已见任务，`n` 是每个任务的总局数。
+采用 `replay_on_switch: ft` 时，每阶段重新分配当前任务的 TD replay。偏好历史池独立于 TD replay。ε 可逐任务重置（默认）或累计退火。阶段阈值可按本阶段步数或全序列累计步数计算。在线网络、目标网络、优化器和全局步数跨阶段延续。阶段末评价所有已见任务，并在新任务首次训练前保存对应评价；结合初始模型评价计算 ACC、BWT、FWT。最终检查点可用 `scripts/evaluate.py --run <run-dir> --episodes <n>` 独立评价所有已见任务，`n` 是每个任务的总局数。
 
 当前使用同一个 SMACv2 `10gen_protoss` 5v5 布局。仓库环境按 unit type 和位置分配本局 ally slots，Agent ID 的 one-hot 对应本局 slot。动作 0 为死亡单位 no-op，1 为停止，2–5 为移动，6–10 按本局敌方 slot 攻击。slot 表示局内索引，阵容变化会改变该 slot 对应的单位。旧轨迹保留自己的观测和合法动作掩码。真实 5v5 测得 state 130、obs 92、Agent 数 5、动作数 11。改变队伍规模或动作布局需要先定义新的输入及动作映射。
 
@@ -38,8 +38,8 @@ cd /home/wyh/marl_method_lab
 
 1. 保存 `models/phaseNNNN_<step>/agent.th`，用该状态创建独立的冻结 CPU Agent。贪心 runner 的随机状态与训练隔离。
 2. 在该阶段的任务环境中按多个种子采集完整 episode。胜局进入 `action_set_memory/phaseNNNN/success.th`，失败局进入同目录的 `failure.th`。达到种子尝试上限后继续阶段流程，`summary.json` 记录目标、实际胜局和缺口。
-3. 在有效决策中，标记满足 `legal[a] and max_legal_Q - Q[a] <= delta` 的动作。ASPR 保存贪心 rollout 捕获的参考 Q，并用这份 Q 计算校准间隔与 Good Mask。ASPR-Max 沿用冻结 Agent 从零隐藏状态重放并标记的路径。
-4. 池按阶段编号持久化，包含任务 ID、δ、输入/动作布局、参考 checkpoint 路径和 episode 列表。每条成功记录保存轨迹和布尔 `good_mask`。ASPR 还保存 `data.old_q_values`，两项标签及 `avail_actions` 均含末尾观测，尺寸为 `[T,N,A]`。分支恢复时检查两项标签是否存在并与动作掩码对齐。
+3. 在有效决策中，标记满足 `legal[a] and max_legal_Q - Q[a] <= delta` 的动作。ASPR-2G 保存贪心 rollout 捕获的参考 Q，并用这份 Q 计算校准间隔与 Good Mask。ASPR-Max 沿用冻结 Agent 从零隐藏状态重放并标记的路径。
+4. 池按阶段编号持久化，包含任务 ID、δ、输入/动作布局、参考 checkpoint 路径和 episode 列表。每条成功记录保存轨迹和布尔 `good_mask`。ASPR-2G 还保存 `data.old_q_values`，两项标签及 `avail_actions` 均含末尾观测，尺寸为 `[T,N,A]`。分支恢复时检查两项标签是否存在并与动作掩码对齐。
 
 回访会保存一个新阶段快照。当前任务在自己的回访阶段也只受其他任务约束。其他任务若有多次完成记录，采样最近一次非空池，所有较早快照继续留存。零胜局的池保留诊断信息，采样器跳过它。当前入口以一次进程执行整条序列。
 
@@ -59,24 +59,24 @@ cd /home/wyh/marl_method_lab
 
 真实最后一次决策参与约束，包括超时前最后一步。最终 bootstrap 观测、padding、终止后的帧和仅有 no-op 的死亡 Agent 均排除。无合法坏动作的状态只计入集合诊断。参考标记在有效状态遇到空集合时报告数据构建错误。
 
-ASPR 枚举每个 Good 动作与每个合法 Bad 动作的配对。合法旧 Q 先减均值，再除以 `σ = max(std(Q_old[legal]), q_scale_floor)`。过滤归一化旧 Q 间隔小于 `min_gap` 或等于零的动作对。对保留的 `(g, b)` 计算 `softplus((Q_new[b] - Q_new[g]) / (σ * temperature))`。同组动作和额外 margin 不参与损失。ASPR-Max 每个有效状态计算 `relu(m + max_bad(Q) - max_good(Q))`。
+ASPR-2G 枚举每个 Good 动作与每个合法 Bad 动作的配对。合法旧 Q 先减均值，再除以 `σ = max(std(Q_old[legal]), q_scale_floor)`。过滤归一化旧 Q 间隔小于 `min_gap` 或等于零的动作对。对保留的 `(g, b)` 计算 `softplus((Q_new[b] - Q_new[g]) / (σ * temperature))`。同组动作和额外 margin 不参与损失。ASPR-Max 每个有效状态计算 `relu(m + max_bad(Q) - max_good(Q))`。
 
-ASPR 先平均状态内保留的动作对。两版均对任务内有效状态求平均，再对本次含有效状态的历史任务等权平均，最后使用 `TD_loss + weight * preference_loss` 一次反传。历史数据作为偏好分支输入，当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
+ASPR-2G 先平均状态内保留的动作对。两版均对任务内有效状态求平均，再对本次含有效状态的历史任务等权平均，最后使用 `TD_loss + weight * preference_loss` 一次反传。历史数据作为偏好分支输入，当前任务的 action selector、VDN Mixer、Double-Q target 和 TD 公式沿用原实现。
 
 ### ASPR-3G 与 ASPR-4G
 
 `aspr_3g_preference` 和 `aspr_4g_preference` 是独立多组分支，二组 `aspr_preference` 的 Good/Bad 标签及损失路径保持不变。每个有效决策只取合法动作的旧 Q，用现有 `reference_scale()` 在状态内标准化；按 Q 从高到低排序后，把相同 Q 合成不可拆分的连续单元。确定性动态规划求一维 K-means 的最小组内平方误差，实际组数为 `min(group_count, 合法动作数, 不同 Q 数)`。组中心从高到低编号为 G1 到 G4；非法动作、无效决策和最终 bootstrap 位置标为 `group_ids=-1`。
 
-多组分支只枚举不同组的无序合法动作对，同组不约束。旧 Q 与新 Q 差距仍按同一个旧策略尺度归一化，经 `min_gap=0.5` 过滤后复用 ASPR/FRPR 的 Softplus、温度、状态内平均、历史任务等权聚合和 TD 联合更新。历史 `success.th` 保存与 `old_q_values`、`avail_actions` 同形状的 `group_ids`；从 TKPR-K1 共享 S 前缀分支时，只在新分支目录用父池旧 Q 生成标签，不修改父运行。`aspr_group_summary.csv` 与 `aspr_group_distribution.csv` 记录已存轨迹的组大小及空组分布；`aspr_group_training_sampled.csv` 按训练阶段、历史任务汇总实际抽取轨迹，重复抽取重复计数，并记录跨组候选/有效动作对和违反率。
+多组分支只枚举不同组的无序合法动作对，同组不约束。旧 Q 与新 Q 差距仍按同一个旧策略尺度归一化，按配置的 `min_gap` 过滤后复用 ASPR-2G/FRPR 的 Softplus、温度、状态内平均、历史任务等权聚合和 TD 联合更新。历史 `success.th` 保存与 `old_q_values`、`avail_actions` 同形状的 `group_ids`；从 TKPR-K1 共享 S 前缀分支时，只在新分支目录用父池旧 Q 生成标签，不修改父运行。`aspr_group_summary.csv` 与 `aspr_group_distribution.csv` 记录已存轨迹的组大小及空组分布；`aspr_group_training_sampled.csv` 按训练阶段、历史任务汇总实际抽取轨迹，重复抽取重复计数，并记录跨组候选/有效动作对和违反率。
 
-ASPR 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`。逐更新汇总与各历史任务均记录候选与有效对数、保留比例、违反比例、平均 Good 集合大小、单元素比例、全合法动作比例。保留比例以非平局候选对为分母，违反比例以有效对为分母，新 Q 打平计为违反。ASPR-Max 写入 `aspr_max_preference_updates.jsonl` 和 `aspr_max_preference_probes.jsonl`，保留原 hinge 统计。旧别名同时写原 `action_set_updates.jsonl` 和 `action_set_probes.jsonl`，供历史读取器使用。常规训练指标沿用 `metrics.jsonl`。
+ASPR-2G 写入 `aspr_preference_updates.jsonl` 和 `aspr_preference_probes.jsonl`。逐更新汇总与各历史任务均记录候选与有效对数、保留比例、违反比例、平均 Good 集合大小、单元素比例、全合法动作比例。保留比例以非平局候选对为分母，违反比例以有效对为分母，新 Q 打平计为违反。ASPR-Max 写入 `aspr_max_preference_updates.jsonl` 和 `aspr_max_preference_probes.jsonl`，保留原 hinge 统计。旧别名同时写原 `action_set_updates.jsonl` 和 `action_set_probes.jsonl`，供历史读取器使用。常规训练指标沿用 `metrics.jsonl`。
 
 ## 代码位置与验证
 
 - `src/learners/action_set_preference.py` 管理历史池采样、GRU 展开、合法/有效掩码、损失和逐更新日志。 `src/learners/q_learner.py` 接收可选偏好项并接入原有单次反传。
 - `drivers/continual/action_set_train.py` 驱动任务切换、独立评估、轨迹采集与持久化。 `action_set_protocol.py` 负责协议默认值和结构校验。
 - `scripts/run.py` 和 `scripts/evaluate.py` 注册训练与最终评价。 `configs/continual/action_preference/examples/vdn_action_set_example.json` 是三任务示例。
-- `.venv/bin/python tests/test_action_set_preference.py -v` 使用脚本环境和真实 VDN/GRU 验证 T1→T2→T3、联合损失、梯度、采样、掩码和关闭方法的对照。另在实际 SMACv2 的三个示例任务各完成一条冻结 Agent 贪心轨迹并检查掩码；正式持续学习训练及保留效果尚未评估。
+- `.venv/bin/python tests/test_action_set_preference.py -v` 使用脚本环境和真实 VDN/GRU 验证 T1→T2→T3、联合损失、梯度、采样、掩码和关闭方法的对照。另在实际 SMACv2 的三个示例任务各完成一条冻结 Agent 贪心轨迹并检查掩码；这是初版实现检查。后续训练见[公开结果索引](results/README.md)。
 
 ## 完整动作排序与 Top-1 偏好保持
 
@@ -181,6 +181,8 @@ cd /home/wyh/marl_method_lab
 
 ## Top-K 偏好回放（TKPR）
 
+**正式 TKPR-K1 的阶段末采集。** 驱动在任务训练完成并保存检查点后，用阶段末 Agent 的冻结副本执行贪心采集。成功轨迹保存完整时序、合法动作掩码及 rollout 当时的 `data.old_q_values`，采集尝试上限内达到多少就保留多少。后续阶段从非当前任务的最近非空池中采样并按整条历史轨迹展开当前 GRU。在标准路径不重新标记既有池；任务回访完成后可以新增一个阶段快照。具体实现见 [阶段训练驱动](../drivers/continual/action_set_train.py)和[历史采样与聚合](../src/learners/action_set_preference.py)。
+
 
 `tkpr_refresh` 独立使用 TKPR-K1 损失。每次更新从每个非当前任务的非空历史池各采 8 条轨迹；池内优先无放回，不足 8 条时有放回，各任务损失仍等权平均。原 `topk_preference` 保持跨任务总共 8 条。每阶段末评价后，当前策略为首次出现的任务采集最多 100 条成功轨迹，并为所有已有池的任务各采集最多 50 条。满池时随机保留 50 条旧轨迹，采到的新成功轨迹替换等量旧轨迹；不足 50 条则只替换实际采到的数量，零成功时保持原池。每个任务只有一个生效池，最多 100 条。新轨迹的 `old_q_values` 由采集它的当前策略生成，并与轨迹一起保存 `reference_phase`、`reference_checkpoint`；保留轨迹的 Q 值不变。更新摘要见 `tkpr_refresh_memory_updates.jsonl`。[独立配置](../configs/continual/action_preference/szc/szc_vdn64_tkpr_refresh.json)。
 
@@ -190,7 +192,7 @@ cd /home/wyh/marl_method_lab
 
 TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top-2 的间隔筛选整个决策，并给损失乘以置信度。在 K 覆盖全部合法动作中除最后一名外的排名时，每个有效动作对都被覆盖，TKPR 的损失和梯度等于 FRPR Softplus。
 
-`topk_preference` 配置接受 `weight`、`temperature`、`min_gap`、`q_scale_floor` 和 `k`，默认依次为 1.0、1.0、0.5、0.1 和 2。K 为正整数，运行时上限为环境的 `n_actions - 1`。通用 SZC TKPR 示例沿用 `szc_vdn64_t1pr.json` 的任务、预算和评估，使用 `per_task`。K 值消融与共享 S 前缀协议也显式使用逐任务 ε 退火。 [配置索引](../configs/continual/README.md)
+`topk_preference` 配置接受 `weight`、`temperature`、`min_gap`、`q_scale_floor` 和 `k`，默认依次为 1.0、1.0、0.5、0.1 和 2。K 为正整数，运行时上限为环境的 `n_actions - 1`。选用正式 TKPR-K1 时应显式使用 `k=1`，示例配置已设置 `min_gap=0.5`。SZC 示例沿用 `szc_vdn64_t1pr.json` 的任务、预算和评估，使用 `per_task`。K 值消融与共享 S 前缀协议也显式使用逐任务 ε 退火。 [配置索引](../configs/continual/README.md)
 
 `topk_preference_updates.jsonl` 和统一指标文件记录有效状态数、覆盖率、有效动作对数、Top-1 翻转率及以下诊断。
 
@@ -202,7 +204,7 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 ```sh
 .venv/bin/python scripts/run.py --suite vdn_action_set --algorithm vdn \
   --method topk_preference --seed 3535 --run-id szc_tkpr_3535 \
-  --protocol configs/continual/action_preference/szc/szc_vdn64_tkpr.json --dry-run
+  --protocol configs/continual/action_preference/szc/szc_vdn64_tkpr_k1.json --dry-run
 ```
 
 ### SZC-FT 的 K 值消融
@@ -217,11 +219,20 @@ TKPR K=1 仍按动作对筛选和均值聚合。原版 T1PR 按旧 Top-1 与 Top
 
 阶段末沿用已有 `row` 评价结果。当前任务仅在首次建立池时采集成功轨迹；回访不重复采集或替换。对其他已建立的任务，取此前全部阶段末评价（不含本阶段）的最佳胜率，当前胜率达到 `best - task_gate_tolerance` 才重评；失败时保留已经接受的 Q、有效掩码和来源，不回退到原始参考。通过时用当前在线 MAC 在 `torch.no_grad()` 下按 `action_set.batch_episodes`（默认 8）分块完整展开历史 Episode，复用 `batch_episodes()`、`unroll()` 和 `reference_order()`；不额外评价环境，不使用 target MAC。
 
-每个真实、存活且至少有两个合法动作的决策按以下优先级选择：新置信度达阈值，并且（旧掩码无效或新置信度严格超过旧置信度加 margin），则采用新 Q；否则，旧掩码有效、双方并非都低于阈值，且 Top-1 相同或旧置信度严格超过新置信度加 margin，则保留旧参考；其余标为不确定。不确定状态将有效掩码置 false，来源置 -1，但轨迹与已有 Q 保留，可在后续新置信度达标时重新激活。异 Top-1 且置信度差距不足/等于 margin 的状态不强制选择任一方；同 Top-1 优先保留旧参考。填充、bootstrap 与其他非决策位置不参与选择或损失。
+每个真实、存活且至少有两个合法动作的决策按以下优先级选择：新置信度达阈值，并且（旧掩码无效或新置信度严格超过旧置信度加 margin），则采用新 Q；否则，旧掩码有效、双方并非都低于阈值，且 Top-1 相同或旧置信度严格超过新置信度加 margin，则保留旧参考；其余标为不确定。不确定状态将有效掩码置 false，来源置 -1，但轨迹与已有 Q 保留，可在后续新置信度达标时重新激活。异 Top-1 且置信度差距不足或等于 margin 时，按上述优先级处理。同 Top-1 可以更新为更强的参考；未触发更新且满足保留条件时沿用旧参考。填充、bootstrap 与其他非决策位置不参与选择或损失。
 
 每条轨迹顶层保存 `original_q_values[T, n_agents, n_actions]`（采集时 Q 的独立副本，永久保留）、`reference_valid_mask[T, n_agents]`（bool）和 `reference_source_phase[T, n_agents]`（long）。时间轴含末尾 bootstrap，与 `data["old_q_values"]` 对齐。首次有效掩码全部初始化为 true，来源为采集阶段；后续仅修改所选决策的 `data["old_q_values"]`、掩码与来源。训练时仅 CPR 在原 `decisions` 上叠加该有效掩码，其余损失和任务等权归约相同。池级 `reference_checkpoint` 只指向最初采集模型（`reference_checkpoint_role=original_collection_only`）；逐状态来源通过 `reference_checkpoints` 阶段→checkpoint 映射追溯。恢复保留已接受的参考及全部元数据，并将池复制到分支目录后更新；兼容具有存储旧 Q 的静态池初始化，部分或错位元数据视为输入结构错误。
 
-`tkpr_cpr_updates.jsonl` 每阶段/历史任务记录当前与历史最佳胜率、门控、重评轨迹数、决策/更新/保留/不确定数量、已采用参考的 Top-1 变化率、有效参考覆盖率、来源阶段计数（含 -1）与重评耗时。变化率分母是全部真实合法决策；覆盖率是这些决策中的有效参考掩码比例，不等同于经过 min-gap 后的有效 Pair 覆盖。门控失败时更新数与重评轨迹数为零，保留/不确定数描述未改变的已有掩码。逐训练辅助损失日志另写 `tkpr_cpr_preference_updates.jsonl`，避免与阶段更新日志混用。上述仅为实现，不代表已完成正式训练或验证性能收益。
+`tkpr_cpr_updates.jsonl` 每阶段/历史任务记录当前与历史最佳胜率、门控、重评轨迹数、决策/更新/保留/不确定数量、已采用参考的 Top-1 变化率、有效参考覆盖率、来源阶段计数（含 -1）与重评耗时。变化率分母是全部真实合法决策；覆盖率是这些决策中的有效参考掩码比例，不等同于经过 min-gap 后的有效 Pair 覆盖。门控失败时更新数与重评轨迹数为零，保留/不确定数描述未改变的已有掩码。逐训练辅助损失日志另写 `tkpr_cpr_preference_updates.jsonl`，避免与阶段更新日志混用。已完成的两种子对照见 [TS5-1M CPR／Refresh 报告](results/comparisons/ts5-tkpr-cpr-1m/README.md)。
+
+### CPR-Anchor 分支
+
+`feature/tkpr-cpr-anchor` 的 `tkpr_cpr_anchor` 复用 CPR 的任务门控及历史池，用永久原始 Q 的 Top-1 限制参考更新。更新要求见[方法总览](METHODS.md#方法扩展extensions)。实现比较的是 `reference_order()` 计算的 Top-1 与置信度。策略更新参考时仍能改变同一锚点下的 Q 差、尺度和有效动作对。实现、训练配置和报告分别见 [0e4d330](https://github.com/wangyahao6/marl_method_lab/commit/0e4d330)、[9ff065f](https://github.com/wangyahao6/marl_method_lab/commit/9ff065f)和 [e7f1dd3 报告](https://github.com/wangyahao6/marl_method_lab/blob/e7f1dd3b6f1051932198f5539d44afe7d868179d/docs/results/comparisons/ts5-tkpr-cpr-anchor-1m/README.md)。
+
+### 固定历史与 TC 对照入口
+
+- **固定 VDN-FT 历史的原生 K1**使用 `topk_preference(k=1)` 与 `fixed_reference_history: true`。它以 FT 参考的 S 检查点为父运行，在对应任务完成后挂接已保存的完整 FT 历史池。两个 gap 组的池字节相同，没有 TC 额外状态筛选。间隔过滤后无有效对的决策依然在轨迹中并参与 GRU 展开。[原生 gap 协议](protocols/TS5_NATIVE_K1_GAP.md) · [池挂接实现](../drivers/continual/memory/fixed_reference.py)
+- **TC K1-only** 使用 `pair_tc_k1` 和固定 FT 池。其离线掩码只保留共同有效状态上的 Top-1 基础边；共同状态要求至少四个合法动作、旧 Q 严格排序。gap 0.5 进一步要求筛后有基础边且能满足 TC 额外边的距离配额，即使 K1-only 自身使用零条额外边。因此 TC 扩展的跨 gap 对比同时改变有效状态总体与动作对筛选。[TC 扩展协议](protocols/TS5_TC_GAP_EXTENSION.md) · [TC 掩码实现](../src/learners/pair_tc.py)
 
 ## FRPR-Raw 与 FRPR-RawLoss
 

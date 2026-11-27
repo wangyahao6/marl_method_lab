@@ -4,11 +4,27 @@
 
 [全局运行索引](run_index.csv)与[分析索引](analysis_index.csv)还收录可访问的历史运行证据、失败尝试及未归档运行，不等于新增公开结论。按环境、任务、方法和种子查询及生成覆盖矩阵见[环境与任务索引](../environments/README.md)；无法确认的记录见[索引审计](index_audit.json)。这些视图由 `scripts/experiment_index.py` 自动生成，原实验报告、CSV 和 scheduler 保持各自原有职责。
 
+## TS5-1M 的 K1 运行对照
+
+以下批次均用单前馈 VDN64、五阶段各 1M 和逐任务 ε。实际父运行、训练版本、评价种子与 AUC 积分口径见各报告。引用时同时写明历史池来源、状态筛选和 gap。对照表中的同一 `run_id` 只计一次。
+
+| 原报告或数据标签 | 实现和 gap | 历史来源与状态筛选 | 实验角色 |
+| --- | --- | --- | --- |
+| [CPR／Refresh 四组中的 TKPR-K1](comparisons/ts5-tkpr-cpr-1m/README.md) | `topk_preference(k=1)`，0.5；训练提交 `8ba02fe` | A 共用 K1 入口训练的前缀及同一批胜局。B–E 由 K1 分支继续训练并用自身策略采集，沿用原生决策掩码。 | **正式主体结果**，也是该批扩展方法的对照。seed 2222、3535。 |
+| [CPR-Anchor 分支报告中的 TKPR-K1](https://github.com/wangyahao6/marl_method_lab/blob/e7f1dd3b6f1051932198f5539d44afe7d868179d/docs/results/comparisons/ts5-tkpr-cpr-anchor-1m/README.md) | 同上 | 同上，K1 的两个 `run_id` 与四组报告相同。 | **复用正式结果**。本批新增两条 Anchor 分支，训练提交 `9ff065f`。 |
+| [原生 gap 消融的 TKPR-K1-native](parameter-ablations/ts5-native-tkpr-k1-gap/README.md) | `topk_preference(k=1)`，0／0.5；`fixed_reference_history: true`，训练提交 `ad99b5c` | 同种子 VDN-FT 的 S 前缀与固定完整 S/Z/C/D 胜局及旧 Q，两 gap 复用相同池，无额外状态筛选。 | **机制消融**，在固定输入下隔离原生 gap。gap 0.5 组也是固定历史的原生 K1 对照。 |
+| [TC 扩展的 K1-only（CSV 为 k1-TC）](parameter-ablations/ts5-vdn64-tc-gap-extension/README.md) | `pair_tc_k1`，0／0.5；训练提交 `8b7aa9d`／`f0e8fa5` | 同种子 VDN-FT 固定池。只保留 TC 共同状态的 Top-1 基础边。gap 0.5 额外施加配额可行性筛选，零条额外边。 | **TC 对照**，用来衡量同一 gap 下增加额外边的变化。跨 gap 连同有效状态总体一起变化。 |
+| [原始 Low／Medium／High-TC](parameter-ablations/ts5-vdn64-tc-coverage/README.md) | `pair_tc_low`／`medium`／`high`，0；训练提交 `13a6d9b`／`470c22c` | VDN-FT 固定池，冻结掩码同时保留 Top-1 基础边和带配额的额外边。 | **结构消融**。原三种子实验没有独立 K1-only 组，扩展复用了其中两个种子的六条结果。 |
+
+四组对照的 CPR 在保存轨迹上改参考 Q／有效掩码，Refresh 会替换部分轨迹并使用逐历史任务采样。Anchor 复用 CPR 路径并限制参考更新。它们是扩展组，各自的训练结果按原方法名引用。更早的 [TS5 Refresh 结果](comparisons/ts5-tkpr-refresh/README.md)也有自身采集的 K1，但它是单种子、每阶段 2M 的独立运行。
+
+完整的实现、命名和分支版本见[方法总览](../METHODS.md#动作偏好约束方法)。
+
 ## 方法与基线对照
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
-| [TS5-1M · TKPR-CPR共同前缀对照](comparisons/ts5-tkpr-cpr-1m/README.md) | 单前馈VDN64，seed3535/2222，A共用1M、B–E各1M | ER、K1、CPR、Refresh的保持矩阵、学习AUC、参考更新及梯度诊断。 |
+| [TS5-1M · TKPR-CPR共同前缀对照](comparisons/ts5-tkpr-cpr-1m/README.md) | 单前馈VDN64，seed3535/2222，A共用1M、B–E各1M | 正式 TKPR-K1 对照 ER、CPR、Refresh；含保持矩阵、学习 AUC、参考更新和梯度诊断。 |
 | [TS5 · TKPR-Refresh 四方法对照](comparisons/ts5-tkpr-refresh/README.md) | 单前馈层 VDN64，seed 3535，五阶段各 2M | TKPR-K1、TKPR-Refresh、VDN-FT/ER 的评价矩阵、学习曲线数据、实际配置与记忆更新记录。 |
 | [SZC · 双层 VDN64 约束方法结果](comparisons/szc-vdn64/README.md) | 追猎者 → 狂热者 → 巨像，33 条独立运行，每阶段 2M 步 | 集中查看 FRPR-Raw、RawLoss、Unfiltered、ReLU、TKPR、T1PR、ASPR-Max、CHI 与 VDN-FT/ER 的逐种子指标、同种子差值和诊断 CSV。 |
 | [SZC · TKPR-K1 共同前缀对照](comparisons/szc-vdn64-tkpr-k1-shared/README.md) | 双层 VDN64，seed 2222、3535，各 1 个 S 前缀与 5 个 Z→C 分支 | 学习曲线、ACC/BWT/FWT/AUC、同前缀差值、偏好诊断和 Z/C 配对更新时间。 |
@@ -16,7 +32,7 @@
 | [SZC · ASPR-3G-Adjacent vs TKPR-K1](comparisons/szc-vdn64-aspr-3g-adjacent/README.md) | 双层 VDN64，seed 2222、3535，共享 2M S，RMSprop，min_gap=0 | 逐阶段胜率、ACC/BWT/FWT/AUC、配对差、采样动作对与 G1-G3 离线违反率。 |
 | [SZC · ASPR-3G min_gap 2×2](comparisons/szc-vdn64-aspr-3g-gap-ablation/README.md) | 3G/Adjacent × gap0/0.5，seed 2222、3535，共同 S | 配对 ACC/BWT/FWT/AUC、三类对违反率、实际约束量与 Q-gap 分布。 |
 | [SZC · ASPR-3G / ASPR-4G](comparisons/szc-vdn64-aspr-groups/README.md) | 双层 VDN64，seed 2222、3535，共享 S，RMSprop，每阶段 2M 步 | 贪心曲线、ACC/BWT/FWT/AUC、分组完整分布及实际采样 CSV。 |
-| [SZC · ASPR 与 Adam 优化器对照](comparisons/szc-vdn64-aspr-adam/README.md) | 双层 VDN64，seed 2222、3535，每阶段 2M 步 | 新版 ASPR、Adam TKPR-K1/K1-W/FRPR、RMSprop 与 VDN-FT 的训练及贪心曲线、端点和配对差。 |
+| [SZC · ASPR 与 Adam 优化器对照](comparisons/szc-vdn64-aspr-adam/README.md) | 双层 VDN64，seed 2222、3535，每阶段 2M 步 | ASPR-2G、Adam TKPR-K1/K1-W/FRPR、RMSprop 与 VDN-FT 的训练及贪心曲线、端点和配对差。 |
 
 ## 回访与阶段干预消融
 
@@ -28,8 +44,8 @@
 
 | 实验 | 设置 | 从哪里读起 |
 | --- | --- | --- |
-| [TS5-1M · 原生 TKPR-K1 Gap 消融](parameter-ablations/ts5-native-tkpr-k1-gap/README.md) | 原生 topk_preference(k=1)，gap0/0.5 × 2222/3535 | 完整共同历史池、无状态筛选、实际动作对计数与配对性能。 |
-| [TS5-1M · K1 与 gap0/0.5 扩展](parameter-ablations/ts5-vdn64-tc-gap-extension/README.md) | Seed2222/3535；10 新分支、6 旧 TC 分支复用 | 两个同种子四方法对照组、筛后共同状态、固定配额和 Q-gap。 |
+| [TS5-1M · 原生 TKPR-K1 Gap 消融](parameter-ablations/ts5-native-tkpr-k1-gap/README.md) | 原生 topk_preference(k=1)，gap0/0.5 × 2222/3535 | 固定 VDN-FT 完整历史池，无额外状态筛选；记录实际动作对数与配对性能。 |
+| [TS5-1M · K1 与 gap0/0.5 扩展](parameter-ablations/ts5-vdn64-tc-gap-extension/README.md) | Seed2222/3535；10 新分支、6 旧 TC 分支复用 | 固定 VDN-FT 历史池；每个 gap 内以 TC K1-only 对照三种 TC，跨 gap 有效状态总体改变。 |
 | [TS5-1M · 传递闭包覆盖率](parameter-ablations/ts5-vdn64-tc-coverage/README.md) | 单层 VDN64，三个种子，3 个新 FT 参考与 9 个同 S 分支 | 相同 K1、预算、距离配额下的 Micro/Macro TC、ACC/BWT/FWT/AUC、Q-gap 与机制诊断。 |
 | [SZC · TKPR K 值消融](parameter-ablations/szc-vdn64-tkpr-k/README.md) | 双层 VDN64，seed 1111，K=1、2、3、5 与 FRPR | 阶段末胜率、当前任务曲线、有效 K 分布及梯度诊断。 |
 | [SZC · TKPR 排名位置消融](parameter-ablations/szc-vdn64-tkpr-rank-position/README.md) | 双层 VDN64，seed 2222、3535，R2/R3 四条完成，本批 K1 两条失败 | 同前缀逐种子结果、旧 K1 历史对照、锚点排名与失败记录。 |

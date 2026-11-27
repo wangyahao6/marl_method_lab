@@ -4,7 +4,18 @@
 
 从 [catalog.json](catalog.json) 选择实验 ID。先读该实验的 `comparison` 和 `interpretation_limits`，再用 `run_id` 关联运行清单与指标。优先用 `stage_metrics` 比较端点，分析学习曲线或复算指标时再读 `evaluations`。按需读取配置与诊断，图表是同一数据的阅读视图。
 
-索引中的数据路径相对于 `catalog.json`，运行清单中的配置路径相对于清单所在目录。CSV 的空单元格表示缺失或不适用，保留为 null。对照选择器的字段取自 `runs.csv`，配对分析只在声明的 `match_on` 字段内比较。不同实验按各自的任务、网络和协议独立解释。
+索引中的数据路径相对于 `catalog.json`，运行清单中的配置路径相对于清单所在目录。CSV 的空单元格表示缺失或不适用，保留为 null。对照选择器的字段取自 `runs.csv` 或条目指定的比较运行清单。选择器带 `experiment_id` 时，从所指实验的运行清单取变量，沿配对表的 `control_run_id` 定位实际对照。配对分析遵循条目声明的 `match_on` 与父运行关系。不同实验按各自的任务、网络和协议独立解释。
+
+## 动作偏好方法与对照标识
+
+报告显示名、运行清单的 `method` 和配置的入口是三个字段。引用 `run_id` 以定位真实运行，保留原 CSV 标签。正式 **TKPR-K1** 需要同时满足原生 `topk_preference(k=1)`、`min_gap=0.5`、阶段末自身策略采集的成功轨迹与对应旧 Q，以及原生决策掩码。只凭 CSV 的 K1 字样、K 值或 gap 无法判定。共同 K1 首任务前缀可以用于正式方法，VDN-FT 固定池只用于控制实验。
+
+- TS5-1M 相关条目的 `preference_protocols` 用原运行 CSV 的 `method` 作键。值中的 `experiment_role` 描述该组用途，`entrypoint` 是实际入口，`min_gap` 按该组覆盖的实验条件列出，`history_source` 与 `state_selection` 记录历史来源和决策范围。
+- `TKPR-K1-native` 是固定 FT 完整池上的原生 gap 消融。TC 报告里的 K1-only 对应 `comparison_runs.csv` 的 `k1-TC`，配置入口为 `pair_tc_k1`，其离线合法性和配额可行性掩码用于 TC 比较。在同一个 gap 内配对后才能解读额外边的对照；跨 gap 另读报告的有效状态统计。
+- `branch_experiments` 记录尚在独立分支的报告，`report_url` 与 `catalog_url` 固定到发布提交。`reuses_experiment_ids` 指被复用的主分支数据集。通过 `run_id` 去重，Anchor 报告中原四组及共同前缀均为已有运行。
+- 较早 SZC／TS3 的 `ASPR` 或 `action_set_preference` 可能是 ASPR-Max；后续 `aspr_preference` 是 ASPR-2G。按生效配置和训练提交解释，概念见[方法总览](../METHODS.md#动作偏好约束方法)。
+
+跨批次比较时还要核对父运行及历史池来源、是否存在参考更新、状态掩码、任务顺序与阶段步数、TD 回放、探索调度与评价口径。启动源码版本从各清单的 `commit`（部分历史数据为 `source_commit`）和配置快照的 `launch_git_commit`／`launch_commit` 定位。分支发布提交用于定位报告。证据缺项保留原有空值。
 
 ## 从运行定位到数据
 
