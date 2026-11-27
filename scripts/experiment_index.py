@@ -172,30 +172,47 @@ def refs_in(value, known):
     return sorted(set(re.findall(r'[A-Za-z0-9_.-]+', text)) & known.keys())
 
 
+def canonical_ast(node):
+    """Version 3: normalize Python 3.8 Index wrappers and optional AST metadata."""
+    if isinstance(node,ast.Index):
+        return canonical_ast(node.value)
+    if isinstance(node,ast.AST):
+        return dict(node=type(node).__name__,fields={
+            key:canonical_ast(value) for key,value in ast.iter_fields(node)
+            if value is not None and not (key=='type_params' and value==[])})
+    if isinstance(node,list):
+        return [canonical_ast(value) for value in node]
+    return node
+
+
+def registry_key(target):
+    """Read the same literal key from pre-3.9 and modern Subscript nodes."""
+    node=target.slice
+    if isinstance(node,ast.Index):
+        node=node.value
+    return ast.literal_eval(node)
+
+
 def backbone_signature(text, class_name, agent=False, full_class=False):
-    """Version 2 adds full gate-class coverage to the version 1 backbone rules."""
+    """Version 3 retains version 2 coverage with interpreter-independent encoding."""
     try:
         tree=ast.parse(text)
-        # Python 3.12 adds an empty type_params field to otherwise identical functions.
-        for node in ast.walk(tree):
-            if getattr(node,'type_params',None)==[]:
-                delattr(node,'type_params')
         cls = next(n for n in tree.body
                    if isinstance(n, ast.ClassDef) and n.name == class_name)
         if full_class:
-            return hashlib.sha256(ast.dump(cls,include_attributes=False).encode()).hexdigest()
+            return hashlib.sha256(dumps(canonical_ast(cls)).encode()).hexdigest()
         nodes = []
         for fn in cls.body:
             if not isinstance(fn, ast.FunctionDef):
                 continue
             if fn.name == 'forward':
-                nodes.append(ast.dump(fn, include_attributes=False))
+                nodes.append(canonical_ast(fn))
             if agent and fn.name == '__init__':
-                nodes.extend(ast.dump(n, include_attributes=False) for n in fn.body
+                nodes.extend(canonical_ast(n) for n in fn.body
                              if isinstance(n, ast.Assign) and any(
                                  isinstance(t, ast.Attribute) and t.attr in ('net', 'rnn', 'fc2', 'hidden_dim')
                                  for t in n.targets))
-        return hashlib.sha256('\n'.join(nodes).encode()).hexdigest() if nodes else UNKNOWN
+        return hashlib.sha256(dumps(nodes).encode()).hexdigest() if nodes else UNKNOWN
     except (SyntaxError, StopIteration):
         return UNKNOWN
 
@@ -205,7 +222,7 @@ class ArchitectureResolver:
     def __init__(self, root, registry):
         self.root, self.registry = Path(root), registry
         self.cache = {}
-        if registry.get('schema_version') != 1 or registry.get('resolver_version') != 2:
+        if registry.get('schema_version') != 1 or registry.get('resolver_version') != 3:
             raise ValueError('Unsupported architecture registry/resolver version')
 
     def code(self, commit, path):
@@ -272,7 +289,7 @@ class ArchitectureResolver:
             registered = imported and any(isinstance(n, ast.Assign) and isinstance(n.value, ast.Name)
                              and n.value.id == architecture['agent_class'] and any(
                                  isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name)
-                                 and t.value.id == 'REGISTRY' and ast.literal_eval(t.slice) == agent
+                                 and t.value.id == 'REGISTRY' and registry_key(t) == agent
                                  for t in n.targets)
                              for n in registry_nodes)
         except (SyntaxError, ValueError, TypeError):

@@ -22,7 +22,9 @@ VDN 的 `algorithm`统一为 `vdn`；原配置选择器 `vdn`／`vdn_1ff`／`vdn
 
 解析顺序是已有生效配置中的 `agent`、`rnn_hidden_dim`、`mixer`、`mac`，再核对该运行记录的 Git 提交中的 Agent 注册绑定、实际前向主干与 Mixer 实现。配置入口仅说明标准入口，不用于猜测历史运行。相同结构换一个 YAML 名称仍是同一骨架；同名配置中字段被覆盖时按生效字段核对。缺失宽度时不按当前默认值补成 64。
 
-解析器版本 2 沿用版本 1 的主干静态 AST 签名：Agent 构造器中直接赋给 `net`、`rnn`、`fc2`、`hidden_dim`的表达式，以及完整 `forward`；Mixer 使用 `forward`。版本 2 新增 `ActivateLayer` 完整类（含构造器、初始门权重、冻结标志和前向）的签名，并检查 Agent 从 `modules.layers.act_layer` 导入该门。它识别登记并审查过的主干实现，忽略注释、格式、Python 3.12 新增的空 type_params 元数据及未参与该主干的旧兼容张量。登记表固定参考提交和预期签名，不在每次构建时从最新源码自动认可新结构。本次登记表与 Catalog 已显式升级到 `resolver_version=2`，版本 1 不自动通过新解析器。修改提取边界、算法或未知判定规则时必须升级 `resolver_version`并显式迁移；不把它当作完整训练代码指纹。
+解析器版本 3 沿用版本 2 的覆盖范围：Agent 构造器中直接赋给 `net`、`rnn`、`fc2`、`hidden_dim`的表达式，以及完整 `forward`；Mixer 使用 `forward`。版本 2 新增 `ActivateLayer` 完整类（含构造器、初始门权重、冻结标志和前向）的签名，并检查 Agent 从 `modules.layers.act_layer` 导入该门。它识别登记并审查过的主干实现，忽略注释、格式、Python 3.12 新增的空 type_params 元数据及未参与该主干的旧兼容张量。登记表固定参考提交和预期签名，不在每次构建时从最新源码自动认可新结构。本次登记表与 Catalog 已显式升级到 `resolver_version=3`，版本 1／2 不自动通过新解析器。修改提取边界、算法或未知判定规则时必须升级 `resolver_version`并显式迁移；不把它当作完整训练代码指纹。
+
+版本 3 修复 Python 3.8 的两处实际兼容问题：注册表下标是 `ast.Index(value=...)`，须先解包再做字面量校验；`ast.dump`在不同 Python 版本对 `None`等可选字段的输出格式不同，不能直接作为跨版本签名。新签名按 AST 节点类型与字段生成固定顺序 JSON，归一化等价的 Index 包装、空 type_params 和可选 None 字段，仍保留全部既定源码覆盖范围。登记签名从原有固定参考提交重新生成，未修改网络代码。Agent 注册键、类名、导入模块及真实实现匹配要求不变；动态键仍被拒绝。
 
 缺少必要字段、控制器未知、代码版本不可访问、注册绑定不同、实现签名不认识或同一运行的结构证据冲突时，`architecture_id=unknown`，原因保留在 `architecture_source`。已知的 Agent／宽度／Mixer 字段仍可保留。QMIX 和单智能体 DQN 不属于这三个 VDN 骨架，不强行分配相近的 VDN ID。未解析的 VDN 记录还会进入 `index_audit.json`。
 

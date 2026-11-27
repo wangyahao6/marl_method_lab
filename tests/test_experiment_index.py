@@ -164,6 +164,45 @@ class ExperimentIndexTest(unittest.TestCase):
         with patch.object(index.ast, 'parse', return_value=tree):
             self.assertEqual(index.backbone_signature(text, 'RNNAgent', True), expected)
 
+    def test_registry_keys_and_signatures_normalize_legacy_index_nodes(self):
+        target = ast.parse('REGISTRY["rnn"] = RNNAgent').body[0].targets[0]
+        self.assertEqual(index.registry_key(target), 'rnn')
+        expected = index.canonical_ast(target)
+
+        class LegacyIndex(ast.AST):
+            _fields = ('value',)
+
+            def __init__(self, value):
+                self.value = value
+
+        legacy = ast.Subscript(value=target.value, slice=LegacyIndex(ast.Constant(value='rnn')), ctx=ast.Store())
+        with patch.object(index.ast, 'Index', LegacyIndex):
+            self.assertEqual(index.registry_key(legacy), 'rnn')
+            self.assertEqual(index.canonical_ast(legacy), expected)
+        dynamic = ast.parse('REGISTRY[AGENT_KEY] = RNNAgent').body[0].targets[0]
+        with self.assertRaises((ValueError, TypeError)):
+            index.registry_key(dynamic)
+
+    def test_agent_registry_class_key_and_import_must_still_match(self):
+        git, _ = self.architecture_code()
+        resolver = self.builder().architecture_resolver
+        config = dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac')
+        path = self.root / 'src/modules/agents/__init__.py'
+        original = path.read_text()
+        wrong_sources = [
+            original.replace('REGISTRY["rnn"] = RNNAgent', 'REGISTRY["rnn"] = SingleFFRNNAgent'),
+            original.replace('REGISTRY["rnn"] = RNNAgent', 'REGISTRY["different"] = RNNAgent'),
+            original.replace('from .rnn_agent import RNNAgent', 'from .other_agent import RNNAgent'),
+        ]
+        for text in wrong_sources:
+            self.assertNotEqual(text, original)
+            path.write_text(text)
+            git('add', '.')
+            git('-c', 'user.name=Index Test', '-c', 'user.email=index@example.invalid', 'commit', '-qm', 'wrong registry')
+            result = resolver.resolve(config, git('rev-parse', 'HEAD'), 'config')
+            self.assertEqual(result['architecture_id'], 'unknown')
+            self.assertEqual(result['architecture_source']['reason'], 'agent_registry_mismatch')
+
     def test_unrecognized_code_and_launch_hashes_are_not_silently_accepted(self):
         git, commit = self.architecture_code()
         resolver = self.builder().architecture_resolver
@@ -202,9 +241,10 @@ class ExperimentIndexTest(unittest.TestCase):
         self.assertEqual(r['architecture_id'], 'unknown')
         self.assertEqual(r['architecture_source']['reason'], 'unrecognized_backbone_implementation')
         old = json.loads((self.root / 'docs/architectures/architectures.json').read_text())
-        old['resolver_version'] = 1
-        with self.assertRaisesRegex(ValueError, 'Unsupported'):
-            index.ArchitectureResolver(self.root, old)
+        for version in (1, 2):
+            old['resolver_version'] = version
+            with self.assertRaisesRegex(ValueError, 'Unsupported'):
+                index.ArchitectureResolver(self.root, old)
 
     def test_metadata_redaction_preserves_identity_and_is_idempotent(self):
         records = [dict(kind='collection',host='private-machine',roots=['/home/private/project']),
