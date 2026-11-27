@@ -17,6 +17,8 @@ Changing the limit affects new dispatch. Running training continues until its no
 
 SQLite in `runtime/scheduler/state.sqlite3` is the primary dispatch record. Tasks, immutable specifications, dependencies, attempts, exit codes and changes of state are retained. Original training artifacts provide progress, metrics and training completion. Experimental result review remains recorded in the experiment report.
 
+For cross-experiment discovery, use the [environment/task index](environments/README.md) and [architecture index](architectures/README.md). The generated run and analysis indexes are offline snapshots: they retain run IDs, task dependencies and attempt evidence, but do not replace live scheduler state or prove training completion. A scheduled task without execution evidence is reported separately in the index audit. Refresh these views through the [archiving workflow](EXPERIMENTS.md#查询与更新实验索引); the metadata exporter reads SQLite in read-only mode and does not submit, retry or stop tasks.
+
 ## Submit a complete authorized plan
 
 ```sh

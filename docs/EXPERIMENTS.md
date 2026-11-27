@@ -81,6 +81,31 @@ cd /home/wyh/marl_method_lab
 
 多方法/多种子由后续具体实验的方案定义，必要时编写简单队列；某run失败不连带取消剩余已授权任务。不默认新增验证训练、种子或中止条件。汇总图表和REPORT按具体研究问题生成，不预设所有实验都用同一CI或图。
 
+## 查询与更新实验索引
+
+查询已有实验时，先用[环境与任务索引](environments/README.md)定位环境和 Benchmark，再按[网络骨架](architectures/README.md)、方法和种子筛选运行。结果同时包含失败、前缀和未完整归档的记录，需结合 `status`、`result_status`及原报告判断可比较范围。网络骨架由 `architecture_id`单独标识；启动参数中的 `vdn_1ff`等选择器仍按原命令使用，不作为不同方法的依据。
+
+在仓库根目录执行以下只读查询，无须启动环境：
+
+```sh
+python3 scripts/experiment_index.py benchmarks --environment smacv2 --observed
+python3 scripts/experiment_index.py architectures --architecture vdn_1ff_h64
+python3 scripts/experiment_index.py query --environment smacv2 --architecture vdn_1ff_h64 --method tkpr --seed 3535
+python3 scripts/experiment_index.py matrix seed-coverage --experiment ts5-tkpr-cpr-1m
+python3 scripts/experiment_index.py matrix architecture-method --environment smacv2
+```
+
+归档新结果时，先整理该实验的报告、`runs.csv`、配置和评价数据，更新 Catalog 条目及结果阅读入口。需要增加运行元数据时，按[冻结导出与脱敏流程](environments/README.md)核对后更新输入快照；其他分支的历史证据使用审核过的固定提交。随后生成全局视图并检查一致性：
+
+```sh
+python3 scripts/experiment_index.py build
+python3 scripts/experiment_index.py check
+```
+
+检查生成差异及 `docs/results/index_audit.json`，保留无法确认的信息，不补造实验数据。全局 CSV 和矩阵由脚本生成，字段与路径语义见[数据说明](results/DATA.md)。默认生成仅使用仓库输入，不扫描本机 worktree；显式采集本机记录的参数及核对方式见环境索引文档。
+
+索引是离线快照，不自动跟随远端运行刷新。实时调度状态查看[scheduler](SCHEDULER.md)和实际运行产物；索引生成与核对用于归档，不增加训练启动门槛或队列中止条件。
+
 ## 可以这样下达任务
 
 - “在我的仓库中，设计QMIX、QMIX+ReBorn、QMIX+本方法在……上的比较方案，先不运行。”

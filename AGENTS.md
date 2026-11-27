@@ -14,3 +14,4 @@
 - 代码有实质变更后更新相关说明并提交 Git 版本。方法代码通过相应验证后，可在任务收尾时从 Mac 用仓库专用部署密钥同步 Ubuntu 的 `main` 到 GitHub，并核对两端提交号。原始实验产物和运行时保留在各实验主机。启动实验时留存实际源码快照。公开结果按[结果数据规范](docs/results/DATA.md)分类整理。随结果更新机器索引与阅读索引，保留逐种子证据、实际训练版本和可比较范围。
 
 - 已授权实验统一经 scheduler/service.py 的完整计划或 scripts/run.py 入口提交，全局默认 6 个槽位；新批次应提前发布完整任务及依赖。调度运行记录在 runtime/scheduler/state.sqlite3，操作见 docs/SCHEDULER.md。
+- 查询已有实验优先使用[环境与任务索引](docs/environments/README.md)及[架构索引](docs/architectures/README.md)，按环境、Benchmark、骨架、方法和种子定位原报告。归档时更新 Catalog 与来源记录，再按[实验用法](docs/EXPERIMENTS.md#查询与更新实验索引)运行默认 `python3 scripts/experiment_index.py build`和 `python3 scripts/experiment_index.py check`；不手工维护生成的 CSV。索引是离线快照，实时状态以 scheduler 和运行产物为准；索引核对不作为训练启动门槛或队列中止条件。
