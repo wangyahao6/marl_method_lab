@@ -1436,6 +1436,9 @@
         "evidence": "git:d49be537d2d7f74a4d2ae9b9fcc4383808d34b9a:docs/results/comparisons/mountaincar-single-agent-tkpr/README.md",
         "algorithm": "dqn"
       }
-    }
+    },
+    "architectures": "../architectures/architectures.json",
+    "method_identity_version": 2,
+    "architecture_resolver_version": 1
   }
 }

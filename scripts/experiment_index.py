@@ -14,6 +14,8 @@ from pathlib import Path, PurePosixPath
 UNKNOWN = 'unknown'
 RUN_FIELDS = ['run_id','experiment_id','experiment_ids','experiment_group_id','environment_id','benchmark_id','protocol_id','protocol_fingerprint','method','method_id','algorithm','method_variant_id','method_parameters','seed','status','result_status','git_commit','config_path','parent_run_id','role','attempt','attempt_source','logical_run_id','retry_of','run_path','result_paths','source_records','method_aliases','conflicts','execution_evidence','trained_steps','replay_on_switch','epsilon_on_switch','completed_phases','scheduler_task_ids','scheduler_dependencies','observed_at']
 ANALYSIS_FIELDS = ['analysis_id','experiment_id','activity_kind','status','input_run_ids','unresolved_inputs','environment_ids','benchmark_ids','result_paths','source_records','input_sources']
+RUN_FIELDS += ['algorithm_config','architecture_id','agent_type','hidden_dim','mixer_type','architecture_source']
+VDN_CONFIGS = ('vdn', 'vdn_1ff', 'vdn_1ff_128')
 SUITE_ENVS = {'smac':'smac', 'continual':'smacv2','hetero':'smacv2','history':'smacv2','vdn_action_set':'smacv2', **{x:'smacv2' for x in ('ts3','ts4','ts5','ts6','ts7','ts8')}}
 ENV_SELECTORS = {'sc2':'smac','sc2wrapped':'smacv2','action_set_protoss':'smacv2','history_protoss':'smacv2','sequential_protoss':'smacv2','exact_protoss':'smacv2','hetero_protoss':'smacv2','ts4_protoss':'smacv2','particle':'mpe','stag_hunt':'stag-hunt'}
 
@@ -168,6 +170,116 @@ def refs_in(value, known):
     # Match complete run tokens in explicit metadata paths/fields, not seed/name guesses.
     return sorted(set(re.findall(r'[A-Za-z0-9_.-]+', text)) & known.keys())
 
+
+def backbone_signature(text, class_name, agent=False):
+    """Version 1: active layer assignments and forward AST, independent of formatting."""
+    try:
+        tree=ast.parse(text)
+        # Python 3.12 adds an empty type_params field to otherwise identical functions.
+        for node in ast.walk(tree):
+            if getattr(node,'type_params',None)==[]:
+                delattr(node,'type_params')
+        cls = next(n for n in tree.body
+                   if isinstance(n, ast.ClassDef) and n.name == class_name)
+        nodes = []
+        for fn in cls.body:
+            if not isinstance(fn, ast.FunctionDef):
+                continue
+            if fn.name == 'forward':
+                nodes.append(ast.dump(fn, include_attributes=False))
+            if agent and fn.name == '__init__':
+                nodes.extend(ast.dump(n, include_attributes=False) for n in fn.body
+                             if isinstance(n, ast.Assign) and any(
+                                 isinstance(t, ast.Attribute) and t.attr in ('net', 'rnn', 'fc2', 'hidden_dim')
+                                 for t in n.targets))
+        return hashlib.sha256('\n'.join(nodes).encode()).hexdigest() if nodes else UNKNOWN
+    except (SyntaxError, StopIteration):
+        return UNKNOWN
+
+
+class ArchitectureResolver:
+    """Join resolved config fields to reviewed backbones in the run's Git version."""
+    def __init__(self, root, registry):
+        self.root, self.registry = Path(root), registry
+        self.cache = {}
+        if registry.get('schema_version') != 1 or registry.get('resolver_version') != 1:
+            raise ValueError('Unsupported architecture registry/resolver version')
+
+    def code(self, commit, path):
+        key = commit, path
+        if key not in self.cache:
+            result = subprocess.run(['git', 'show', commit + ':' + path], cwd=self.root,
+                                    capture_output=True, text=True)
+            self.cache[key] = result.stdout if result.returncode == 0 else ''
+        return self.cache[key]
+
+    def resolve(self, config, commit, config_path, source_hashes=None):
+        agent = config.get('agent', UNKNOWN)
+        width = config.get('rnn_hidden_dim', UNKNOWN)
+        mixer = config.get('mixer', UNKNOWN)
+        result = dict(architecture_id=UNKNOWN, agent_type=agent, hidden_dim=width, mixer_type=mixer,
+                      architecture_source=dict(config=config_path, code_commit=commit,
+                                               basis='resolved_config_and_git_backbone',
+                                               source_verification='not_checked', reason=UNKNOWN))
+        source = result['architecture_source']
+        matches = [a for a in self.registry['architectures']
+                   if (agent, width, mixer) == (a['agent_type'], a['hidden_dim'], a['mixer_type'])]
+        if len(matches) != 1:
+            source['reason'] = 'missing_or_unregistered_structure'
+            return result
+        if config.get('mac') != 'basic_mac':
+            source['reason'] = 'missing_or_unregistered_controller'
+            return result
+        if not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', str(commit)):
+            source['reason'] = 'missing_code_version'
+            return result
+        architecture = matches[0]
+        path = architecture['implementation_paths'][0]
+        registry_path = 'src/modules/agents/__init__.py'
+        mixer_path = 'src/modules/mixers/vdn.py'
+        texts = {p: self.code(commit, p) for p in (path, registry_path, mixer_path)}
+        source['implementations'] = [dict(path='git:' + commit + ':' + p,
+                                         sha256=hashlib.sha256(text.encode()).hexdigest())
+                                     for p, text in texts.items() if text]
+        if not all(texts.values()):
+            source['reason'] = 'unavailable_code_version'
+            return result
+        source['source_verification']='git_commit_only'
+        hashes=source_hashes or {}
+        if not isinstance(hashes,dict):
+            source['reason']='unsupported_source_hash_format'
+            return result
+        mismatched=[p for p,text in texts.items() if p in hashes and
+                    hashlib.sha256(text.encode()).hexdigest()!=hashes[p]]
+        if mismatched:
+            source.update(reason='launch_source_hash_mismatch',mismatched_paths=mismatched)
+            return result
+        if all(p in hashes for p in texts):
+            source['source_verification']='launch_hashes_match_git'
+        try:
+            registry_nodes=ast.parse(texts[registry_path]).body
+            imported=any(isinstance(n,ast.ImportFrom) and n.level==1 and
+                         n.module==Path(path).stem and any(
+                             a.name==architecture['agent_class'] and a.asname in (None,a.name)
+                             for a in n.names) for n in registry_nodes)
+            registered = imported and any(isinstance(n, ast.Assign) and isinstance(n.value, ast.Name)
+                             and n.value.id == architecture['agent_class'] and any(
+                                 isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name)
+                                 and t.value.id == 'REGISTRY' and ast.literal_eval(t.slice) == agent
+                                 for t in n.targets)
+                             for n in registry_nodes)
+        except (SyntaxError, ValueError, TypeError):
+            registered = False
+        if not registered:
+            source['reason'] = 'agent_registry_mismatch'
+        elif (backbone_signature(texts[path], architecture['agent_class'], True) != architecture['backbone_signature']
+              or backbone_signature(texts[mixer_path], 'VDNMixer') != architecture['mixer_signature']):
+            source['reason'] = 'unrecognized_backbone_implementation'
+        else:
+            result['architecture_id'] = architecture['id']
+            source['reason'] = 'matched_registered_backbone'
+        return result
+
 class Builder:
     def __init__(self, root):
         self.root=Path(root);self.catalog=load_json((self.root/'docs/results/catalog.json').read_text())
@@ -177,6 +289,8 @@ class Builder:
         self.bindings=spec.get('experiment_bindings',{})
         self.raw=spec.get('runtime_metadata','docs/results/runtime_records.jsonl')
         self.envs=load_json((self.root/'docs/environments/environments.json').read_text())
+        self.architectures=load_json((self.root/'docs/architectures/architectures.json').read_text())
+        self.architecture_resolver=ArchitectureResolver(root,self.architectures)
     def benchmark(self,config,protocol,request,binding,source):
         env=environment(config,protocol,request,binding)
         defs=task_spec(config,protocol,env,request)
@@ -207,8 +321,10 @@ class Builder:
         raw_method=next((v for v in (config.get('method'),request.get('method'),protocol.get('method'),row.get('method')) if isinstance(v,str) and v),UNKNOWN)
         algorithm=config.get('algorithm') or protocol.get('algorithm') or request.get('algorithm') or row.get('algorithm') or self.bindings.get(experiment,{}).get('algorithm',UNKNOWN)
         params=config.get(raw_method) or protocol.get(raw_method) or (protocol.get('method') if isinstance(protocol.get('method'),dict) else {}) or {}
-        variant=dict(algorithm=algorithm,method=raw_method,parameters=params)
-        for k in ('optimizer','agent','rnn_hidden_dim','mixer','lr','replay_on_switch','epsilon_on_switch'):
+        algorithm_config=algorithm
+        algorithm='vdn' if algorithm in VDN_CONFIGS else algorithm
+        variant=dict(identity_version=2,algorithm=algorithm,method=raw_method,parameters=params)
+        for k in ('optimizer','lr','replay_on_switch','epsilon_on_switch'):
             v=config.get(k,protocol.get(k,row.get(k)))
             if present(v):variant[k]=v
         for k in ('group','ts3_group','ts4_group','condition'):
@@ -229,6 +345,8 @@ class Builder:
                     epsilon_on_switch=config.get('epsilon_on_switch',protocol.get('epsilon_on_switch',row.get('epsilon_on_switch',UNKNOWN))),
                     completed_phases=row.get('_completed_phases',[]),scheduler_task_ids=[],scheduler_dependencies=[],
                     observed_at=row.get('_observed_at',UNKNOWN),_priority=priority)
+        result['algorithm_config']=algorithm_config
+        result.update(self.architecture_resolver.resolve(config,commit,result['config_path'],row.get('_source_sha256')))
         self.runs[run_id].append(result)
     def published(self):
         seen=set()
@@ -283,6 +401,7 @@ class Builder:
             row=dict(row,resolved_config=src.locator(config_path) if src.exists(config_path) else UNKNOWN)
             if not protocol and isinstance(config,dict) and config.get('task_schedule'):protocol=dict(task_schedule=config['task_schedule'])
             row['commit']=row.get('commit') or row.get('source_commit') or snapshot.get('launch_git_commit')
+            row['_source_sha256']=snapshot.get('source_sha256')
             stage_path=exp.get('files',{}).get('stage_metrics')
             stage_data=[r for r in src.csv('docs/results/'+stage_path) if r.get('run_id')==rid] if stage_path else []
             row['_completed_phases']=sorted({int(r.get('phase',r.get('stage'))) for r in stage_data if str(r.get('phase',r.get('stage',''))).isdigit()})
@@ -318,6 +437,7 @@ class Builder:
             row={'seed':req.get('seed',config.get('seed',UNKNOWN)),'commit':launch.get('git_commit'), 'run_dir':x['host']+':'+x['run_dir'],'resolved_config':x['host']+':'+x['run_dir']+'/config.json','experiment_group_id':launch.get('metadata',{}).get('experiment_group_id',UNKNOWN),'completed_global_steps':statuses.get('status.json',{}).get('t_env') or statuses.get('training_complete.json',{}).get('t_env')}
             metadata=launch.get('metadata',{})
             row['_metadata']=metadata
+            row['_source_sha256']=launch.get('source_sha256')
             row['_observed_at']=self.collection[-1].get('captured_at',UNKNOWN) if self.collection else UNKNOWN
             eid=UNKNOWN  # Conversation/group identity is not a Catalog experiment ID.
             self.candidate(rid,row,config,protocol,req,source,eid,[],priority=200,status=status_from_runtime(statuses),evidence='runtime_progress' if any((v.get('t_env',0) or 0)>0 for v in statuses.values()) else 'failed_process_attempt')
@@ -353,6 +473,27 @@ class Builder:
             # Use one internally consistent variant object, rather than mixing snapshots.
             variant=next((x for x in rows if x['method_id']==r['method_id'] and x['method_id']!=UNKNOWN),rows[0])
             r['method_parameters']=variant['method_parameters'];r['method_variant_id']=variant['method_variant_id']
+            r['algorithm_config']=variant['algorithm_config']
+            # Architecture evidence is atomic: never mix width from one snapshot with another agent.
+            architecture=next((x for x in rows if x['architecture_id']!=UNKNOWN),rows[0])
+            for field in ('architecture_id','agent_type','hidden_dim','mixer_type','architecture_source'):
+                r[field]=architecture[field]
+            disagreements=[]
+            for field in ('architecture_id','agent_type','hidden_dim','mixer_type'):
+                values=sorted({str(x[field]) for x in rows if present(x[field])})
+                if len(values)>1:
+                    disagreements.append(dict(field=field,values=values))
+                    r[field]=UNKNOWN
+            if disagreements:
+                r['architecture_id']=UNKNOWN
+                r['conflicts'].extend(disagreements)
+                r['architecture_source']=dict(reason='conflicting_architecture_records',records=[x['architecture_source'] for x in rows])
+            unsafe=[x['architecture_source'] for x in rows if x['architecture_source'].get('reason') in
+                    ('launch_source_hash_mismatch','unrecognized_backbone_implementation','agent_registry_mismatch',
+                     'unsupported_source_hash_format')]
+            if unsafe and not disagreements:
+                r['architecture_id']=UNKNOWN
+                r['architecture_source']=dict(reason='unverified_implementation_evidence',records=unsafe)
             if r['conflicts']:self.issues.append(dict(kind='conflicting_run_records',run_id=rid,conflicts=r['conflicts']))
             final.append(r)
         self.final=final;return final
@@ -472,7 +613,7 @@ class Builder:
                 if not started(cfg,statuses,launch):continue
                 if req.get('suite')=='network_similarity' or cfg.get('evaluate'):continue
                 protocol=load_json((run/'protocol.json').read_text()) if (run/'protocol.json').exists() else launch.get('details',{}).get('protocol',{})
-                row=dict(seed=cfg.get('seed',req.get('seed',UNKNOWN)),commit=launch.get('git_commit'),run_dir=str(run),resolved_config=str(run/'config.json'),_metadata=launch.get('metadata',{}))
+                row=dict(seed=cfg.get('seed',req.get('seed',UNKNOWN)),commit=launch.get('git_commit'),run_dir=str(run),resolved_config=str(run/'config.json'),_metadata=launch.get('metadata',{}),_source_sha256=launch.get('source_sha256'))
                 self.candidate(req.get('run_id') or run.name,row,cfg,protocol,req,str(run/'status.json'),UNKNOWN,[],priority=300,status=status_from_runtime(statuses),evidence='local_runtime_metadata')
 
     def scheduler_links(self):
@@ -513,6 +654,8 @@ class Builder:
             if r['parent_run_id'] not in ('none',UNKNOWN) and r['parent_run_id'] not in self.runs:self.issues.append(dict(kind='missing_parent',run_id=r['run_id'],parent=r['parent_run_id']))
             missing=[k for k in ('experiment_id','environment_id','benchmark_id','protocol_id','seed','git_commit','parent_run_id') if r[k]==UNKNOWN]
             if missing:self.issues.append(dict(kind='unresolved_run_fields',run_id=r['run_id'],fields=missing))
+            if r['algorithm']=='vdn' and r['architecture_id']==UNKNOWN:
+                self.issues.append(dict(kind='unresolved_vdn_architecture',run_id=r['run_id'],source=r['architecture_source']))
         for a in self.analyses:
             if a['unresolved_inputs']:self.issues.append(dict(kind='unresolved_analysis_inputs',analysis_id=a['analysis_id'],inputs=a['unresolved_inputs']))
         for e in self.envs['environments']:
@@ -527,6 +670,10 @@ class Builder:
             task['associated_run_count']=sum(task['id'] in self.benchmarks.get(r['benchmark_id'],{}).get('task_ids',[]) for r in self.final)
         for sequence in self.sequences.values():
             sequence['actual_run_count']=sum(self.benchmarks.get(r['benchmark_id'],{}).get('task_sequence_id')==sequence['id'] for r in self.final)
+        for architecture in self.architectures['architectures']:
+            rr=[r for r in self.final if r['architecture_id']==architecture['id']]
+            architecture['actual_run_count']=len(rr)
+            architecture['seeds']=sorted({r['seed'] for r in rr if r['seed']!=UNKNOWN})
         return self
 
 
@@ -537,22 +684,23 @@ def csv_text(fields,rows):
 
 def artifacts(b):
     benches=dict(schema_version=1,task_sequences=sorted(b.sequences.values(),key=lambda x:x['id']),generated_by='scripts/experiment_index.py build',tasks=sorted(b.tasks.values(),key=lambda x:x['id']),benchmarks=sorted(b.benchmarks.values(),key=lambda x:x['id']),protocol_sources=sorted(b.protocols,key=lambda x:x['path']))
-    summary=dict(run_count=len(b.final),analysis_count=len(b.analyses),environment_counts=dict(Counter(r['environment_id'] for r in b.final)),status_counts=dict(Counter(r['status'] for r in b.final)),result_counts=dict(Counter(r['result_status'] for r in b.final)),issue_counts=dict(Counter(x['kind'] for x in b.issues)),issues=b.issues)
+    summary=dict(run_count=len(b.final),analysis_count=len(b.analyses),architecture_counts=dict(Counter(r['architecture_id'] for r in b.final)),environment_counts=dict(Counter(r['environment_id'] for r in b.final)),status_counts=dict(Counter(r['status'] for r in b.final)),result_counts=dict(Counter(r['result_status'] for r in b.final)),issue_counts=dict(Counter(x['kind'] for x in b.issues)),issues=b.issues)
     summary['collection']=b.collection
     summary['branch_sources']=b.catalog.get('global_index',{}).get('branch_sources',[])
     raw=b.root/b.raw
     summary['runtime_snapshot_sha256']=hashlib.sha256(raw.read_bytes()).hexdigest() if raw.exists() else UNKNOWN
-    return {'docs/environments/environments.json':json.dumps(b.envs,ensure_ascii=False,indent=2)+'\n','docs/environments/benchmarks.json':json.dumps(benches,ensure_ascii=False,indent=2)+'\n','docs/results/run_index.csv':csv_text(RUN_FIELDS,b.final),'docs/results/analysis_index.csv':csv_text(ANALYSIS_FIELDS,b.analyses),'docs/results/index_audit.json':json.dumps(summary,ensure_ascii=False,indent=2)+'\n'}
+    return {'docs/architectures/architectures.json':json.dumps(b.architectures,ensure_ascii=False,indent=2)+'\n','docs/environments/environments.json':json.dumps(b.envs,ensure_ascii=False,indent=2)+'\n','docs/environments/benchmarks.json':json.dumps(benches,ensure_ascii=False,indent=2)+'\n','docs/results/run_index.csv':csv_text(RUN_FIELDS,b.final),'docs/results/analysis_index.csv':csv_text(ANALYSIS_FIELDS,b.analyses),'docs/results/index_audit.json':json.dumps(summary,ensure_ascii=False,indent=2)+'\n'}
 
 def read_runs(root):
     rows=list(csv.DictReader(io.StringIO((root/'docs/results/run_index.csv').read_text())))
     for row in rows:
-        for k in ('experiment_ids','result_paths','source_records','method_aliases','conflicts','method_parameters','completed_phases','scheduler_task_ids','scheduler_dependencies'):row[k]=json.loads(row[k])
+        for k in ('experiment_ids','result_paths','source_records','method_aliases','conflicts','method_parameters','completed_phases','scheduler_task_ids','scheduler_dependencies','architecture_source'):row[k]=json.loads(row[k])
     return rows
 
 def filter_runs(rows,args):
     for r in rows:
         if getattr(args,'environment',None) and r['environment_id']!=args.environment:continue
+        if getattr(args,'architecture',None) and r['architecture_id']!=args.architecture:continue
         if getattr(args,'benchmark',None) and r['benchmark_id']!=args.benchmark:continue
         if getattr(args,'experiment',None) and args.experiment not in r['experiment_ids']:continue
         if getattr(args,'seed',None) and r['seed']!=args.seed:continue
@@ -560,7 +708,7 @@ def filter_runs(rows,args):
         if getattr(args,'method',None) and not any(args.method.lower() in str(x).lower() for x in [r['method'],r['method_id'],r['method_variant_id']]+r['method_aliases']):continue
         yield r
 
-def matrix(rows,axis,include_prefix=False,coverage='reported_completed',environment_ids=()):
+def matrix(rows,axis,include_prefix=False,coverage='reported_completed',environment_ids=(),architecture_ids=()):
     grouped=defaultdict(set);eligible=[]
     for r in rows:
         if not include_prefix and r['role'] in ('prefix','shared-prefix','pair-reference'):continue
@@ -574,6 +722,8 @@ def matrix(rows,axis,include_prefix=False,coverage='reported_completed',environm
         return r['algorithm']+'/'+labels[r['method_variant_id']]+settings+' ['+r['method_variant_id']+']'
     def key(r):
         if axis=='environment-method':return r['environment_id'],method(r)
+        if axis=='architecture-method':return r['architecture_id'],method(r)
+        if axis=='architecture-environment':return r['architecture_id'],r['environment_id']
         if axis=='benchmark-seed':return r['benchmark_id'],r['seed']
         return method(r),r['seed']
     observed=defaultdict(list)
@@ -582,7 +732,9 @@ def matrix(rows,axis,include_prefix=False,coverage='reported_completed',environm
         if r['status']=='completed' and (coverage!='complete_result' or r['result_status']=='reported_complete_result'):grouped[key(r)].add(r['run_id'])
     row_keys={key(r)[0] for r in eligible}
     if axis=='environment-method':row_keys.update(environment_ids)
+    if axis.startswith('architecture-'):row_keys.update(architecture_ids)
     row_keys=sorted(row_keys);cols=sorted({key(r)[1] for r in eligible})
+    if axis=='architecture-environment':cols=sorted(set(cols)|set(environment_ids))
     return [dict(row=a,column=c,completed_runs=len(grouped[a,c]),run_ids=sorted(grouped[a,c]),observed_runs=len(observed[a,c]),failed_runs=sum(r['status']=='failed' for r in observed[a,c]),coverage=coverage) for a in row_keys for c in cols]
 
 def main():
@@ -590,10 +742,11 @@ def main():
     sub.add_parser('build');sub.add_parser('check');sub.add_parser('summary')
     for name in ('environments','benchmarks','tasks','task_sequences'):
         q=sub.add_parser(name);q.add_argument('--environment');q.add_argument('--observed',action='store_true')
+    q=sub.add_parser('architectures');q.add_argument('--architecture');q.add_argument('--observed',action='store_true')
     q=sub.add_parser('query')
-    for f in ('environment','benchmark','method','seed','experiment','run-status'):q.add_argument('--'+f)
+    for f in ('environment','benchmark','architecture','method','seed','experiment','run-status'):q.add_argument('--'+f)
     q=sub.add_parser('show');q.add_argument('run_id')
-    q=sub.add_parser('matrix');q.add_argument('axis',choices=['environment-method','benchmark-seed','seed-coverage']);q.add_argument('--experiment');q.add_argument('--environment');q.add_argument('--include-prefix',action='store_true');q.add_argument('--benchmark');q.add_argument('--method');q.add_argument('--seed');q.add_argument('--coverage',choices=['reported_completed','complete_result'],default='reported_completed')
+    q=sub.add_parser('matrix');q.add_argument('axis',choices=['environment-method','benchmark-seed','seed-coverage','architecture-method','architecture-environment']);q.add_argument('--experiment');q.add_argument('--environment');q.add_argument('--include-prefix',action='store_true');q.add_argument('--benchmark');q.add_argument('--architecture');q.add_argument('--method');q.add_argument('--seed');q.add_argument('--coverage',choices=['reported_completed','complete_result'],default='reported_completed')
     args=p.parse_args();root=args.root
     if args.command in ('build','check'):
         b=Builder(root).build();files=artifacts(b)
@@ -603,6 +756,13 @@ def main():
             stale=[name for name,text in files.items() if not (root/name).exists() or (root/name).read_text()!=text]
             if stale:p.exit(1,'Stale or missing generated files: '+', '.join(stale)+'\n')
         print(dumps({k:v for k,v in json.loads(files['docs/results/index_audit.json']).items() if k!='issues'}));return
+    if args.command=='architectures':
+        data=json.loads((root/'docs/architectures/architectures.json').read_text())['architectures']
+        rows=read_runs(root)
+        data=[a for a in data if not args.architecture or a['id']==args.architecture]
+        if args.observed:data=[a for a in data if a['actual_run_count']>0]
+        for a in data:a['run_ids']=[r['run_id'] for r in rows if r['architecture_id']==a['id']]
+        print(json.dumps(data,ensure_ascii=False,indent=2));return
     if args.command in ('environments','benchmarks','tasks','task_sequences'):
         path='environments.json' if args.command=='environments' else 'benchmarks.json'
         data=json.loads((root/'docs/environments'/path).read_text())[args.command]
@@ -622,7 +782,9 @@ def main():
     elif args.command=='matrix':
         environments=json.loads((root/'docs/environments/environments.json').read_text())['environments']
         ids=[e['id'] for e in environments if not args.environment or e['id']==args.environment]
-        print(json.dumps(matrix(rows,args.axis,args.include_prefix,args.coverage,ids),ensure_ascii=False,indent=2))
+        registry=json.loads((root/'docs/architectures/architectures.json').read_text())['architectures']
+        architecture_ids=[a['id'] for a in registry if not args.architecture or a['id']==args.architecture]
+        print(json.dumps(matrix(rows,args.axis,args.include_prefix,args.coverage,ids,architecture_ids),ensure_ascii=False,indent=2))
     elif args.command=='summary':print((root/'docs/results/index_audit.json').read_text())
     else: print(json.dumps(rows,ensure_ascii=False,indent=2))
 

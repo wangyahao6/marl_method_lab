@@ -5,6 +5,7 @@ MARL 方法研究代码库，基于 ReBorn 固定提交建立。开发主版本�
 ## 入口
 
 - [实验结果](docs/results/README.md) · 按实验问题浏览报告、逐种子数据与实际训练版本。
+- [VDN 网络骨架索引](docs/architectures/README.md) · 分离网络结构与方法，查询骨架、种子及覆盖矩阵。
 - [环境与任务索引](docs/environments/README.md) · 查询平台、地图／任务序列、方法、种子、共享前缀及结果路径；覆盖矩阵从真实记录生成。
 
 - [方法清单](docs/METHODS.md)：算法、神经元干预、原始配置与实际支持范围。

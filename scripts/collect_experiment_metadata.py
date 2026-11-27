@@ -8,7 +8,10 @@ from pathlib import Path
 
 STATUS_FILES = ('status.json', 'launcher_status.json', 'training_complete.json')
 LAUNCH_FIELDS = ('request', 'details', 'git_commit', 'started', 'output', 'metadata',
-                 'command', 'python', 'sc2path')
+                 'command', 'python', 'sc2path', 'git_status')
+ARCHITECTURE_FILES = ('src/modules/agents/rnn_agent.py',
+                      'src/modules/agents/single_ff_rnn_agent.py',
+                      'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py')
 
 
 def read(path):
@@ -38,6 +41,9 @@ def collect(roots, host):
             seen_runs.add(real)
             original = read(directory / 'launch.json')
             launch = {key: original[key] for key in LAUNCH_FIELDS if key in original}
+            if 'source_sha256' in original:
+                launch['source_sha256'] = {key: value for key, value in original['source_sha256'].items()
+                                          if key in ARCHITECTURE_FILES}
             if 'details' in launch:
                 launch['details'] = {key: value for key, value in launch['details'].items()
                                      if key in ('protocol', 'steps', 'parent', 'method', 'seed')}

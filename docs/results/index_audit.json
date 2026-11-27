@@ -1,6 +1,12 @@
 {
   "run_count": 341,
   "analysis_count": 416,
+  "architecture_counts": {
+    "unknown": 42,
+    "vdn_2ff_h64": 212,
+    "vdn_1ff_h64": 55,
+    "vdn_1ff_h128": 32
+  },
   "environment_counts": {
     "smacv2": 330,
     "minatar": 2,

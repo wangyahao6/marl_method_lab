@@ -4,6 +4,9 @@ import contextlib
 import io
 import json
 import sqlite3
+import hashlib
+import argparse
+import ast
 import subprocess
 import tempfile
 import unittest
@@ -23,6 +26,8 @@ class ExperimentIndexTest(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.write('docs/results/catalog.json', {'experiments': []})
+        self.write('docs/architectures/architectures.json', json.loads(
+            (SCRIPT.parents[1] / 'docs/architectures/architectures.json').read_text()))
         self.write('docs/environments/environments.json', {
             'schema_version': 1, 'environments': [{'id': 'smacv2'}]})
 
@@ -33,6 +38,20 @@ class ExperimentIndexTest(unittest.TestCase):
 
     def builder(self):
         return index.Builder(self.root)
+
+    def architecture_code(self):
+        """Copy only existing source for a static Git fixture; never import its dependencies."""
+        def git(*args):
+            return subprocess.check_output(['git', *args], cwd=self.root, text=True).strip()
+        git('init', '-q')
+        for path in ('src/modules/agents/rnn_agent.py', 'src/modules/agents/single_ff_rnn_agent.py',
+                     'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py'):
+            target = self.root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text((SCRIPT.parents[1] / path).read_text())
+        git('add', '.')
+        git('-c', 'user.name=Index Test', '-c', 'user.email=index@example.invalid', 'commit', '-qm', 'architecture fixture')
+        return git, git('rev-parse', 'HEAD')
 
     def candidate(self, builder, rid='actual_attempt001', **kwargs):
         config = dict(env='action_set_protoss', algorithm='vdn', method='baseline',
@@ -84,6 +103,103 @@ class ExperimentIndexTest(unittest.TestCase):
         a = index.task_spec({}, {'order': ['A'], 'tasks': {'A': [5]}, 'thresholds': [100]}, 'smacv2')
         z = index.task_spec({}, {'order': ['A'], 'tasks': {'A': [5]}, 'thresholds': [200]}, 'smacv2')
         self.assertEqual(a, z)
+
+    def test_method_identity_excludes_backbone_and_configuration_alias(self):
+        b = self.builder()
+        self.candidate(b, 'two', config={'algorithm': 'vdn', 'agent': 'rnn', 'rnn_hidden_dim': 64, 'mixer': 'vdn'})
+        self.candidate(b, 'one', config={'algorithm': 'vdn_1ff', 'agent': 'single_ff_rnn', 'rnn_hidden_dim': 64, 'mixer': 'vdn'})
+        self.candidate(b, 'wide', config={'algorithm': 'vdn_1ff_128', 'agent': 'single_ff_rnn', 'rnn_hidden_dim': 128, 'mixer': 'vdn'})
+        b.merge()
+        self.assertEqual({r['algorithm'] for r in b.final}, {'vdn'})
+        self.assertEqual(len({r['method_variant_id'] for r in b.final}), 1)
+        self.assertEqual({r['algorithm_config'] for r in b.final}, set(index.VDN_CONFIGS))
+        for r in b.final:
+            self.assertFalse({'agent', 'rnn_hidden_dim', 'mixer'} & r['method_parameters'].keys())
+        self.candidate(b, 'k1', config={'method': 'topk_preference', 'topk_preference': {'k': 1}})
+        self.candidate(b, 'k2', config={'method': 'topk_preference', 'topk_preference': {'k': 2}})
+        self.assertNotEqual(b.runs['k1'][0]['method_variant_id'], b.runs['k2'][0]['method_variant_id'])
+
+    def test_architectures_match_actual_code_not_config_names(self):
+        _, commit = self.architecture_code()
+        resolver = self.builder().architecture_resolver
+        for agent, width, expected in [('rnn', 64, 'vdn_2ff_h64'),
+                                       ('single_ff_rnn', 64, 'vdn_1ff_h64'),
+                                       ('single_ff_rnn', 128, 'vdn_1ff_h128')]:
+            config = dict(agent=agent, rnn_hidden_dim=width, mixer='vdn', mac='basic_mac')
+            for name in ('vdn.yaml', 'vdn_1ff_128.yaml', 'arbitrary.yaml'):
+                r = resolver.resolve(config, commit, name)
+                self.assertEqual(r['architecture_id'], expected)
+                self.assertEqual(r['architecture_source']['code_commit'], commit)
+                self.assertEqual(r['architecture_source']['source_verification'], 'git_commit_only')
+        self.assertEqual(resolver.resolve({'algorithm': 'vdn_1ff_128'}, commit, 'config')['architecture_id'], 'unknown')
+        self.assertEqual(resolver.resolve(dict(config, mixer='qmix'), commit, 'config')['architecture_id'], 'unknown')
+        self.assertEqual(resolver.resolve(config, 'unknown', 'config')['architecture_id'], 'unknown')
+        self.assertEqual(resolver.resolve(config, 'f' * 40, 'config')['architecture_source']['reason'], 'unavailable_code_version')
+
+    def test_backbone_signature_ignores_format_and_empty_python_type_metadata(self):
+        text = (SCRIPT.parents[1] / 'src/modules/agents/rnn_agent.py').read_text()
+        expected = index.backbone_signature(text, 'RNNAgent', True)
+        self.assertEqual(index.backbone_signature('# comment\n' + text, 'RNNAgent', True), expected)
+        tree = ast.parse(text)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                node._fields = tuple(f for f in node._fields if f != 'type_params') + ('type_params',)
+                node.type_params = []
+        with patch.object(index.ast, 'parse', return_value=tree):
+            self.assertEqual(index.backbone_signature(text, 'RNNAgent', True), expected)
+
+    def test_unrecognized_code_and_launch_hashes_are_not_silently_accepted(self):
+        git, commit = self.architecture_code()
+        resolver = self.builder().architecture_resolver
+        config = dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac')
+        paths = ('src/modules/agents/rnn_agent.py', 'src/modules/agents/__init__.py', 'src/modules/mixers/vdn.py')
+        hashes = {p: hashlib.sha256((self.root / p).read_bytes()).hexdigest() for p in paths}
+        r = resolver.resolve(config, commit, 'config', hashes)
+        self.assertEqual(r['architecture_source']['source_verification'], 'launch_hashes_match_git')
+        r = resolver.resolve(config, commit, 'config', dict(hashes, **{paths[0]: 'mismatch'}))
+        self.assertEqual(r['architecture_id'], 'unknown')
+        self.assertEqual(r['architecture_source']['reason'], 'launch_source_hash_mismatch')
+        path = self.root / paths[0]
+        path.write_text(path.read_text().replace('q = self.fc2(h)', 'q = self.fc2(h) + 1'))
+        git('add', '.')
+        git('-c', 'user.name=Index Test', '-c', 'user.email=index@example.invalid', 'commit', '-qm', 'unrecognized forward')
+        r = resolver.resolve(config, git('rev-parse', 'HEAD'), 'config')
+        self.assertEqual(r['architecture_id'], 'unknown')
+        self.assertEqual(r['architecture_source']['reason'], 'unrecognized_backbone_implementation')
+
+    def test_architecture_conflicts_remain_unknown(self):
+        _, commit = self.architecture_code()
+        b = self.builder()
+        self.candidate(b, row={'commit': commit}, config=dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac'))
+        self.candidate(b, row={'commit': commit}, config=dict(agent='single_ff_rnn', rnn_hidden_dim=128, mixer='vdn', mac='basic_mac'))
+        b.merge()
+        self.assertEqual(b.final[0]['architecture_id'], 'unknown')
+        self.assertEqual(b.final[0]['architecture_source']['reason'], 'conflicting_architecture_records')
+
+    def test_known_git_candidate_does_not_hide_launch_source_mismatch(self):
+        _, commit = self.architecture_code()
+        b = self.builder()
+        config = dict(agent='rnn', rnn_hidden_dim=64, mixer='vdn', mac='basic_mac')
+        self.candidate(b, row={'commit': commit}, config=config)
+        self.candidate(b, row={'commit': commit, '_source_sha256': {'src/modules/agents/rnn_agent.py': 'mismatch'}},
+                       config=config, priority=200)
+        b.merge()
+        self.assertEqual(b.final[0]['architecture_id'], 'unknown')
+        self.assertEqual(b.final[0]['architecture_source']['reason'], 'unverified_implementation_evidence')
+
+    def test_architecture_filters_and_matrices_keep_seed_and_run_evidence(self):
+        _, commit = self.architecture_code()
+        b = self.builder()
+        for rid, width in [('small', 64), ('wide', 128)]:
+            self.candidate(b, rid, row={'commit': commit}, config=dict(agent='single_ff_rnn', rnn_hidden_dim=width, mixer='vdn', mac='basic_mac'))
+        b.merge()
+        args = argparse.Namespace(architecture='vdn_1ff_h128')
+        self.assertEqual([r['run_id'] for r in index.filter_runs(b.final, args)], ['wide'])
+        cells = index.matrix(b.final, 'architecture-method')
+        self.assertEqual(len({c['column'] for c in cells}), 1)
+        self.assertEqual({c['row'] for c in cells}, {'vdn_1ff_h64', 'vdn_1ff_h128'})
+        cells = index.matrix(b.final, 'architecture-environment', environment_ids=['mpe'], architecture_ids=['vdn_2ff_h64'])
+        self.assertTrue(any(c['row'] == 'vdn_2ff_h64' and c['column'] == 'mpe' and c['observed_runs'] == 0 for c in cells))
 
     def test_conflicting_seed_is_unknown_and_audited(self):
         b = self.builder()
@@ -212,6 +328,8 @@ class ExperimentIndexTest(unittest.TestCase):
         spec.loader.exec_module(collector)
         self.write('runs/actual/status.json', {'t_env': 10})
         self.write('runs/actual/config.json', {'seed': 3535})
+        self.write('runs/actual/launch.json', {'source_sha256': {
+            'src/modules/agents/rnn_agent.py': 'network-hash', 'docs/unrelated.md': 'unrelated-hash'}})
         database = self.root / 'runtime/scheduler/state.sqlite3'
         database.parent.mkdir(parents=True)
         connection = sqlite3.connect(database)
@@ -227,6 +345,7 @@ class ExperimentIndexTest(unittest.TestCase):
         records = [json.loads(line) for line in output.getvalue().splitlines()]
         self.assertEqual([r['kind'] for r in records], ['collection', 'runtime', 'scheduler_training'])
         self.assertEqual(records[1]['config']['seed'], 3535)
+        self.assertEqual(records[1]['launch']['source_sha256'], {'src/modules/agents/rnn_agent.py': 'network-hash'})
         self.assertEqual(database.read_bytes(), before)
 
 

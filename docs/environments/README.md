@@ -23,7 +23,7 @@ Task/Benchmark ID 来自结构化定义的内容哈希，包含平台、地图�
 
 `status` 是来源报告的运行状态；`result_status` 独立记录结果归档程度。`reported_prefix_result` 只表示前缀端点，不能充当整个序列的方法结果。分支的阶段覆盖可以关联其直接父运行的已发布端点；缺少证据时保留 `published_partial_or_unverified`。已有进度但没有完成证据时不升级为完成，退出码 0 也不能单独证明完成。缺失字段用 `unknown`，空列表用 `[]`。
 
-[run_index.csv](../results/run_index.csv)每个 `run_id` 一行；重复公开引用合并到 `experiment_ids`、`result_paths`、`source_records`，不增加训练次数。`experiment_id` 是 Catalog 实验身份，`experiment_group_id` 保留 scheduler 批次／会话身份，两者不互相冒充。`method_id` 保留底层方法名，`method`保留公开标签；`method_variant_id`还区分网络、优化器、FT/ER 回放与探索设置等已记录差异。相同 variant 不自动证明实验可比，仍需查看完整配置和协议。
+[run_index.csv](../results/run_index.csv)每个 `run_id` 一行；重复公开引用合并到 `experiment_ids`、`result_paths`、`source_records`，不增加训练次数。`experiment_id` 是 Catalog 实验身份，`experiment_group_id` 保留 scheduler 批次／会话身份，两者不互相冒充。`method_id` 保留底层方法名，`method`保留公开标签；`method_variant_id`区分方法参数、优化器、FT/ER 回放与探索设置等已记录差异。网络结构由独立的 `architecture_id`及架构字段记录，见[VDN 骨架索引](../architectures/README.md)。相同 variant 不自动证明实验可比，仍需匹配架构并查看完整配置和协议。
 
 `parent_run_id`、`role`、`scheduler_task_ids`、`scheduler_dependencies`保留前缀树和调度关联。`logical_run_id`仅在元数据显式给出 group、branch、seed 时生成；`attempt`优先取显式元数据。运行名的 `attemptNNN` 只能作为标签记录（`attempt_source=run_id_label`），不会据此猜测 `retry_of`。失败运行保留独立行，只有排队记录且没有运行证据的任务进入审计报告。
 
