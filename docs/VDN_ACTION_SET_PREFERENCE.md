@@ -340,3 +340,8 @@ G1-G3 的诊断有效对指可统计的非平局对，`participates_in_loss=fals
 ## TKPR-K1-PerTask8
 
 独立标识 `tkpr_k1_per_task8` 复用原生K1损失和任务等权平均，仅启用既有逐任务采样器：每个非空历史任务8条，无放回优先、不足时有放回。与Refresh不同，不刷新、不替换历史轨迹或参考Q。TS5原生对照的固定池按原任务边界激活，B/C/D/E分别采样8/16/24/32条。原K1仍是总预算8条。配置与配对协议见 [TS5 PerTask8](protocols/TS5_K1_PER_TASK8.md)。
+
+
+## 自身策略采集与胜率门控换池
+
+修正后的PerTask8在各任务结束时由该分支策略采集成功轨迹，不使用FT参考的未来池。独立方法 `tkpr_win_refresh` 每阶段复用已见任务评价；只有任务当前胜率严格超过现池采集时胜率，才重新采集最多100成功轨迹和对应rollout Q并全量换池；相等/下降不采，零成功保留旧池。两组均每历史任务8条。规则、配置和来源边界见 [Own-policy TS5协议](protocols/TS5_TKPR_OWN_POLICY.md)。

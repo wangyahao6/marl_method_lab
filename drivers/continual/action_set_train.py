@@ -45,6 +45,7 @@ from common.runtime import episode_spec, restore_rng, rng_state, td_sample
 from drivers.continual.memory import History, PreferenceHistory
 from drivers.continual.memory.episodes import pack_episode, preference_episode_id
 from drivers.continual.memory.fixed_reference import attach_reference_pool
+from drivers.continual.memory.win_refresh import initialize_own_pool, update_history as update_win_history
 from drivers.continual.memory.cpr import (
     initialize_pool as initialize_cpr_pool, update_pool as update_cpr_pool,
     restore_history as restore_cpr_history,
@@ -75,6 +76,8 @@ def config(protocol, seed, out):
                action_set=protocol["action_set"])
     if protocol.get("full_shared_prefix"):
         cfg["full_shared_prefix"] = True
+    if protocol.get("own_policy_history"):
+        cfg["own_policy_history"] = True
     if protocol.get("rank_position_diagnostics"):
         cfg["rank_position_diagnostics"] = True
     if protocol["method"] in PREFERENCE_RANK_METHODS:
@@ -326,7 +329,7 @@ def collect_memory(args, spec, expected_layout, reference, checkpoint, task, pha
             requested_wins=target, stored_wins=len(successful), shortfall=target - len(successful),
             failed=len(failed), blocks=blocks, collection_seconds=perf_counter() - start,
             **labels, **diagnostics))
-    if getattr(args, "full_shared_prefix", False):
+    if getattr(args, "full_shared_prefix", False) or getattr(args, "own_policy_history", False):
         base.append(out / "memory_collection.jsonl", dict(
             phase=phase, task=task, collection_kind="initial" if persist else "refresh",
             requested_wins=target, successful=len(successful), failed=len(failed),
@@ -437,6 +440,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
         selected_frpr = method in SELECTED_METHODS
         pair_ablation = method in PAIR_METHODS
         fixed_reference = protocol.get("fixed_reference_history", False)
+        own_policy_history = protocol.get("own_policy_history", False)
         shared_history = PreferenceHistory()
         anchor_rank = RANK_POSITION_METHODS.get(method)
         if method == "topk_preference" and protocol.get("rank_position_diagnostics"):
@@ -492,7 +496,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if method == "tkpr_cpr":
                 update_log = "tkpr_cpr_preference"
             ranking = dict(protocol[method], batch_episodes=settings["batch_episodes"])
-            if method in ("tkpr_refresh", "tkpr_k1_per_task8"):
+            if method in ("tkpr_refresh", "tkpr_k1_per_task8", "tkpr_win_refresh"):
                 ranking["batch_episodes_per_task"] = settings["batch_episodes_per_task"]
             if pair_ablation:
                 preference_type = (TCPPreference if protocol.get("pair_ablation_experiment") == "tc_coverage"
@@ -629,7 +633,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             prefix_role = "shared-prefix" if role == "shared-branch" else "prefix"
             # Older direct launches used per-task exploration when the field was absent.
             parent_protocol = {"epsilon_on_switch": "per_task", **state["protocol"]}
-            if fixed_reference:
+            if fixed_reference or own_policy_history:
                 prefix_role = "pair-reference"
                 same_protocol = matching_fixed_reference_protocol(parent_protocol, protocol)
             elif pair_ablation:
@@ -641,7 +645,7 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
             if state.get("fork_role", "prefix") != prefix_role or not same_protocol or state["seed"] != seed:
                 raise ValueError("preference branch must match its prefix role, protocol and seed")
             report = json.loads((parent / "retention.json").read_text())
-            if pair_ablation or fixed_reference:
+            if pair_ablation or fixed_reference or own_policy_history:
                 report["stages"] = report["stages"][:1]
                 # Z must be treated as unseen when restoring at the S boundary.
                 next_task = stages[1]["task"]
@@ -677,6 +681,15 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 preference.rng.bit_generator.state = state["preference_rng"]
                 if full_shared:
                     full_restore.update(copy_prefix_memory(parent, out, method, preference.history))
+                elif own_policy_history:
+                    preference.history.restore_success(parent, [0], require_old_q=True)
+                    pool = initialize_own_pool(preference.history[0], 0,
+                                               results[0]["win_rates"][stages[0]["task"]])
+                    History.save(PreferenceHistory.phase_path(out, 0) / "success.th", pool)
+                    base.append(out / "own_policy_memory.jsonl", dict(task=pool["task"], pool_phase=0,
+                                collection_phase=0, successful=len(pool["episodes"]),
+                                reference_win_rate=pool["reference_win_rate"],
+                                reference_checkpoint=pool["reference_checkpoint"], reused_own_A_prefix=True))
                 elif fixed_reference:
                     shared_history.restore_success(parent, range(len(stages) - 1), require_old_q=True)
                     attach_fixed_reference_pool(0)
@@ -842,6 +855,17 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                     if update["task_gate_passed"]:
                         History.save(PreferenceHistory.phase_path(out, pool_phase) / "success.th", pool)
                     base.append(out / "tkpr_cpr_updates.jsonl", update)
+            elif preference is not None and method == "tkpr_win_refresh":
+                status("collecting_memory")
+                def collect_updated_pool(memory_task):
+                    return collect_memory(args, spec, expected_layout, reference, checkpoint,
+                                          memory_task, phase, settings, out, persist=False)
+                for update in update_win_history(preference.history, row, phase, collect_updated_pool,
+                                                  capacity=settings["success_episodes"]):
+                    if update["pool_changed"]:
+                        History.save(PreferenceHistory.phase_path(out, update["pool_phase"]) / "success.th",
+                                     preference.history[update["pool_phase"]])
+                    base.append(out / "tkpr_win_refresh_memory_updates.jsonl", update)
             elif preference is not None and method == "tkpr_refresh":
                 status("collecting_memory")
                 seen_tasks = dict.fromkeys(stage["task"] for stage in stages[:phase + 1])
@@ -869,6 +893,13 @@ def train_sequence(protocol, seed, out, role=None, parent=None, capture_timing=F
                 status("collecting_memory")
                 pool = collect_memory(args, spec, expected_layout, reference, checkpoint,
                                       task, phase, settings, out, protocol[method] if aspr_group else None)
+                if own_policy_history:
+                    initialize_own_pool(pool, phase, row[task])
+                    History.save(PreferenceHistory.phase_path(out, phase) / "success.th", pool)
+                    base.append(out / "own_policy_memory.jsonl", dict(task=task, pool_phase=phase,
+                                collection_phase=phase, successful=len(pool["episodes"]),
+                                reference_win_rate=row[task], reference_checkpoint=pool["reference_checkpoint"],
+                                reused_own_A_prefix=False))
                 preference.history[phase] = pool
                 if aspr_group:
                     export_group_results(out, preference.history, augmented, groups,

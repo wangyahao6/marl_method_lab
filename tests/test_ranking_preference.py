@@ -49,6 +49,7 @@ METHOD_DEFAULTS = {
     "topk_preference": TOPK_DEFAULTS,
     "tkpr_refresh": TOPK_WEIGHTED_DEFAULTS,
     "tkpr_k1_per_task8": TOPK_WEIGHTED_DEFAULTS,
+    "tkpr_win_refresh": TOPK_WEIGHTED_DEFAULTS,
     "tkpr_cpr": CPR_DEFAULTS,
     "tkpr_k1_gap0": dict(TOPK_WEIGHTED_DEFAULTS, min_gap=0.0),
     "topk_preference_high_regret": TOPK_HIGH_REGRET_DEFAULTS,
